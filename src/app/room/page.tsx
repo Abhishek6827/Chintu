@@ -44,11 +44,18 @@ export default function RoomPage() {
   // ─── AI Speech tracking ─────────────────────────────────
   const [aiSpeechBubbles, setAiSpeechBubbles] = useState<string[]>([]);
 
+  // ─── Speech Recognition refs ────────────────────────────
   const recognitionRef = useRef<any>(null);
   const finalTranscriptRef = useRef("");
   const isRecordingRef = useRef(false);
   const responseLengthRef = useRef<ResponseLength>("balanced");
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // ─── Whisper-based recording refs (for Electron) ────────
+  const whisperMicStreamRef = useRef<MediaStream | null>(null);
+  const whisperRecorderRef = useRef<MediaRecorder | null>(null);
+  const whisperChunksRef = useRef<Blob[]>([]);
+  const liveTranscriptRef = useRef("");
 
   // ─── Fullscreen UI persistence ref ──────────────────────
   const controlsRef = useRef<HTMLDivElement>(null);
@@ -68,19 +75,15 @@ export default function RoomPage() {
   }, [router]);
 
   // ─── Fullscreen change listener ─────────────────────────
-  // When the interview platform goes fullscreen, move our UI inside
-  // document.fullscreenElement so it remains visible on top.
   useEffect(() => {
     const handleFullscreenChange = () => {
       const controls = controlsRef.current;
       if (!controls) return;
 
       if (document.fullscreenElement) {
-        // Save original parent so we can restore later
         if (!originalParentRef.current) {
           originalParentRef.current = controls.parentElement;
         }
-        // Move controls inside the fullscreen element
         document.fullscreenElement.appendChild(controls);
         controls.style.position = "fixed";
         controls.style.zIndex = "2147483647";
@@ -89,7 +92,6 @@ export default function RoomPage() {
         controls.style.left = "auto";
         controls.style.top = "auto";
       } else {
-        // Restore controls to original parent
         if (originalParentRef.current && controls.parentElement !== originalParentRef.current) {
           originalParentRef.current.appendChild(controls);
         }
@@ -112,40 +114,31 @@ export default function RoomPage() {
   }, []);
 
   // ─── Screen + Audio Recording ────────────────────────────
-  // Captures screen video + system audio (via getDisplayMedia) + mic audio
-  // (via getUserMedia), merges both audio tracks via AudioContext, and records
-  // the combined stream using MediaRecorder.
-
   const startScreenRecording = useCallback(async () => {
     try {
       setError(null);
 
-      // 1. Get display media with BOTH video and audio
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
-        audio: true, // System/tab audio (loopback in Electron)
+        audio: true,
       });
       displayStreamRef.current = displayStream;
 
-      // 2. Get microphone audio separately
       let micStream: MediaStream | null = null;
       try {
         micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         micStreamForRecordingRef.current = micStream;
       } catch (micErr) {
-        console.warn("[Recording] Could not get mic audio, continuing with system audio only:", micErr);
+        console.warn("[Recording] Could not get mic audio:", micErr);
       }
 
-      // 3. Extract tracks
       const videoTrack = displayStream.getVideoTracks()[0];
       const systemAudioTracks = displayStream.getAudioTracks();
 
-      // 4. Merge audio streams using AudioContext
       const audioCtx = new AudioContext();
       recordingAudioCtxRef.current = audioCtx;
       const destination = audioCtx.createMediaStreamDestination();
 
-      // Connect system audio if available
       if (systemAudioTracks.length > 0) {
         const systemAudioStream = new MediaStream(systemAudioTracks);
         const systemSource = audioCtx.createMediaStreamSource(systemAudioStream);
@@ -153,59 +146,38 @@ export default function RoomPage() {
         systemGain.gain.value = 1.0;
         systemSource.connect(systemGain);
         systemGain.connect(destination);
-        console.log("[Recording] System audio connected");
-      } else {
-        console.warn("[Recording] No system audio tracks available");
       }
 
-      // Connect mic audio if available
       if (micStream && micStream.getAudioTracks().length > 0) {
         const micSource = audioCtx.createMediaStreamSource(micStream);
         const micGain = audioCtx.createGain();
         micGain.gain.value = 1.0;
         micSource.connect(micGain);
         micGain.connect(destination);
-        console.log("[Recording] Mic audio connected");
       }
 
-      // 5. Build final MediaStream: video track + merged audio track
       const mergedAudioTrack = destination.stream.getAudioTracks()[0];
       const finalStream = new MediaStream();
+      if (videoTrack) finalStream.addTrack(videoTrack);
+      if (mergedAudioTrack) finalStream.addTrack(mergedAudioTrack);
 
-      if (videoTrack) {
-        finalStream.addTrack(videoTrack);
-      }
-      if (mergedAudioTrack) {
-        finalStream.addTrack(mergedAudioTrack);
-      }
-
-      console.log("[Recording] Final stream - Video tracks:", finalStream.getVideoTracks().length,
-        "Audio tracks:", finalStream.getAudioTracks().length);
-
-      // 6. Create MediaRecorder with audio codec
       const mimeType = "video/webm; codecs=vp8,opus";
       let recorder: MediaRecorder;
       if (MediaRecorder.isTypeSupported(mimeType)) {
         recorder = new MediaRecorder(finalStream, { mimeType });
       } else {
-        // Fallback
-        console.warn("[Recording] Preferred mimeType not supported, using default");
         recorder = new MediaRecorder(finalStream);
       }
 
       screenChunksRef.current = [];
 
       recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          screenChunksRef.current.push(e.data);
-        }
+        if (e.data.size > 0) screenChunksRef.current.push(e.data);
       };
 
       recorder.onstop = () => {
-        // Build the final blob and trigger download
         const blob = new Blob(screenChunksRef.current, { type: "video/webm" });
         screenChunksRef.current = [];
-
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -213,24 +185,16 @@ export default function RoomPage() {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-
-        // Revoke after a short delay
         setTimeout(() => URL.revokeObjectURL(url), 5000);
       };
 
-      // Handle track ending (e.g., user stops sharing via browser UI)
       if (videoTrack) {
-        videoTrack.onended = () => {
-          stopScreenRecording();
-        };
+        videoTrack.onended = () => stopScreenRecording();
       }
 
-      // 7. Start recording (collect data every 1 second)
       recorder.start(1000);
       screenRecorderRef.current = recorder;
       setIsScreenRecording(true);
-      console.log("[Recording] Started successfully");
-
     } catch (err: any) {
       console.error("[Recording] Error:", err);
       if (err.name === "NotAllowedError") {
@@ -242,47 +206,53 @@ export default function RoomPage() {
   }, []);
 
   const stopScreenRecording = useCallback(() => {
-    // Stop MediaRecorder
     const recorder = screenRecorderRef.current;
-    if (recorder && recorder.state !== "inactive") {
-      recorder.stop();
-    }
+    if (recorder && recorder.state !== "inactive") recorder.stop();
     screenRecorderRef.current = null;
 
-    // Stop display stream tracks
     if (displayStreamRef.current) {
       displayStreamRef.current.getTracks().forEach((t) => t.stop());
       displayStreamRef.current = null;
     }
 
-    // Stop mic stream used for recording
     if (micStreamForRecordingRef.current) {
       micStreamForRecordingRef.current.getTracks().forEach((t) => t.stop());
       micStreamForRecordingRef.current = null;
     }
 
-    // Close AudioContext
     if (recordingAudioCtxRef.current) {
       recordingAudioCtxRef.current.close().catch(() => {});
       recordingAudioCtxRef.current = null;
     }
 
     setIsScreenRecording(false);
-    console.log("[Recording] Stopped");
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
-    return () => {
-      stopScreenRecording();
-    };
+    return () => { stopScreenRecording(); };
   }, [stopScreenRecording]);
 
-  // ─── Plain Speech Recognition (Mic only — for live transcript) ──
+  // ════════════════════════════════════════════════════════════
+  // ─── SPEECH-TO-TEXT: Dual Strategy ─────────────────────────
+  // In Chrome (localhost): Use WebSpeechRecognition (free, real-time)
+  // In Electron (.exe):    Use Whisper API via MediaRecorder chunks
+  // ════════════════════════════════════════════════════════════
+
+  // --- Helper: Check if Web Speech API actually works ---
+  const useWhisperFallback = useRef(false);
+
   const setupPlainRecognition = useCallback(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { setError("Use Chrome or Edge for speech recognition."); return; }
 
+    // If in Electron, skip Web Speech API entirely — it doesn't work
+    if (isElectron || !SR) {
+      console.log("[STT] Electron detected or no SpeechRecognition — using Whisper fallback");
+      useWhisperFallback.current = true;
+      setMicReady(true);
+      return;
+    }
+
+    // Try Web Speech API (works in real Chrome browser)
     const recognition = new SR();
     recognition.continuous = true;
     recognition.interimResults = true;
@@ -300,7 +270,14 @@ export default function RoomPage() {
     };
 
     recognition.onerror = (event: any) => {
-      if (event.error === "not-allowed") setError("Mic access denied.");
+      console.warn("[STT] SpeechRecognition error:", event.error);
+      if (event.error === "not-allowed") {
+        setError("Mic access denied.");
+      } else if (event.error === "network" || event.error === "service-not-allowed") {
+        // Web Speech API failed (common in Electron) — switch to Whisper
+        console.log("[STT] Switching to Whisper fallback due to:", event.error);
+        useWhisperFallback.current = true;
+      }
     };
 
     recognition.onstart = () => setMicReady(true);
@@ -308,32 +285,149 @@ export default function RoomPage() {
     setMicReady(true);
   }, []);
 
-  // Speech Recognition init
   useEffect(() => {
     setupPlainRecognition();
     return () => { try { recognitionRef.current?.stop(); } catch {} };
   }, [setupPlainRecognition]);
 
-  const startRecording = useCallback(() => {
-    if (isRecordingRef.current || !recognitionRef.current) return;
+  // ─── Whisper-based recording (Electron fallback) ──────────
+  // Records mic audio with MediaRecorder, then sends the blob to
+  // /api/transcribe (Groq Whisper) when the user stops recording.
+
+  const startWhisperRecording = useCallback(async () => {
+    try {
+      const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      whisperMicStreamRef.current = micStream;
+
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : "audio/webm";
+
+      const recorder = new MediaRecorder(micStream, { mimeType });
+      whisperChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) whisperChunksRef.current.push(e.data);
+      };
+
+      recorder.start(500); // Collect chunks every 500ms
+      whisperRecorderRef.current = recorder;
+      setLiveTranscript("🎤 Listening...");
+      console.log("[Whisper STT] Recording started");
+    } catch (err: any) {
+      console.error("[Whisper STT] Mic error:", err);
+      setError("Mic access denied. Check permissions.");
+    }
+  }, []);
+
+  const stopWhisperRecordingAndTranscribe = useCallback(async (): Promise<string> => {
+    return new Promise((resolve) => {
+      const recorder = whisperRecorderRef.current;
+      if (!recorder || recorder.state === "inactive") {
+        resolve("");
+        return;
+      }
+
+      recorder.onstop = async () => {
+        // Stop mic stream
+        if (whisperMicStreamRef.current) {
+          whisperMicStreamRef.current.getTracks().forEach((t) => t.stop());
+          whisperMicStreamRef.current = null;
+        }
+
+        const chunks = whisperChunksRef.current;
+        whisperChunksRef.current = [];
+
+        if (chunks.length === 0) {
+          resolve("");
+          return;
+        }
+
+        const blob = new Blob(chunks, { type: "audio/webm" });
+        console.log("[Whisper STT] Sending", blob.size, "bytes to Whisper API");
+
+        if (blob.size < 1000) {
+          console.warn("[Whisper STT] Audio too short");
+          resolve("");
+          return;
+        }
+
+        setLiveTranscript("⏳ Transcribing...");
+
+        try {
+          const formData = new FormData();
+          formData.append("file", blob, "mic_recording.webm");
+
+          const res = await fetch("/api/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const text = (data.text || "").trim();
+            console.log("[Whisper STT] Transcript:", text);
+            resolve(text);
+          } else {
+            const errText = await res.text();
+            console.error("[Whisper STT] API error:", res.status, errText);
+            resolve("");
+          }
+        } catch (err) {
+          console.error("[Whisper STT] Fetch error:", err);
+          resolve("");
+        }
+      };
+
+      recorder.stop();
+      whisperRecorderRef.current = null;
+    });
+  }, []);
+
+  // ─── Unified start/stop recording ─────────────────────────
+
+  const startRecording = useCallback(async () => {
+    if (isRecordingRef.current) return;
     isRecordingRef.current = true;
     setError(null);
     setStatus("recording");
     setLiveTranscript("");
     finalTranscriptRef.current = "";
-    try { recognitionRef.current.start(); }
-    catch { try { recognitionRef.current.stop(); setTimeout(() => recognitionRef.current.start(), 100); } catch {} }
-  }, []);
+    liveTranscriptRef.current = "";
+
+    if (useWhisperFallback.current) {
+      // Electron: use Whisper
+      await startWhisperRecording();
+    } else {
+      // Chrome: use Web Speech API
+      const recognition = recognitionRef.current;
+      if (!recognition) return;
+      try { recognition.start(); }
+      catch {
+        try { recognition.stop(); setTimeout(() => recognition.start(), 100); } catch {}
+      }
+    }
+  }, [startWhisperRecording]);
 
   const stopRecordingAndGenerate = useCallback(async () => {
-    if (!isRecordingRef.current || !recognitionRef.current) return;
+    if (!isRecordingRef.current) return;
     isRecordingRef.current = false;
     setError(null);
-    try { recognitionRef.current.stop(); } catch {}
-    await new Promise((r) => setTimeout(r, 300));
 
-    const transcript = (finalTranscriptRef.current || liveTranscript).trim();
+    let transcript = "";
+
+    if (useWhisperFallback.current) {
+      // Electron: stop Whisper recording and get transcript
+      transcript = await stopWhisperRecordingAndTranscribe();
+    } else {
+      // Chrome: stop Web Speech API
+      try { recognitionRef.current?.stop(); } catch {}
+      await new Promise((r) => setTimeout(r, 300));
+      transcript = (finalTranscriptRef.current || liveTranscript).trim();
+    }
+
     setLiveTranscript("");
+
     if (!transcript || transcript.length < 3) {
       setError("No speech detected. Try again.");
       setStatus("idle");
@@ -343,7 +437,6 @@ export default function RoomPage() {
     setStatus("generating");
     const entryId = Date.now().toString();
 
-    // Include AI speech context if available
     const aiContext = aiSpeechBubbles.length > 0
       ? "\n\n[AI Interviewer said]: " + aiSpeechBubbles.join(" ")
       : "";
@@ -351,8 +444,6 @@ export default function RoomPage() {
     const fullTranscript = transcript + aiContext;
 
     setAnswers((prev) => [...prev, { id: entryId, question: transcript, answer: "", isStreaming: true }]);
-
-    // Clear AI speech bubbles after using them
     setAiSpeechBubbles([]);
 
     try {
@@ -380,7 +471,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [jobDescription, liveTranscript, aiSpeechBubbles]);
+  }, [jobDescription, liveTranscript, aiSpeechBubbles, stopWhisperRecordingAndTranscribe]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -422,7 +513,6 @@ export default function RoomPage() {
           <span className="text-white/90 text-sm font-bold">✦ Angel</span>
         </div>
         <div className="flex items-center gap-1 no-drag">
-          {/* Screen recording indicator */}
           {isScreenRecording && (
             <div className="system-audio-badge mr-2">
               <span className="system-audio-dot" style={{ background: "#f87171" }} />
@@ -459,7 +549,7 @@ export default function RoomPage() {
         </div>
       )}
 
-      {/* AI Speech bubbles (from system audio transcription) */}
+      {/* AI Speech bubbles */}
       {aiSpeechBubbles.length > 0 && (
         <div className="px-4 pb-2">
           <div className="ai-speech-container rounded-xl px-4 py-2">
@@ -492,9 +582,8 @@ export default function RoomPage() {
         <div ref={chatEndRef} />
       </div>
 
-      {/* Bottom toolbar — ref for fullscreen persistence */}
+      {/* Bottom toolbar */}
       <div ref={controlsRef} className="toolbar px-4 py-3 flex items-center justify-between shrink-0">
-        {/* Settings */}
         <button
           onClick={() => setShowSettings(true)}
           className="no-drag w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-all"
@@ -505,9 +594,8 @@ export default function RoomPage() {
           </svg>
         </button>
 
-        {/* Center controls */}
         <div className="flex items-center gap-3">
-          {/* Screen Record toggle button */}
+          {/* Screen Record toggle */}
           <button
             onClick={isScreenRecording ? stopScreenRecording : startScreenRecording}
             className={`
@@ -517,15 +605,13 @@ export default function RoomPage() {
                 : "bg-white/10 text-white/50 hover:bg-white/20 hover:text-white"
               }
             `}
-            title={isScreenRecording ? "Stop screen recording" : "Start screen recording (captures screen + system audio + mic)"}
+            title={isScreenRecording ? "Stop screen recording" : "Start screen recording"}
           >
             {isScreenRecording ? (
-              // Stop icon (square)
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <rect x="6" y="6" width="12" height="12" rx="2" />
               </svg>
             ) : (
-              // Record icon (circle)
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="8" />
               </svg>
@@ -565,7 +651,7 @@ export default function RoomPage() {
           </button>
         </div>
 
-        {/* Hide/Show toggle button */}
+        {/* Hide/Show toggle */}
         <button
           onClick={handleHide}
           className={`
@@ -594,7 +680,6 @@ export default function RoomPage() {
       {showSettings && (
         <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-6" onClick={() => setShowSettings(false)}>
           <div className="settings-panel w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
-            {/* Settings Header */}
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="text-lg font-bold text-gray-800">Settings</h2>
@@ -608,7 +693,6 @@ export default function RoomPage() {
               </button>
             </div>
 
-            {/* Response Detail */}
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2">
                 <div>
@@ -627,25 +711,24 @@ export default function RoomPage() {
               </div>
             </div>
 
-            {/* Screen Recording Info */}
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <p className="text-sm font-semibold text-gray-700">Screen Recording</p>
-                  <p className="text-xs text-gray-400">Records screen + system audio + mic</p>
+                  <p className="text-sm font-semibold text-gray-700">Speech Engine</p>
+                  <p className="text-xs text-gray-400">How your voice is transcribed</p>
                 </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${isScreenRecording ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-500"}`}>
-                  {isScreenRecording ? "Recording" : "Off"}
+                <span className={`text-xs font-medium px-2 py-1 rounded-full ${useWhisperFallback.current ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}`}>
+                  {useWhisperFallback.current ? "Whisper API" : "Web Speech"}
                 </span>
               </div>
               <p className="text-[11px] text-gray-400 leading-relaxed">
-                Click the ⏺ record button in the toolbar to start screen recording.
-                It captures your screen, system audio (AI voice), and microphone (your voice)
-                into a single recording file.
+                {useWhisperFallback.current
+                  ? "Using Groq Whisper API for transcription. Hold Space → speak → release to transcribe."
+                  : "Using browser's built-in speech recognition for real-time transcription."
+                }
               </p>
             </div>
 
-            {/* Shortcuts */}
             <div className="mb-4">
               <p className="text-sm font-semibold text-gray-700 mb-2">Shortcuts</p>
               <div className="space-y-2 text-xs text-gray-500">
@@ -660,7 +743,6 @@ export default function RoomPage() {
               </div>
             </div>
 
-            {/* Info */}
             <div className="text-center">
               <p className="text-[10px] text-gray-300">
                 🔒 Window is invisible to screen sharing
