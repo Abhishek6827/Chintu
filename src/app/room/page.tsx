@@ -33,19 +33,26 @@ export default function RoomPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [isWindowHidden, setIsWindowHidden] = useState(false);
 
-  // ─── System Audio State ──────────────────────────────────
-  const [systemAudioActive, setSystemAudioActive] = useState(false);
-  const [systemAudioError, setSystemAudioError] = useState<string | null>(null);
-  const systemStreamRef = useRef<MediaStream | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const mixedStreamRef = useRef<MediaStream | null>(null);
-  const micStreamRef = useRef<MediaStream | null>(null);
+  // ─── Screen + Audio Recording State ─────────────────────
+  const [isScreenRecording, setIsScreenRecording] = useState(false);
+  const screenRecorderRef = useRef<MediaRecorder | null>(null);
+  const screenChunksRef = useRef<Blob[]>([]);
+  const displayStreamRef = useRef<MediaStream | null>(null);
+  const micStreamForRecordingRef = useRef<MediaStream | null>(null);
+  const recordingAudioCtxRef = useRef<AudioContext | null>(null);
+
+  // ─── AI Speech tracking ─────────────────────────────────
+  const [aiSpeechBubbles, setAiSpeechBubbles] = useState<string[]>([]);
 
   const recognitionRef = useRef<any>(null);
   const finalTranscriptRef = useRef("");
   const isRecordingRef = useRef(false);
   const responseLengthRef = useRef<ResponseLength>("balanced");
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // ─── Fullscreen UI persistence ref ──────────────────────
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const originalParentRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => { responseLengthRef.current = responseLength; }, [responseLength]);
 
@@ -60,127 +67,218 @@ export default function RoomPage() {
     setJobDescription(jd);
   }, [router]);
 
-  // ─── System Audio Capture ─────────────────────────────────
-  const startSystemAudio = useCallback(async () => {
+  // ─── Fullscreen change listener ─────────────────────────
+  // When the interview platform goes fullscreen, move our UI inside
+  // document.fullscreenElement so it remains visible on top.
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const controls = controlsRef.current;
+      if (!controls) return;
+
+      if (document.fullscreenElement) {
+        // Save original parent so we can restore later
+        if (!originalParentRef.current) {
+          originalParentRef.current = controls.parentElement;
+        }
+        // Move controls inside the fullscreen element
+        document.fullscreenElement.appendChild(controls);
+        controls.style.position = "fixed";
+        controls.style.zIndex = "2147483647";
+        controls.style.bottom = "20px";
+        controls.style.right = "20px";
+        controls.style.left = "auto";
+        controls.style.top = "auto";
+      } else {
+        // Restore controls to original parent
+        if (originalParentRef.current && controls.parentElement !== originalParentRef.current) {
+          originalParentRef.current.appendChild(controls);
+        }
+        controls.style.position = "";
+        controls.style.zIndex = "";
+        controls.style.bottom = "";
+        controls.style.right = "";
+        controls.style.left = "";
+        controls.style.top = "";
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  // ─── Screen + Audio Recording ────────────────────────────
+  // Captures screen video + system audio (via getDisplayMedia) + mic audio
+  // (via getUserMedia), merges both audio tracks via AudioContext, and records
+  // the combined stream using MediaRecorder.
+
+  const startScreenRecording = useCallback(async () => {
     try {
-      setSystemAudioError(null);
+      setError(null);
 
-      // Request system audio via getDisplayMedia.
-      // Electron's main process intercepts this and provides loopback audio.
+      // 1. Get display media with BOTH video and audio
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,   // Electron requires video in the request
-        audio: true,   // This gets system loopback audio
+        video: true,
+        audio: true, // System/tab audio (loopback in Electron)
       });
+      displayStreamRef.current = displayStream;
 
-      // We only need the audio tracks; stop video tracks to save resources
-      displayStream.getVideoTracks().forEach((t) => t.stop());
-
-      const audioTracks = displayStream.getAudioTracks();
-      if (audioTracks.length === 0) {
-        setSystemAudioError("No system audio captured. Try again.");
-        return;
+      // 2. Get microphone audio separately
+      let micStream: MediaStream | null = null;
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        micStreamForRecordingRef.current = micStream;
+      } catch (micErr) {
+        console.warn("[Recording] Could not get mic audio, continuing with system audio only:", micErr);
       }
 
-      systemStreamRef.current = displayStream;
-      setSystemAudioActive(true);
+      // 3. Extract tracks
+      const videoTrack = displayStream.getVideoTracks()[0];
+      const systemAudioTracks = displayStream.getAudioTracks();
 
-      // Now set up the AudioContext to mix mic + system audio
-      await setupMixedRecognition(displayStream);
+      // 4. Merge audio streams using AudioContext
+      const audioCtx = new AudioContext();
+      recordingAudioCtxRef.current = audioCtx;
+      const destination = audioCtx.createMediaStreamDestination();
+
+      // Connect system audio if available
+      if (systemAudioTracks.length > 0) {
+        const systemAudioStream = new MediaStream(systemAudioTracks);
+        const systemSource = audioCtx.createMediaStreamSource(systemAudioStream);
+        const systemGain = audioCtx.createGain();
+        systemGain.gain.value = 1.0;
+        systemSource.connect(systemGain);
+        systemGain.connect(destination);
+        console.log("[Recording] System audio connected");
+      } else {
+        console.warn("[Recording] No system audio tracks available");
+      }
+
+      // Connect mic audio if available
+      if (micStream && micStream.getAudioTracks().length > 0) {
+        const micSource = audioCtx.createMediaStreamSource(micStream);
+        const micGain = audioCtx.createGain();
+        micGain.gain.value = 1.0;
+        micSource.connect(micGain);
+        micGain.connect(destination);
+        console.log("[Recording] Mic audio connected");
+      }
+
+      // 5. Build final MediaStream: video track + merged audio track
+      const mergedAudioTrack = destination.stream.getAudioTracks()[0];
+      const finalStream = new MediaStream();
+
+      if (videoTrack) {
+        finalStream.addTrack(videoTrack);
+      }
+      if (mergedAudioTrack) {
+        finalStream.addTrack(mergedAudioTrack);
+      }
+
+      console.log("[Recording] Final stream - Video tracks:", finalStream.getVideoTracks().length,
+        "Audio tracks:", finalStream.getAudioTracks().length);
+
+      // 6. Create MediaRecorder with audio codec
+      const mimeType = "video/webm; codecs=vp8,opus";
+      let recorder: MediaRecorder;
+      if (MediaRecorder.isTypeSupported(mimeType)) {
+        recorder = new MediaRecorder(finalStream, { mimeType });
+      } else {
+        // Fallback
+        console.warn("[Recording] Preferred mimeType not supported, using default");
+        recorder = new MediaRecorder(finalStream);
+      }
+
+      screenChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          screenChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        // Build the final blob and trigger download
+        const blob = new Blob(screenChunksRef.current, { type: "video/webm" });
+        screenChunksRef.current = [];
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `interview-recording-${new Date().toISOString().replace(/[:.]/g, "-")}.webm`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Revoke after a short delay
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      };
+
+      // Handle track ending (e.g., user stops sharing via browser UI)
+      if (videoTrack) {
+        videoTrack.onended = () => {
+          stopScreenRecording();
+        };
+      }
+
+      // 7. Start recording (collect data every 1 second)
+      recorder.start(1000);
+      screenRecorderRef.current = recorder;
+      setIsScreenRecording(true);
+      console.log("[Recording] Started successfully");
 
     } catch (err: any) {
-      console.error("System audio error:", err);
+      console.error("[Recording] Error:", err);
       if (err.name === "NotAllowedError") {
-        setSystemAudioError("Permission denied. Allow screen capture to enable system audio.");
+        setError("Screen sharing permission denied.");
       } else {
-        setSystemAudioError(err.message || "Failed to capture system audio.");
+        setError("Failed to start recording: " + (err.message || err));
       }
     }
   }, []);
 
-  const stopSystemAudio = useCallback(() => {
-    // Stop system audio tracks
-    if (systemStreamRef.current) {
-      systemStreamRef.current.getTracks().forEach((t) => t.stop());
-      systemStreamRef.current = null;
+  const stopScreenRecording = useCallback(() => {
+    // Stop MediaRecorder
+    const recorder = screenRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      recorder.stop();
+    }
+    screenRecorderRef.current = null;
+
+    // Stop display stream tracks
+    if (displayStreamRef.current) {
+      displayStreamRef.current.getTracks().forEach((t) => t.stop());
+      displayStreamRef.current = null;
     }
 
-    // Stop mic stream used for mixing
-    if (micStreamRef.current) {
-      micStreamRef.current.getTracks().forEach((t) => t.stop());
-      micStreamRef.current = null;
+    // Stop mic stream used for recording
+    if (micStreamForRecordingRef.current) {
+      micStreamForRecordingRef.current.getTracks().forEach((t) => t.stop());
+      micStreamForRecordingRef.current = null;
     }
 
     // Close AudioContext
-    if (audioContextRef.current) {
-      audioContextRef.current.close().catch(() => {});
-      audioContextRef.current = null;
+    if (recordingAudioCtxRef.current) {
+      recordingAudioCtxRef.current.close().catch(() => {});
+      recordingAudioCtxRef.current = null;
     }
 
-    mixedStreamRef.current = null;
-    setSystemAudioActive(false);
-
-    // Re-initialize plain mic-only speech recognition
-    setupPlainRecognition();
+    setIsScreenRecording(false);
+    console.log("[Recording] Stopped");
   }, []);
 
-  // ─── Mixed Audio Recognition (Mic + System) ──────────────
-  const setupMixedRecognition = useCallback(async (systemStream: MediaStream) => {
-    try {
-      // Get microphone stream
-      const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      micStreamRef.current = micStream;
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopScreenRecording();
+    };
+  }, [stopScreenRecording]);
 
-      // Create AudioContext to mix both streams
-      const audioCtx = new AudioContext();
-      audioContextRef.current = audioCtx;
-
-      const micSource = audioCtx.createMediaStreamSource(micStream);
-      const systemSource = audioCtx.createMediaStreamSource(systemStream);
-
-      // Create a destination to merge both into one stream
-      const destination = audioCtx.createMediaStreamDestination();
-
-      // Optional: Adjust gains so system audio doesn't overpower mic
-      const micGain = audioCtx.createGain();
-      micGain.gain.value = 1.0;
-      const systemGain = audioCtx.createGain();
-      systemGain.gain.value = 1.2; // Boost system audio slightly
-
-      micSource.connect(micGain);
-      systemGain.connect(destination);
-      micGain.connect(destination);
-      systemSource.connect(systemGain);
-
-      const mixedStream = destination.stream;
-      mixedStreamRef.current = mixedStream;
-
-      // Now re-create SpeechRecognition.
-      // Unfortunately, Web Speech API uses the default mic, not a custom stream.
-      // The mixed stream approach won't work directly with the browser's
-      // SpeechRecognition API since it always uses the default input device.
-      //
-      // WORKAROUND: We keep the Web Speech API on the mic as before,
-      // BUT we also run a parallel live transcript of the system audio
-      // using a separate SpeechRecognition if possible, or we display
-      // the system audio waveform to confirm it's being captured.
-      //
-      // BEST APPROACH for Electron: Set the mixed stream as the
-      // default audio input by outputting it to a virtual audio device.
-      // But that requires extra drivers.
-      //
-      // PRACTICAL APPROACH: Since we're in Electron, we'll use the
-      // Groq Whisper API to transcribe system audio chunks in real-time.
-      // This gives us the AI interviewer's words separately.
-
-      console.log("[System Audio] Mixed stream created with", mixedStream.getAudioTracks().length, "tracks");
-
-    } catch (err: any) {
-      console.error("Mixed audio setup error:", err);
-      setSystemAudioError("Failed to set up audio mixer: " + err.message);
-    }
-  }, []);
-
-  // ─── Plain Speech Recognition (Mic only) ──────────────────
+  // ─── Plain Speech Recognition (Mic only — for live transcript) ──
   const setupPlainRecognition = useCallback(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { setError("Use Chrome or Edge for speech recognition."); return; }
@@ -215,160 +313,6 @@ export default function RoomPage() {
     setupPlainRecognition();
     return () => { try { recognitionRef.current?.stop(); } catch {} };
   }, [setupPlainRecognition]);
-
-  // ─── System Audio Transcription via Groq Whisper ──────────
-  // Records system audio chunks and sends to Groq for transcription
-  const systemRecorderRef = useRef<MediaRecorder | null>(null);
-  const systemTranscriptRef = useRef("");
-  const [aiSpeechBubbles, setAiSpeechBubbles] = useState<string[]>([]);
-
-  const startSystemTranscription = useCallback(() => {
-    const stream = systemStreamRef.current;
-    if (!stream || stream.getAudioTracks().length === 0) return;
-
-    // Create a new stream with only audio tracks
-    const audioStream = new MediaStream(stream.getAudioTracks());
-
-    try {
-      const recorder = new MediaRecorder(audioStream, {
-        mimeType: "audio/webm;codecs=opus",
-      });
-      systemRecorderRef.current = recorder;
-
-      const chunks: Blob[] = [];
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunks.push(e.data);
-        }
-      };
-
-      // Every 5 seconds, send accumulated audio to Groq Whisper for transcription
-      recorder.onstop = async () => {
-        if (chunks.length === 0) return;
-        const blob = new Blob(chunks, { type: "audio/webm" });
-        chunks.length = 0;
-
-        // Only transcribe if blob has meaningful size (>1KB = likely has speech)
-        if (blob.size < 1000) return;
-
-        try {
-          const formData = new FormData();
-          formData.append("file", blob, "system_audio.webm");
-
-          const res = await fetch("/api/transcribe", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-            if (data.text && data.text.trim()) {
-              const text = data.text.trim();
-              systemTranscriptRef.current += " " + text;
-              setAiSpeechBubbles((prev) => [...prev, text]);
-            }
-          }
-        } catch (err) {
-          console.error("Transcription error:", err);
-        }
-      };
-
-      // Record in 5-second intervals
-      recorder.start();
-
-      const intervalId = setInterval(() => {
-        if (recorder.state === "recording") {
-          recorder.stop();
-          // Restart immediately for continuous capture
-          setTimeout(() => {
-            if (systemStreamRef.current && systemStreamRef.current.active) {
-              try {
-                const newAudioStream = new MediaStream(systemStreamRef.current.getAudioTracks());
-                const newRecorder = new MediaRecorder(newAudioStream, {
-                  mimeType: "audio/webm;codecs=opus",
-                });
-                const newChunks: Blob[] = [];
-
-                newRecorder.ondataavailable = (e) => {
-                  if (e.data.size > 0) newChunks.push(e.data);
-                };
-
-                newRecorder.onstop = async () => {
-                  if (newChunks.length === 0) return;
-                  const newBlob = new Blob(newChunks, { type: "audio/webm" });
-                  newChunks.length = 0;
-                  if (newBlob.size < 1000) return;
-
-                  try {
-                    const formData = new FormData();
-                    formData.append("file", newBlob, "system_audio.webm");
-                    const res = await fetch("/api/transcribe", {
-                      method: "POST",
-                      body: formData,
-                    });
-                    if (res.ok) {
-                      const data = await res.json();
-                      if (data.text && data.text.trim()) {
-                        setAiSpeechBubbles((prev) => [...prev, data.text.trim()]);
-                      }
-                    }
-                  } catch (err) {
-                    console.error("Transcription error:", err);
-                  }
-                };
-
-                systemRecorderRef.current = newRecorder;
-                newRecorder.start();
-              } catch {}
-            }
-          }, 100);
-        }
-      }, 5000);
-
-      // Store interval for cleanup
-      (recorder as any)._intervalId = intervalId;
-
-    } catch (err: any) {
-      console.error("MediaRecorder error:", err);
-      setSystemAudioError("Failed to start recording: " + err.message);
-    }
-  }, []);
-
-  const stopSystemTranscription = useCallback(() => {
-    const recorder = systemRecorderRef.current;
-    if (recorder) {
-      if ((recorder as any)._intervalId) {
-        clearInterval((recorder as any)._intervalId);
-      }
-      if (recorder.state === "recording") {
-        recorder.stop();
-      }
-      systemRecorderRef.current = null;
-    }
-  }, []);
-
-  // Toggle system audio capture
-  const toggleSystemAudio = useCallback(async () => {
-    if (systemAudioActive) {
-      stopSystemTranscription();
-      stopSystemAudio();
-    } else {
-      await startSystemAudio();
-      // Small delay to ensure stream is ready
-      setTimeout(() => {
-        startSystemTranscription();
-      }, 500);
-    }
-  }, [systemAudioActive, startSystemAudio, stopSystemAudio, startSystemTranscription, stopSystemTranscription]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stopSystemTranscription();
-      stopSystemAudio();
-    };
-  }, [stopSystemAudio, stopSystemTranscription]);
 
   const startRecording = useCallback(() => {
     if (isRecordingRef.current || !recognitionRef.current) return;
@@ -478,11 +422,11 @@ export default function RoomPage() {
           <span className="text-white/90 text-sm font-bold">✦ Angel</span>
         </div>
         <div className="flex items-center gap-1 no-drag">
-          {/* System Audio indicator */}
-          {systemAudioActive && (
+          {/* Screen recording indicator */}
+          {isScreenRecording && (
             <div className="system-audio-badge mr-2">
-              <span className="system-audio-dot" />
-              <span className="text-[10px] text-emerald-300 font-medium">AI Listening</span>
+              <span className="system-audio-dot" style={{ background: "#f87171" }} />
+              <span className="text-[10px] text-red-300 font-medium">REC</span>
             </div>
           )}
           {isElectron && (
@@ -533,11 +477,11 @@ export default function RoomPage() {
       )}
 
       {/* Error */}
-      {(error || systemAudioError) && (
+      {error && (
         <div className="px-4 pb-2">
           <div className="bg-red-500/20 rounded-xl px-4 py-2 text-red-200 text-xs flex items-center justify-between">
-            <span>{error || systemAudioError}</span>
-            <button onClick={() => { setError(null); setSystemAudioError(null); }} className="text-red-300 hover:text-white ml-2">✕</button>
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="text-red-300 hover:text-white ml-2">✕</button>
           </div>
         </div>
       )}
@@ -548,8 +492,8 @@ export default function RoomPage() {
         <div ref={chatEndRef} />
       </div>
 
-      {/* Bottom toolbar */}
-      <div className="toolbar px-4 py-3 flex items-center justify-between shrink-0">
+      {/* Bottom toolbar — ref for fullscreen persistence */}
+      <div ref={controlsRef} className="toolbar px-4 py-3 flex items-center justify-between shrink-0">
         {/* Settings */}
         <button
           onClick={() => setShowSettings(true)}
@@ -563,25 +507,29 @@ export default function RoomPage() {
 
         {/* Center controls */}
         <div className="flex items-center gap-3">
-          {/* System Audio toggle */}
+          {/* Screen Record toggle button */}
           <button
-            onClick={toggleSystemAudio}
+            onClick={isScreenRecording ? stopScreenRecording : startScreenRecording}
             className={`
               no-drag w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300
-              ${systemAudioActive
-                ? "bg-cyan-500/30 text-cyan-300 ring-2 ring-cyan-400/50 shadow-lg shadow-cyan-500/20 system-audio-pulse"
+              ${isScreenRecording
+                ? "bg-red-500/30 text-red-300 ring-2 ring-red-400/50 shadow-lg shadow-red-500/20 mic-recording"
                 : "bg-white/10 text-white/50 hover:bg-white/20 hover:text-white"
               }
             `}
-            title={systemAudioActive ? "Stop listening to AI" : "Listen to AI (capture system audio)"}
+            title={isScreenRecording ? "Stop screen recording" : "Start screen recording (captures screen + system audio + mic)"}
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              {systemAudioActive ? (
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-              ) : (
-                <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-              )}
-            </svg>
+            {isScreenRecording ? (
+              // Stop icon (square)
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+              </svg>
+            ) : (
+              // Record icon (circle)
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8" />
+              </svg>
+            )}
           </button>
 
           {/* Mic button */}
@@ -679,20 +627,21 @@ export default function RoomPage() {
               </div>
             </div>
 
-            {/* System Audio Info */}
+            {/* Screen Recording Info */}
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <p className="text-sm font-semibold text-gray-700">System Audio</p>
-                  <p className="text-xs text-gray-400">Capture AI interviewer&apos;s voice</p>
+                  <p className="text-sm font-semibold text-gray-700">Screen Recording</p>
+                  <p className="text-xs text-gray-400">Records screen + system audio + mic</p>
                 </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${systemAudioActive ? "bg-cyan-100 text-cyan-700" : "bg-gray-100 text-gray-500"}`}>
-                  {systemAudioActive ? "Active" : "Off"}
+                <span className={`text-xs font-medium px-2 py-1 rounded-full ${isScreenRecording ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-500"}`}>
+                  {isScreenRecording ? "Recording" : "Off"}
                 </span>
               </div>
               <p className="text-[11px] text-gray-400 leading-relaxed">
-                Click the 🔊 speaker button in the toolbar to start capturing system audio.
-                This records what the AI interviewer says and transcribes it using Whisper.
+                Click the ⏺ record button in the toolbar to start screen recording.
+                It captures your screen, system audio (AI voice), and microphone (your voice)
+                into a single recording file.
               </p>
             </div>
 
