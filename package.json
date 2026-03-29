@@ -9,11 +9,15 @@
     "start": "next start",
     "lint": "next lint",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron:build": "next build && electron-builder --win"
+    "electron:build": "next build && electron-builder --win",
+    "electron:preview": "next build && electron . --preview"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
     "groq-sdk": "^1.1.2",
+    "multer": "^1.4.5-lts.1",
     "next": "14.2.35",
     "openai": "^6.33.0",
     "react": "^18",
@@ -39,14 +43,12 @@
     "directories": {
       "output": "dist-electron"
     },
+    "asar": false,
     "files": [
       "electron/**/*",
-      ".next/**/*",
-      "src/**/*",
-      "public/**/*",
+      "out/**/*",
       "node_modules/**/*",
-      "package.json",
-      "next.config.mjs"
+      "package.json"
     ],
     "win": {
       "target": "dir",

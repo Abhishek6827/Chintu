@@ -1,12 +1,63 @@
 const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, desktopCapturer, session } = require("electron");
 const path = require("path");
+const { createServer } = require("./server");
 
 let mainWindow = null;
 let tray = null;
-let isHidden = false; // tracks skipTaskbar state (no Electron getter exists)
-const isDev = process.env.NODE_ENV !== "production";
-const SERVER_URL = "http://localhost:3000";
+let isHidden = false;
+let serverPort = null;
 
+// ─── Determine runtime mode ───────────────────────────────
+// In development (running from source), we load from Next.js dev server.
+// In production (packaged .exe), we start the embedded Express server.
+// Use --preview flag to test production server without packaging.
+const isPreview = process.argv.includes("--preview");
+const isDev = !app.isPackaged && !isPreview;
+
+// ─── Load environment variables ───────────────────────────
+function loadEnv() {
+  try {
+    require("dotenv").config({ path: path.join(__dirname, "..", ".env.local") });
+    require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
+  } catch {}
+
+  // In production, also check next to the executable
+  if (!isDev) {
+    const exeDir = path.dirname(process.execPath);
+    try {
+      require("dotenv").config({ path: path.join(exeDir, ".env") });
+      require("dotenv").config({ path: path.join(exeDir, ".env.local") });
+    } catch {}
+  }
+}
+
+// ─── Start embedded Express server (production only) ──────
+function startServer() {
+  return new Promise((resolve, reject) => {
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      reject(new Error("GROQ_API_KEY not found. Place a .env file with GROQ_API_KEY=your_key next to the .exe"));
+      return;
+    }
+
+    // Static files are in the "out" directory (Next.js export output)
+    const staticDir = path.join(__dirname, "..", "out");
+    const server = createServer(apiKey, staticDir);
+
+    // Listen on a random available port on localhost
+    const listener = server.listen(0, "127.0.0.1", () => {
+      serverPort = listener.address().port;
+      console.log(`[Server] Running on http://127.0.0.1:${serverPort}`);
+      resolve(serverPort);
+    });
+
+    listener.on("error", (err) => {
+      reject(err);
+    });
+  });
+}
+
+// ─── Create main window ──────────────────────────────────
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 440,
@@ -28,18 +79,20 @@ function createWindow() {
   mainWindow.setContentProtection(true);
 
   // ─── System Audio Loopback ───────────────────────────────
-  // Intercept getDisplayMedia requests from the renderer.
-  // By passing audio: 'loopback', Electron captures system audio
-  // (whatever is playing through speakers) without a virtual cable.
   session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
     desktopCapturer.getSources({ types: ["screen"] }).then((sources) => {
-      // Grant the first screen source + loopback audio automatically
       callback({ video: sources[0], audio: "loopback" });
     });
   });
 
-  // Load the app
-  mainWindow.loadURL(SERVER_URL + "/room");
+  // ─── Load the app ────────────────────────────────────────
+  if (isDev) {
+    // Development: use Next.js dev server
+    mainWindow.loadURL("http://localhost:3000/room");
+  } else {
+    // Production: use embedded Express server
+    mainWindow.loadURL(`http://127.0.0.1:${serverPort}/room`);
+  }
 
   // Set window position (bottom-right corner)
   const { screen } = require("electron");
@@ -58,15 +111,11 @@ function createWindow() {
     mainWindow = null;
   });
 
-  // Prevent window from being captured by screenshot tools
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 }
 
 function createTray() {
-  // Use a simple icon — in production you'd use a proper .ico/.png
-  tray = new Tray(
-    path.join(__dirname, "icon.png")
-  );
+  tray = new Tray(path.join(__dirname, "icon.png"));
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -76,7 +125,6 @@ function createTray() {
           if (mainWindow.isVisible() && !isHidden) {
             mainWindow.hide();
           } else {
-            // Ensure fully visible
             isHidden = false;
             mainWindow.setOpacity(1);
             mainWindow.setIgnoreMouseEvents(false);
@@ -112,27 +160,25 @@ function createTray() {
   });
 }
 
-// IPC handlers for window controls
+// ─── IPC handlers ─────────────────────────────────────────
 ipcMain.on("window-minimize", () => mainWindow?.minimize());
 ipcMain.on("window-close", () => mainWindow?.hide());
 
-// Toggle hide: makes window fully invisible (hidden from screen + taskbar) or visible again
 ipcMain.handle("window-hide-toggle", () => {
   if (!mainWindow) return isHidden;
   isHidden = !isHidden;
   if (isHidden) {
-    mainWindow.setOpacity(0);          // make it invisible
-    mainWindow.setSkipTaskbar(true);   // hide from taskbar
-    mainWindow.setIgnoreMouseEvents(true); // click-through when hidden
+    mainWindow.setOpacity(0);
+    mainWindow.setSkipTaskbar(true);
+    mainWindow.setIgnoreMouseEvents(true);
   } else {
-    mainWindow.setOpacity(1);          // make it visible again
-    mainWindow.setSkipTaskbar(true);   // always skip taskbar (stealth)
+    mainWindow.setOpacity(1);
+    mainWindow.setSkipTaskbar(true);
     mainWindow.setIgnoreMouseEvents(false);
   }
   return isHidden;
 });
 
-// Getter so renderer can check initial state
 ipcMain.handle("window-get-hidden", () => isHidden);
 
 ipcMain.on("window-toggle", () => {
@@ -140,7 +186,25 @@ ipcMain.on("window-toggle", () => {
   else mainWindow?.show();
 });
 
-app.whenReady().then(() => {
+// ─── App lifecycle ────────────────────────────────────────
+app.whenReady().then(async () => {
+  loadEnv();
+
+  if (!isDev) {
+    // Production: start the embedded server before creating the window
+    try {
+      await startServer();
+    } catch (err) {
+      const { dialog } = require("electron");
+      dialog.showErrorBox(
+        "Startup Error",
+        `Failed to start the server:\n\n${err.message}\n\nMake sure you have a .env file with GROQ_API_KEY next to the executable.`
+      );
+      app.quit();
+      return;
+    }
+  }
+
   createWindow();
   createTray();
 });
@@ -153,7 +217,6 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
 
-// Prevent app from quitting when window is closed (minimize to tray)
 app.on("before-quit", () => {
   app.isQuitting = true;
 });
