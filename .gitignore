@@ -28,6 +28,9 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# embedded config (contains API keys — included in .exe build, not in git)
+electron/config.json
+
 # vercel
 .vercel
 

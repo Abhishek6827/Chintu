@@ -31,12 +31,27 @@ function loadEnv() {
   }
 }
 
+// ─── Load embedded config (API key baked into the build) ──
+function getApiKey() {
+  // 1. Check environment variable first (override)
+  if (process.env.GROQ_API_KEY) return process.env.GROQ_API_KEY;
+
+  // 2. Read from config.json bundled with the app
+  const configPath = path.join(__dirname, "config.json");
+  try {
+    const config = JSON.parse(require("fs").readFileSync(configPath, "utf-8"));
+    if (config.GROQ_API_KEY) return config.GROQ_API_KEY;
+  } catch {}
+
+  return null;
+}
+
 // ─── Start embedded Express server (production only) ──────
 function startServer() {
   return new Promise((resolve, reject) => {
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = getApiKey();
     if (!apiKey) {
-      reject(new Error("GROQ_API_KEY not found. Place a .env file with GROQ_API_KEY=your_key next to the .exe"));
+      reject(new Error("GROQ_API_KEY not found. Add it to electron/config.json"));
       return;
     }
 
