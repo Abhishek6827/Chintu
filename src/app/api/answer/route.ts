@@ -3,9 +3,9 @@ import Groq from "groq-sdk";
 
 // ─── Response length presets ────────────────────────────────
 const RESPONSE_PROMPTS: Record<string, string> = {
-  concise: `Keep your answer very brief — 2-4 bullet points or 3-4 sentences max. No fluff. Get straight to the core answer.`,
-  balanced: `Keep your answer well-structured and moderate in length — around 150-200 words. Use bullet points when helpful. Balance depth with brevity.`,
-  detailed: `Give a thorough, comprehensive answer with examples, explanations, and context. Use structured formatting with headers and bullet points. Aim for 300-500 words to cover the topic in depth.`,
+  concise: `Keep your answer very brief — about 3-4 short sentences. Speak naturally and conversationally, as if you are thinking on your feet. Do NOT use bullet points, headers, or lists. Make it sound like a natural, off-the-cuff spoken response.`,
+  balanced: `Keep your answer moderate in length — around 2-3 paragraphs. Use a natural, conversational tone with smooth transitions. Do NOT use bullet points, headers, or any special formatting. It MUST sound like a human speaking aloud in an interview, not reading from a script.`,
+  detailed: `Give a thorough but conversational answer. Tell a cohesive story with natural phrasing. Do NOT use bullet points, headers, or numbered lists. Use a natural speaking style that sounds authentic when spoken aloud. Aim for about 4-5 paragraphs.`,
   coding: `Write extremely accurate, efficient, and well-commented code to solve the core problem. Use markdown code blocks. Keep explanation very brief, let the code speak for itself. You are acting as an expert programmer.`,
 };
 
@@ -34,20 +34,24 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `You are an expert interview coach. The candidate is interviewing for a role with the following job description:
+          content: `You are generating spoken responses for an interviewee. The candidate is interviewing for a role with the following job description:
 
 ---
 ${jobDescription}
 ---
 
-When the candidate shares a question they were asked, provide a well-structured answer they can use.
+When the candidate shares a question they were asked, write the EXACT words they should speak in response. Write in the first person ("I").
+CRITICAL: The response MUST sound like a human speaking naturally in real-time. It should sound conversational, thoughtful, and unscripted. 
+NEVER use bullet points, numbered lists, bold text, or headers. The candidate will be reading this aloud, so formatting ruins the natural flow.
 
 **Response length instruction:** ${lengthInstruction}
 
 Rules:
 - Be technically accurate
 - Do NOT repeat the question back
-- Jump straight into the answer`,
+- Jump straight into the answer
+- Avoid robotic or overly formal phrasing.
+- NEVER use markdown formatting like bullet points, lists, or bold text (except for the coding profile).`,
         },
         {
           role: "user",
