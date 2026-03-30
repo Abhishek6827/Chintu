@@ -77,6 +77,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 440,
     height: 700,
+    minWidth: 320,
+    minHeight: 500,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -89,6 +91,10 @@ function createWindow() {
       contextIsolation: true,
     },
   });
+
+  // Force window to stay absolutely on top of everything, including fullscreen games/apps
+  mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
+  mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
   // Make window invisible to screen capture (Windows)
   mainWindow.setContentProtection(true);
@@ -126,7 +132,18 @@ function createWindow() {
     mainWindow = null;
   });
 
-  mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  // Aggressively keep it on top even when losing focus
+  mainWindow.on("blur", () => {
+    if (mainWindow && !isHidden) {
+      mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
+    }
+  });
+
+  mainWindow.on("always-on-top-changed", (event, isAlwaysOnTop) => {
+    if (!isAlwaysOnTop && mainWindow && !isHidden) {
+      mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
+    }
+  });
 }
 
 function createTray() {
@@ -144,6 +161,7 @@ function createTray() {
             mainWindow.setOpacity(1);
             mainWindow.setIgnoreMouseEvents(false);
             mainWindow.show();
+            mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
           }
         }
       },
@@ -190,6 +208,7 @@ ipcMain.handle("window-hide-toggle", () => {
     mainWindow.setOpacity(1);
     mainWindow.setSkipTaskbar(true);
     mainWindow.setIgnoreMouseEvents(false);
+    mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
   }
   return isHidden;
 });
@@ -198,7 +217,10 @@ ipcMain.handle("window-get-hidden", () => isHidden);
 
 ipcMain.on("window-toggle", () => {
   if (mainWindow?.isVisible()) mainWindow.hide();
-  else mainWindow?.show();
+  else {
+    mainWindow?.show();
+    mainWindow?.setAlwaysOnTop(true, "screen-saver", 1);
+  }
 });
 
 // ─── App lifecycle ────────────────────────────────────────

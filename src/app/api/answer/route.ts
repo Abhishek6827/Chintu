@@ -6,6 +6,7 @@ const RESPONSE_PROMPTS: Record<string, string> = {
   concise: `Keep your answer very brief — 2-4 bullet points or 3-4 sentences max. No fluff. Get straight to the core answer.`,
   balanced: `Keep your answer well-structured and moderate in length — around 150-200 words. Use bullet points when helpful. Balance depth with brevity.`,
   detailed: `Give a thorough, comprehensive answer with examples, explanations, and context. Use structured formatting with headers and bullet points. Aim for 300-500 words to cover the topic in depth.`,
+  coding: `Write extremely accurate, efficient, and well-commented code to solve the core problem. Use markdown code blocks. Keep explanation very brief, let the code speak for itself. You are acting as an expert programmer.`,
 };
 
 export async function POST(req: NextRequest) {

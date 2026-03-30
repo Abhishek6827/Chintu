@@ -16,7 +16,7 @@ interface SpeechRecognitionEvent extends Event {
   resultIndex: number;
 }
 
-type ResponseLength = "concise" | "balanced" | "detailed";
+type ResponseLength = "concise" | "balanced" | "detailed" | "coding";
 
 // Check if running in Electron
 const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
@@ -32,6 +32,7 @@ export default function RoomPage() {
   const [responseLength, setResponseLength] = useState<ResponseLength>("balanced");
   const [showSettings, setShowSettings] = useState(false);
   const [isWindowHidden, setIsWindowHidden] = useState(false);
+  const [inputText, setInputText] = useState("");
 
   // ─── Screen + Audio Recording State ─────────────────────
   const [isScreenRecording, setIsScreenRecording] = useState(false);
@@ -307,13 +308,16 @@ export default function RoomPage() {
       whisperChunksRef.current = [];
 
       recorder.ondataavailable = (e) => {
+        console.log("[Whisper STT] Got chunk:", e.data.size, "bytes");
         if (e.data.size > 0) whisperChunksRef.current.push(e.data);
       };
 
-      recorder.start(500); // Collect chunks every 500ms
+      // Record without timeslice — all data comes in one chunk when stop() is called
+      // This avoids tiny fragmented chunks that get lost
+      recorder.start();
       whisperRecorderRef.current = recorder;
       setLiveTranscript("🎤 Listening...");
-      console.log("[Whisper STT] Recording started");
+      console.log("[Whisper STT] Recording started, state:", recorder.state);
     } catch (err: any) {
       console.error("[Whisper STT] Mic error:", err);
       setError("Mic access denied. Check permissions.");
@@ -321,67 +325,75 @@ export default function RoomPage() {
   }, []);
 
   const stopWhisperRecordingAndTranscribe = useCallback(async (): Promise<string> => {
-    return new Promise((resolve) => {
-      const recorder = whisperRecorderRef.current;
-      if (!recorder || recorder.state === "inactive") {
-        resolve("");
-        return;
-      }
+    const recorder = whisperRecorderRef.current;
+    if (!recorder || recorder.state === "inactive") {
+      console.warn("[Whisper STT] No active recorder to stop");
+      return "";
+    }
 
-      recorder.onstop = async () => {
+    console.log("[Whisper STT] Stopping recorder, state:", recorder.state);
+
+    // Wait for the recorder to fully stop and flush all data
+    const blob = await new Promise<Blob>((resolve) => {
+      recorder.ondataavailable = (e) => {
+        console.log("[Whisper STT] Final chunk:", e.data.size, "bytes");
+        if (e.data.size > 0) whisperChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        console.log("[Whisper STT] Recorder stopped, total chunks:", whisperChunksRef.current.length);
+
         // Stop mic stream
         if (whisperMicStreamRef.current) {
           whisperMicStreamRef.current.getTracks().forEach((t) => t.stop());
           whisperMicStreamRef.current = null;
         }
 
-        const chunks = whisperChunksRef.current;
+        const chunks = [...whisperChunksRef.current];
         whisperChunksRef.current = [];
 
-        if (chunks.length === 0) {
-          resolve("");
-          return;
-        }
-
-        const blob = new Blob(chunks, { type: "audio/webm" });
-        console.log("[Whisper STT] Sending", blob.size, "bytes to Whisper API");
-
-        if (blob.size < 1000) {
-          console.warn("[Whisper STT] Audio too short");
-          resolve("");
-          return;
-        }
-
-        setLiveTranscript("⏳ Transcribing...");
-
-        try {
-          const formData = new FormData();
-          formData.append("file", blob, "mic_recording.webm");
-
-          const res = await fetch("/api/transcribe", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-            const text = (data.text || "").trim();
-            console.log("[Whisper STT] Transcript:", text);
-            resolve(text);
-          } else {
-            const errText = await res.text();
-            console.error("[Whisper STT] API error:", res.status, errText);
-            resolve("");
-          }
-        } catch (err) {
-          console.error("[Whisper STT] Fetch error:", err);
-          resolve("");
-        }
+        const audioBlob = new Blob(chunks, { type: "audio/webm" });
+        console.log("[Whisper STT] Total blob size:", audioBlob.size, "bytes");
+        resolve(audioBlob);
       };
 
       recorder.stop();
-      whisperRecorderRef.current = null;
     });
+
+    whisperRecorderRef.current = null;
+
+    if (blob.size < 100) {
+      console.warn("[Whisper STT] Audio too small:", blob.size, "bytes");
+      return "";
+    }
+
+    setLiveTranscript("⏳ Transcribing...");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", blob, "mic_recording.webm");
+
+      const res = await fetch("/api/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = (data.text || "").trim();
+        console.log("[Whisper STT] Transcript:", JSON.stringify(text));
+        return text;
+      } else {
+        const errData = await res.text();
+        console.error("[Whisper STT] API error:", res.status, errData);
+        setError("Transcription failed: " + res.status);
+        return "";
+      }
+    } catch (err) {
+      console.error("[Whisper STT] Fetch error:", err);
+      setError("Transcription request failed. Check connection.");
+      return "";
+    }
   }, []);
 
   // ─── Unified start/stop recording ─────────────────────────
@@ -429,7 +441,7 @@ export default function RoomPage() {
     setLiveTranscript("");
 
     if (!transcript || transcript.length < 3) {
-      setError("No speech detected. Try again.");
+      setError((prev) => prev || "No speech detected. Try again.");
       setStatus("idle");
       return;
     }
@@ -472,6 +484,53 @@ export default function RoomPage() {
       setStatus("idle");
     }
   }, [jobDescription, liveTranscript, aiSpeechBubbles, stopWhisperRecordingAndTranscribe]);
+
+  const handleSendText = useCallback(async () => {
+    if (!inputText.trim()) return;
+    const textToUse = inputText.trim();
+    setInputText("");
+    
+    if (status !== "idle") return;
+    setStatus("generating");
+    setError(null);
+
+    const entryId = Date.now().toString();
+
+    const aiContext = aiSpeechBubbles.length > 0
+      ? "\n\n[AI Interviewer said]: " + aiSpeechBubbles.join(" ")
+      : "";
+
+    const fullTranscript = textToUse + aiContext;
+
+    setAnswers((prev) => [...prev, { id: entryId, question: textToUse, answer: "", isStreaming: true }]);
+    setAiSpeechBubbles([]);
+
+    try {
+      const res = await fetch("/api/answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript: fullTranscript, jobDescription, responseLength: responseLengthRef.current }),
+      });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Failed"); }
+      if (!res.body) throw new Error("No response body");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: a.answer + chunk } : a));
+      }
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, isStreaming: false } : a));
+      setStatus("idle");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Error";
+      setError(msg);
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
+      setStatus("idle");
+    }
+  }, [inputText, status, jobDescription, aiSpeechBubbles]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -580,6 +639,35 @@ export default function RoomPage() {
       <div className="flex-1 overflow-y-auto py-3" style={{ scrollbarGutter: "stable" }}>
         <AnswerDisplay answers={answers} />
         <div ref={chatEndRef} />
+      </div>
+
+      {/* Text Input Row */}
+      <div className="px-4 pb-2 shrink-0">
+        <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-white/10 transition-all">
+          <input
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSendText();
+              }
+            }}
+            placeholder="Ask a coding question or type..."
+            className="w-full bg-transparent px-4 py-3 text-sm text-white/90 placeholder-white/30 focus:outline-none"
+            disabled={status !== "idle"}
+          />
+          <button
+            onClick={handleSendText}
+            disabled={!inputText.trim() || status !== "idle"}
+            className="absolute right-2 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-500/80 text-white hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:hover:bg-indigo-500/80"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.125A59.769 59.769 0 0121.485 12 59.768 59.768 0 013.27 20.875L5.999 12Zm0 0h7.5" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Bottom toolbar */}
@@ -707,6 +795,7 @@ export default function RoomPage() {
                   <option value="concise">Small</option>
                   <option value="balanced">Balanced</option>
                   <option value="detailed">Detailed</option>
+                  <option value="coding">Coding</option>
                 </select>
               </div>
             </div>

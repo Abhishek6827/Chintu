@@ -98,6 +98,7 @@ Rules:
 
   // ─── API: Audio transcription via Groq Whisper ────────────
   app.post("/api/transcribe", upload.single("file"), async (req, res) => {
+    let tempPath = req.file ? req.file.path : null;
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No audio file provided" });
@@ -105,16 +106,22 @@ Rules:
 
       console.log(`[/api/transcribe] Received audio: ${req.file.originalname}, size: ${req.file.size} bytes`);
 
+      // FIX: Multer saves files without extensions. Groq API requires a valid extension to detect audio format.
+      const originalExt = path.extname(req.file.originalname) || ".webm";
+      const newPath = tempPath + originalExt;
+      fs.renameSync(tempPath, newPath);
+      tempPath = newPath;
+
       // Pass file stream to Groq Whisper
       const transcription = await groq.audio.transcriptions.create({
-        file: fs.createReadStream(req.file.path),
+        file: fs.createReadStream(tempPath),
         model: "whisper-large-v3",
         language: "en",
         response_format: "json",
       });
 
       // Clean up temp file
-      try { fs.unlinkSync(req.file.path); } catch {}
+      try { fs.unlinkSync(tempPath); } catch {}
 
       console.log(`[/api/transcribe] Result: "${transcription.text?.slice(0, 80)}..."`);
 
@@ -122,8 +129,8 @@ Rules:
     } catch (error) {
       console.error("[/api/transcribe] Error:", error);
       // Clean up temp file on error
-      if (req.file) {
-        try { fs.unlinkSync(req.file.path); } catch {}
+      if (tempPath) {
+        try { fs.unlinkSync(tempPath); } catch {}
       }
       const message = error instanceof Error ? error.message : "Transcription failed";
       res.status(500).json({ error: message });
