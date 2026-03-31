@@ -223,6 +223,12 @@ ipcMain.on("window-toggle", () => {
   }
 });
 
+ipcMain.on("set-focusable", (event, b) => {
+  if (mainWindow) {
+    mainWindow.setFocusable(b);
+  }
+});
+
 // ─── App lifecycle ────────────────────────────────────────
 app.whenReady().then(async () => {
   loadEnv();

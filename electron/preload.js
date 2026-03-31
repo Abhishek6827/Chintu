@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   hideToggle: () => ipcRenderer.invoke("window-hide-toggle"),   // returns Promise<boolean>
   getHidden: () => ipcRenderer.invoke("window-get-hidden"),     // returns Promise<boolean>
   toggle: () => ipcRenderer.send("window-toggle"),
+  setFocusable: (b) => ipcRenderer.send("set-focusable", b),
   isElectron: true,
   // System audio capture is handled via getDisplayMedia + desktopCapturer loopback
   // configured in main.js — no extra IPC needed.

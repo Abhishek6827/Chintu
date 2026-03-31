@@ -536,16 +536,46 @@ export default function RoomPage() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
-      if (e.code === "Space" && !e.repeat) { e.preventDefault(); startRecording(); }
-    };
-    const onKeyUp = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
-      if (e.code === "Space") { e.preventDefault(); stopRecordingAndGenerate(); }
+      if (e.code === "Space" && !e.repeat) {
+        e.preventDefault();
+        if (isRecordingRef.current) stopRecordingAndGenerate();
+        else startRecording();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("keyup", onKeyUp);
-    return () => { document.removeEventListener("keydown", onKeyDown); document.removeEventListener("keyup", onKeyUp); };
+    return () => { document.removeEventListener("keydown", onKeyDown); };
   }, [startRecording, stopRecordingAndGenerate]);
+
+  // Keep window non-focusable by default in the room so clicking the PIP doesn't activate the taskbar
+  useEffect(() => {
+    if (isElectron && (window as any).electronAPI?.setFocusable) {
+      if (showSettings) {
+        (window as any).electronAPI.setFocusable(true);
+      } else {
+        (window as any).electronAPI.setFocusable(false);
+        // On unmount, make sure to return focusability when leaving route
+        return () => {
+          if (isElectron && (window as any).electronAPI?.setFocusable) {
+            (window as any).electronAPI.setFocusable(true);
+          }
+        };
+      }
+    }
+  }, [showSettings]);
+
+  const enableFocus = () => {
+    if (isElectron && (window as any).electronAPI?.setFocusable) {
+      (window as any).electronAPI.setFocusable(true);
+    }
+  };
+
+  const disableFocus = () => {
+    if (isElectron && (window as any).electronAPI?.setFocusable) {
+      // Only disable if we aren't actively focused on an input
+      if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA" || document.activeElement?.tagName === "SELECT") return;
+      (window as any).electronAPI.setFocusable(false);
+    }
+  };
 
   const handleMicButton = () => {
     if (isRecordingRef.current) stopRecordingAndGenerate();
@@ -642,11 +672,16 @@ export default function RoomPage() {
       </div>
 
       {/* Text Input Row */}
-      <div className="px-4 pb-2 shrink-0">
+      <div 
+        className="px-4 pb-2 shrink-0" 
+        onMouseEnter={enableFocus} 
+        onMouseLeave={disableFocus}
+      >
         <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-white/10 transition-all">
           <input
             type="text"
             value={inputText}
+            onBlur={disableFocus}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
