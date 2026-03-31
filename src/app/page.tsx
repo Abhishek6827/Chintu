@@ -24,8 +24,8 @@ export default function SetupPage() {
           <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
             <span className="text-3xl">✦</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Chintu AI</h1>
-          <p className="text-sm text-white/60 mt-1">Chintu</p>
+          <h1 className="text-2xl font-bold text-white">Angel AI</h1>
+          <p className="text-sm text-white/60 mt-1">Angel</p>
         </div>
 
         {/* Job Description */}

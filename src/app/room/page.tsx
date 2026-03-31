@@ -569,7 +569,7 @@ export default function RoomPage() {
       {/* Draggable title bar */}
       <div className="drag-region flex items-center justify-between px-4 h-12 shrink-0">
         <div className="flex items-center gap-2 no-drag">
-          <span className="text-white/90 text-sm font-bold">✦ Chintu</span>
+          <span className="text-white/90 text-sm font-bold">✦ Angel</span>
         </div>
         <div className="flex items-center gap-1 no-drag">
           {isScreenRecording && (
