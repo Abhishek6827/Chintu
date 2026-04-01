@@ -43,7 +43,7 @@
     "directories": {
       "output": "dist-electron"
     },
-    "asar": false,
+    "asar": true,
     "files": [
       "electron/**/*",
       "out/**/*",
@@ -51,7 +51,7 @@
       "package.json"
     ],
     "win": {
-      "target": "dir",
+      "target": "portable",
       "icon": "electron/icon.png",
       "signAndEditExecutable": false
     },

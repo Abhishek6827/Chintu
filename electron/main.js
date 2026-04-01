@@ -90,6 +90,7 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
+    icon: path.join(__dirname, "icon.png"),
   });
 
   // Force window to stay absolutely on top of everything, including fullscreen games/apps
@@ -98,6 +99,9 @@ function createWindow() {
 
   // Make window invisible to screen capture (Windows)
   mainWindow.setContentProtection(true);
+
+  // Aggressively enforce skipTaskbar so it doesn't appear in the Windows Taskbar
+  mainWindow.setSkipTaskbar(true);
 
   // ─── System Audio Loopback ───────────────────────────────
   session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
@@ -161,6 +165,7 @@ function createTray() {
             mainWindow.setOpacity(1);
             mainWindow.setIgnoreMouseEvents(false);
             mainWindow.show();
+            mainWindow.setSkipTaskbar(true);
             mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
           }
         }
@@ -219,6 +224,7 @@ ipcMain.on("window-toggle", () => {
   if (mainWindow?.isVisible()) mainWindow.hide();
   else {
     mainWindow?.show();
+    mainWindow?.setSkipTaskbar(true);
     mainWindow?.setAlwaysOnTop(true, "screen-saver", 1);
   }
 });
