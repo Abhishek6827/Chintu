@@ -84,6 +84,7 @@ function createWindow() {
     alwaysOnTop: true,
     resizable: true,
     skipTaskbar: true,
+    show: false,
     hasShadow: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -91,6 +92,11 @@ function createWindow() {
       contextIsolation: true,
     },
     icon: path.join(__dirname, "icon.png"),
+  });
+
+  mainWindow.once("ready-to-show", () => {
+    mainWindow.show();
+    mainWindow.setSkipTaskbar(true);
   });
 
   // Force window to stay absolutely on top of everything, including fullscreen games/apps
@@ -193,6 +199,8 @@ function createTray() {
         mainWindow.setOpacity(1);
         mainWindow.setIgnoreMouseEvents(false);
         mainWindow.show();
+        mainWindow.setSkipTaskbar(true);
+        mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
       }
     }
   });
