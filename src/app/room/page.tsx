@@ -33,6 +33,11 @@ export default function RoomPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [isWindowHidden, setIsWindowHidden] = useState(false);
   const [inputText, setInputText] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // ─── Screen + Audio Recording State ─────────────────────
   const [isScreenRecording, setIsScreenRecording] = useState(false);
@@ -553,15 +558,18 @@ export default function RoomPage() {
         (window as any).electronAPI.setFocusable(true);
       } else {
         (window as any).electronAPI.setFocusable(false);
-        // On unmount, make sure to return focusability when leaving route
-        return () => {
-          if (isElectron && (window as any).electronAPI?.setFocusable) {
-            (window as any).electronAPI.setFocusable(true);
-          }
-        };
       }
     }
   }, [showSettings]);
+
+  // Restore focusability when leaving the room route entirely
+  useEffect(() => {
+    return () => {
+      if (isElectron && (window as any).electronAPI?.setFocusable) {
+        (window as any).electronAPI.setFocusable(true);
+      }
+    };
+  }, []);
 
   const enableFocus = () => {
     if (isElectron && (window as any).electronAPI?.setFocusable) {
@@ -608,7 +616,7 @@ export default function RoomPage() {
               <span className="text-[10px] text-red-300 font-medium">REC</span>
             </div>
           )}
-          {isElectron && (
+          {mounted && isElectron && (
             <>
               <button onClick={handleHide} className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all text-xs">─</button>
               <button onClick={handleClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:bg-red-500/30 transition-all text-xs">✕</button>

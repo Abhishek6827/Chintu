@@ -95,8 +95,8 @@ function createWindow() {
   });
 
   mainWindow.once("ready-to-show", () => {
-    mainWindow.show();
     mainWindow.setSkipTaskbar(true);
+    mainWindow.show();
   });
 
   // Force window to stay absolutely on top of everything, including fullscreen games/apps
@@ -240,6 +240,8 @@ ipcMain.on("window-toggle", () => {
 ipcMain.on("set-focusable", (event, b) => {
   if (mainWindow) {
     mainWindow.setFocusable(b);
+    // Re-enforce skipTaskbar because setting focusable can sometimes reset it on Windows
+    mainWindow.setSkipTaskbar(true);
   }
 });
 
