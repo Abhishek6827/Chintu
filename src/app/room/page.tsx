@@ -602,6 +602,10 @@ export default function RoomPage() {
     else router.push("/");
   };
 
+  if (!mounted) {
+    return <div className="app-container" />;
+  }
+
   return (
     <div className="app-container">
       {/* Draggable title bar */}
@@ -616,7 +620,7 @@ export default function RoomPage() {
               <span className="text-[10px] text-red-300 font-medium">REC</span>
             </div>
           )}
-          {mounted && isElectron && (
+          {isElectron && (
             <>
               <button onClick={handleHide} className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all text-xs">─</button>
               <button onClick={handleClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:bg-red-500/30 transition-all text-xs">✕</button>
