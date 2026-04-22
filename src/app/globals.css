@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
   --bg-gradient-start: #667eea;
@@ -101,6 +101,27 @@ body {
   box-shadow: 0 2px 20px rgba(102, 126, 234, 0.15);
 }
 
+/* Markdown answer rendering */
+.markdown-answer {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.markdown-answer pre,
+.markdown-answer code {
+  user-select: text !important;
+  cursor: text !important;
+}
+
+.markdown-answer pre > div {
+  border-radius: 10px !important;
+}
+
+.markdown-answer p:last-child {
+  margin-bottom: 0;
+}
+
+
 /* Toolbar */
 .toolbar {
   background: rgba(255, 255, 255, 0.15);
@@ -118,6 +139,186 @@ body {
   background: white;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* Opacity slider */
+.opacity-slider {
+  cursor: pointer !important;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: linear-gradient(to right, #e0e7ff, #6366f1);
+  border-radius: 999px;
+  outline: none;
+}
+
+.opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #6366f1;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4);
+  cursor: pointer !important;
+}
+
+/* ─── Floating Side Controls ─────────────────────────── */
+.floating-side-controls {
+  position: fixed;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(30, 30, 50, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 10px 6px;
+  z-index: 40;
+}
+
+.side-control-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.side-control-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+}
+
+.side-control-value {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.45);
+  font-variant-numeric: tabular-nums;
+}
+
+.side-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 6px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  outline: none;
+  cursor: default !important;
+}
+
+.side-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #818cf8;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  cursor: default !important;
+}
+
+/* Prevent hover effects on floating controls */
+.floating-side-controls,
+.floating-side-controls *,
+.floating-side-controls *:hover {
+  box-shadow: none !important;
+  cursor: default !important;
+}
+
+.floating-side-controls {
+  transform: translateY(-50%) !important;
+}
+
+
+/* ─── Responsive Toolbar ─────────────────────────────── */
+@media (max-height: 550px) {
+  .toolbar {
+    padding: 6px 10px !important;
+  }
+  .toolbar button {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .toolbar button svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  /* Smaller mic button */
+  .toolbar .w-14 {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .toolbar {
+    padding: 6px 8px !important;
+    gap: 4px;
+  }
+  .toolbar button {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  .toolbar .w-14 {
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+
+@media (max-width: 300px) {
+  .toolbar {
+    padding: 4px 6px !important;
+    gap: 2px;
+  }
+  .toolbar button {
+    width: 26px !important;
+    height: 26px !important;
+  }
+  .toolbar button svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  .toolbar .w-14 {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+/* ─── Responsive Floating Controls ──────────────────── */
+@media (max-height: 450px) {
+  .floating-side-controls {
+    gap: 6px;
+    padding: 6px 4px;
+  }
+  .side-slider {
+    height: 50px;
+  }
+  .side-control-label {
+    font-size: 8px;
+  }
+  .side-control-value {
+    font-size: 7px;
+  }
+}
+
+@media (max-height: 350px) {
+  .floating-side-controls {
+    gap: 4px;
+    padding: 4px 3px;
+    border-radius: 10px;
+  }
+  .side-slider {
+    height: 35px;
+  }
 }
 
 /* Mic button pulse */

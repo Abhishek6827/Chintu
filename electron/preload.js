@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getHidden: () => ipcRenderer.invoke("window-get-hidden"),     // returns Promise<boolean>
   toggle: () => ipcRenderer.send("window-toggle"),
   setFocusable: (b) => ipcRenderer.send("set-focusable", b),
+  setOpacity: (opacity) => ipcRenderer.send("set-opacity", opacity),
+  getOpacity: () => ipcRenderer.invoke("get-opacity"),
   captureScreenshot: () => ipcRenderer.invoke("capture-screenshot"), // returns Promise<string|null>
   onHiddenChange: (callback) => {
     const handler = (_event, hidden) => callback(hidden);

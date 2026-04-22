@@ -88,13 +88,13 @@ function createServer(apiKey, staticDir) {
   // ─── API: Answer generation (streaming) ───────────────────
   app.post("/api/answer", async (req, res) => {
     try {
-      const { transcript, jobDescription, responseLength = "balanced" } = req.body;
+      const { transcript, jobDescription, responseLength = "concise" } = req.body;
 
       if (!transcript || !jobDescription) {
         return res.status(400).json({ error: "Missing transcript or jobDescription" });
       }
 
-      const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.balanced;
+      const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.concise;
       const isCoding = responseLength === "coding";
 
       console.log(`[/api/answer] Mode: ${responseLength} | Question: "${transcript.slice(0, 80)}..."`);

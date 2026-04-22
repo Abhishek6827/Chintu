@@ -34,9 +34,16 @@ export default function RoomPage() {
   const [isWindowHidden, setIsWindowHidden] = useState(false);
   const [inputText, setInputText] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [windowOpacity, setWindowOpacity] = useState(1);
+  const [fontSize, setFontSize] = useState(14);
+  const [spaceMode, setSpaceMode] = useState<"hold" | "toggle">("hold");
 
   useEffect(() => {
     setMounted(true);
+    // Load saved opacity
+    if (isElectron && (window as any).electronAPI?.getOpacity) {
+      (window as any).electronAPI.getOpacity().then((o: number) => setWindowOpacity(o));
+    }
   }, []);
 
   // Listen for window visibility changes from Electron (e.g. tray unhide)
@@ -554,43 +561,32 @@ export default function RoomPage() {
   // Stable refs for handlers to use in useEffect without re-registering listener
   const startRecordingRef = useRef(startRecording);
   const stopRecordingRef = useRef(stopRecordingAndGenerate);
+  const spaceModeRef = useRef<"hold" | "toggle">(spaceMode);
   
   useEffect(() => { startRecordingRef.current = startRecording; }, [startRecording]);
   useEffect(() => { stopRecordingRef.current = stopRecordingAndGenerate; }, [stopRecordingAndGenerate]);
+  useEffect(() => { spaceModeRef.current = spaceMode; }, [spaceMode]);
 
-  // Debug: Log focus state
+  // Keyboard shortcuts: Space to Record (supports hold and toggle modes)
   useEffect(() => {
-    const logFocus = () => console.log("[Focus] Window focused");
-    const logBlur = () => console.log("[Focus] Window blurred");
-    window.addEventListener("focus", logFocus);
-    window.addEventListener("blur", logBlur);
-    return () => {
-      window.removeEventListener("focus", logFocus);
-      window.removeEventListener("blur", logBlur);
-    };
-  }, []);
-
-  // Keyboard shortcuts: Hold Space to Record
-  useEffect(() => {
-    console.log("[Shortcut] Registering listeners");
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space" || e.key === " ") {
-        console.log("[Shortcut] Space KeyDown detected", { 
-          target: (e.target as any)?.tagName,
-          isRecording: isRecordingRef.current,
-          repeat: e.repeat 
-        });
-        
-        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) {
-          console.log("[Shortcut] Ignoring Space: focus is in input");
-          return;
-        }
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
 
         if (!e.repeat) {
           e.preventDefault();
-          if (!isRecordingRef.current) {
-            console.log("[Shortcut] Calling startRecording...");
-            startRecordingRef.current();
+          if (spaceModeRef.current === "toggle") {
+            // Toggle mode: press to start, press again to stop
+            if (isRecordingRef.current) {
+              stopRecordingRef.current();
+            } else {
+              startRecordingRef.current();
+            }
+          } else {
+            // Hold mode: press to start
+            if (!isRecordingRef.current) {
+              startRecordingRef.current();
+            }
           }
         }
       }
@@ -598,10 +594,9 @@ export default function RoomPage() {
 
     const onKeyUp = (e: KeyboardEvent) => {
       if (e.code === "Space" || e.key === " ") {
-        console.log("[Shortcut] Space KeyUp detected", { isRecording: isRecordingRef.current });
         e.preventDefault();
-        if (isRecordingRef.current) {
-          console.log("[Shortcut] Calling stopRecording...");
+        // Only stop on release in "hold" mode
+        if (spaceModeRef.current === "hold" && isRecordingRef.current) {
           stopRecordingRef.current();
         }
       }
@@ -615,6 +610,7 @@ export default function RoomPage() {
       window.removeEventListener("keyup", onKeyUp, true);
     };
   }, []);
+
 
   // Window focusability logic
   useEffect(() => {
@@ -709,6 +705,13 @@ export default function RoomPage() {
   }, [capturedScreenshots, status, jobDescription, inputText]);
 
 
+  const handleOpacityChange = (value: number) => {
+    setWindowOpacity(value);
+    if (isElectron && (window as any).electronAPI?.setOpacity) {
+      (window as any).electronAPI.setOpacity(value);
+    }
+  };
+
   const handleHide = async () => {
     if (isElectron) {
       const hidden = await (window as any).electronAPI.hideToggle();
@@ -728,9 +731,9 @@ export default function RoomPage() {
   return (
     <div className="app-container">
       {/* Draggable title bar */}
-      <div className="drag-region flex items-center justify-between px-4 h-12 shrink-0">
+      <div className="drag-region flex items-center justify-between px-2 sm:px-4 h-10 sm:h-12 shrink-0">
         <div className="flex items-center gap-2 no-drag">
-          <span className="text-white/90 text-sm font-bold">✦ Angel</span>
+          <span className="text-white/90 text-sm font-bold">✦ Chintu</span>
         </div>
         <div className="flex items-center gap-1 no-drag">
           {isScreenRecording && (
@@ -798,13 +801,13 @@ export default function RoomPage() {
 
       {/* Chat area */}
       <div className="flex-1 overflow-y-auto py-3" style={{ scrollbarGutter: "stable" }}>
-        <AnswerDisplay answers={answers} />
+        <AnswerDisplay answers={answers} fontSize={fontSize} />
         <div ref={chatEndRef} />
       </div>
 
       {/* Screenshot preview strip */}
       {capturedScreenshots.length > 0 && (
-        <div className="px-4 pb-2 shrink-0">
+        <div className="px-2 sm:px-4 pb-2 shrink-0">
           <div className="bg-white/5 border border-cyan-500/20 rounded-2xl p-3">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-cyan-300 text-xs font-medium">📸 {capturedScreenshots.length} screenshot{capturedScreenshots.length > 1 ? "s" : ""} captured</span>
@@ -841,7 +844,7 @@ export default function RoomPage() {
       )}
 
       {/* Text Input Row */}
-      <div className="px-4 pb-2 shrink-0">
+      <div className="px-2 sm:px-4 pb-2 shrink-0">
         <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-white/10 transition-all">
           <input
             type="text"
@@ -874,7 +877,7 @@ export default function RoomPage() {
       </div>
 
       {/* Bottom toolbar */}
-      <div ref={controlsRef} className="toolbar px-4 py-3 flex items-center justify-between shrink-0">
+      <div ref={controlsRef} className="toolbar px-2 sm:px-4 py-3 flex flex-wrap items-center justify-center gap-2 sm:justify-between shrink-0">
         <button
           onClick={() => setShowSettings(true)}
           className="no-drag w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/70"
@@ -885,7 +888,7 @@ export default function RoomPage() {
           </svg>
         </button>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center gap-1 sm:gap-2 md:gap-3 flex-wrap">
           {/* Screen Record toggle */}
           <button
             onClick={isScreenRecording ? stopScreenRecording : startScreenRecording}
@@ -991,6 +994,38 @@ export default function RoomPage() {
         </button>
       </div>
 
+      {/* Floating side controls for Opacity & Font Size */}
+      {isElectron && (
+        <div className="floating-side-controls no-drag">
+          {/* Opacity */}
+          <div className="side-control-group">
+            <span className="side-control-label">🔍</span>
+            <input
+              type="range"
+              min="10"
+              max="100"
+              value={Math.round(windowOpacity * 100)}
+              onChange={(e) => handleOpacityChange(parseInt(e.target.value) / 100)}
+              className="side-slider"
+            />
+            <span className="side-control-value">{Math.round(windowOpacity * 100)}</span>
+          </div>
+          {/* Font Size */}
+          <div className="side-control-group">
+            <span className="side-control-label">Aa</span>
+            <input
+              type="range"
+              min="10"
+              max="22"
+              value={fontSize}
+              onChange={(e) => setFontSize(parseInt(e.target.value))}
+              className="side-slider"
+            />
+            <span className="side-control-value">{fontSize}</span>
+          </div>
+        </div>
+      )}
+
       {/* Settings Modal */}
       {showSettings && (
         <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-6" onClick={() => setShowSettings(false)}>
@@ -1045,12 +1080,104 @@ export default function RoomPage() {
               </p>
             </div>
 
+            {/* Opacity control - only in Electron */}
+            {isElectron && (
+              <div className="mb-5">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700">Window Opacity</p>
+                    <p className="text-xs text-gray-400">Adjust window transparency</p>
+                  </div>
+                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                    {Math.round(windowOpacity * 100)}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="10"
+                  max="100"
+                  value={Math.round(windowOpacity * 100)}
+                  onChange={(e) => handleOpacityChange(parseInt(e.target.value) / 100)}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none opacity-slider"
+                />
+                <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                  <span>10%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+            )}
+
+            {/* Font Size control */}
+            <div className="mb-5">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">Font Size</p>
+                  <p className="text-xs text-gray-400">Adjust answer text size</p>
+                </div>
+                <span className="text-xs font-medium px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                  {fontSize}px
+                </span>
+              </div>
+              <input
+                type="range"
+                min="10"
+                max="22"
+                value={fontSize}
+                onChange={(e) => setFontSize(parseInt(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none opacity-slider"
+              />
+              <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                <span>Small</span>
+                <span>Large</span>
+              </div>
+            </div>
+
+            {/* Space Key Mode */}
+            <div className="mb-5">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">Space Key Mode</p>
+                  <p className="text-xs text-gray-400">How Space triggers recording</p>
+                </div>
+                <div className="flex bg-gray-100 rounded-lg p-0.5">
+                  <button
+                    onClick={() => setSpaceMode("hold")}
+                    className={`text-xs px-3 py-1.5 rounded-md font-medium ${
+                      spaceMode === "hold"
+                        ? "bg-indigo-500 text-white shadow-sm"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    Hold
+                  </button>
+                  <button
+                    onClick={() => setSpaceMode("toggle")}
+                    className={`text-xs px-3 py-1.5 rounded-md font-medium ${
+                      spaceMode === "toggle"
+                        ? "bg-indigo-500 text-white shadow-sm"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    Toggle
+                  </button>
+                </div>
+              </div>
+              <p className="text-[11px] text-gray-400 leading-relaxed">
+                {spaceMode === "hold"
+                  ? "Hold Space to record, release to stop and generate answer."
+                  : "Press Space once to start recording, press again to stop."
+                }
+              </p>
+            </div>
+
             <div className="mb-4">
               <p className="text-sm font-semibold text-gray-700 mb-2">Shortcuts</p>
               <div className="space-y-2 text-xs text-gray-500">
                 <div className="flex justify-between">
                   <span>Record</span>
-                  <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600 font-mono">Space (hold)</kbd>
+                  <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600 font-mono">
+                    {spaceMode === "hold" ? "Space (hold)" : "Space (toggle)"}
+                  </kbd>
                 </div>
                 <div className="flex justify-between">
                   <span>Hide window</span>

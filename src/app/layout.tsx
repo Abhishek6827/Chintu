@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Interview Copilot",
+  title: "Chintu",
   description: "AI-powered interview assistant — invisible to screen sharing",
 };
 

@@ -77,8 +77,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 440,
     height: 700,
-    minWidth: 320,
-    minHeight: 500,
+    minWidth: 200,
+    minHeight: 250,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -168,7 +168,7 @@ function createTray() {
             mainWindow.hide();
           } else {
             isHidden = false;
-            mainWindow.setOpacity(1);
+            mainWindow.setOpacity(userOpacity);
             mainWindow.setIgnoreMouseEvents(false);
             mainWindow.show();
             mainWindow.setSkipTaskbar(true);
@@ -188,7 +188,7 @@ function createTray() {
     },
   ]);
 
-  tray.setToolTip("Interview Copilot");
+  tray.setToolTip("Chintu");
   tray.setContextMenu(contextMenu);
 
   tray.on("click", () => {
@@ -197,7 +197,7 @@ function createTray() {
         mainWindow.hide();
       } else {
         isHidden = false;
-        mainWindow.setOpacity(1);
+        mainWindow.setOpacity(userOpacity);
         mainWindow.setIgnoreMouseEvents(false);
         mainWindow.show();
         mainWindow.setSkipTaskbar(true);
@@ -220,7 +220,7 @@ ipcMain.handle("window-hide-toggle", () => {
     mainWindow.setSkipTaskbar(true);
     mainWindow.setIgnoreMouseEvents(true);
   } else {
-    mainWindow.setOpacity(1);
+    mainWindow.setOpacity(userOpacity);
     mainWindow.setSkipTaskbar(true);
     mainWindow.setIgnoreMouseEvents(false);
     mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
@@ -251,7 +251,7 @@ ipcMain.handle("capture-screenshot", async () => {
     
     // Restore window
     if (wasVisible) {
-      mainWindow.setOpacity(1);
+      mainWindow.setOpacity(userOpacity);
     }
     
     if (sources.length === 0) return null;
@@ -262,7 +262,7 @@ ipcMain.handle("capture-screenshot", async () => {
   } catch (err) {
     console.error("[Screenshot] Error:", err);
     // Make sure to restore opacity if something fails
-    if (mainWindow) mainWindow.setOpacity(1);
+    if (mainWindow) mainWindow.setOpacity(userOpacity);
     return null;
   }
 });
@@ -285,6 +285,19 @@ ipcMain.on("set-focusable", (event, b) => {
     mainWindow.setSkipTaskbar(true);
   }
 });
+
+// ─── Opacity control ─────────────────────────────────────────
+let userOpacity = 1;
+
+ipcMain.on("set-opacity", (event, opacity) => {
+  userOpacity = Math.max(0.1, Math.min(1, opacity));
+  if (mainWindow && !isHidden) {
+    mainWindow.setOpacity(userOpacity);
+  }
+});
+
+ipcMain.handle("get-opacity", () => userOpacity);
+
 
 // ─── App lifecycle ────────────────────────────────────────
 app.whenReady().then(async () => {

@@ -55,7 +55,7 @@ export default function PipWindow({
     // Title
     ctx.fillStyle = "#d4d4d8";
     ctx.font = "bold 28px Inter, system-ui, sans-serif";
-    ctx.fillText("🎯 Interview Copilot", 24, 48);
+    ctx.fillText("🎯 Chintu", 24, 48);
 
     // Status pill
     const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
