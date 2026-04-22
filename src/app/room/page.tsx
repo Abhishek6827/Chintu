@@ -533,6 +533,9 @@ export default function RoomPage() {
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Failed"); }
       if (!res.body) throw new Error("No response body");
 
+      const actualModelUsed = res.headers.get("X-Model-Used") || modelName;
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: actualModelUsed } : a));
+
       let fullResponse = "";
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -600,6 +603,9 @@ export default function RoomPage() {
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Failed"); }
       if (!res.body) throw new Error("No response body");
+
+      const actualModelUsed = res.headers.get("X-Model-Used") || modelName;
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: actualModelUsed } : a));
 
       let fullResponse = "";
       const reader = res.body.getReader();
@@ -760,6 +766,10 @@ export default function RoomPage() {
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Vision failed"); }
       if (!res.body) throw new Error("No response body");
+
+      const actualModelUsed = res.headers.get("X-Model-Used") || selectedModelRef.current;
+      const displayModelName = `Scout + ${MODELS.find(m => m.key === actualModelUsed)?.name || actualModelUsed}`;
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: displayModelName } : a));
 
       // ─── Accumulate full response for history ──────────────
       let fullResponse = "";

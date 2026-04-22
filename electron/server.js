@@ -205,6 +205,7 @@ Rules:
       // ─── Keep last 10 history messages to avoid token overflow ─
       const trimmedHistory = conversationHistory.slice(-10);
 
+      let actualModelUsed = selectedModel;
       let stream;
       let lastError;
       const MAX_RETRIES = 3;
@@ -231,6 +232,7 @@ Rules:
                 { role: "user", content: transcript },
               ],
             });
+            actualModelUsed = selectedModel;
             console.log(`[/api/answer] ✓ Stream created with key ${i + 1}`);
             break;
           } catch (error) {
@@ -266,6 +268,7 @@ Rules:
                 { role: "user", content: transcript },
               ],
             });
+            actualModelUsed = selectedModel;
             console.log(`[/api/answer] ✓ OpenRouter stream created`);
           } catch (orErr) {
             console.error(`[/api/answer] ✗ OpenRouter also failed:`, orErr?.message?.slice(0, 100));
@@ -288,6 +291,7 @@ Rules:
                   ],
                 });
                 stream = fallbackStream;
+                actualModelUsed = "Llama-4-Scout (Groq Fallback)";
                 console.log(`[/api/answer] ✓ Groq fallback stream created`);
                 break;
               } catch (fallbackGroqErr) {
@@ -302,6 +306,7 @@ Rules:
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
+      res.setHeader("X-Model-Used", actualModelUsed);
 
       let insideThinkTag = false;
       let buffer = "";
@@ -502,6 +507,7 @@ Rules:
       const finalTranscript = `[Screenshot Transcription]:\n${extractedText}\n\n[User Context]: ${additionalContext || "None"}`;
       const trimmedHistory = conversationHistory.slice(-10);
 
+      let actualModelUsed = selectedModel;
       let stream;
       let finalError;
 
@@ -522,6 +528,7 @@ Rules:
                 { role: "user", content: finalTranscript },
               ],
             });
+            actualModelUsed = selectedModel;
             break;
           } catch (err) {
             finalError = err;
@@ -547,6 +554,7 @@ Rules:
               { role: "user", content: finalTranscript },
             ],
           });
+          actualModelUsed = selectedModel;
         } catch (err) {
           finalError = err;
           console.log(`[/api/answer-vision] OpenRouter with ${openrouterModel} failed. Falling back...`);
@@ -566,6 +574,7 @@ Rules:
                 ],
               });
               stream = fallbackStream;
+              actualModelUsed = "Llama-4-Scout (Groq Fallback)";
               console.log(`[/api/answer-vision] ✓ Groq fallback stream created`);
               break;
             } catch (fallbackGroqErr) {
@@ -579,6 +588,7 @@ Rules:
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
+      res.setHeader("X-Model-Used", actualModelUsed);
 
       let insideThinkTag = false;
       let buffer = "";

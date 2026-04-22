@@ -207,6 +207,8 @@ Rules:
     // ─── Keep last 10 history messages to avoid token overflow ─
     const trimmedHistory = conversationHistory.slice(-10);
 
+    let actualModelUsed = selectedModel;
+    let actualModelUsed = selectedModel;
     let stream;
     let lastError;
     const MAX_RETRIES = 3;
@@ -268,6 +270,7 @@ Rules:
               { role: "user", content: transcript },
             ],
           });
+          actualModelUsed = selectedModel;
           console.log(`[/api/answer] ✓ OpenRouter stream created`);
         } catch (orErr: any) {
           console.error(`[/api/answer] ✗ OpenRouter also failed:`, orErr?.message?.slice(0, 100));
@@ -290,6 +293,7 @@ Rules:
                 ],
               });
               stream = fallbackStream;
+              actualModelUsed = "Llama-4-Scout (Groq Fallback)";
               console.log(`[/api/answer] ✓ Groq fallback stream created`);
               break;
             } catch (fallbackGroqErr: any) {

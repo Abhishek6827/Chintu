@@ -359,6 +359,8 @@ Rules:
             { role: "user", content: finalTranscript },
           ],
         });
+        actualModelUsed = selectedModel;
+        console.log(`[/api/answer-vision] ✓ OpenRouter stream created`);
       } catch (err) {
         finalError = err;
         console.log(`[/api/answer-vision] OpenRouter with ${openrouterModel} failed. Falling back...`);
