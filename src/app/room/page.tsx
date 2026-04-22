@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import AnswerDisplay from "@/components/AnswerDisplay";
 
 interface AnswerEntry {
@@ -829,7 +830,7 @@ export default function RoomPage() {
             <div className="flex gap-2 overflow-x-auto">
               {capturedScreenshots.map((img, i) => (
                 <div key={i} className="relative shrink-0 w-24 h-16 rounded-lg overflow-hidden border border-white/10">
-                  <img src={img} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
+                  <Image src={img} alt={`Screenshot ${i + 1}`} fill unoptimized className="object-cover" />
                   <button
                     onClick={() => removeScreenshot(i)}
                     className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 rounded-full text-white text-[0.5rem] flex items-center justify-center"
