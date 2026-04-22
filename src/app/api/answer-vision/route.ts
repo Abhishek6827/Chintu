@@ -314,6 +314,7 @@ Rules:
     });
     const trimmedHistory = sanitizedHistory.slice(-10);
 
+    let actualModelUsed = selectedModel;
     let stream: any;
     let finalError: any;
 
@@ -324,17 +325,18 @@ Rules:
         try {
           console.log(`[/api/answer-vision] Step 2: Trying key ${i + 1} with ${groqModel}...`);
           const groq = new Groq({ apiKey: apiKeys[i] });
-          stream = await groq.chat.completions.create({
-            model: groqModel,
-            stream: true,
-            max_tokens: 2048,
-            messages: [
-              { role: "system", content: systemPrompt },
-              ...trimmedHistory,
-              { role: "user", content: finalTranscript },
-            ],
-          });
-          break;
+            stream = await groq.chat.completions.create({
+              model: groqModel,
+              stream: true,
+              max_tokens: 2048,
+              messages: [
+                { role: "system", content: systemPrompt },
+                ...trimmedHistory,
+                { role: "user", content: finalTranscript },
+              ],
+            });
+            actualModelUsed = selectedModel;
+            break;
         } catch (err) {
           finalError = err;
         }
@@ -380,6 +382,7 @@ Rules:
               ],
             });
             stream = fallbackStream;
+            actualModelUsed = "Llama-4-Scout (Groq Fallback)";
             console.log(`[/api/answer-vision] ✓ Groq fallback stream created`);
             break;
           } catch (fallbackGroqErr) {
@@ -435,6 +438,7 @@ Rules:
     return new Response(readableStream, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
+        "X-Model-Used": actualModelUsed,
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
       },

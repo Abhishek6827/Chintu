@@ -208,7 +208,6 @@ Rules:
     const trimmedHistory = conversationHistory.slice(-10);
 
     let actualModelUsed = selectedModel;
-    let actualModelUsed = selectedModel;
     let stream;
     let lastError;
     const MAX_RETRIES = 3;
@@ -235,6 +234,7 @@ Rules:
               { role: "user", content: transcript },
             ],
           });
+          actualModelUsed = selectedModel;
           console.log(`[/api/answer] ✓ Stream created with key ${i + 1}`);
           break; // Success, exit key loop
         } catch (error: any) {
@@ -356,6 +356,7 @@ Rules:
     return new Response(readableStream, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
+        "X-Model-Used": actualModelUsed,
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
       },
