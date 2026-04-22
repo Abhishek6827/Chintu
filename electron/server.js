@@ -142,7 +142,12 @@ function createServer(apiKeys, staticDir) {
   // ─── API: Answer generation (streaming) ───────────────────
   app.post("/api/answer", async (req, res) => {
     try {
-      const { transcript, jobDescription, responseLength = "small" } = req.body;
+      const {
+        transcript,
+        jobDescription,
+        responseLength = "small",
+        conversationHistory = [],
+      } = req.body;
 
       if (!transcript || !jobDescription) {
         return res.status(400).json({ error: "Missing transcript or jobDescription" });
@@ -151,7 +156,7 @@ function createServer(apiKeys, staticDir) {
       const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.small;
       const isCoding = responseLength === "coding";
 
-      console.log(`[/api/answer] Mode: ${responseLength} | Question: "${transcript.slice(0, 80)}..."`);
+      console.log(`[/api/answer] Mode: ${responseLength} | Question: "${transcript.slice(0, 80)}..." | History: ${conversationHistory.length} messages`);
 
       const model = isCoding
         ? "openai/gpt-oss-120b"
@@ -165,7 +170,9 @@ The candidate is interviewing for this role:
 ${jobDescription}
 ---
 
-${lengthInstruction}`
+${lengthInstruction}
+
+You have access to previous questions and answers in the conversation history — use them for context.`
         : `You are generating spoken responses for an interviewee. The candidate is interviewing for a role with the following job description:
 
 ---
@@ -175,6 +182,7 @@ ${jobDescription}
 Write the EXACT words they should speak in response. Write in the first person ("I").
 CRITICAL: Sound like a human speaking naturally — conversational, thoughtful, and unscripted.
 NEVER use bullet points, numbered lists, bold text, or headers. The candidate will be reading this aloud.
+You have access to previous questions and answers in the conversation history — use them for context.
 
 ${lengthInstruction}
 
@@ -183,6 +191,9 @@ Rules:
 - Do NOT repeat the question back
 - Jump straight into the answer
 - Avoid robotic or overly formal phrasing`;
+
+      // ─── Keep last 10 history messages to avoid token overflow ─
+      const trimmedHistory = conversationHistory.slice(-10);
 
       let stream;
       let lastError;
@@ -206,6 +217,7 @@ Rules:
               max_tokens: 2048,
               messages: [
                 { role: "system", content: systemPrompt },
+                ...trimmedHistory,
                 { role: "user", content: transcript },
               ],
             });

@@ -50,6 +50,11 @@ export default function RoomPage() {
   // has context when multiple screenshots are sent in sequence.
   const [visionConversationHistory, setVisionConversationHistory] = useState<HistoryMessage[]>([]);
 
+  // ─── Chat conversation history ────────────────────────────
+  // Keeps track of previous Q&A exchanges for regular chat so
+  // the model has context across all response modes.
+  const [chatConversationHistory, setChatConversationHistory] = useState<HistoryMessage[]>([]);
+
   useEffect(() => {
     setMounted(true);
     if (isElectron && (window as any).electronAPI?.getOpacity) {
@@ -467,24 +472,42 @@ export default function RoomPage() {
     setAnswers((prev) => [...prev, { id: entryId, question: transcript, answer: "", isStreaming: true, mode: responseLengthRef.current }]);
     setAiSpeechBubbles([]);
 
+    const historyToSend = [...chatConversationHistory];
+
     try {
       const res = await fetch("/api/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transcript: fullTranscript, jobDescription, responseLength: responseLengthRef.current }),
+        body: JSON.stringify({
+          transcript: fullTranscript,
+          jobDescription,
+          responseLength: responseLengthRef.current,
+          conversationHistory: historyToSend,
+        }),
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Failed"); }
       if (!res.body) throw new Error("No response body");
 
+      let fullResponse = "";
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
+        fullResponse += chunk;
         setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: a.answer + chunk } : a));
       }
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, isStreaming: false } : a));
+
+      // ─── Save this exchange to chat history ──────────────
+      setChatConversationHistory((prev) => {
+        const userMsg: HistoryMessage = { role: "user", content: fullTranscript };
+        const assistantMsg: HistoryMessage = { role: "assistant", content: fullResponse };
+        const updated = [...prev, userMsg, assistantMsg];
+        return updated.slice(-10); // keep last 10 messages = 5 exchanges
+      });
+
       setStatus("idle");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error";
@@ -492,7 +515,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [jobDescription, liveTranscript, aiSpeechBubbles, stopWhisperRecordingAndTranscribe]);
+  }, [jobDescription, liveTranscript, aiSpeechBubbles, stopWhisperRecordingAndTranscribe, chatConversationHistory]);
 
   const handleSendText = useCallback(async () => {
     if (!inputText.trim()) return;
@@ -514,24 +537,42 @@ export default function RoomPage() {
     setAnswers((prev) => [...prev, { id: entryId, question: textToUse, answer: "", isStreaming: true, mode: responseLengthRef.current }]);
     setAiSpeechBubbles([]);
 
+    const historyToSend = [...chatConversationHistory];
+
     try {
       const res = await fetch("/api/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transcript: fullTranscript, jobDescription, responseLength: responseLengthRef.current }),
+        body: JSON.stringify({
+          transcript: fullTranscript,
+          jobDescription,
+          responseLength: responseLengthRef.current,
+          conversationHistory: historyToSend,
+        }),
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Failed"); }
       if (!res.body) throw new Error("No response body");
 
+      let fullResponse = "";
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
+        fullResponse += chunk;
         setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: a.answer + chunk } : a));
       }
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, isStreaming: false } : a));
+
+      // ─── Save this exchange to chat history ──────────────
+      setChatConversationHistory((prev) => {
+        const userMsg: HistoryMessage = { role: "user", content: fullTranscript };
+        const assistantMsg: HistoryMessage = { role: "assistant", content: fullResponse };
+        const updated = [...prev, userMsg, assistantMsg];
+        return updated.slice(-10); // keep last 10 messages = 5 exchanges
+      });
+
       setStatus("idle");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error";
@@ -539,7 +580,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [inputText, status, jobDescription, aiSpeechBubbles]);
+  }, [inputText, status, jobDescription, aiSpeechBubbles, chatConversationHistory]);
 
   const startRecordingRef = useRef(startRecording);
   const stopRecordingRef = useRef(stopRecordingAndGenerate);
@@ -990,7 +1031,8 @@ export default function RoomPage() {
             onClick={() => {
               setAnswers([]);
               setAiSpeechBubbles([]);
-              setVisionConversationHistory([]); // ← clear history too
+              setVisionConversationHistory([]);
+              setChatConversationHistory([]); // ← clear all history
             }}
             className="no-drag w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/70"
           >

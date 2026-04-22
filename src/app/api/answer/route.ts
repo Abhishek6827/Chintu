@@ -139,7 +139,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "GROQ_API_KEY not configured" }, { status: 500 });
     }
 
-    const { transcript, jobDescription, responseLength = "balanced" } = await req.json();
+    const {
+      transcript,
+      jobDescription,
+      responseLength = "balanced",
+      conversationHistory = [],
+    } = await req.json();
 
     if (!transcript || !jobDescription) {
       return NextResponse.json({ error: "Missing transcript or jobDescription" }, { status: 400 });
@@ -148,7 +153,7 @@ export async function POST(req: NextRequest) {
     const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.balanced;
     const isCoding = responseLength === "coding";
 
-    console.log(`[/api/answer] Mode: ${responseLength} | Question: "${transcript.slice(0, 80)}..."`);
+    console.log(`[/api/answer] Mode: ${responseLength} | Question: "${transcript.slice(0, 80)}..." | History: ${conversationHistory.length} messages`);
 
     // ─── Coding uses DeepSeek R1 (reasoning model), spoken uses Llama ───
     const model = isCoding
@@ -164,6 +169,8 @@ The candidate is interviewing for this role:
 ${jobDescription}
 ---
 
+You have access to previous questions and answers in the conversation history — use them for context.
+
 ${lengthInstruction}`
 
       : `You are generating spoken responses for an interviewee. The candidate is interviewing for a role with the following job description:
@@ -175,6 +182,7 @@ ${jobDescription}
 Write the EXACT words they should speak in response. Write in the first person ("I").
 CRITICAL: Sound like a human speaking naturally — conversational, thoughtful, and unscripted.
 NEVER use bullet points, numbered lists, bold text, or headers. The candidate will be reading this aloud.
+You have access to previous questions and answers in the conversation history — use them for context.
 
 ${lengthInstruction}
 
@@ -183,6 +191,9 @@ Rules:
 - Do NOT repeat the question back
 - Jump straight into the answer
 - Avoid robotic or overly formal phrasing`;
+
+    // ─── Keep last 10 history messages to avoid token overflow ─
+    const trimmedHistory = conversationHistory.slice(-10);
 
     let stream;
     let lastError;
@@ -206,6 +217,7 @@ Rules:
             max_tokens: 2048,
             messages: [
               { role: "system", content: systemPrompt },
+              ...trimmedHistory,
               { role: "user", content: transcript },
             ],
           });
