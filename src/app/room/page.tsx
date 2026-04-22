@@ -702,7 +702,7 @@ export default function RoomPage() {
           content: fullResponse,
         };
         const updated = [...prev, userMsg, assistantMsg];
-        return updated.slice(-6); // keep last 6 messages = 3 exchanges
+        return updated.slice(-10); // keep last 6 messages = 3 exchanges
       });
 
       setCapturedScreenshots([]);

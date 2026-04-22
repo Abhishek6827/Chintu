@@ -7,7 +7,28 @@ const RESPONSE_PROMPTS: Record<string, string> = {
 
   balanced: `Keep your answer moderate in length — around 2-3 paragraphs. Use a natural, conversational tone with smooth transitions. Do NOT use bullet points, headers, or any special formatting. It MUST sound like a human speaking aloud in an interview, not reading from a script.`,
 
-  detailed: `Give a thorough but conversational answer. Tell a cohesive story with natural phrasing. Do NOT use bullet points, headers, or numbered lists. Use a natural speaking style that sounds authentic when spoken aloud. Aim for about 4-5 paragraphs.`,
+  detailed: `Determine the context first — are you looking at screenshot(s) or answering a spoken question?
+
+─── If responding to SCREENSHOT(S) ───
+Give a complete, structured, and thorough response. You MAY use:
+- Headers to separate sections (e.g. **Overview**, **Step 1**, **Step 2**)
+- Numbered steps for sequential tasks
+- Code blocks where relevant
+- Brief bullet points for lists of options or findings
+
+If multiple screenshots are given:
+- First, briefly describe what each screenshot shows (1 line each)
+- Then synthesize: what is the overall task or problem across all of them?
+- Then give the full answer, referencing specific screenshots where needed
+  (e.g. "In the first screenshot, the issue is... while the second shows...")
+- Do NOT treat each screenshot in isolation — connect them into one coherent answer
+- If screenshots show different parts of the same file or flow, combine them mentally
+
+─── If responding to a SPOKEN question ───
+Give a thorough but conversational answer. Tell a cohesive story with natural phrasing.
+Do NOT use bullet points, headers, or numbered lists.
+Use a natural speaking style that sounds authentic when spoken aloud.
+Aim for about 4-5 paragraphs.`,
 
   coding: `You are an expert programmer assisting in a technical interview.
 
@@ -193,7 +214,7 @@ Rules:
 - Avoid overly formal phrasing`;
 
     // ─── Keep last 6 history messages to avoid token overflow ─
-    const trimmedHistory = conversationHistory.slice(-6);
+    const trimmedHistory = conversationHistory.slice(-10);
 
     let stream: any;
     let lastError: any;
