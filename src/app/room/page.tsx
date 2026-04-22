@@ -39,6 +39,15 @@ export default function RoomPage() {
     setMounted(true);
   }, []);
 
+  // Listen for window visibility changes from Electron (e.g. tray unhide)
+  useEffect(() => {
+    if (isElectron && (window as any).electronAPI?.onHiddenChange) {
+      return (window as any).electronAPI.onHiddenChange((hidden: boolean) => {
+        setIsWindowHidden(hidden);
+      });
+    }
+  }, []);
+
   // ─── Screen + Audio Recording State ─────────────────────
   const [isScreenRecording, setIsScreenRecording] = useState(false);
   const screenRecorderRef = useRef<MediaRecorder | null>(null);
@@ -46,6 +55,11 @@ export default function RoomPage() {
   const displayStreamRef = useRef<MediaStream | null>(null);
   const micStreamForRecordingRef = useRef<MediaStream | null>(null);
   const recordingAudioCtxRef = useRef<AudioContext | null>(null);
+
+  // ─── Screenshot Capture State ──────────────────────────
+  const [capturedScreenshots, setCapturedScreenshots] = useState<string[]>([]);
+  const [isCapturing, setIsCapturing] = useState(false);
+
 
   // ─── AI Speech tracking ─────────────────────────────────
   const [aiSpeechBubbles, setAiSpeechBubbles] = useState<string[]>([]);
@@ -537,30 +551,78 @@ export default function RoomPage() {
     }
   }, [inputText, status, jobDescription, aiSpeechBubbles]);
 
-  // Keyboard shortcuts
+  // Stable refs for handlers to use in useEffect without re-registering listener
+  const startRecordingRef = useRef(startRecording);
+  const stopRecordingRef = useRef(stopRecordingAndGenerate);
+  
+  useEffect(() => { startRecordingRef.current = startRecording; }, [startRecording]);
+  useEffect(() => { stopRecordingRef.current = stopRecordingAndGenerate; }, [stopRecordingAndGenerate]);
+
+  // Debug: Log focus state
   useEffect(() => {
+    const logFocus = () => console.log("[Focus] Window focused");
+    const logBlur = () => console.log("[Focus] Window blurred");
+    window.addEventListener("focus", logFocus);
+    window.addEventListener("blur", logBlur);
+    return () => {
+      window.removeEventListener("focus", logFocus);
+      window.removeEventListener("blur", logBlur);
+    };
+  }, []);
+
+  // Keyboard shortcuts: Hold Space to Record
+  useEffect(() => {
+    console.log("[Shortcut] Registering listeners");
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
-      if (e.code === "Space" && !e.repeat) {
-        e.preventDefault();
-        if (isRecordingRef.current) stopRecordingAndGenerate();
-        else startRecording();
+      if (e.code === "Space" || e.key === " ") {
+        console.log("[Shortcut] Space KeyDown detected", { 
+          target: (e.target as any)?.tagName,
+          isRecording: isRecordingRef.current,
+          repeat: e.repeat 
+        });
+        
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) {
+          console.log("[Shortcut] Ignoring Space: focus is in input");
+          return;
+        }
+
+        if (!e.repeat) {
+          e.preventDefault();
+          if (!isRecordingRef.current) {
+            console.log("[Shortcut] Calling startRecording...");
+            startRecordingRef.current();
+          }
+        }
       }
     };
-    document.addEventListener("keydown", onKeyDown);
-    return () => { document.removeEventListener("keydown", onKeyDown); };
-  }, [startRecording, stopRecordingAndGenerate]);
 
-  // Keep window non-focusable by default in the room so clicking the PIP doesn't activate the taskbar
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === "Space" || e.key === " ") {
+        console.log("[Shortcut] Space KeyUp detected", { isRecording: isRecordingRef.current });
+        e.preventDefault();
+        if (isRecordingRef.current) {
+          console.log("[Shortcut] Calling stopRecording...");
+          stopRecordingRef.current();
+        }
+      }
+    };
+
+    // Use capture phase (true) to ensure we catch it early
+    window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keyup", onKeyUp, true);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keyup", onKeyUp, true);
+    };
+  }, []);
+
+  // Window focusability logic
   useEffect(() => {
     if (isElectron && (window as any).electronAPI?.setFocusable) {
-      if (showSettings) {
-        (window as any).electronAPI.setFocusable(true);
-      } else {
-        (window as any).electronAPI.setFocusable(false);
-      }
+      // Keep it focusable so shortcuts work
+      (window as any).electronAPI.setFocusable(true);
     }
-  }, [showSettings]);
+  }, []);
 
   // Restore focusability when leaving the room route entirely
   useEffect(() => {
@@ -571,24 +633,81 @@ export default function RoomPage() {
     };
   }, []);
 
-  const enableFocus = () => {
-    if (isElectron && (window as any).electronAPI?.setFocusable) {
-      (window as any).electronAPI.setFocusable(true);
-    }
-  };
-
-  const disableFocus = () => {
-    if (isElectron && (window as any).electronAPI?.setFocusable) {
-      // Only disable if we aren't actively focused on an input
-      if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA" || document.activeElement?.tagName === "SELECT") return;
-      (window as any).electronAPI.setFocusable(false);
-    }
-  };
-
   const handleMicButton = () => {
     if (isRecordingRef.current) stopRecordingAndGenerate();
     else startRecording();
   };
+
+  // ─── Screenshot functions ─────────────────────────────────
+  const captureScreenshot = useCallback(async () => {
+    if (!isElectron || !(window as any).electronAPI?.captureScreenshot) {
+      setError("Screenshot only works in the desktop app");
+      return;
+    }
+    setIsCapturing(true);
+    try {
+      const dataUrl = await (window as any).electronAPI.captureScreenshot();
+      if (dataUrl) {
+        setCapturedScreenshots((prev) => [...prev, dataUrl]);
+      } else {
+        setError("Failed to capture screenshot");
+      }
+    } catch (err) {
+      setError("Screenshot capture failed");
+    }
+    setIsCapturing(false);
+  }, []);
+
+  const removeScreenshot = (index: number) => {
+    setCapturedScreenshots((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const sendScreenshots = useCallback(async () => {
+    if (capturedScreenshots.length === 0) return;
+    if (status !== "idle") return;
+
+    setStatus("generating");
+    setError(null);
+
+    const entryId = Date.now().toString();
+    const questionText = `📸 Screenshot${capturedScreenshots.length > 1 ? "s" : ""} (${capturedScreenshots.length})`;
+
+    setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true }]);
+
+    try {
+      const res = await fetch("/api/answer-vision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          images: capturedScreenshots,
+          jobDescription,
+          responseLength: responseLengthRef.current,
+          additionalContext: inputText.trim() || "",
+        }),
+      });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Vision failed"); }
+      if (!res.body) throw new Error("No response body");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: a.answer + chunk } : a));
+      }
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, isStreaming: false } : a));
+      setCapturedScreenshots([]);
+      setInputText("");
+      setStatus("idle");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Error";
+      setError(msg);
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
+      setStatus("idle");
+    }
+  }, [capturedScreenshots, status, jobDescription, inputText]);
+
 
   const handleHide = async () => {
     if (isElectron) {
@@ -622,8 +741,8 @@ export default function RoomPage() {
           )}
           {isElectron && (
             <>
-              <button onClick={handleHide} className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all text-xs">─</button>
-              <button onClick={handleClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:bg-red-500/30 transition-all text-xs">✕</button>
+              <button onClick={handleHide} className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs">─</button>
+              <button onClick={handleClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs">✕</button>
             </>
           )}
         </div>
@@ -672,7 +791,7 @@ export default function RoomPage() {
         <div className="px-4 pb-2">
           <div className="bg-red-500/20 rounded-xl px-4 py-2 text-red-200 text-xs flex items-center justify-between">
             <span>{error}</span>
-            <button onClick={() => setError(null)} className="text-red-300 hover:text-white ml-2">✕</button>
+            <button onClick={() => setError(null)} className="text-red-300 ml-2">✕</button>
           </div>
         </div>
       )}
@@ -683,32 +802,69 @@ export default function RoomPage() {
         <div ref={chatEndRef} />
       </div>
 
+      {/* Screenshot preview strip */}
+      {capturedScreenshots.length > 0 && (
+        <div className="px-4 pb-2 shrink-0">
+          <div className="bg-white/5 border border-cyan-500/20 rounded-2xl p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-cyan-300 text-xs font-medium">📸 {capturedScreenshots.length} screenshot{capturedScreenshots.length > 1 ? "s" : ""} captured</span>
+              <div className="flex-1" />
+              <button
+                onClick={() => setCapturedScreenshots([])}
+                className="text-white/40 text-xs px-2 py-1 rounded-lg bg-white/5"
+              >
+                Clear
+              </button>
+              <button
+                onClick={sendScreenshots}
+                disabled={status !== "idle"}
+                className="text-white text-xs px-3 py-1 rounded-lg bg-cyan-600/80 font-medium disabled:opacity-50"
+              >
+                Analyze
+              </button>
+            </div>
+            <div className="flex gap-2 overflow-x-auto">
+              {capturedScreenshots.map((img, i) => (
+                <div key={i} className="relative shrink-0 w-24 h-16 rounded-lg overflow-hidden border border-white/10">
+                  <img src={img} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => removeScreenshot(i)}
+                    className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 rounded-full text-white text-[8px] flex items-center justify-center"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Text Input Row */}
-      <div 
-        className="px-4 pb-2 shrink-0" 
-        onMouseEnter={enableFocus} 
-        onMouseLeave={disableFocus}
-      >
+      <div className="px-4 pb-2 shrink-0">
         <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-white/10 transition-all">
           <input
             type="text"
             value={inputText}
-            onBlur={disableFocus}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                handleSendText();
+                if (capturedScreenshots.length > 0) {
+                  sendScreenshots();
+                } else {
+                  handleSendText();
+                }
               }
             }}
-            placeholder="Ask a coding question or type..."
+            placeholder={capturedScreenshots.length > 0 ? "Add context (optional) then press Enter or Analyze..." : "Ask a coding question or type..."}
             className="w-full bg-transparent px-4 py-3 text-sm text-white/90 placeholder-white/30 focus:outline-none"
             disabled={status !== "idle"}
           />
           <button
-            onClick={handleSendText}
-            disabled={!inputText.trim() || status !== "idle"}
-            className="absolute right-2 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-500/80 text-white hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:hover:bg-indigo-500/80"
+            onClick={capturedScreenshots.length > 0 ? sendScreenshots : handleSendText}
+            disabled={(capturedScreenshots.length === 0 && !inputText.trim()) || status !== "idle"}
+            className="absolute right-2 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-500/80 text-white disabled:opacity-50"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.125A59.769 59.769 0 0121.485 12 59.768 59.768 0 013.27 20.875L5.999 12Zm0 0h7.5" />
@@ -721,7 +877,7 @@ export default function RoomPage() {
       <div ref={controlsRef} className="toolbar px-4 py-3 flex items-center justify-between shrink-0">
         <button
           onClick={() => setShowSettings(true)}
-          className="no-drag w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-all"
+          className="no-drag w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/70"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
@@ -734,13 +890,12 @@ export default function RoomPage() {
           <button
             onClick={isScreenRecording ? stopScreenRecording : startScreenRecording}
             className={`
-              no-drag w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300
+              no-drag w-10 h-10 rounded-full flex items-center justify-center
               ${isScreenRecording
                 ? "bg-red-500/30 text-red-300 ring-2 ring-red-400/50 shadow-lg shadow-red-500/20 mic-recording"
-                : "bg-white/10 text-white/50 hover:bg-white/20 hover:text-white"
+                : "bg-white/10 text-white/50"
               }
             `}
-            title={isScreenRecording ? "Stop screen recording" : "Start screen recording"}
           >
             {isScreenRecording ? (
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -753,15 +908,42 @@ export default function RoomPage() {
             )}
           </button>
 
+          {/* Screenshot capture */}
+          {isElectron && (
+            <button
+              onClick={captureScreenshot}
+              disabled={isCapturing || status === "generating"}
+              className={`
+                no-drag w-10 h-10 rounded-full flex items-center justify-center relative
+                ${capturedScreenshots.length > 0
+                  ? "bg-cyan-500/30 text-cyan-300 ring-1 ring-cyan-500/50"
+                  : "bg-white/10 text-white/50"
+                }
+              `}
+            >
+              {/* Camera icon */}
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+              </svg>
+              {/* Badge showing count */}
+              {capturedScreenshots.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-cyan-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {capturedScreenshots.length}
+                </span>
+              )}
+            </button>
+          )}
+
           {/* Mic button */}
           <button
             onClick={handleMicButton}
             disabled={!micReady || status === "generating"}
             className={`
-              no-drag w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300
+              no-drag w-14 h-14 rounded-full flex items-center justify-center
               ${status === "recording"
                 ? "bg-red-500 text-white shadow-lg shadow-red-500/40 scale-110 mic-recording"
-                : "bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-105"
+                : "bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30"
               }
             `}
           >
@@ -777,8 +959,7 @@ export default function RoomPage() {
           {/* Clear answers */}
           <button
             onClick={() => { setAnswers([]); setAiSpeechBubbles([]); }}
-            className="no-drag w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-all"
-            title="Clear answers"
+            className="no-drag w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/70"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
@@ -790,13 +971,12 @@ export default function RoomPage() {
         <button
           onClick={handleHide}
           className={`
-            no-drag w-10 h-10 rounded-full flex items-center justify-center transition-all
+            no-drag w-10 h-10 rounded-full flex items-center justify-center
             ${isWindowHidden
-              ? "bg-emerald-500/30 text-emerald-300 hover:bg-emerald-500/40 ring-1 ring-emerald-500/50"
-              : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+              ? "bg-emerald-500/30 text-emerald-300 ring-1 ring-emerald-500/50"
+              : "bg-white/10 text-white/70"
             }
           `}
-          title={isWindowHidden ? "Show window" : "Hide window"}
         >
           {isWindowHidden ? (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -822,7 +1002,7 @@ export default function RoomPage() {
               </div>
               <button
                 onClick={() => setShowSettings(false)}
-                className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center hover:bg-indigo-200 transition-all font-bold"
+                className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold"
               >
                 ✕
               </button>

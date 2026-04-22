@@ -7,8 +7,15 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getHidden: () => ipcRenderer.invoke("window-get-hidden"),     // returns Promise<boolean>
   toggle: () => ipcRenderer.send("window-toggle"),
   setFocusable: (b) => ipcRenderer.send("set-focusable", b),
+  captureScreenshot: () => ipcRenderer.invoke("capture-screenshot"), // returns Promise<string|null>
+  onHiddenChange: (callback) => {
+    const handler = (_event, hidden) => callback(hidden);
+    ipcRenderer.on("window-hidden-change", handler);
+    return () => ipcRenderer.removeListener("window-hidden-change", handler);
+  },
   isElectron: true,
   // System audio capture is handled via getDisplayMedia + desktopCapturer loopback
   // configured in main.js — no extra IPC needed.
   supportsSystemAudio: true,
 });
+

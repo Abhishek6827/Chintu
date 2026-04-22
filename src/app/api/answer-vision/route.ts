@@ -11,7 +11,7 @@ const RESPONSE_PROMPTS: Record<string, string> = {
 
   coding: `You are an expert programmer assisting in a technical interview.
 
-FIRST — detect the intent from the problem/question:
+FIRST — detect the intent from the screenshot(s):
 
 1. "Find the bug / What's wrong / Error in this code" → DEBUG mode
 2. "Solve / Write / Implement this" → SOLVE mode
@@ -58,7 +58,7 @@ If OPTIMIZE mode:
 
 Global Rules:
 - NEVER rewrite entire code if only a small fix is needed
-- Detect language from the code — default to JavaScript if unclear
+- Detect language from the code visible in screenshot — default to JavaScript if unclear
 - ALWAYS put language name after triple backticks
 - Prioritize optimal solution over brute force
 - Be precise — no unnecessary explanation`,
@@ -71,18 +71,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "GROQ_API_KEY not configured" }, { status: 500 });
     }
 
-    const { transcript, jobDescription, responseLength = "balanced" } = await req.json();
+    const { images, jobDescription, responseLength = "coding", additionalContext = "" } = await req.json();
 
-    if (!transcript || !jobDescription) {
-      return NextResponse.json({ error: "Missing transcript or jobDescription" }, { status: 400 });
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return NextResponse.json({ error: "No images provided" }, { status: 400 });
     }
 
-    const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.balanced;
+    if (!jobDescription) {
+      return NextResponse.json({ error: "Missing jobDescription" }, { status: 400 });
+    }
+
+    const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.coding;
     const isCoding = responseLength === "coding";
 
-    console.log(`[/api/answer] Mode: ${responseLength} | Question: "${transcript.slice(0, 80)}..."`);
+    console.log(`[/api/answer-vision] Mode: ${responseLength} | Images: ${images.length}`);
 
-    // ─── Separate system prompts for coding vs spoken responses ───
+    const groq = new Groq({ apiKey });
+
+    // ─── Build content array with images ──────────────────────
+    const contentParts: any[] = [];
+
+    for (const img of images) {
+      contentParts.push({
+        type: "image_url",
+        image_url: {
+          url: img.startsWith("data:") ? img : `data:image/png;base64,${img}`,
+        },
+      });
+    }
+
+    contentParts.push({
+      type: "text",
+      text: additionalContext
+        ? `Look at the screenshot(s) carefully. The user says: "${additionalContext}". Based on what you see, provide the answer.`
+        : "Look at the screenshot(s) carefully. Read ALL visible text, code, and questions. Then provide a complete answer.",
+    });
+
+    // ─── Separate system prompts for coding vs spoken ──────────
     const systemPrompt = isCoding
       ? `You are an expert programmer helping a candidate during a technical interview.
 The candidate is interviewing for this role:
@@ -91,34 +116,37 @@ The candidate is interviewing for this role:
 ${jobDescription}
 ---
 
+The candidate will share screenshot(s) of problems they see on screen.
+Read all visible text and code from the screenshots carefully.
+If multiple screenshots show the same problem, combine context from all of them.
+
 ${lengthInstruction}`
 
-      : `You are generating spoken responses for an interviewee. The candidate is interviewing for a role with the following job description:
+      : `You are generating spoken responses for an interviewee. The candidate is interviewing for:
 
 ---
 ${jobDescription}
 ---
 
-Write the EXACT words they should speak in response. Write in the first person ("I").
-CRITICAL: Sound like a human speaking naturally — conversational, thoughtful, and unscripted.
-NEVER use bullet points, numbered lists, bold text, or headers. The candidate will be reading this aloud.
+The candidate will share screenshot(s) of questions they see on screen.
+Read the question from the screenshot and write the EXACT words they should speak in response.
+Write in the first person ("I"). Sound natural and conversational — never robotic.
+NEVER use bullet points, numbered lists, bold text, or headers.
+If multiple screenshots show the same question, combine context from all of them.
 
 ${lengthInstruction}
 
 Rules:
 - Be technically accurate
-- Do NOT repeat the question back
 - Jump straight into the answer
-- Avoid robotic or overly formal phrasing`;
-
-    const groq = new Groq({ apiKey });
+- Avoid overly formal phrasing`;
 
     const stream = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
       stream: true,
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: transcript },
+        { role: "user", content: contentParts },
       ],
     });
 
@@ -148,8 +176,8 @@ Rules:
       },
     });
   } catch (error) {
-    console.error("[/api/answer] Error:", error);
-    const message = error instanceof Error ? error.message : "Answer generation failed";
+    console.error("[/api/answer-vision] Error:", error);
+    const message = error instanceof Error ? error.message : "Vision answer failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -15,7 +15,25 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  cursor: default !important;
+  user-select: none; /* Prevent text selection cursor */
 }
+
+/* Global hover disable - simplified */
+*:hover {
+  box-shadow: none !important;
+  transform: none !important;
+  outline: none !important;
+  cursor: default !important;
+}
+
+/* Allow text selection in chat/inputs but keep cursor default */
+.chat-bubble p, input, textarea {
+  user-select: text;
+  cursor: default !important;
+}
+
+
 
 html, body {
   overflow: hidden;
@@ -76,11 +94,6 @@ body {
   border-radius: 16px;
   padding: 14px 18px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  transition: all 0.2s ease;
-}
-
-.chat-bubble:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .chat-bubble-streaming {

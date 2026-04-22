@@ -173,6 +173,7 @@ function createTray() {
             mainWindow.show();
             mainWindow.setSkipTaskbar(true);
             mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
+            mainWindow.webContents.send("window-hidden-change", false);
           }
         }
       },
@@ -201,6 +202,7 @@ function createTray() {
         mainWindow.show();
         mainWindow.setSkipTaskbar(true);
         mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
+        mainWindow.webContents.send("window-hidden-change", false);
       }
     }
   });
@@ -223,10 +225,48 @@ ipcMain.handle("window-hide-toggle", () => {
     mainWindow.setIgnoreMouseEvents(false);
     mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
   }
+  mainWindow?.webContents.send("window-hidden-change", isHidden);
   return isHidden;
 });
 
 ipcMain.handle("window-get-hidden", () => isHidden);
+
+// ─── Screenshot capture ──────────────────────────────────────
+ipcMain.handle("capture-screenshot", async () => {
+  if (!mainWindow) return null;
+  try {
+    // Briefly hide our window so it doesn't appear in the screenshot
+    const wasVisible = mainWindow.isVisible() && !isHidden;
+    if (wasVisible) {
+      mainWindow.setOpacity(0);
+    }
+    
+    // Small delay to ensure window is hidden
+    await new Promise((r) => setTimeout(r, 150));
+    
+    const sources = await desktopCapturer.getSources({
+      types: ["screen"],
+      thumbnailSize: { width: 1920, height: 1080 },
+    });
+    
+    // Restore window
+    if (wasVisible) {
+      mainWindow.setOpacity(1);
+    }
+    
+    if (sources.length === 0) return null;
+    
+    // Return the primary screen as base64 PNG
+    const screenshot = sources[0].thumbnail.toPNG();
+    return `data:image/png;base64,${screenshot.toString("base64")}`;
+  } catch (err) {
+    console.error("[Screenshot] Error:", err);
+    // Make sure to restore opacity if something fails
+    if (mainWindow) mainWindow.setOpacity(1);
+    return null;
+  }
+});
+
 
 ipcMain.on("window-toggle", () => {
   if (mainWindow?.isVisible()) mainWindow.hide();
@@ -239,6 +279,7 @@ ipcMain.on("window-toggle", () => {
 
 ipcMain.on("set-focusable", (event, b) => {
   if (mainWindow) {
+    console.log("[Electron] Setting focusable to:", b);
     mainWindow.setFocusable(b);
     // Re-enforce skipTaskbar because setting focusable can sometimes reset it on Windows
     mainWindow.setSkipTaskbar(true);
@@ -266,6 +307,13 @@ app.whenReady().then(async () => {
 
   createWindow();
   createTray();
+
+  // Add global shortcut to open dev tools for debugging
+  globalShortcut.register("CommandOrControl+Shift+D", () => {
+    if (mainWindow) {
+      mainWindow.webContents.toggleDevTools();
+    }
+  });
 });
 
 app.on("window-all-closed", () => {
