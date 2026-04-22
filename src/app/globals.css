@@ -174,17 +174,17 @@ body {
 /* ─── Floating Side Controls ─────────────────────────── */
 .floating-side-controls {
   position: fixed;
-  right: 6px;
+  right: 0.375rem; /* 6px */
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem; /* 12px */
   background: rgba(30, 30, 50, 0.85);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  padding: 10px 6px;
+  border-radius: 0.875rem; /* 14px */
+  padding: 0.625rem 0.375rem; /* 10px 6px */
   z-index: 40;
 }
 
@@ -192,17 +192,17 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 0.25rem; /* 4px */
 }
 
 .side-control-label {
-  font-size: 10px;
+  font-size: 0.625rem; /* 10px */
   color: rgba(255, 255, 255, 0.6);
   font-weight: 600;
 }
 
 .side-control-value {
-  font-size: 9px;
+  font-size: 0.5625rem; /* 9px */
   color: rgba(255, 255, 255, 0.45);
   font-variant-numeric: tabular-nums;
 }
@@ -212,8 +212,8 @@ body {
   appearance: none;
   writing-mode: vertical-lr;
   direction: rtl;
-  width: 6px;
-  height: 80px;
+  width: 0.375rem; /* 6px */
+  height: 5rem; /* 80px */
   background: rgba(255, 255, 255, 0.15);
   border-radius: 999px;
   outline: none;
@@ -223,11 +223,11 @@ body {
 .side-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 0.875rem; /* 14px */
+  height: 0.875rem; /* 14px */
   border-radius: 50%;
   background: #818cf8;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 0.125rem solid rgba(255, 255, 255, 0.3); /* 2px */
   cursor: default !important;
 }
 
@@ -298,33 +298,6 @@ body {
   }
 }
 
-/* ─── Responsive Floating Controls ──────────────────── */
-@media (max-height: 450px) {
-  .floating-side-controls {
-    gap: 6px;
-    padding: 6px 4px;
-  }
-  .side-slider {
-    height: 50px;
-  }
-  .side-control-label {
-    font-size: 8px;
-  }
-  .side-control-value {
-    font-size: 7px;
-  }
-}
-
-@media (max-height: 350px) {
-  .floating-side-controls {
-    gap: 4px;
-    padding: 4px 3px;
-    border-radius: 10px;
-  }
-  .side-slider {
-    height: 35px;
-  }
-}
 
 /* Mic button pulse */
 @keyframes mic-pulse {
