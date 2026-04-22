@@ -12,6 +12,7 @@ interface AnswerEntry {
   answer: string;
   isStreaming: boolean;
   mode?: string;
+  model?: string;
 }
 
 interface AnswerDisplayProps {
@@ -212,6 +213,11 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                 {entry.mode && (
                   <span className="text-[0.55rem] font-medium tracking-wide uppercase text-indigo-400 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100/50 opacity-70">
                     {entry.mode}
+                  </span>
+                )}
+                {entry.model && (
+                  <span className="text-[0.55rem] font-medium tracking-wide text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100/50 opacity-70">
+                    {entry.model}
                   </span>
                 )}
               </div>

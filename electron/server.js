@@ -3,6 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const os = require("os");
 const Groq = require("groq-sdk");
+const OpenAI = require("openai");
 const multer = require("multer");
 
 // ─── Response length presets ────────────────────────────────
@@ -128,15 +129,15 @@ Global Rules:
 - Be precise — no unnecessary explanation`,
 };
 
-function createServer(apiKeys, staticDir) {
+function createServer(apiKeys, openRouterKey, staticDir) {
   const app = express();
   const upload = multer({ dest: os.tmpdir() });
 
   // apiKeys is now passed directly from main.js (already resolved from env/config.json)
-  console.log(`[Server] API keys loaded: ${apiKeys.length} (keys ending: ${apiKeys.map(k => '...' + k.slice(-4)).join(', ')})`);
+  console.log(`[Server] Groq keys loaded: ${apiKeys.length} | OpenRouter: ${openRouterKey ? "yes" : "no"}`);
 
 
-  app.use(express.json({ limit: "10mb" }));
+  app.use(express.json({ limit: "50mb" }));
   app.use(express.static(staticDir, { extensions: ["html"] }));
 
   // ─── API: Answer generation (streaming) ───────────────────
@@ -235,6 +236,32 @@ Rules:
         }
 
         if (stream) break; // success — exit retry loop
+      }
+
+      if (!stream) {
+        // ─── OpenRouter fallback ────────────────────────────────
+        if (openRouterKey) {
+          console.log(`[/api/answer] 🔄 All Groq keys failed. Trying OpenRouter...`);
+          try {
+            const openrouter = new OpenAI({
+              baseURL: "https://openrouter.ai/api/v1",
+              apiKey: openRouterKey,
+            });
+            stream = await openrouter.chat.completions.create({
+              model: "deepseek/deepseek-r1-0528",
+              stream: true,
+              max_tokens: 2048,
+              messages: [
+                { role: "system", content: systemPrompt },
+                ...trimmedHistory,
+                { role: "user", content: transcript },
+              ],
+            });
+            console.log(`[/api/answer] ✓ OpenRouter stream created`);
+          } catch (orErr) {
+            console.error(`[/api/answer] ✗ OpenRouter also failed:`, orErr?.message?.slice(0, 100));
+          }
+        }
       }
 
       if (!stream) throw lastError;
@@ -408,6 +435,32 @@ Rules:
         }
 
         if (stream) break; // success — exit retry loop
+      }
+
+      if (!stream) {
+        // ─── OpenRouter fallback ────────────────────────────────
+        if (openRouterKey) {
+          console.log(`[/api/answer-vision] 🔄 All Groq keys failed. Trying OpenRouter...`);
+          try {
+            const openrouter = new OpenAI({
+              baseURL: "https://openrouter.ai/api/v1",
+              apiKey: openRouterKey,
+            });
+            stream = await openrouter.chat.completions.create({
+              model: "meta-llama/llama-4-scout:free",
+              stream: true,
+              max_tokens: 2048,
+              messages: [
+                { role: "system", content: systemPrompt },
+                ...trimmedHistory,
+                { role: "user", content: contentParts },
+              ],
+            });
+            console.log(`[/api/answer-vision] ✓ OpenRouter stream created`);
+          } catch (orErr) {
+            console.error(`[/api/answer-vision] ✗ OpenRouter also failed:`, orErr?.message?.slice(0, 100));
+          }
+        }
       }
 
       if (!stream) throw lastError;

@@ -1,6 +1,6 @@
 {
   "name": "interview-copilot",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
@@ -9,12 +9,13 @@
     "start": "next start",
     "lint": "next lint",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron:build": "next build && electron-builder --win",
+    "electron:build": "next build && electron-builder --win --publish never",
     "electron:preview": "next build && electron . --preview"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "dotenv": "^16.6.1",
+    "electron-updater": "^6.8.3",
     "express": "^4.22.1",
     "groq-sdk": "^1.1.2",
     "multer": "^1.4.5-lts.1",
@@ -24,7 +25,8 @@
     "react-dom": "^18",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^16.1.1",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "electron-updater": "^6.3.9"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -55,9 +57,19 @@
       "package.json"
     ],
     "win": {
-      "target": "portable",
+      "target": "nsis",
       "icon": "electron/icon.png",
       "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "Abhishek6827",
+      "repo": "Chintu"
     },
     "forceCodeSigning": false
   }

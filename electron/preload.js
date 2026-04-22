@@ -19,5 +19,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // System audio capture is handled via getDisplayMedia + desktopCapturer loopback
   // configured in main.js — no extra IPC needed.
   supportsSystemAudio: true,
+
+  // ─── Auto-update ──────────────────────────────────────────
+  onUpdateStatus: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on("update-status", handler);
+    return () => ipcRenderer.removeListener("update-status", handler);
+  },
+  restartForUpdate: () => ipcRenderer.send("restart-for-update"),
 });
 

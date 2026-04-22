@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import OpenAI from "openai";
+
+// ─── Increase body size limit for large screenshot payloads ─
+export const maxDuration = 60; // seconds
+export const dynamic = "force-dynamic";
+
+// Next.js App Router: increase body size from 1MB default to 50MB
+export const fetchCache = "force-no-store";
+
 
 // ─── Response length presets ────────────────────────────────
 const RESPONSE_PROMPTS: Record<string, string> = {
@@ -133,10 +142,12 @@ export async function POST(req: NextRequest) {
       process.env.GROQ_API_KEY_3,
     ].filter(Boolean) as string[];
 
-    console.log(`[/api/answer-vision] API keys loaded: ${apiKeys.length} (keys ending: ${apiKeys.map(k => '...' + k.slice(-4)).join(', ')})`);
+    const openRouterKey = process.env.OPENROUTER_API_KEY || "";
 
-    if (apiKeys.length === 0) {
-      return NextResponse.json({ error: "GROQ_API_KEY not configured" }, { status: 500 });
+    console.log(`[/api/answer-vision] Groq keys: ${apiKeys.length} | OpenRouter: ${openRouterKey ? "yes" : "no"}`);
+
+    if (apiKeys.length === 0 && !openRouterKey) {
+      return NextResponse.json({ error: "No API keys configured" }, { status: 500 });
     }
 
     const {
@@ -211,9 +222,9 @@ You have access to previous screenshots and answers in the conversation history 
 ${lengthInstruction}
 
 ${images && images.length > 1
-  ? `Note: The candidate has shared ${images.length} screenshots. Treat them as parts of one task — connect context across all of them.`
-  : ""
-}
+        ? `Note: The candidate has shared ${images.length} screenshots. Treat them as parts of one task — connect context across all of them.`
+        : ""
+      }
 
 Rules:
 - Be technically accurate
@@ -263,6 +274,32 @@ Rules:
       }
 
       if (stream) break; // success — exit retry loop
+    }
+
+    if (!stream) {
+      // ─── OpenRouter fallback ────────────────────────────────
+      if (openRouterKey) {
+        console.log(`[/api/answer-vision] 🔄 All Groq keys failed. Trying OpenRouter...`);
+        try {
+          const openrouter = new OpenAI({
+            baseURL: "https://openrouter.ai/api/v1",
+            apiKey: openRouterKey,
+          });
+          stream = await openrouter.chat.completions.create({
+            model: "deepseek/deepseek-r1:free",
+            stream: true,
+            max_tokens: 2048,
+            messages: [
+              { role: "system", content: systemPrompt },
+              ...trimmedHistory,
+              { role: "user", content: contentParts },
+            ],
+          });
+          console.log(`[/api/answer-vision] ✓ OpenRouter stream created`);
+        } catch (orErr: any) {
+          console.error(`[/api/answer-vision] ✗ OpenRouter also failed:`, orErr?.message?.slice(0, 100));
+        }
+      }
     }
 
     if (!stream) throw lastError;

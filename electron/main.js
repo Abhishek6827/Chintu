@@ -1,6 +1,7 @@
 const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, desktopCapturer, session } = require("electron");
 const path = require("path");
 const { createServer } = require("./server");
+const { autoUpdater } = require("electron-updater");
 
 let mainWindow = null;
 let tray = null;
@@ -34,11 +35,13 @@ function loadEnv() {
 // ─── Load all API keys (env vars + config.json fallback) ──
 function getAllApiKeys() {
   const keys = [];
+  let openRouterKey = "";
 
   // 1. Check environment variables first
   if (process.env.GROQ_API_KEY) keys.push(process.env.GROQ_API_KEY);
   if (process.env.GROQ_API_KEY_2) keys.push(process.env.GROQ_API_KEY_2);
   if (process.env.GROQ_API_KEY_3) keys.push(process.env.GROQ_API_KEY_3);
+  if (process.env.OPENROUTER_API_KEY) openRouterKey = process.env.OPENROUTER_API_KEY;
 
   // 2. If no env keys found, read from config.json bundled with the app
   if (keys.length === 0) {
@@ -48,25 +51,26 @@ function getAllApiKeys() {
       if (config.GROQ_API_KEY) keys.push(config.GROQ_API_KEY);
       if (config.GROQ_API_KEY_2) keys.push(config.GROQ_API_KEY_2);
       if (config.GROQ_API_KEY_3) keys.push(config.GROQ_API_KEY_3);
+      if (!openRouterKey && config.OPENROUTER_API_KEY) openRouterKey = config.OPENROUTER_API_KEY;
     } catch {}
   }
 
-  console.log(`[Main] API keys found: ${keys.length}`);
-  return keys;
+  console.log(`[Main] Groq keys found: ${keys.length}, OpenRouter: ${openRouterKey ? "yes" : "no"}`);
+  return { groqKeys: keys, openRouterKey };
 }
 
 // ─── Start embedded Express server (production only) ──────
 function startServer() {
   return new Promise((resolve, reject) => {
-    const apiKeys = getAllApiKeys();
-    if (apiKeys.length === 0) {
-      reject(new Error("No GROQ API keys found. Add them to electron/config.json or a .env file next to the executable."));
+    const { groqKeys, openRouterKey } = getAllApiKeys();
+    if (groqKeys.length === 0 && !openRouterKey) {
+      reject(new Error("No API keys found. Add them to electron/config.json or a .env file next to the executable."));
       return;
     }
 
     // Static files are in the "out" directory (Next.js export output)
     const staticDir = path.join(__dirname, "..", "out");
-    const server = createServer(apiKeys, staticDir);
+    const server = createServer(groqKeys, openRouterKey, staticDir);
 
     // Listen on a random available port on localhost
     const listener = server.listen(0, "127.0.0.1", () => {
@@ -330,12 +334,87 @@ app.whenReady().then(async () => {
   createWindow();
   createTray();
 
+  // ─── Auto-update (production only) ────────────────────────
+  if (!isDev) {
+    setupAutoUpdater();
+  }
+
   // Add global shortcut to open dev tools for debugging
   globalShortcut.register("CommandOrControl+Shift+D", () => {
     if (mainWindow) {
       mainWindow.webContents.toggleDevTools();
     }
   });
+});
+
+// ─── Auto-Updater Setup ─────────────────────────────────────
+function setupAutoUpdater() {
+  // For private repos: read GitHub PAT from config.json
+  try {
+    const configPath = path.join(__dirname, "config.json");
+    const config = JSON.parse(require("fs").readFileSync(configPath, "utf-8"));
+    if (config.GH_TOKEN) {
+      process.env.GH_TOKEN = config.GH_TOKEN;
+      console.log("[AutoUpdater] GitHub token loaded for private repo access");
+    }
+  } catch {}
+
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on("checking-for-update", () => {
+    console.log("[AutoUpdater] Checking for updates...");
+  });
+
+  autoUpdater.on("update-available", (info) => {
+    console.log("[AutoUpdater] Update available:", info.version);
+    if (mainWindow) {
+      mainWindow.webContents.send("update-status", {
+        status: "downloading",
+        version: info.version,
+      });
+    }
+  });
+
+  autoUpdater.on("update-not-available", () => {
+    console.log("[AutoUpdater] App is up to date.");
+  });
+
+  autoUpdater.on("download-progress", (progress) => {
+    console.log(`[AutoUpdater] Download: ${Math.round(progress.percent)}%`);
+    if (mainWindow) {
+      mainWindow.webContents.send("update-status", {
+        status: "downloading",
+        percent: Math.round(progress.percent),
+      });
+    }
+  });
+
+  autoUpdater.on("update-downloaded", (info) => {
+    console.log("[AutoUpdater] Update downloaded:", info.version);
+    if (mainWindow) {
+      mainWindow.webContents.send("update-status", {
+        status: "ready",
+        version: info.version,
+      });
+    }
+  });
+
+  autoUpdater.on("error", (err) => {
+    console.error("[AutoUpdater] Error:", err.message);
+  });
+
+  // Check for updates after a short delay
+  setTimeout(() => {
+    autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+      console.warn("[AutoUpdater] Check failed:", err.message);
+    });
+  }, 5000);
+}
+
+// ─── IPC: Restart to apply update ───────────────────────────
+ipcMain.on("restart-for-update", () => {
+  autoUpdater.quitAndInstall(false, true);
 });
 
 app.on("window-all-closed", () => {

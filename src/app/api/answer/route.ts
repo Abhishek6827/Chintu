@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import OpenAI from "openai";
 
 // ─── Response length presets ────────────────────────────────
 const RESPONSE_PROMPTS: Record<string, string> = {
@@ -133,10 +134,12 @@ export async function POST(req: NextRequest) {
       process.env.GROQ_API_KEY_3,
     ].filter(Boolean) as string[];
 
-    console.log(`[/api/answer] API keys loaded: ${apiKeys.length} (keys ending: ${apiKeys.map(k => '...' + k.slice(-4)).join(', ')})`);
+    const openRouterKey = process.env.OPENROUTER_API_KEY || "";
 
-    if (apiKeys.length === 0) {
-      return NextResponse.json({ error: "GROQ_API_KEY not configured" }, { status: 500 });
+    console.log(`[/api/answer] Groq keys: ${apiKeys.length} | OpenRouter: ${openRouterKey ? "yes" : "no"}`);
+
+    if (apiKeys.length === 0 && !openRouterKey) {
+      return NextResponse.json({ error: "No API keys configured" }, { status: 500 });
     }
 
     const {
@@ -144,6 +147,7 @@ export async function POST(req: NextRequest) {
       jobDescription,
       responseLength = "balanced",
       conversationHistory = [],
+      selectedModel = "gpt-oss-120b",
     } = await req.json();
 
     if (!transcript || !jobDescription) {
@@ -153,12 +157,19 @@ export async function POST(req: NextRequest) {
     const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.balanced;
     const isCoding = responseLength === "coding";
 
-    console.log(`[/api/answer] Mode: ${responseLength} | Question: "${transcript.slice(0, 80)}..." | History: ${conversationHistory.length} messages`);
+    // ─── Model mapping: key → { groq model ID, openrouter model ID } ─
+    const MODEL_MAP: Record<string, { groq: string; openrouter: string }> = {
+      "gpt-oss-120b":      { groq: "openai/gpt-oss-120b",      openrouter: "openai/gpt-oss-120b" },
+      "qwen3-coder-480b":  { groq: "qwen/qwen3-coder-480b",    openrouter: "qwen/qwen3-coder-480b" },
+      "deepseek-r1":       { groq: "deepseek-r1-distill-llama-70b", openrouter: "deepseek/deepseek-r1:free" },
+      "nemotron-super":    { groq: "nvidia/llama-3.3-nemotron-super-49b-v1", openrouter: "nvidia/llama-3.3-nemotron-super-49b-v1" },
+    };
 
-    // ─── Coding uses DeepSeek R1 (reasoning model), spoken uses Llama ───
-    const model = isCoding
-      ? "openai/gpt-oss-120b"  // best for code accuracy & bug detection
-      : "openai/gpt-oss-120b";       // best for natural spoken responses
+    const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
+    const groqModel = modelConfig.groq;
+    const openrouterModel = modelConfig.openrouter;
+
+    console.log(`[/api/answer] Mode: ${responseLength} | Model: ${selectedModel} (groq: ${groqModel}) | History: ${conversationHistory.length} messages`);
 
     // ─── Separate system prompts for coding vs spoken responses ───
     const systemPrompt = isCoding
@@ -212,7 +223,7 @@ Rules:
           console.log(`[/api/answer] Trying key ${i + 1}/${apiKeys.length} (attempt ${attempt + 1}) (ending: ...${apiKey.slice(-4)})`);
           const groq = new Groq({ apiKey });
           stream = await groq.chat.completions.create({
-            model,
+            model: groqModel,
             stream: true,
             max_tokens: 2048,
             messages: [
@@ -235,6 +246,32 @@ Rules:
       }
 
       if (stream) break; // success — exit retry loop
+    }
+
+    if (!stream) {
+      // ─── OpenRouter fallback ────────────────────────────────
+      if (openRouterKey) {
+        console.log(`[/api/answer] 🔄 All Groq keys failed. Trying OpenRouter...`);
+        try {
+          const openrouter = new OpenAI({
+            baseURL: "https://openrouter.ai/api/v1",
+            apiKey: openRouterKey,
+          });
+          stream = await openrouter.chat.completions.create({
+            model: openrouterModel,
+            stream: true,
+            max_tokens: 2048,
+            messages: [
+              { role: "system", content: systemPrompt },
+              ...trimmedHistory,
+              { role: "user", content: transcript },
+            ],
+          });
+          console.log(`[/api/answer] ✓ OpenRouter stream created`);
+        } catch (orErr: any) {
+          console.error(`[/api/answer] ✗ OpenRouter also failed:`, orErr?.message?.slice(0, 100));
+        }
+      }
     }
 
     if (!stream) {

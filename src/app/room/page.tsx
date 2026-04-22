@@ -10,6 +10,8 @@ interface AnswerEntry {
   question: string;
   answer: string;
   isStreaming: boolean;
+  mode?: string;
+  model?: string;
 }
 
 interface SpeechRecognitionEvent extends Event {
@@ -18,6 +20,16 @@ interface SpeechRecognitionEvent extends Event {
 }
 
 type ResponseLength = "small" | "balanced" | "detailed" | "coding";
+
+// ─── Available models ─────────────────────────────────────────
+const MODELS = [
+  { key: "gpt-oss-120b", name: "GPT-OSS 120B" },
+  { key: "qwen3-coder-480b", name: "Qwen3 Coder 480B" },
+  { key: "deepseek-r1", name: "DeepSeek R1" },
+  { key: "nemotron-super", name: "Nemotron Super" },
+] as const;
+
+type ModelKey = typeof MODELS[number]["key"];
 
 // ─── Conversation history message type ────────────────────
 interface HistoryMessage {
@@ -44,6 +56,8 @@ export default function RoomPage() {
   const [windowOpacity, setWindowOpacity] = useState(1);
   const [fontSize, setFontSize] = useState(14);
   const [spaceMode, setSpaceMode] = useState<"hold" | "toggle">("hold");
+  const [selectedModel, setSelectedModel] = useState<ModelKey>("gpt-oss-120b");
+  const selectedModelRef = useRef<ModelKey>("gpt-oss-120b");
 
   // ─── Vision conversation history ──────────────────────────
   // Keeps track of previous screenshot exchanges so the model
@@ -54,6 +68,9 @@ export default function RoomPage() {
   // Keeps track of previous Q&A exchanges for regular chat so
   // the model has context across all response modes.
   const [chatConversationHistory, setChatConversationHistory] = useState<HistoryMessage[]>([]);
+
+  // ─── Auto-update status ───────────────────────────────────
+  const [updateStatus, setUpdateStatus] = useState<{ status: string; version?: string; percent?: number } | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -66,6 +83,15 @@ export default function RoomPage() {
     if (isElectron && (window as any).electronAPI?.onHiddenChange) {
       return (window as any).electronAPI.onHiddenChange((hidden: boolean) => {
         setIsWindowHidden(hidden);
+      });
+    }
+  }, []);
+
+  // ─── Listen for auto-update events ────────────────────────
+  useEffect(() => {
+    if (isElectron && (window as any).electronAPI?.onUpdateStatus) {
+      return (window as any).electronAPI.onUpdateStatus((data: any) => {
+        setUpdateStatus(data);
       });
     }
   }, []);
@@ -103,6 +129,19 @@ export default function RoomPage() {
   const originalParentRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => { responseLengthRef.current = responseLength; }, [responseLength]);
+
+  // Auto-switch model when coding mode is selected
+  useEffect(() => {
+    if (responseLength === "coding") {
+      setSelectedModel("qwen3-coder-480b");
+      selectedModelRef.current = "qwen3-coder-480b";
+    } else {
+      setSelectedModel("gpt-oss-120b");
+      selectedModelRef.current = "gpt-oss-120b";
+    }
+  }, [responseLength]);
+
+  useEffect(() => { selectedModelRef.current = selectedModel; }, [selectedModel]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -469,7 +508,8 @@ export default function RoomPage() {
 
     const fullTranscript = transcript + aiContext;
 
-    setAnswers((prev) => [...prev, { id: entryId, question: transcript, answer: "", isStreaming: true, mode: responseLengthRef.current }]);
+    const modelName = MODELS.find(m => m.key === selectedModelRef.current)?.name || selectedModelRef.current;
+    setAnswers((prev) => [...prev, { id: entryId, question: transcript, answer: "", isStreaming: true, mode: responseLengthRef.current, model: modelName }]);
     setAiSpeechBubbles([]);
 
     const historyToSend = [...chatConversationHistory];
@@ -483,6 +523,7 @@ export default function RoomPage() {
           jobDescription,
           responseLength: responseLengthRef.current,
           conversationHistory: historyToSend,
+          selectedModel: selectedModelRef.current,
         }),
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Failed"); }
@@ -534,7 +575,8 @@ export default function RoomPage() {
 
     const fullTranscript = textToUse + aiContext;
 
-    setAnswers((prev) => [...prev, { id: entryId, question: textToUse, answer: "", isStreaming: true, mode: responseLengthRef.current }]);
+    const modelName = MODELS.find(m => m.key === selectedModelRef.current)?.name || selectedModelRef.current;
+    setAnswers((prev) => [...prev, { id: entryId, question: textToUse, answer: "", isStreaming: true, mode: responseLengthRef.current, model: modelName }]);
     setAiSpeechBubbles([]);
 
     const historyToSend = [...chatConversationHistory];
@@ -548,6 +590,7 @@ export default function RoomPage() {
           jobDescription,
           responseLength: responseLengthRef.current,
           conversationHistory: historyToSend,
+          selectedModel: selectedModelRef.current,
         }),
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Failed"); }
@@ -683,7 +726,7 @@ export default function RoomPage() {
     const questionText = `📸 Screenshot${capturedScreenshots.length > 1 ? "s" : ""} (${capturedScreenshots.length})`;
     const contextText = inputText.trim();
 
-    setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true, mode: responseLengthRef.current }]);
+    setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true, mode: responseLengthRef.current, model: "Llama 4 Scout (Vision)" }]);
 
     // ─── Snapshot current screenshots & context before clearing ─
     const screenshotsToSend = [...capturedScreenshots];
@@ -854,6 +897,27 @@ export default function RoomPage() {
             >
               Clear
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Auto-update notification */}
+      {updateStatus && (
+        <div className="px-4 pb-2">
+          <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-xl px-4 py-2 text-emerald-200 text-xs flex items-center justify-between">
+            {updateStatus.status === "downloading" ? (
+              <span>⬇️ Downloading v{updateStatus.version}... {updateStatus.percent ? `${updateStatus.percent}%` : ""}</span>
+            ) : updateStatus.status === "ready" ? (
+              <>
+                <span>✅ v{updateStatus.version} ready!</span>
+                <button
+                  onClick={() => (window as any).electronAPI?.restartForUpdate()}
+                  className="ml-2 px-3 py-1 bg-emerald-500/40 rounded-lg text-emerald-100 font-medium hover:bg-emerald-500/60 transition-colors"
+                >
+                  Restart & Update
+                </button>
+              </>
+            ) : null}
           </div>
         </div>
       )}
@@ -1130,6 +1194,30 @@ export default function RoomPage() {
                   <option value="coding">Coding</option>
                 </select>
               </div>
+            </div>
+
+            <div className="mb-5">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">AI Model</p>
+                  <p className="text-xs text-gray-400">Model used for text responses</p>
+                </div>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => {
+                    setSelectedModel(e.target.value as ModelKey);
+                    selectedModelRef.current = e.target.value as ModelKey;
+                  }}
+                  className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 outline-none max-w-[10rem]"
+                >
+                  {MODELS.map((m) => (
+                    <option key={m.key} value={m.key}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+              <p className="text-[0.6875rem] text-gray-400 leading-relaxed">
+                Vision (screenshots) always uses Llama 4 Scout. This model is for text/coding responses only.
+              </p>
             </div>
 
             <div className="mb-5">
