@@ -147,7 +147,7 @@ export default function RoomPage() {
   useEffect(() => { selectedModelRef.current = selectedModel; }, [selectedModel]);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    chatEndRef.current?.scrollIntoView({ behavior: "auto" });
   }, [answers]);
 
   useEffect(() => {
@@ -810,7 +810,7 @@ export default function RoomPage() {
           content: fullResponse,
         };
         const updated = [...prev, userMsg, assistantMsg];
-        return updated.slice(-10); // keep last 6 messages = 3 exchanges
+        return updated.slice(-20); // keep last 20 messages = 10 exchanges
       });
 
       setCapturedScreenshots([]);
@@ -997,8 +997,7 @@ export default function RoomPage() {
       {/* Text Input Row */}
       <div className="px-2 sm:px-4 pb-2 shrink-0">
         <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-white/10 transition-all">
-          <input
-            type="text"
+          <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={(e) => {
@@ -1012,7 +1011,8 @@ export default function RoomPage() {
               }
             }}
             placeholder={capturedScreenshots.length > 0 ? "Add context (optional) then press Enter or Analyze..." : "Ask a coding question or type..."}
-            className="w-full bg-transparent px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-white/90 placeholder-white/30 focus:outline-none pr-10 sm:pr-12"
+            className="w-full bg-transparent px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-white/90 placeholder-white/30 focus:outline-none pr-10 sm:pr-12 resize-none"
+            rows={inputText.split('\n').length > 1 ? Math.min(inputText.split('\n').length, 5) : 1}
             disabled={status !== "idle"}
           />
           <button

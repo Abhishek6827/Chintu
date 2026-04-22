@@ -15,6 +15,7 @@ Give a complete, structured, and thorough response. You MAY use:
 - Headers to separate sections (e.g. **Overview**, **Step 1**, **Step 2**)
 - Numbered steps for sequential tasks
 - Code blocks where relevant
+Please keep the code changes minimal. Do not add unnecessary information or extra code unless I ask. Do not change the names of any given functions or variables. Only correct the code, and add a single comment line explaining what was changed or what the mistake was. Do not change the whole logic or code structure unless it is required
 - Brief bullet points for lists of options or findings
 
 If multiple screenshots are given:

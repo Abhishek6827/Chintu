@@ -11,7 +11,10 @@
   --card-border: rgba(255, 255, 255, 0.5);
 }
 
-/* Global fluid scaling removed - relying on Tailwind utilities instead to prevent inputs/icons from becoming too small */
+/* Global fluid scaling with limits to prevent inputs/icons from becoming too small */
+html {
+  font-size: clamp(10px, 3vmin, 16px);
+}
 
 * {
   margin: 0;
@@ -34,8 +37,6 @@
   user-select: text;
   cursor: default !important;
 }
-
-
 
 html, body {
   overflow: hidden;
