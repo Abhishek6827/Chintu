@@ -36,7 +36,7 @@ Do NOT use bullet points, headers, or numbered lists.
 Use a natural speaking style that sounds authentic when spoken aloud.
 Aim for about 4-5 paragraphs.`,
 
-  coding: `You are an expert programmer assisting in a technical interview.
+  coding: `Act as an expert programmer helping me in a technical interview. Instead of giving a long summary, please add comments on the exact lines where you fixed the code, with a short explanation of the mistake. This will help me understand the issue quickly and explain it better to the interviewer
 
 FIRST — detect the intent from the problem/question:
 
