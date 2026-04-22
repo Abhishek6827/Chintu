@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     // ─── Coding uses DeepSeek R1 (reasoning model), spoken uses Llama ───
     const model = isCoding
       ? "openai/gpt-oss-120b"  // best for code accuracy & bug detection
-      : "llama-3.3-70b-versatile";       // best for natural spoken responses
+      : "openai/gpt-oss-120b";       // best for natural spoken responses
 
     // ─── Separate system prompts for coding vs spoken responses ───
     const systemPrompt = isCoding
