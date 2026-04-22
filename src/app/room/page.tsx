@@ -739,7 +739,7 @@ export default function RoomPage() {
           {isScreenRecording && (
             <div className="system-audio-badge mr-2">
               <span className="system-audio-dot" style={{ background: "#f87171" }} />
-              <span className="text-[10px] text-red-300 font-medium">REC</span>
+              <span className="text-[0.625rem] text-red-300 font-medium">REC</span>
             </div>
           )}
           {isElectron && (
@@ -780,9 +780,9 @@ export default function RoomPage() {
               <svg className="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
               </svg>
-              <span className="text-[10px] text-cyan-400 font-semibold uppercase tracking-wider">AI Interviewer</span>
+              <span className="text-[0.625rem] text-cyan-400 font-semibold uppercase tracking-wider">AI Interviewer</span>
             </div>
-            <p className="text-[13px] text-cyan-100/90 leading-relaxed">
+            <p className="text-[0.8125rem] text-cyan-100/90 leading-relaxed">
               {aiSpeechBubbles[aiSpeechBubbles.length - 1]}
             </p>
           </div>
@@ -832,7 +832,7 @@ export default function RoomPage() {
                   <img src={img} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
                   <button
                     onClick={() => removeScreenshot(i)}
-                    className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 rounded-full text-white text-[8px] flex items-center justify-center"
+                    className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 rounded-full text-white text-[0.5rem] flex items-center justify-center"
                   >
                     ✕
                   </button>
@@ -861,19 +861,20 @@ export default function RoomPage() {
               }
             }}
             placeholder={capturedScreenshots.length > 0 ? "Add context (optional) then press Enter or Analyze..." : "Ask a coding question or type..."}
-            className="w-full bg-transparent px-4 py-3 text-sm text-white/90 placeholder-white/30 focus:outline-none"
+            className="w-full bg-transparent px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-white/90 placeholder-white/30 focus:outline-none pr-10 sm:pr-12"
             disabled={status !== "idle"}
           />
           <button
             onClick={capturedScreenshots.length > 0 ? sendScreenshots : handleSendText}
             disabled={(capturedScreenshots.length === 0 && !inputText.trim()) || status !== "idle"}
-            className="absolute right-2 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-500/80 text-white disabled:opacity-50"
+            className="absolute right-1.5 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg sm:rounded-xl bg-indigo-500/80 text-white disabled:opacity-50"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.125A59.769 59.769 0 0121.485 12 59.768 59.768 0 013.27 20.875L5.999 12Zm0 0h7.5" />
             </svg>
           </button>
         </div>
+
       </div>
 
       {/* Bottom toolbar */}
@@ -931,7 +932,7 @@ export default function RoomPage() {
               </svg>
               {/* Badge showing count */}
               {capturedScreenshots.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-cyan-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-cyan-500 text-white text-[0.625rem] font-bold rounded-full flex items-center justify-center">
                   {capturedScreenshots.length}
                 </span>
               )}
@@ -1028,8 +1029,8 @@ export default function RoomPage() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-6" onClick={() => setShowSettings(false)}>
-          <div className="settings-panel w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-2 sm:p-6" onClick={() => setShowSettings(false)}>
+          <div className="settings-panel w-full max-w-sm p-4 sm:p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="text-lg font-bold text-gray-800">Settings</h2>
@@ -1072,64 +1073,12 @@ export default function RoomPage() {
                   {useWhisperFallback.current ? "Whisper API" : "Web Speech"}
                 </span>
               </div>
-              <p className="text-[11px] text-gray-400 leading-relaxed">
+              <p className="text-[0.6875rem] text-gray-400 leading-relaxed">
                 {useWhisperFallback.current
                   ? "Using Groq Whisper API for transcription. Hold Space → speak → release to transcribe."
                   : "Using browser's built-in speech recognition for real-time transcription."
                 }
               </p>
-            </div>
-
-            {/* Opacity control - only in Electron */}
-            {isElectron && (
-              <div className="mb-5">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">Window Opacity</p>
-                    <p className="text-xs text-gray-400">Adjust window transparency</p>
-                  </div>
-                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
-                    {Math.round(windowOpacity * 100)}%
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="10"
-                  max="100"
-                  value={Math.round(windowOpacity * 100)}
-                  onChange={(e) => handleOpacityChange(parseInt(e.target.value) / 100)}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none opacity-slider"
-                />
-                <div className="flex justify-between text-[10px] text-gray-400 mt-1">
-                  <span>10%</span>
-                  <span>100%</span>
-                </div>
-              </div>
-            )}
-
-            {/* Font Size control */}
-            <div className="mb-5">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <p className="text-sm font-semibold text-gray-700">Font Size</p>
-                  <p className="text-xs text-gray-400">Adjust answer text size</p>
-                </div>
-                <span className="text-xs font-medium px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
-                  {fontSize}px
-                </span>
-              </div>
-              <input
-                type="range"
-                min="10"
-                max="22"
-                value={fontSize}
-                onChange={(e) => setFontSize(parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none opacity-slider"
-              />
-              <div className="flex justify-between text-[10px] text-gray-400 mt-1">
-                <span>Small</span>
-                <span>Large</span>
-              </div>
             </div>
 
             {/* Space Key Mode */}
@@ -1162,7 +1111,7 @@ export default function RoomPage() {
                   </button>
                 </div>
               </div>
-              <p className="text-[11px] text-gray-400 leading-relaxed">
+              <p className="text-[0.6875rem] text-gray-400 leading-relaxed">
                 {spaceMode === "hold"
                   ? "Hold Space to record, release to stop and generate answer."
                   : "Press Space once to start recording, press again to stop."
@@ -1187,7 +1136,7 @@ export default function RoomPage() {
             </div>
 
             <div className="text-center">
-              <p className="text-[10px] text-gray-300">
+              <p className="text-[0.625rem] text-gray-300">
                 🔒 Window is invisible to screen sharing
               </p>
             </div>

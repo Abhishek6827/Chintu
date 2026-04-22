@@ -11,6 +11,11 @@
   --card-border: rgba(255, 255, 255, 0.5);
 }
 
+/* Global fluid scaling for rem units based on window size */
+html {
+  font-size: clamp(8px, min(4vw, 3.5vh), 16px);
+}
+
 * {
   margin: 0;
   padding: 0;

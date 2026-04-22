@@ -67,7 +67,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                         </SyntaxHighlighter>
                       ) : (
                         <code
-                          className="bg-gray-100 text-pink-600 px-1.5 py-0.5 rounded text-[12px] font-mono"
+                          className="bg-gray-100 text-pink-600 px-1.5 py-0.5 rounded text-xs font-mono"
                           {...props}
                         >
                           {children}
@@ -88,7 +88,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                       return <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>;
                     },
                     li({ children }) {
-                      return <li className="text-[13px]">{children}</li>;
+                      return <li className="text-[0.8125rem]">{children}</li>;
                     },
                     hr() {
                       return <hr className="border-gray-200 my-3" />;
