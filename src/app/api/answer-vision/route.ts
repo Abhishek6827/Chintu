@@ -263,7 +263,7 @@ export async function POST(req: NextRequest) {
     // ====================================================================
     const MODEL_MAP: Record<string, { groq: string; openrouter: string }> = {
       "gpt-oss-120b": { groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
-      "qwen3-coder-480b": { groq: "qwen/qwen3-coder:free", openrouter: "qwen/qwen3-coder:free" },
+      "qwen3-coder-480b": { groq: "qwen/qwen3-32b", openrouter: "qwen/qwen3-32b" },
       "deepseek-r1": { groq: "deepseek-r1-distill-llama-70b", openrouter: "deepseek/deepseek-r1:free" },
       "nemotron-3-120b": { groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
       "llama-3.3-nemotron-49b": { groq: "nvidia/llama-3.3-nemotron-super-49b-v1", openrouter: "nvidia/llama-3.3-nemotron-super-49b-v1" },
@@ -361,6 +361,29 @@ Rules:
         });
       } catch (err) {
         finalError = err;
+        console.log(`[/api/answer-vision] OpenRouter with ${openrouterModel} failed. Falling back...`);
+        let fallbackStream;
+        for (let i = 0; i < apiKeys.length; i++) {
+          try {
+            console.log(`[/api/answer-vision] Fallback: Trying Groq key ${i + 1} with meta-llama/llama-4-scout-17b-16e-instruct...`);
+            const groq = new Groq({ apiKey: apiKeys[i] });
+            fallbackStream = await groq.chat.completions.create({
+              model: "meta-llama/llama-4-scout-17b-16e-instruct",
+              stream: true,
+              max_tokens: 2048,
+              messages: [
+                { role: "system", content: systemPrompt },
+                ...trimmedHistory,
+                { role: "user", content: finalTranscript },
+              ],
+            });
+            stream = fallbackStream;
+            console.log(`[/api/answer-vision] ✓ Groq fallback stream created`);
+            break;
+          } catch (fallbackGroqErr) {
+            finalError = fallbackGroqErr;
+          }
+        }
       }
     }
 
