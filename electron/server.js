@@ -107,17 +107,10 @@ Global Rules:
 - Be precise — no unnecessary explanation`,
 };
 
-/**
- * Creates and returns an Express app with API routes and static file serving.
- * @param {string} apiKey - Groq API key
- * @param {string} staticDir - Path to the Next.js static export directory (out/)
- * @returns {express.Express}
- */
 function createServer(apiKey, staticDir) {
   const app = express();
   const upload = multer({ dest: os.tmpdir() });
 
-  // ─── Support multiple API keys for fallback ───────────────
   const apiKeys = [
     process.env.GROQ_API_KEY || apiKey,
     process.env.GROQ_API_KEY_2,
@@ -125,8 +118,6 @@ function createServer(apiKey, staticDir) {
   ].filter(Boolean);
 
   app.use(express.json({ limit: "10mb" }));
-
-  // ─── Serve static files from Next.js export ───────────────
   app.use(express.static(staticDir, { extensions: ["html"] }));
 
   // ─── API: Answer generation (streaming) ───────────────────
@@ -143,12 +134,10 @@ function createServer(apiKey, staticDir) {
 
       console.log(`[/api/answer] Mode: ${responseLength} | Question: "${transcript.slice(0, 80)}..."`);
 
-      // ─── Coding uses DeepSeek R1 (reasoning model), spoken uses Llama ───
       const model = isCoding
-        ? "openai/gpt-oss-120b"  // best for code accuracy & bug detection
-        : "openai/gpt-oss-120b";       // best for natural spoken responses
+        ? "openai/gpt-oss-120b"
+        : "openai/gpt-oss-120b";
 
-      // ─── Separate system prompts for coding vs spoken ────────
       const systemPrompt = isCoding
         ? `You are an expert programmer helping a candidate during a technical interview.
 The candidate is interviewing for this role:
@@ -158,7 +147,6 @@ ${jobDescription}
 ---
 
 ${lengthInstruction}`
-
         : `You are generating spoken responses for an interviewee. The candidate is interviewing for a role with the following job description:
 
 ---
@@ -192,7 +180,7 @@ Rules:
               { role: "user", content: transcript },
             ],
           });
-          break; // Success
+          break;
         } catch (error) {
           lastError = error;
           if (error?.status === 429) {
@@ -203,15 +191,12 @@ Rules:
         }
       }
 
-      if (!stream) {
-        throw lastError;
-      }
+      if (!stream) throw lastError;
 
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      // ─── Stream with <think> tag filter (DeepSeek R1 internal reasoning) ───
       let insideThinkTag = false;
       let buffer = "";
 
@@ -221,15 +206,12 @@ Rules:
 
         buffer += text;
 
-        // Entering <think> block — stop writing to client
         if (buffer.includes("<think>")) {
           insideThinkTag = true;
-          // Discard everything up to and including <think>
           buffer = buffer.split("<think>").pop() ?? "";
           continue;
         }
 
-        // Exiting </think> block — resume writing after the closing tag
         if (insideThinkTag && buffer.includes("</think>")) {
           insideThinkTag = false;
           const afterThink = buffer.split("</think>").pop() ?? "";
@@ -238,12 +220,8 @@ Rules:
           continue;
         }
 
-        // Inside think block — skip silently
-        if (insideThinkTag) {
-          continue;
-        }
+        if (insideThinkTag) continue;
 
-        // Normal content — write to client
         res.write(text);
         buffer = "";
       }
@@ -263,7 +241,13 @@ Rules:
   // ─── API: Answer generation with Vision ───────────────────
   app.post("/api/answer-vision", async (req, res) => {
     try {
-      const { images, jobDescription, responseLength = "coding", additionalContext = "" } = req.body;
+      const {
+        images,
+        jobDescription,
+        responseLength = "coding",
+        additionalContext = "",
+        conversationHistory = [],   // ← NEW: previous messages for context
+      } = req.body;
 
       if (!images || !Array.isArray(images) || images.length === 0) {
         return res.status(400).json({ error: "No images provided" });
@@ -276,10 +260,11 @@ Rules:
       const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.coding;
       const isCoding = responseLength === "coding";
 
-      console.log(`[/api/answer-vision] Mode: ${responseLength} | Images: ${images.length}`);
+      console.log(`[/api/answer-vision] Mode: ${responseLength} | Images: ${images.length} | History: ${conversationHistory.length} messages`);
 
       const model = "meta-llama/llama-4-scout-17b-16e-instruct";
 
+      // ─── Build new user message with screenshots ───────────
       const contentParts = [];
       for (const img of images) {
         contentParts.push({
@@ -289,7 +274,6 @@ Rules:
           },
         });
       }
-
       contentParts.push({
         type: "text",
         text: additionalContext
@@ -308,6 +292,7 @@ ${jobDescription}
 The candidate will share screenshot(s) of problems they see on screen.
 Read all visible text and code from the screenshots carefully.
 If multiple screenshots show the same problem, combine context from all of them.
+You have access to previous screenshots and answers in the conversation history — use them for context.
 
 ${lengthInstruction}`
         : `You are generating spoken responses for an interviewee. The candidate is interviewing for:
@@ -320,7 +305,7 @@ The candidate will share screenshot(s) of questions they see on screen.
 Read the question from the screenshot and write the EXACT words they should speak in response.
 Write in the first person ("I"). Sound natural and conversational — never robotic.
 NEVER use bullet points, numbered lists, bold text, or headers.
-If multiple screenshots show the same question, combine context from all of them.
+You have access to previous screenshots and answers in the conversation history — use them for context.
 
 ${lengthInstruction}
 
@@ -328,6 +313,9 @@ Rules:
 - Be technically accurate
 - Jump straight into the answer
 - Avoid overly formal phrasing`;
+
+      // ─── Keep last 6 history messages to avoid token overflow ─
+      const trimmedHistory = conversationHistory.slice(-6);
 
       let stream;
       let lastError;
@@ -341,10 +329,11 @@ Rules:
             max_tokens: 2048,
             messages: [
               { role: "system", content: systemPrompt },
-              { role: "user", content: contentParts },
+              ...trimmedHistory,              // ← previous messages
+              { role: "user", content: contentParts }, // ← new screenshot message
             ],
           });
-          break; // Success
+          break;
         } catch (error) {
           lastError = error;
           if (error?.status === 429) {
@@ -355,9 +344,7 @@ Rules:
         }
       }
 
-      if (!stream) {
-        throw lastError;
-      }
+      if (!stream) throw lastError;
 
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.setHeader("Cache-Control", "no-cache");
@@ -431,7 +418,7 @@ Rules:
             language: "en",
             response_format: "json",
           });
-          break; // Success
+          break;
         } catch (error) {
           lastError = error;
           if (error?.status === 429) {
@@ -442,9 +429,7 @@ Rules:
         }
       }
 
-      if (!transcription) {
-        throw lastError;
-      }
+      if (!transcription) throw lastError;
 
       try { fs.unlinkSync(tempPath); } catch {}
 

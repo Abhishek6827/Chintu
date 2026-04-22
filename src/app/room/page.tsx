@@ -19,6 +19,12 @@ interface SpeechRecognitionEvent extends Event {
 
 type ResponseLength = "small" | "balanced" | "detailed" | "coding";
 
+// ─── Conversation history message type ────────────────────
+interface HistoryMessage {
+  role: "user" | "assistant";
+  content: any; // string for assistant, array for user (with images)
+}
+
 // Check if running in Electron
 const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
@@ -39,15 +45,18 @@ export default function RoomPage() {
   const [fontSize, setFontSize] = useState(14);
   const [spaceMode, setSpaceMode] = useState<"hold" | "toggle">("hold");
 
+  // ─── Vision conversation history ──────────────────────────
+  // Keeps track of previous screenshot exchanges so the model
+  // has context when multiple screenshots are sent in sequence.
+  const [visionConversationHistory, setVisionConversationHistory] = useState<HistoryMessage[]>([]);
+
   useEffect(() => {
     setMounted(true);
-    // Load saved opacity
     if (isElectron && (window as any).electronAPI?.getOpacity) {
       (window as any).electronAPI.getOpacity().then((o: number) => setWindowOpacity(o));
     }
   }, []);
 
-  // Listen for window visibility changes from Electron (e.g. tray unhide)
   useEffect(() => {
     if (isElectron && (window as any).electronAPI?.onHiddenChange) {
       return (window as any).electronAPI.onHiddenChange((hidden: boolean) => {
@@ -67,7 +76,6 @@ export default function RoomPage() {
   // ─── Screenshot Capture State ──────────────────────────
   const [capturedScreenshots, setCapturedScreenshots] = useState<string[]>([]);
   const [isCapturing, setIsCapturing] = useState(false);
-
 
   // ─── AI Speech tracking ─────────────────────────────────
   const [aiSpeechBubbles, setAiSpeechBubbles] = useState<string[]>([]);
@@ -91,7 +99,6 @@ export default function RoomPage() {
 
   useEffect(() => { responseLengthRef.current = responseLength; }, [responseLength]);
 
-  // Auto-scroll to latest answer
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [answers]);
@@ -164,7 +171,6 @@ export default function RoomPage() {
     setIsScreenRecording(false);
   }, []);
 
-  // ─── Screen + Audio Recording ────────────────────────────
   const startScreenRecording = useCallback(async () => {
     try {
       setError(null);
@@ -260,19 +266,11 @@ export default function RoomPage() {
     return () => { stopScreenRecording(); };
   }, [stopScreenRecording]);
 
-  // ════════════════════════════════════════════════════════════
-  // ─── SPEECH-TO-TEXT: Dual Strategy ─────────────────────────
-  // In Chrome (localhost): Use WebSpeechRecognition (free, real-time)
-  // In Electron (.exe):    Use Whisper API via MediaRecorder chunks
-  // ════════════════════════════════════════════════════════════
-
-  // --- Helper: Check if Web Speech API actually works ---
   const useWhisperFallback = useRef(false);
 
   const setupPlainRecognition = useCallback(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-    // If in Electron, skip Web Speech API entirely — it doesn't work
     if (isElectron || !SR) {
       console.log("[STT] Electron detected or no SpeechRecognition — using Whisper fallback");
       useWhisperFallback.current = true;
@@ -280,7 +278,6 @@ export default function RoomPage() {
       return;
     }
 
-    // Try Web Speech API (works in real Chrome browser)
     const recognition = new SR();
     recognition.continuous = true;
     recognition.interimResults = true;
@@ -302,7 +299,6 @@ export default function RoomPage() {
       if (event.error === "not-allowed") {
         setError("Mic access denied.");
       } else if (event.error === "network" || event.error === "service-not-allowed") {
-        // Web Speech API failed (common in Electron) — switch to Whisper
         console.log("[STT] Switching to Whisper fallback due to:", event.error);
         useWhisperFallback.current = true;
       }
@@ -317,10 +313,6 @@ export default function RoomPage() {
     setupPlainRecognition();
     return () => { try { recognitionRef.current?.stop(); } catch {} };
   }, [setupPlainRecognition]);
-
-  // ─── Whisper-based recording (Electron fallback) ──────────
-  // Records mic audio with MediaRecorder, then sends the blob to
-  // /api/transcribe (Groq Whisper) when the user stops recording.
 
   const startWhisperRecording = useCallback(async () => {
     try {
@@ -339,8 +331,6 @@ export default function RoomPage() {
         if (e.data.size > 0) whisperChunksRef.current.push(e.data);
       };
 
-      // Record without timeslice — all data comes in one chunk when stop() is called
-      // This avoids tiny fragmented chunks that get lost
       recorder.start();
       whisperRecorderRef.current = recorder;
       setLiveTranscript("🎤 Listening...");
@@ -360,7 +350,6 @@ export default function RoomPage() {
 
     console.log("[Whisper STT] Stopping recorder, state:", recorder.state);
 
-    // Wait for the recorder to fully stop and flush all data
     const blob = await new Promise<Blob>((resolve) => {
       recorder.ondataavailable = (e) => {
         console.log("[Whisper STT] Final chunk:", e.data.size, "bytes");
@@ -370,7 +359,6 @@ export default function RoomPage() {
       recorder.onstop = () => {
         console.log("[Whisper STT] Recorder stopped, total chunks:", whisperChunksRef.current.length);
 
-        // Stop mic stream
         if (whisperMicStreamRef.current) {
           whisperMicStreamRef.current.getTracks().forEach((t) => t.stop());
           whisperMicStreamRef.current = null;
@@ -423,8 +411,6 @@ export default function RoomPage() {
     }
   }, []);
 
-  // ─── Unified start/stop recording ─────────────────────────
-
   const startRecording = useCallback(async () => {
     if (isRecordingRef.current) return;
     isRecordingRef.current = true;
@@ -435,10 +421,8 @@ export default function RoomPage() {
     liveTranscriptRef.current = "";
 
     if (useWhisperFallback.current) {
-      // Electron: use Whisper
       await startWhisperRecording();
     } else {
-      // Chrome: use Web Speech API
       const recognition = recognitionRef.current;
       if (!recognition) return;
       try { recognition.start(); }
@@ -456,10 +440,8 @@ export default function RoomPage() {
     let transcript = "";
 
     if (useWhisperFallback.current) {
-      // Electron: stop Whisper recording and get transcript
       transcript = await stopWhisperRecordingAndTranscribe();
     } else {
-      // Chrome: stop Web Speech API
       try { recognitionRef.current?.stop(); } catch {}
       await new Promise((r) => setTimeout(r, 300));
       transcript = (finalTranscriptRef.current || liveTranscript).trim();
@@ -516,7 +498,7 @@ export default function RoomPage() {
     if (!inputText.trim()) return;
     const textToUse = inputText.trim();
     setInputText("");
-    
+
     if (status !== "idle") return;
     setStatus("generating");
     setError(null);
@@ -559,16 +541,14 @@ export default function RoomPage() {
     }
   }, [inputText, status, jobDescription, aiSpeechBubbles]);
 
-  // Stable refs for handlers to use in useEffect without re-registering listener
   const startRecordingRef = useRef(startRecording);
   const stopRecordingRef = useRef(stopRecordingAndGenerate);
   const spaceModeRef = useRef<"hold" | "toggle">(spaceMode);
-  
+
   useEffect(() => { startRecordingRef.current = startRecording; }, [startRecording]);
   useEffect(() => { stopRecordingRef.current = stopRecordingAndGenerate; }, [stopRecordingAndGenerate]);
   useEffect(() => { spaceModeRef.current = spaceMode; }, [spaceMode]);
 
-  // Keyboard shortcuts: Space to Record (supports hold and toggle modes)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space" || e.key === " ") {
@@ -577,14 +557,12 @@ export default function RoomPage() {
         if (!e.repeat) {
           e.preventDefault();
           if (spaceModeRef.current === "toggle") {
-            // Toggle mode: press to start, press again to stop
             if (isRecordingRef.current) {
               stopRecordingRef.current();
             } else {
               startRecordingRef.current();
             }
           } else {
-            // Hold mode: press to start
             if (!isRecordingRef.current) {
               startRecordingRef.current();
             }
@@ -596,14 +574,12 @@ export default function RoomPage() {
     const onKeyUp = (e: KeyboardEvent) => {
       if (e.code === "Space" || e.key === " ") {
         e.preventDefault();
-        // Only stop on release in "hold" mode
         if (spaceModeRef.current === "hold" && isRecordingRef.current) {
           stopRecordingRef.current();
         }
       }
     };
 
-    // Use capture phase (true) to ensure we catch it early
     window.addEventListener("keydown", onKeyDown, true);
     window.addEventListener("keyup", onKeyUp, true);
     return () => {
@@ -612,16 +588,12 @@ export default function RoomPage() {
     };
   }, []);
 
-
-  // Window focusability logic
   useEffect(() => {
     if (isElectron && (window as any).electronAPI?.setFocusable) {
-      // Keep it focusable so shortcuts work
       (window as any).electronAPI.setFocusable(true);
     }
   }, []);
 
-  // Restore focusability when leaving the room route entirely
   useEffect(() => {
     return () => {
       if (isElectron && (window as any).electronAPI?.setFocusable) {
@@ -668,32 +640,71 @@ export default function RoomPage() {
 
     const entryId = Date.now().toString();
     const questionText = `📸 Screenshot${capturedScreenshots.length > 1 ? "s" : ""} (${capturedScreenshots.length})`;
+    const contextText = inputText.trim();
 
     setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true, mode: responseLengthRef.current }]);
+
+    // ─── Snapshot current screenshots & context before clearing ─
+    const screenshotsToSend = [...capturedScreenshots];
+    const historyToSend = [...visionConversationHistory];
 
     try {
       const res = await fetch("/api/answer-vision", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          images: capturedScreenshots,
+          images: screenshotsToSend,
           jobDescription,
           responseLength: responseLengthRef.current,
-          additionalContext: inputText.trim() || "",
+          additionalContext: contextText,
+          conversationHistory: historyToSend,  // ← send history for context
         }),
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Vision failed"); }
       if (!res.body) throw new Error("No response body");
 
+      // ─── Accumulate full response for history ──────────────
+      let fullResponse = "";
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
+        fullResponse += chunk;
         setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: a.answer + chunk } : a));
       }
+
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, isStreaming: false } : a));
+
+      // ─── Save this exchange to vision history ──────────────
+      // Keep last 6 messages (3 exchanges) to avoid token overflow
+      setVisionConversationHistory((prev) => {
+        const userMsg: HistoryMessage = {
+          role: "user",
+          content: [
+            ...screenshotsToSend.map((img) => ({
+              type: "image_url",
+              image_url: {
+                url: img.startsWith("data:") ? img : `data:image/png;base64,${img}`,
+              },
+            })),
+            {
+              type: "text",
+              text: contextText
+                ? `Look at the screenshot(s) carefully. The user says: "${contextText}". Based on what you see, provide the answer.`
+                : "Look at the screenshot(s) carefully. Read ALL visible text, code, and questions. Then provide a complete answer.",
+            },
+          ],
+        };
+        const assistantMsg: HistoryMessage = {
+          role: "assistant",
+          content: fullResponse,
+        };
+        const updated = [...prev, userMsg, assistantMsg];
+        return updated.slice(-6); // keep last 6 messages = 3 exchanges
+      });
+
       setCapturedScreenshots([]);
       setInputText("");
       setStatus("idle");
@@ -703,8 +714,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [capturedScreenshots, status, jobDescription, inputText]);
-
+  }, [capturedScreenshots, status, jobDescription, inputText, visionConversationHistory]);
 
   const handleOpacityChange = (value: number) => {
     setWindowOpacity(value);
@@ -786,6 +796,23 @@ export default function RoomPage() {
             <p className="text-[0.8125rem] text-cyan-100/90 leading-relaxed">
               {aiSpeechBubbles[aiSpeechBubbles.length - 1]}
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Vision history indicator */}
+      {visionConversationHistory.length > 0 && (
+        <div className="px-4 pb-1">
+          <div className="flex items-center justify-between bg-cyan-500/10 border border-cyan-500/20 rounded-xl px-3 py-1.5">
+            <span className="text-[0.625rem] text-cyan-400 font-medium">
+              📸 {visionConversationHistory.length / 2} previous screenshot exchange{visionConversationHistory.length / 2 > 1 ? "s" : ""} in memory
+            </span>
+            <button
+              onClick={() => setVisionConversationHistory([])}
+              className="text-[0.625rem] text-cyan-400/60 hover:text-cyan-400 transition-colors"
+            >
+              Clear
+            </button>
           </div>
         </div>
       )}
@@ -875,7 +902,6 @@ export default function RoomPage() {
             </svg>
           </button>
         </div>
-
       </div>
 
       {/* Bottom toolbar */}
@@ -885,7 +911,7 @@ export default function RoomPage() {
           className="no-drag w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/70"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         </button>
@@ -926,12 +952,10 @@ export default function RoomPage() {
                 }
               `}
             >
-              {/* Camera icon */}
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
               </svg>
-              {/* Badge showing count */}
               {capturedScreenshots.length > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-cyan-500 text-white text-[0.625rem] font-bold rounded-full flex items-center justify-center">
                   {capturedScreenshots.length}
@@ -961,9 +985,13 @@ export default function RoomPage() {
             )}
           </button>
 
-          {/* Clear answers */}
+          {/* Clear answers — also clears vision history */}
           <button
-            onClick={() => { setAnswers([]); setAiSpeechBubbles([]); }}
+            onClick={() => {
+              setAnswers([]);
+              setAiSpeechBubbles([]);
+              setVisionConversationHistory([]); // ← clear history too
+            }}
             className="no-drag w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/70"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -996,10 +1024,9 @@ export default function RoomPage() {
         </button>
       </div>
 
-      {/* Floating side controls for Opacity & Font Size */}
+      {/* Floating side controls */}
       {isElectron && (
         <div className="floating-side-controls no-drag">
-          {/* Opacity */}
           <div className="side-control-group">
             <span className="side-control-label">🔍</span>
             <input
@@ -1012,7 +1039,6 @@ export default function RoomPage() {
             />
             <span className="side-control-value">{Math.round(windowOpacity * 100)}</span>
           </div>
-          {/* Font Size */}
           <div className="side-control-group">
             <span className="side-control-label">Aa</span>
             <input
@@ -1082,7 +1108,6 @@ export default function RoomPage() {
               </p>
             </div>
 
-            {/* Space Key Mode */}
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2">
                 <div>

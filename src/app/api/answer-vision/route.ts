@@ -116,7 +116,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "GROQ_API_KEY not configured" }, { status: 500 });
     }
 
-    const { images, jobDescription, responseLength = "coding", additionalContext = "" } = await req.json();
+    const {
+      images,
+      jobDescription,
+      responseLength = "coding",
+      additionalContext = "",
+      conversationHistory = [],   // ← NEW: previous messages for context
+    } = await req.json();
 
     if (!images || !Array.isArray(images) || images.length === 0) {
       return NextResponse.json({ error: "No images provided" }, { status: 400 });
@@ -129,14 +135,11 @@ export async function POST(req: NextRequest) {
     const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.coding;
     const isCoding = responseLength === "coding";
 
-    console.log(`[/api/answer-vision] Mode: ${responseLength} | Images: ${images.length}`);
+    console.log(`[/api/answer-vision] Mode: ${responseLength} | Images: ${images.length} | History: ${conversationHistory.length} messages`);
 
-    // ─── NOTE: Vision route always uses llama-4-scout ─────────
-    // DeepSeek R1 does not support image inputs.
-    // llama-4-scout is the best vision-capable model on Groq.
     const model = "meta-llama/llama-4-scout-17b-16e-instruct";
 
-    // ─── Build content array with images ──────────────────────
+    // ─── Build new user message with screenshots ─────────────
     const contentParts: any[] = [];
 
     for (const img of images) {
@@ -155,7 +158,6 @@ export async function POST(req: NextRequest) {
         : "Look at the screenshot(s) carefully. Read ALL visible text, code, and questions. Then provide a complete answer.",
     });
 
-    // ─── Separate system prompts for coding vs spoken ──────────
     const systemPrompt = isCoding
       ? `You are an expert programmer helping a candidate during a technical interview.
 The candidate is interviewing for this role:
@@ -167,6 +169,7 @@ ${jobDescription}
 The candidate will share screenshot(s) of problems they see on screen.
 Read all visible text and code from the screenshots carefully.
 If multiple screenshots show the same problem, combine context from all of them.
+You have access to previous screenshots and answers in the conversation history — use them for context.
 
 ${lengthInstruction}`
 
@@ -180,7 +183,7 @@ The candidate will share screenshot(s) of questions they see on screen.
 Read the question from the screenshot and write the EXACT words they should speak in response.
 Write in the first person ("I"). Sound natural and conversational — never robotic.
 NEVER use bullet points, numbered lists, bold text, or headers.
-If multiple screenshots show the same question, combine context from all of them.
+You have access to previous screenshots and answers in the conversation history — use them for context.
 
 ${lengthInstruction}
 
@@ -189,8 +192,11 @@ Rules:
 - Jump straight into the answer
 - Avoid overly formal phrasing`;
 
-    let stream;
-    let lastError;
+    // ─── Keep last 6 history messages to avoid token overflow ─
+    const trimmedHistory = conversationHistory.slice(-6);
+
+    let stream: any;
+    let lastError: any;
 
     for (const apiKey of apiKeys) {
       try {
@@ -201,27 +207,24 @@ Rules:
           max_tokens: 2048,
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: contentParts },
+            ...trimmedHistory,              // ← previous messages
+            { role: "user", content: contentParts }, // ← new screenshot message
           ],
         });
-        break; // Success, exit loop
+        break;
       } catch (error: any) {
         lastError = error;
         if (error?.status === 429) {
           console.warn("[/api/answer-vision] Rate limit hit, trying next API key...");
-          continue; // Try next key
+          continue;
         }
-        throw error; // Throw non-rate-limit errors immediately
+        throw error;
       }
     }
 
-    if (!stream) {
-      throw lastError;
-    }
+    if (!stream) throw lastError;
 
     // ─── Stream with <think> tag filter ───────────────────────
-    // llama-4-scout does not emit <think> tags, but filter is kept
-    // here as a safety net in case model ever changes.
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({
       async start(controller) {
@@ -235,14 +238,12 @@ Rules:
 
             buffer += text;
 
-            // Entering <think> block — stop writing to client
             if (buffer.includes("<think>")) {
               insideThinkTag = true;
               buffer = buffer.split("<think>").pop() ?? "";
               continue;
             }
 
-            // Exiting </think> block — resume writing after the closing tag
             if (insideThinkTag && buffer.includes("</think>")) {
               insideThinkTag = false;
               const afterThink = buffer.split("</think>").pop() ?? "";
@@ -251,10 +252,8 @@ Rules:
               continue;
             }
 
-            // Inside think block — skip silently
             if (insideThinkTag) continue;
 
-            // Normal content — send to client
             controller.enqueue(encoder.encode(text));
             buffer = "";
           }
