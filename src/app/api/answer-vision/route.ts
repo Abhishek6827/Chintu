@@ -208,6 +208,11 @@ You have access to previous screenshots and answers in the conversation history 
 
 ${lengthInstruction}
 
+${images && images.length > 1
+  ? `Note: The candidate has shared ${images.length} screenshots. Treat them as parts of one task — connect context across all of them.`
+  : ""
+}
+
 Rules:
 - Be technically accurate
 - Jump straight into the answer
