@@ -11,10 +11,7 @@
   --card-border: rgba(255, 255, 255, 0.5);
 }
 
-/* Global fluid scaling for rem units based on window size */
-html {
-  font-size: clamp(10px, 2.5vw + 2px, 16px);
-}
+/* Global fluid scaling removed - relying on Tailwind utilities instead to prevent inputs/icons from becoming too small */
 
 * {
   margin: 0;

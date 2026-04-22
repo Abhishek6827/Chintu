@@ -237,7 +237,7 @@ export async function POST(req: NextRequest) {
           apiKey: openRouterKey,
         });
         const response = await openrouter.chat.completions.create({
-          model: "meta-llama/llama-4-scout:free",
+          model: "meta-llama/llama-3.3-70b-instruct:free",
           stream: false,
           max_tokens: 2048,
           messages: [
