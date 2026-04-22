@@ -133,6 +133,8 @@ export async function POST(req: NextRequest) {
       process.env.GROQ_API_KEY_3,
     ].filter(Boolean) as string[];
 
+    console.log(`[/api/answer] API keys loaded: ${apiKeys.length} (keys ending: ${apiKeys.map(k => '...' + k.slice(-4)).join(', ')})`);
+
     if (apiKeys.length === 0) {
       return NextResponse.json({ error: "GROQ_API_KEY not configured" }, { status: 500 });
     }
@@ -185,8 +187,10 @@ Rules:
     let stream;
     let lastError;
 
-    for (const apiKey of apiKeys) {
+    for (let i = 0; i < apiKeys.length; i++) {
+      const apiKey = apiKeys[i];
       try {
+        console.log(`[/api/answer] Trying API key ${i + 1}/${apiKeys.length} (ending: ...${apiKey.slice(-4)})`);
         const groq = new Groq({ apiKey });
         stream = await groq.chat.completions.create({
           model,
@@ -197,11 +201,13 @@ Rules:
             { role: "user", content: transcript },
           ],
         });
+        console.log(`[/api/answer] ✓ Stream created successfully with key ${i + 1}`);
         break; // Success, exit loop
       } catch (error: any) {
         lastError = error;
+        console.error(`[/api/answer] ✗ Key ${i + 1} failed — status: ${error?.status}, message: ${error?.message?.slice(0, 100)}`);
         if (error?.status === 429) {
-          console.warn("[/api/answer] Rate limit hit, trying next API key...");
+          console.warn(`[/api/answer] Rate limit on key ${i + 1}, trying next...`);
           continue; // Try next key
         }
         throw error; // Throw non-rate-limit errors immediately

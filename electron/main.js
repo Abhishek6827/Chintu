@@ -31,33 +31,42 @@ function loadEnv() {
   }
 }
 
-// ─── Load embedded config (API key baked into the build) ──
-function getApiKey() {
-  // 1. Check environment variable first (override)
-  if (process.env.GROQ_API_KEY) return process.env.GROQ_API_KEY;
+// ─── Load all API keys (env vars + config.json fallback) ──
+function getAllApiKeys() {
+  const keys = [];
 
-  // 2. Read from config.json bundled with the app
-  const configPath = path.join(__dirname, "config.json");
-  try {
-    const config = JSON.parse(require("fs").readFileSync(configPath, "utf-8"));
-    if (config.GROQ_API_KEY) return config.GROQ_API_KEY;
-  } catch {}
+  // 1. Check environment variables first
+  if (process.env.GROQ_API_KEY) keys.push(process.env.GROQ_API_KEY);
+  if (process.env.GROQ_API_KEY_2) keys.push(process.env.GROQ_API_KEY_2);
+  if (process.env.GROQ_API_KEY_3) keys.push(process.env.GROQ_API_KEY_3);
 
-  return null;
+  // 2. If no env keys found, read from config.json bundled with the app
+  if (keys.length === 0) {
+    const configPath = path.join(__dirname, "config.json");
+    try {
+      const config = JSON.parse(require("fs").readFileSync(configPath, "utf-8"));
+      if (config.GROQ_API_KEY) keys.push(config.GROQ_API_KEY);
+      if (config.GROQ_API_KEY_2) keys.push(config.GROQ_API_KEY_2);
+      if (config.GROQ_API_KEY_3) keys.push(config.GROQ_API_KEY_3);
+    } catch {}
+  }
+
+  console.log(`[Main] API keys found: ${keys.length}`);
+  return keys;
 }
 
 // ─── Start embedded Express server (production only) ──────
 function startServer() {
   return new Promise((resolve, reject) => {
-    const apiKey = getApiKey();
-    if (!apiKey) {
-      reject(new Error("GROQ_API_KEY not found. Add it to electron/config.json"));
+    const apiKeys = getAllApiKeys();
+    if (apiKeys.length === 0) {
+      reject(new Error("No GROQ API keys found. Add them to electron/config.json or a .env file next to the executable."));
       return;
     }
 
     // Static files are in the "out" directory (Next.js export output)
     const staticDir = path.join(__dirname, "..", "out");
-    const server = createServer(apiKey, staticDir);
+    const server = createServer(apiKeys, staticDir);
 
     // Listen on a random available port on localhost
     const listener = server.listen(0, "127.0.0.1", () => {

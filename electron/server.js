@@ -128,15 +128,13 @@ Global Rules:
 - Be precise — no unnecessary explanation`,
 };
 
-function createServer(apiKey, staticDir) {
+function createServer(apiKeys, staticDir) {
   const app = express();
   const upload = multer({ dest: os.tmpdir() });
 
-  const apiKeys = [
-    process.env.GROQ_API_KEY || apiKey,
-    process.env.GROQ_API_KEY_2,
-    process.env.GROQ_API_KEY_3
-  ].filter(Boolean);
+  // apiKeys is now passed directly from main.js (already resolved from env/config.json)
+  console.log(`[Server] API keys loaded: ${apiKeys.length} (keys ending: ${apiKeys.map(k => '...' + k.slice(-4)).join(', ')})`);
+
 
   app.use(express.json({ limit: "10mb" }));
   app.use(express.static(staticDir, { extensions: ["html"] }));
@@ -346,8 +344,10 @@ Rules:
       let stream;
       let lastError;
 
-      for (const key of apiKeys) {
+      for (let i = 0; i < apiKeys.length; i++) {
+        const key = apiKeys[i];
         try {
+          console.log(`[/api/answer-vision] Trying API key ${i + 1}/${apiKeys.length} (ending: ...${key.slice(-4)})`);
           const groq = new Groq({ apiKey: key });
           stream = await groq.chat.completions.create({
             model,
@@ -359,11 +359,13 @@ Rules:
               { role: "user", content: contentParts }, // ← new screenshot message
             ],
           });
+          console.log(`[/api/answer-vision] ✓ Stream created successfully with key ${i + 1}`);
           break;
         } catch (error) {
           lastError = error;
+          console.error(`[/api/answer-vision] ✗ Key ${i + 1} failed — status: ${error?.status}, message: ${error?.message?.slice(0, 100)}`);
           if (error?.status === 429) {
-            console.warn("[/api/answer-vision] Rate limit hit, trying next API key...");
+            console.warn(`[/api/answer-vision] Rate limit on key ${i + 1}, trying next...`);
             continue;
           }
           throw error;
