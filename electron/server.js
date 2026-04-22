@@ -117,7 +117,12 @@ function createServer(apiKey, staticDir) {
   const app = express();
   const upload = multer({ dest: os.tmpdir() });
 
-  const groq = new Groq({ apiKey });
+  // ─── Support multiple API keys for fallback ───────────────
+  const apiKeys = [
+    process.env.GROQ_API_KEY || apiKey,
+    process.env.GROQ_API_KEY_2,
+    process.env.GROQ_API_KEY_3
+  ].filter(Boolean);
 
   app.use(express.json({ limit: "10mb" }));
 
@@ -172,15 +177,35 @@ Rules:
 - Jump straight into the answer
 - Avoid robotic or overly formal phrasing`;
 
-      const stream = await groq.chat.completions.create({
-        model,
-        stream: true,
-        max_tokens: 2048,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: transcript },
-        ],
-      });
+      let stream;
+      let lastError;
+
+      for (const key of apiKeys) {
+        try {
+          const groq = new Groq({ apiKey: key });
+          stream = await groq.chat.completions.create({
+            model,
+            stream: true,
+            max_tokens: 2048,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: transcript },
+            ],
+          });
+          break; // Success
+        } catch (error) {
+          lastError = error;
+          if (error?.status === 429) {
+            console.warn("[/api/answer] Rate limit hit, trying next API key...");
+            continue;
+          }
+          throw error;
+        }
+      }
+
+      if (!stream) {
+        throw lastError;
+      }
 
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.setHeader("Cache-Control", "no-cache");
@@ -235,6 +260,150 @@ Rules:
     }
   });
 
+  // ─── API: Answer generation with Vision ───────────────────
+  app.post("/api/answer-vision", async (req, res) => {
+    try {
+      const { images, jobDescription, responseLength = "coding", additionalContext = "" } = req.body;
+
+      if (!images || !Array.isArray(images) || images.length === 0) {
+        return res.status(400).json({ error: "No images provided" });
+      }
+
+      if (!jobDescription) {
+        return res.status(400).json({ error: "Missing jobDescription" });
+      }
+
+      const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.coding;
+      const isCoding = responseLength === "coding";
+
+      console.log(`[/api/answer-vision] Mode: ${responseLength} | Images: ${images.length}`);
+
+      const model = "meta-llama/llama-4-scout-17b-16e-instruct";
+
+      const contentParts = [];
+      for (const img of images) {
+        contentParts.push({
+          type: "image_url",
+          image_url: {
+            url: img.startsWith("data:") ? img : `data:image/png;base64,${img}`,
+          },
+        });
+      }
+
+      contentParts.push({
+        type: "text",
+        text: additionalContext
+          ? `Look at the screenshot(s) carefully. The user says: "${additionalContext}". Based on what you see, provide the answer.`
+          : "Look at the screenshot(s) carefully. Read ALL visible text, code, and questions. Then provide a complete answer.",
+      });
+
+      const systemPrompt = isCoding
+        ? `You are an expert programmer helping a candidate during a technical interview.
+The candidate is interviewing for this role:
+
+---
+${jobDescription}
+---
+
+The candidate will share screenshot(s) of problems they see on screen.
+Read all visible text and code from the screenshots carefully.
+If multiple screenshots show the same problem, combine context from all of them.
+
+${lengthInstruction}`
+        : `You are generating spoken responses for an interviewee. The candidate is interviewing for:
+
+---
+${jobDescription}
+---
+
+The candidate will share screenshot(s) of questions they see on screen.
+Read the question from the screenshot and write the EXACT words they should speak in response.
+Write in the first person ("I"). Sound natural and conversational — never robotic.
+NEVER use bullet points, numbered lists, bold text, or headers.
+If multiple screenshots show the same question, combine context from all of them.
+
+${lengthInstruction}
+
+Rules:
+- Be technically accurate
+- Jump straight into the answer
+- Avoid overly formal phrasing`;
+
+      let stream;
+      let lastError;
+
+      for (const key of apiKeys) {
+        try {
+          const groq = new Groq({ apiKey: key });
+          stream = await groq.chat.completions.create({
+            model,
+            stream: true,
+            max_tokens: 2048,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: contentParts },
+            ],
+          });
+          break; // Success
+        } catch (error) {
+          lastError = error;
+          if (error?.status === 429) {
+            console.warn("[/api/answer-vision] Rate limit hit, trying next API key...");
+            continue;
+          }
+          throw error;
+        }
+      }
+
+      if (!stream) {
+        throw lastError;
+      }
+
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+
+      let insideThinkTag = false;
+      let buffer = "";
+
+      for await (const chunk of stream) {
+        const text = chunk.choices[0]?.delta?.content;
+        if (!text) continue;
+
+        buffer += text;
+
+        if (buffer.includes("<think>")) {
+          insideThinkTag = true;
+          buffer = buffer.split("<think>").pop() ?? "";
+          continue;
+        }
+
+        if (insideThinkTag && buffer.includes("</think>")) {
+          insideThinkTag = false;
+          const afterThink = buffer.split("</think>").pop() ?? "";
+          buffer = afterThink;
+          if (afterThink) res.write(afterThink);
+          continue;
+        }
+
+        if (insideThinkTag) continue;
+
+        res.write(text);
+        buffer = "";
+      }
+
+      res.end();
+    } catch (error) {
+      console.error("[/api/answer-vision] Error:", error);
+      const message = error instanceof Error ? error.message : "Vision answer failed";
+      if (!res.headersSent) {
+        res.status(500).json({ error: message });
+      } else {
+        res.end();
+      }
+    }
+  });
+
   // ─── API: Audio transcription via Groq Whisper ────────────
   app.post("/api/transcribe", upload.single("file"), async (req, res) => {
     let tempPath = req.file ? req.file.path : null;
@@ -250,12 +419,32 @@ Rules:
       fs.renameSync(tempPath, newPath);
       tempPath = newPath;
 
-      const transcription = await groq.audio.transcriptions.create({
-        file: fs.createReadStream(tempPath),
-        model: "whisper-large-v3",
-        language: "en",
-        response_format: "json",
-      });
+      let transcription;
+      let lastError;
+
+      for (const key of apiKeys) {
+        try {
+          const groq = new Groq({ apiKey: key });
+          transcription = await groq.audio.transcriptions.create({
+            file: fs.createReadStream(tempPath),
+            model: "whisper-large-v3",
+            language: "en",
+            response_format: "json",
+          });
+          break; // Success
+        } catch (error) {
+          lastError = error;
+          if (error?.status === 429) {
+            console.warn("[/api/transcribe] Rate limit hit, trying next API key...");
+            continue;
+          }
+          throw error;
+        }
+      }
+
+      if (!transcription) {
+        throw lastError;
+      }
 
       try { fs.unlinkSync(tempPath); } catch {}
 
