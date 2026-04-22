@@ -3,7 +3,7 @@ import Groq from "groq-sdk";
 
 // ─── Response length presets ────────────────────────────────
 const RESPONSE_PROMPTS: Record<string, string> = {
-  concise: `Keep your answer very brief — about 3-4 short sentences. Speak naturally and conversationally, as if you are thinking on your feet. Do NOT use bullet points, headers, or lists. Make it sound like a natural, off-the-cuff spoken response.`,
+  small: `Keep your answer very brief — about 3-4 short sentences. Speak naturally and conversationally, as if you are thinking on your feet. Do NOT use bullet points, headers, or lists. Make it sound like a natural, off-the-cuff spoken response.`,
 
   balanced: `Keep your answer moderate in length — around 2-3 paragraphs. Use a natural, conversational tone with smooth transitions. Do NOT use bullet points, headers, or any special formatting. It MUST sound like a human speaking aloud in an interview, not reading from a script.`,
 
@@ -20,14 +20,33 @@ FIRST — detect the intent from the problem/question:
 ---
 
 If DEBUG mode:
-**Bug Found:** [1 line — exactly what and where the bug is]
+You MUST actually read and analyze the code deeply. Do NOT give generic advice.
+Find the EXACT line(s) causing the bug — including BOTH runtime errors AND compile-time errors.
+
+IMPORTANT — Also check for these TypeScript-specific mistakes:
+- ReturnType<Fn> instead of ReturnType<typeof Fn>
+- Wrong or missing type assertions
+- Accessing properties on possibly undefined types
+- Missing ! on non-null assertions
+These are SILENT bugs — TypeScript won't compile, but they are easy to miss.
+
+**Bugs Found:** [List EVERY bug — both runtime AND compile-time, numbered]
+Format: Line [N]: [what is wrong] — [runtime crash / TS compile error / logic error]
+Find as many bugs as actually exist — do not stop at one.
+
+**Root Cause per bug:** [1 line each — WHY it breaks]
 
 **Fix:**
 \`\`\`language
-// Only the corrected part, not the entire code unless necessary
+// On EVERY line you changed: // ← FIXED: [what and why]
+// On EVERY line you added:   // ← ADDED: [what this does]
 \`\`\`
 
-**Why it was wrong:** [1-2 lines — root cause explanation]
+Rules for DEBUG mode:
+- NEVER say "the code looks mostly correct" — call out EVERY bug directly
+- NEVER miss TypeScript type-level errors — they are as critical as runtime bugs
+- NEVER give generic suggestions unless that IS the actual bug
+- If multiple bugs exist, number and fix EACH one separately
 
 ---
 
@@ -36,6 +55,7 @@ If SOLVE mode:
 
 \`\`\`language
 // Clean, well-commented optimal solution
+// On any non-obvious line, add: // ← [brief explanation]
 \`\`\`
 
 **Edge Cases:** [key edge cases handled]
@@ -49,7 +69,8 @@ If OPTIMIZE mode:
 
 **Optimized Solution:**
 \`\`\`language
-// Improved solution with comments
+// On every line changed from original: // ← CHANGED: [what and why]
+// On every line added:                 // ← ADDED: [what this does]
 \`\`\`
 
 **Before vs After:** Time: O(?) → O(?) | Space: O(?) → O(?)
@@ -81,6 +102,11 @@ export async function POST(req: NextRequest) {
     const isCoding = responseLength === "coding";
 
     console.log(`[/api/answer] Mode: ${responseLength} | Question: "${transcript.slice(0, 80)}..."`);
+
+    // ─── Coding uses DeepSeek R1 (reasoning model), spoken uses Llama ───
+    const model = isCoding
+      ? "deepseek-r1-distill-qwen-32b"  // best for code accuracy & bug detection
+      : "llama-3.3-70b-versatile";       // best for natural spoken responses
 
     // ─── Separate system prompts for coding vs spoken responses ───
     const systemPrompt = isCoding
@@ -114,8 +140,9 @@ Rules:
     const groq = new Groq({ apiKey });
 
     const stream = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model,
       stream: true,
+      max_tokens: 2048,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: transcript },

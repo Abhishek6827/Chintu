@@ -16,7 +16,7 @@ interface SpeechRecognitionEvent extends Event {
   resultIndex: number;
 }
 
-type ResponseLength = "concise" | "balanced" | "detailed" | "coding";
+type ResponseLength = "small" | "balanced" | "detailed" | "coding";
 
 // Check if running in Electron
 const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
@@ -481,7 +481,7 @@ export default function RoomPage() {
 
     const fullTranscript = transcript + aiContext;
 
-    setAnswers((prev) => [...prev, { id: entryId, question: transcript, answer: "", isStreaming: true }]);
+    setAnswers((prev) => [...prev, { id: entryId, question: transcript, answer: "", isStreaming: true, mode: responseLengthRef.current }]);
     setAiSpeechBubbles([]);
 
     try {
@@ -528,7 +528,7 @@ export default function RoomPage() {
 
     const fullTranscript = textToUse + aiContext;
 
-    setAnswers((prev) => [...prev, { id: entryId, question: textToUse, answer: "", isStreaming: true }]);
+    setAnswers((prev) => [...prev, { id: entryId, question: textToUse, answer: "", isStreaming: true, mode: responseLengthRef.current }]);
     setAiSpeechBubbles([]);
 
     try {
@@ -668,7 +668,7 @@ export default function RoomPage() {
     const entryId = Date.now().toString();
     const questionText = `📸 Screenshot${capturedScreenshots.length > 1 ? "s" : ""} (${capturedScreenshots.length})`;
 
-    setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true }]);
+    setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true, mode: responseLengthRef.current }]);
 
     try {
       const res = await fetch("/api/answer-vision", {
@@ -1016,7 +1016,7 @@ export default function RoomPage() {
             <span className="side-control-label">Aa</span>
             <input
               type="range"
-              min="10"
+              min="6"
               max="22"
               value={fontSize}
               onChange={(e) => setFontSize(parseInt(e.target.value))}
@@ -1055,7 +1055,7 @@ export default function RoomPage() {
                   onChange={(e) => setResponseLength(e.target.value as ResponseLength)}
                   className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 outline-none"
                 >
-                  <option value="concise">Small</option>
+                  <option value="small">Small</option>
                   <option value="balanced">Balanced</option>
                   <option value="detailed">Detailed</option>
                   <option value="coding">Coding</option>

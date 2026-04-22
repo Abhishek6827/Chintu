@@ -13,7 +13,7 @@ interface PipWindowProps {
   answers: AnswerEntry[];
   status: "idle" | "recording" | "transcribing" | "generating";
   liveTranscript: string;
-  responseLength: "concise" | "balanced" | "detailed";
+  responseLength: "small" | "balanced" | "detailed";
 }
 
 export default function PipWindow({
@@ -74,7 +74,7 @@ export default function PipWindow({
     ctx.fillText(sc.label, pillX + 16, 44);
 
     // Response length indicator
-    const rlLabels: Record<string, string> = { concise: "⚡ Concise", balanced: "⚖️ Balanced", detailed: "📝 Detailed" };
+    const rlLabels: Record<string, string> = { small: "⚡ Small", balanced: "⚖️ Balanced", detailed: "📝 Detailed" };
     ctx.fillStyle = "#3f3f46";
     ctx.font = "16px Inter, system-ui, sans-serif";
     ctx.fillText(rlLabels[rl] || "Balanced", 24, topH - 10);
