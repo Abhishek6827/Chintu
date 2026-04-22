@@ -13,6 +13,8 @@ interface AnswerEntry {
   isStreaming: boolean;
   mode?: string;
   model?: string;
+  startTime?: number;
+  timeTaken?: number;
 }
 
 interface AnswerDisplayProps {
@@ -58,7 +60,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
           {/* Question bubble */}
           <div className="flex justify-end mb-2">
             <div className="chat-bubble max-w-[85%] bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-indigo-200/50">
-              <p style={{ fontSize: `${Math.max(8, fontSize - 1)}px` }} className="text-gray-700 leading-relaxed">
+              <p style={{ fontSize: `calc(${Math.max(8, fontSize - 1) / 14} * 1rem)` }} className="text-gray-700 leading-relaxed">
                 {entry.question}
               </p>
             </div>
@@ -66,9 +68,19 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
 
           {/* Answer bubble */}
           <div className="flex justify-start relative">
-            <div className={`chat-bubble max-w-[92%] pb-6 ${entry.isStreaming && idx === 0 ? "chat-bubble-streaming" : ""}`}>
-              <div className="markdown-answer text-gray-800 leading-[1.7]" style={{ fontSize: `${fontSize}px` }}>
+            <div className={`chat-bubble max-w-[92%] ${entry.isStreaming && idx === 0 ? "chat-bubble-streaming" : ""}`}>
+              <div className="markdown-answer text-gray-800 leading-[1.7]" style={{ fontSize: `calc(${fontSize / 14} * 1rem)` }}>
                 {(() => {
+                  if (entry.isStreaming && !entry.answer) {
+                    return (
+                      <div className="flex items-center gap-1.5 py-2 px-1">
+                        <span className="bg-indigo-400 rounded-full animate-bounce" style={{ width: `calc(${fontSize / 14} * 0.4rem)`, height: `calc(${fontSize / 14} * 0.4rem)`, animationDelay: '0ms' }} />
+                        <span className="bg-indigo-400 rounded-full animate-bounce" style={{ width: `calc(${fontSize / 14} * 0.4rem)`, height: `calc(${fontSize / 14} * 0.4rem)`, animationDelay: '150ms' }} />
+                        <span className="bg-indigo-400 rounded-full animate-bounce" style={{ width: `calc(${fontSize / 14} * 0.4rem)`, height: `calc(${fontSize / 14} * 0.4rem)`, animationDelay: '300ms' }} />
+                        <span className="ml-2 text-indigo-400/80 font-medium tracking-wide" style={{ fontSize: `calc(${Math.max(8, fontSize - 2) / 14} * 1rem)` }}>Processing...</span>
+                      </div>
+                    );
+                  }
                   const { think, main, isThinking } = parseAnswer(entry.answer);
                   return (
                     <>
@@ -109,11 +121,11 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                             margin: "8px 0",
                             borderRadius: "10px",
                             padding: "14px",
-                            fontSize: `${Math.max(6, fontSize - 2)}px`,
+                            fontSize: `calc(${Math.max(6, fontSize - 2) / 14} * 1rem)`,
                           }}
                           codeTagProps={{
                             style: {
-                              fontSize: `${Math.max(6, fontSize - 2)}px`,
+                              fontSize: `calc(${Math.max(6, fontSize - 2) / 14} * 1rem)`,
                             }
                           }}
                           {...rest}
@@ -123,7 +135,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                       ) : (
                         <code
                           className={`${className || ""} bg-gray-100 text-pink-600 px-1.5 py-0.5 rounded font-mono`}
-                          style={{ fontSize: `${Math.max(6, fontSize - 1)}px` }}
+                          style={{ fontSize: `calc(${Math.max(6, fontSize - 1) / 14} * 1rem)` }}
                           {...rest}
                         >
                           {children}
@@ -186,7 +198,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
               </div>
               
               {/* Response Footer (Mode Badge + Copy Button) */}
-              <div className="absolute bottom-2 right-3 flex items-center gap-2">
+              <div className="mt-3 flex items-center justify-end gap-2 border-t border-gray-100/60 pt-2.5">
                 {!entry.isStreaming && (
                   <button
                     onClick={() => handleCopy(entry.id, entry.answer)}
@@ -216,7 +228,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                   </span>
                 )}
                 {entry.model && (
-                  <span className="text-[0.55rem] font-medium tracking-wide text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100/50 opacity-70">
+                  <span className="text-[0.55rem] font-medium tracking-wide text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200/60 opacity-80">
                     {entry.model}
                   </span>
                 )}

@@ -263,7 +263,7 @@ export async function POST(req: NextRequest) {
     // ====================================================================
     const MODEL_MAP: Record<string, { groq: string; openrouter: string }> = {
       "gpt-oss-120b": { groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
-      "qwen3-coder-480b": { groq: "qwen/qwen3-coder-480b", openrouter: "qwen/qwen3-coder-480b" },
+      "qwen3-coder-480b": { groq: "qwen/qwen3-coder:free", openrouter: "qwen/qwen3-coder:free" },
       "deepseek-r1": { groq: "deepseek-r1-distill-llama-70b", openrouter: "deepseek/deepseek-r1:free" },
       "nemotron-3-120b": { groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
       "llama-3.3-nemotron-49b": { groq: "nvidia/llama-3.3-nemotron-super-49b-v1", openrouter: "nvidia/llama-3.3-nemotron-super-49b-v1" },
@@ -304,7 +304,15 @@ Rules:
 - Avoid robotic or overly formal phrasing`;
 
     const finalTranscript = `[Screenshot Transcription]:\n${extractedText}\n\n[User Context]: ${additionalContext || "None"}`;
-    const trimmedHistory = conversationHistory.slice(-10);
+
+    const sanitizedHistory = conversationHistory.map((msg: any) => {
+      if (Array.isArray(msg.content)) {
+        const textParts = msg.content.filter((part: any) => part.type === "text").map((part: any) => part.text).join("\n");
+        return { ...msg, content: "[User sent screenshots]\n" + textParts };
+      }
+      return msg;
+    });
+    const trimmedHistory = sanitizedHistory.slice(-10);
 
     let stream: any;
     let finalError: any;

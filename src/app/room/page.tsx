@@ -706,7 +706,13 @@ export default function RoomPage() {
     try {
       const dataUrl = await (window as any).electronAPI.captureScreenshot();
       if (dataUrl) {
-        setCapturedScreenshots((prev) => [...prev, dataUrl]);
+        setCapturedScreenshots((prev) => {
+          const updated = [...prev, dataUrl];
+          if (updated.length > 20) {
+            return updated.slice(updated.length - 20);
+          }
+          return updated;
+        });
       } else {
         setError("Failed to capture screenshot");
       }
@@ -951,14 +957,8 @@ export default function RoomPage() {
         <div className="px-2 sm:px-4 pb-2 shrink-0">
           <div className="bg-white/5 border border-cyan-500/20 rounded-2xl p-3">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-cyan-300 text-xs font-medium">📸 {capturedScreenshots.length} screenshot{capturedScreenshots.length > 1 ? "s" : ""} captured</span>
+              <span className="text-cyan-300 text-xs font-medium">📸 {capturedScreenshots.length}/20 screenshot{capturedScreenshots.length > 1 ? "s" : ""}</span>
               <div className="flex-1" />
-              <button
-                onClick={() => setCapturedScreenshots([])}
-                className="text-white/40 text-xs px-2 py-1 rounded-lg bg-white/5"
-              >
-                Clear
-              </button>
               <button
                 onClick={sendScreenshots}
                 disabled={status !== "idle"}
