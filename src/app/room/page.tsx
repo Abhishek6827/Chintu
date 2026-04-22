@@ -140,6 +140,29 @@ export default function RoomPage() {
     };
   }, []);
 
+  const stopScreenRecording = useCallback(() => {
+    const recorder = screenRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") recorder.stop();
+    screenRecorderRef.current = null;
+
+    if (displayStreamRef.current) {
+      displayStreamRef.current.getTracks().forEach((t) => t.stop());
+      displayStreamRef.current = null;
+    }
+
+    if (micStreamForRecordingRef.current) {
+      micStreamForRecordingRef.current.getTracks().forEach((t) => t.stop());
+      micStreamForRecordingRef.current = null;
+    }
+
+    if (recordingAudioCtxRef.current) {
+      recordingAudioCtxRef.current.close().catch(() => {});
+      recordingAudioCtxRef.current = null;
+    }
+
+    setIsScreenRecording(false);
+  }, []);
+
   // ─── Screen + Audio Recording ────────────────────────────
   const startScreenRecording = useCallback(async () => {
     try {
@@ -230,30 +253,7 @@ export default function RoomPage() {
         setError("Failed to start recording: " + (err.message || err));
       }
     }
-  }, []);
-
-  const stopScreenRecording = useCallback(() => {
-    const recorder = screenRecorderRef.current;
-    if (recorder && recorder.state !== "inactive") recorder.stop();
-    screenRecorderRef.current = null;
-
-    if (displayStreamRef.current) {
-      displayStreamRef.current.getTracks().forEach((t) => t.stop());
-      displayStreamRef.current = null;
-    }
-
-    if (micStreamForRecordingRef.current) {
-      micStreamForRecordingRef.current.getTracks().forEach((t) => t.stop());
-      micStreamForRecordingRef.current = null;
-    }
-
-    if (recordingAudioCtxRef.current) {
-      recordingAudioCtxRef.current.close().catch(() => {});
-      recordingAudioCtxRef.current = null;
-    }
-
-    setIsScreenRecording(false);
-  }, []);
+  }, [stopScreenRecording]);
 
   useEffect(() => {
     return () => { stopScreenRecording(); };
@@ -648,7 +648,7 @@ export default function RoomPage() {
       } else {
         setError("Failed to capture screenshot");
       }
-    } catch (err) {
+    } catch {
       setError("Screenshot capture failed");
     }
     setIsCapturing(false);

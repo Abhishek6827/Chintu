@@ -93,6 +93,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                   remarkPlugins={[remarkGfm]}
                   components={{
                     code(props: any) {
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
                       const { children, className, node, ...rest } = props;
                       const match = /language-(\w+)/.exec(className || "");
                       const isBlock = match || String(children).includes("\n");
