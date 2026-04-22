@@ -186,28 +186,43 @@ Rules:
 
       let stream;
       let lastError;
+      const MAX_RETRIES = 3;
+      const RETRY_DELAY_MS = 10000; // 10 seconds
 
-      for (const key of apiKeys) {
-        try {
-          const groq = new Groq({ apiKey: key });
-          stream = await groq.chat.completions.create({
-            model,
-            stream: true,
-            max_tokens: 2048,
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: transcript },
-            ],
-          });
-          break;
-        } catch (error) {
-          lastError = error;
-          if (error?.status === 429) {
-            console.warn("[/api/answer] Rate limit hit, trying next API key...");
-            continue;
-          }
-          throw error;
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        if (attempt > 0) {
+          console.log(`[/api/answer] ⏳ All keys rate-limited. Waiting ${RETRY_DELAY_MS / 1000}s before retry ${attempt + 1}/${MAX_RETRIES}...`);
+          await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
         }
+
+        for (let i = 0; i < apiKeys.length; i++) {
+          const key = apiKeys[i];
+          try {
+            console.log(`[/api/answer] Trying key ${i + 1}/${apiKeys.length} (attempt ${attempt + 1}) (ending: ...${key.slice(-4)})`);
+            const groq = new Groq({ apiKey: key });
+            stream = await groq.chat.completions.create({
+              model,
+              stream: true,
+              max_tokens: 2048,
+              messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: transcript },
+              ],
+            });
+            console.log(`[/api/answer] ✓ Stream created with key ${i + 1}`);
+            break;
+          } catch (error) {
+            lastError = error;
+            console.error(`[/api/answer] ✗ Key ${i + 1} failed — status: ${error?.status}, message: ${error?.message?.slice(0, 100)}`);
+            if (error?.status === 429) {
+              console.warn(`[/api/answer] Rate limit on key ${i + 1}, trying next...`);
+              continue;
+            }
+            throw error;
+          }
+        }
+
+        if (stream) break; // success — exit retry loop
       }
 
       if (!stream) throw lastError;
@@ -343,33 +358,44 @@ Rules:
 
       let stream;
       let lastError;
+      const MAX_RETRIES = 3;
+      const RETRY_DELAY_MS = 10000; // 10 seconds
 
-      for (let i = 0; i < apiKeys.length; i++) {
-        const key = apiKeys[i];
-        try {
-          console.log(`[/api/answer-vision] Trying API key ${i + 1}/${apiKeys.length} (ending: ...${key.slice(-4)})`);
-          const groq = new Groq({ apiKey: key });
-          stream = await groq.chat.completions.create({
-            model,
-            stream: true,
-            max_tokens: 2048,
-            messages: [
-              { role: "system", content: systemPrompt },
-              ...trimmedHistory,              // ← previous messages
-              { role: "user", content: contentParts }, // ← new screenshot message
-            ],
-          });
-          console.log(`[/api/answer-vision] ✓ Stream created successfully with key ${i + 1}`);
-          break;
-        } catch (error) {
-          lastError = error;
-          console.error(`[/api/answer-vision] ✗ Key ${i + 1} failed — status: ${error?.status}, message: ${error?.message?.slice(0, 100)}`);
-          if (error?.status === 429) {
-            console.warn(`[/api/answer-vision] Rate limit on key ${i + 1}, trying next...`);
-            continue;
-          }
-          throw error;
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        if (attempt > 0) {
+          console.log(`[/api/answer-vision] ⏳ All keys rate-limited. Waiting ${RETRY_DELAY_MS / 1000}s before retry ${attempt + 1}/${MAX_RETRIES}...`);
+          await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
         }
+
+        for (let i = 0; i < apiKeys.length; i++) {
+          const key = apiKeys[i];
+          try {
+            console.log(`[/api/answer-vision] Trying key ${i + 1}/${apiKeys.length} (attempt ${attempt + 1}) (ending: ...${key.slice(-4)})`);
+            const groq = new Groq({ apiKey: key });
+            stream = await groq.chat.completions.create({
+              model,
+              stream: true,
+              max_tokens: 2048,
+              messages: [
+                { role: "system", content: systemPrompt },
+                ...trimmedHistory,              // ← previous messages
+                { role: "user", content: contentParts }, // ← new screenshot message
+              ],
+            });
+            console.log(`[/api/answer-vision] ✓ Stream created with key ${i + 1}`);
+            break;
+          } catch (error) {
+            lastError = error;
+            console.error(`[/api/answer-vision] ✗ Key ${i + 1} failed — status: ${error?.status}, message: ${error?.message?.slice(0, 100)}`);
+            if (error?.status === 429) {
+              console.warn(`[/api/answer-vision] Rate limit on key ${i + 1}, trying next...`);
+              continue;
+            }
+            throw error;
+          }
+        }
+
+        if (stream) break; // success — exit retry loop
       }
 
       if (!stream) throw lastError;

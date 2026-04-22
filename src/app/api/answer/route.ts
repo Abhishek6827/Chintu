@@ -186,32 +186,43 @@ Rules:
 
     let stream;
     let lastError;
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 10000; // 10 seconds
 
-    for (let i = 0; i < apiKeys.length; i++) {
-      const apiKey = apiKeys[i];
-      try {
-        console.log(`[/api/answer] Trying API key ${i + 1}/${apiKeys.length} (ending: ...${apiKey.slice(-4)})`);
-        const groq = new Groq({ apiKey });
-        stream = await groq.chat.completions.create({
-          model,
-          stream: true,
-          max_tokens: 2048,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: transcript },
-          ],
-        });
-        console.log(`[/api/answer] ✓ Stream created successfully with key ${i + 1}`);
-        break; // Success, exit loop
-      } catch (error: any) {
-        lastError = error;
-        console.error(`[/api/answer] ✗ Key ${i + 1} failed — status: ${error?.status}, message: ${error?.message?.slice(0, 100)}`);
-        if (error?.status === 429) {
-          console.warn(`[/api/answer] Rate limit on key ${i + 1}, trying next...`);
-          continue; // Try next key
-        }
-        throw error; // Throw non-rate-limit errors immediately
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      if (attempt > 0) {
+        console.log(`[/api/answer] ⏳ All keys rate-limited. Waiting ${RETRY_DELAY_MS / 1000}s before retry ${attempt + 1}/${MAX_RETRIES}...`);
+        await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
       }
+
+      for (let i = 0; i < apiKeys.length; i++) {
+        const apiKey = apiKeys[i];
+        try {
+          console.log(`[/api/answer] Trying key ${i + 1}/${apiKeys.length} (attempt ${attempt + 1}) (ending: ...${apiKey.slice(-4)})`);
+          const groq = new Groq({ apiKey });
+          stream = await groq.chat.completions.create({
+            model,
+            stream: true,
+            max_tokens: 2048,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: transcript },
+            ],
+          });
+          console.log(`[/api/answer] ✓ Stream created with key ${i + 1}`);
+          break; // Success, exit key loop
+        } catch (error: any) {
+          lastError = error;
+          console.error(`[/api/answer] ✗ Key ${i + 1} failed — status: ${error?.status}, message: ${error?.message?.slice(0, 100)}`);
+          if (error?.status === 429) {
+            console.warn(`[/api/answer] Rate limit on key ${i + 1}, trying next...`);
+            continue; // Try next key
+          }
+          throw error; // Throw non-rate-limit errors immediately
+        }
+      }
+
+      if (stream) break; // success — exit retry loop
     }
 
     if (!stream) {
