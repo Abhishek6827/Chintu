@@ -106,8 +106,13 @@ Global Rules:
 
 export async function POST(req: NextRequest) {
   try {
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
+    const apiKeys = [
+      process.env.GROQ_API_KEY,
+      process.env.GROQ_API_KEY_2,
+      process.env.GROQ_API_KEY_3,
+    ].filter(Boolean) as string[];
+
+    if (apiKeys.length === 0) {
       return NextResponse.json({ error: "GROQ_API_KEY not configured" }, { status: 500 });
     }
 
@@ -156,17 +161,35 @@ Rules:
 - Jump straight into the answer
 - Avoid robotic or overly formal phrasing`;
 
-    const groq = new Groq({ apiKey });
+    let stream;
+    let lastError;
 
-    const stream = await groq.chat.completions.create({
-      model,
-      stream: true,
-      max_tokens: 2048,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: transcript },
-      ],
-    });
+    for (const apiKey of apiKeys) {
+      try {
+        const groq = new Groq({ apiKey });
+        stream = await groq.chat.completions.create({
+          model,
+          stream: true,
+          max_tokens: 2048,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: transcript },
+          ],
+        });
+        break; // Success, exit loop
+      } catch (error: any) {
+        lastError = error;
+        if (error?.status === 429) {
+          console.warn("[/api/answer] Rate limit hit, trying next API key...");
+          continue; // Try next key
+        }
+        throw error; // Throw non-rate-limit errors immediately
+      }
+    }
+
+    if (!stream) {
+      throw lastError;
+    }
 
     // ─── Stream with <think> tag filter (DeepSeek R1 internal reasoning) ───
     const encoder = new TextEncoder();

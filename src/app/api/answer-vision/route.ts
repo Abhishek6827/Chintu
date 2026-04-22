@@ -106,8 +106,13 @@ Global Rules:
 
 export async function POST(req: NextRequest) {
   try {
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
+    const apiKeys = [
+      process.env.GROQ_API_KEY,
+      process.env.GROQ_API_KEY_2,
+      process.env.GROQ_API_KEY_3,
+    ].filter(Boolean) as string[];
+
+    if (apiKeys.length === 0) {
       return NextResponse.json({ error: "GROQ_API_KEY not configured" }, { status: 500 });
     }
 
@@ -130,8 +135,6 @@ export async function POST(req: NextRequest) {
     // DeepSeek R1 does not support image inputs.
     // llama-4-scout is the best vision-capable model on Groq.
     const model = "meta-llama/llama-4-scout-17b-16e-instruct";
-
-    const groq = new Groq({ apiKey });
 
     // ─── Build content array with images ──────────────────────
     const contentParts: any[] = [];
@@ -186,15 +189,35 @@ Rules:
 - Jump straight into the answer
 - Avoid overly formal phrasing`;
 
-    const stream = await groq.chat.completions.create({
-      model,
-      stream: true,
-      max_tokens: 2048,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: contentParts },
-      ],
-    });
+    let stream;
+    let lastError;
+
+    for (const apiKey of apiKeys) {
+      try {
+        const groq = new Groq({ apiKey });
+        stream = await groq.chat.completions.create({
+          model,
+          stream: true,
+          max_tokens: 2048,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: contentParts },
+          ],
+        });
+        break; // Success, exit loop
+      } catch (error: any) {
+        lastError = error;
+        if (error?.status === 429) {
+          console.warn("[/api/answer-vision] Rate limit hit, trying next API key...");
+          continue; // Try next key
+        }
+        throw error; // Throw non-rate-limit errors immediately
+      }
+    }
+
+    if (!stream) {
+      throw lastError;
+    }
 
     // ─── Stream with <think> tag filter ───────────────────────
     // llama-4-scout does not emit <think> tags, but filter is kept

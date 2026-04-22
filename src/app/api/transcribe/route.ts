@@ -9,8 +9,13 @@ export async function POST(req: NextRequest) {
   let tempPath: string | null = null;
 
   try {
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
+    const apiKeys = [
+      process.env.GROQ_API_KEY,
+      process.env.GROQ_API_KEY_2,
+      process.env.GROQ_API_KEY_3,
+    ].filter(Boolean) as string[];
+
+    if (apiKeys.length === 0) {
       return NextResponse.json({ error: "GROQ_API_KEY not configured" }, { status: 500 });
     }
 
@@ -30,13 +35,32 @@ export async function POST(req: NextRequest) {
     await writeFile(tempPath, buffer);
 
     // Pass file stream to Groq Whisper
-    const groq = new Groq({ apiKey });
-    const transcription = await groq.audio.transcriptions.create({
-      file: createReadStream(tempPath),
-      model: "whisper-large-v3",
-      language: "en",
-      response_format: "json",
-    });
+    let transcription;
+    let lastError;
+
+    for (const apiKey of apiKeys) {
+      try {
+        const groq = new Groq({ apiKey });
+        transcription = await groq.audio.transcriptions.create({
+          file: createReadStream(tempPath),
+          model: "whisper-large-v3",
+          language: "en",
+          response_format: "json",
+        });
+        break; // Success
+      } catch (error: any) {
+        lastError = error;
+        if (error?.status === 429) {
+          console.warn("[/api/transcribe] Rate limit hit, trying next API key...");
+          continue; // Try next key
+        }
+        throw error; // Throw non-rate-limit errors
+      }
+    }
+
+    if (!transcription) {
+      throw lastError;
+    }
 
     // Clean up temp file
     try { await unlink(tempPath); } catch {}
