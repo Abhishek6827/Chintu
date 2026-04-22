@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
@@ -17,6 +18,17 @@ interface AnswerDisplayProps {
   answers: AnswerEntry[];
   fontSize?: number;
 }
+
+const parseAnswer = (text: string) => {
+  const thinkMatch = text.match(/<think>([\s\S]*?)(?:<\/think>|$)/);
+  if (!thinkMatch) return { think: null, main: text, isThinking: false };
+  
+  const think = thinkMatch[1].trim();
+  const main = text.replace(/<think>[\s\S]*?(?:<\/think>|$)/, "").trim();
+  const isThinking = text.includes('<think>') && !text.includes('</think>');
+  
+  return { think, main, isThinking };
+};
 
 export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -55,14 +67,41 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
           <div className="flex justify-start relative">
             <div className={`chat-bubble max-w-[92%] pb-6 ${entry.isStreaming && idx === 0 ? "chat-bubble-streaming" : ""}`}>
               <div className="markdown-answer text-gray-800 leading-[1.7]" style={{ fontSize: `${fontSize}px` }}>
-                <ReactMarkdown
+                {(() => {
+                  const { think, main, isThinking } = parseAnswer(entry.answer);
+                  return (
+                    <>
+                      {think && (
+                        <div className="mb-3 text-xs bg-gray-50 border border-gray-200 rounded-md overflow-hidden">
+                          <details className="group" open={isThinking}>
+                            <summary className="cursor-pointer px-3 py-2 bg-gray-100 text-gray-500 font-medium hover:bg-gray-200 transition-colors flex items-center gap-2 select-none">
+                              <svg className="w-3.5 h-3.5 text-gray-400 group-open:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              {isThinking ? "Thinking..." : "Thought Process"}
+                              <svg className="w-3.5 h-3.5 ml-auto text-gray-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </summary>
+                            <div className="p-3 text-gray-600 whitespace-pre-wrap border-t border-gray-200 bg-gray-50 font-mono text-[0.7rem] leading-relaxed opacity-80">
+                              {think}
+                            </div>
+                          </details>
+                        </div>
+                      )}
+                      <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
                   components={{
-                    code({ node, inline, className, children, ...props }: any) {
+                    code(props: any) {
+                      const { children, className, node, ...rest } = props;
                       const match = /language-(\w+)/.exec(className || "");
-                      return !inline && match ? (
+                      const isBlock = match || String(children).includes("\n");
+                      const language = match ? match[1] : "javascript";
+
+                      return isBlock ? (
                         <SyntaxHighlighter
-                          style={vscDarkPlus}
-                          language={match[1]}
+                          style={vscDarkPlus as any}
+                          language={language}
                           PreTag="div"
                           customStyle={{
                             margin: "8px 0",
@@ -75,15 +114,15 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                               fontSize: `${Math.max(6, fontSize - 2)}px`,
                             }
                           }}
-                          {...props}
+                          {...rest}
                         >
                           {String(children).replace(/\n$/, "")}
                         </SyntaxHighlighter>
                       ) : (
                         <code
-                          className="bg-gray-100 text-pink-600 px-1.5 py-0.5 rounded font-mono"
+                          className={`${className || ""} bg-gray-100 text-pink-600 px-1.5 py-0.5 rounded font-mono`}
                           style={{ fontSize: `${Math.max(6, fontSize - 1)}px` }}
-                          {...props}
+                          {...rest}
                         >
                           {children}
                         </code>
@@ -91,31 +130,57 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                     },
                     // Style other markdown elements
                     p({ children }) {
-                      return <p className="mb-2 last:mb-0">{children}</p>;
+                      return <p className="mb-3 last:mb-0 leading-relaxed text-gray-700">{children}</p>;
                     },
                     strong({ children }) {
                       return <strong className="font-semibold text-gray-900">{children}</strong>;
                     },
                     ul({ children }) {
-                      return <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>;
+                      return <ul className="list-disc list-outside ml-5 mb-4 space-y-1.5 text-gray-700">{children}</ul>;
                     },
                     ol({ children }) {
-                      return <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>;
+                      return <ol className="list-decimal list-outside ml-5 mb-4 space-y-1.5 text-gray-700">{children}</ol>;
                     },
                     li({ children }) {
-                      // removed hardcoded sizing so it inherits from parent properly
-                      return <li>{children}</li>;
+                      return <li className="pl-1 leading-relaxed">{children}</li>;
                     },
                     hr() {
-                      return <hr className="border-gray-200 my-3" />;
+                      return <hr className="border-gray-200 my-4" />;
+                    },
+                    table({ children }) {
+                      return (
+                        <div className="overflow-x-auto my-4 rounded-lg border border-gray-200/80 shadow-sm bg-white">
+                          <table className="min-w-full text-left border-collapse text-sm">
+                            {children}
+                          </table>
+                        </div>
+                      );
+                    },
+                    thead({ children }) {
+                      return <thead className="bg-indigo-50/80 text-indigo-900 border-b border-gray-200/80">{children}</thead>;
+                    },
+                    tbody({ children }) {
+                      return <tbody className="divide-y divide-gray-100">{children}</tbody>;
+                    },
+                    tr({ children }) {
+                      return <tr className="hover:bg-indigo-50/40 transition-colors">{children}</tr>;
+                    },
+                    th({ children }) {
+                      return <th className="px-4 py-3 font-semibold whitespace-nowrap">{children}</th>;
+                    },
+                    td({ children }) {
+                      return <td className="px-4 py-3 text-gray-700 align-top">{children}</td>;
                     },
                   }}
                 >
-                  {entry.answer}
+                  {main}
                 </ReactMarkdown>
-                {entry.isStreaming && (
+                {entry.isStreaming && !isThinking && (
                   <span className="inline-block w-2 h-4 bg-indigo-500 ml-0.5 animate-pulse rounded-sm" />
                 )}
+                    </>
+                  );
+                })()}
               </div>
               
               {/* Response Footer (Mode Badge + Copy Button) */}

@@ -20,6 +20,8 @@ FIRST — detect the intent from the problem/question:
 1. "Find the bug / What's wrong / Error in this code" → DEBUG mode
 2. "Solve / Write / Implement this" → SOLVE mode
 3. "Optimize / Improve this" → OPTIMIZE mode
+4. "Is this correct / Review this / Any improvements / Is this right?" → DEBUG mode
+   (Treat as DEBUG — read the code deeply, find ALL bugs. If no bugs exist, say "No bugs found" and briefly explain why the code is correct.)
 
 ---
 
@@ -32,26 +34,42 @@ IMPORTANT — Also check for these TypeScript-specific mistakes:
 - Wrong or missing type assertions
 - Accessing properties on possibly undefined types
 - Missing ! on non-null assertions
+- MISSING return statements — a function that returns nothing is a bug
+- MISSING required constructor arguments — empty config objects are a bug
 These are SILENT bugs — TypeScript won't compile, but they are easy to miss.
 
-**Bugs Found:** [List EVERY bug — both runtime AND compile-time, numbered]
-Format: Line [N]: [what is wrong] — [runtime crash / TS compile error / logic error]
-Find as many bugs as actually exist — do not stop at one.
+ALWAYS check for MISSING code — what the code is supposed to do vs what it actually does.
+NEVER flag unused imports/variables as bugs unless they cause an error.
+NEVER respond in multiple modes at once — pick ONE mode and stick to it.
 
-**Root Cause per bug:** [1 line each — WHY it breaks]
+─── RESPONSE FORMAT — follow this EXACT order ───
 
-**Fix:**
+**Summary:**
+| # | Line | Bug | Type |
+|---|------|-----|------|
+| 1 | Line N | [one line — what is wrong] | runtime crash / TS error / logic error |
+| 2 | Line N | [one line — what is wrong] | runtime crash / TS error / logic error |
+
+**Fixed Code:**
 \`\`\`language
+// Show the COMPLETE corrected code
 // On EVERY line you changed: // ← FIXED: [what and why]
 // On EVERY line you added:   // ← ADDED: [what this does]
+// Unchanged lines have no comment
 \`\`\`
 
-Rules for DEBUG mode:
-- NEVER say "the code looks mostly correct" — call out EVERY bug directly
-- NEVER miss TypeScript type-level errors — they are as critical as runtime bugs
-- NEVER give generic suggestions unless that IS the actual bug
-- If multiple bugs exist, number and fix EACH one separately
+**Root Cause:**
+[For each bug in the table — 1 line explaining WHY it breaks at runtime or compile time]
 
+─── Rules ───
+- Summary table MUST come first — always
+- Fixed code MUST come second — always
+- NEVER say "the code looks mostly correct"
+- NEVER miss TypeScript type-level errors
+- NEVER use words like "might", "seems", "appears", "potentially", "could be"
+  — if you found a bug, state it directly; if no bug exists, say "No bugs found"
+- NEVER add analysis or suggestions after the Fixed Code — Root Cause ke baad STOP
+- If no bugs found: say "No bugs found" with 1 line explanation
 ---
 
 If SOLVE mode:
@@ -122,7 +140,7 @@ function createServer(apiKey, staticDir) {
 
       // ─── Coding uses DeepSeek R1 (reasoning model), spoken uses Llama ───
       const model = isCoding
-        ? "deepseek-r1-distill-qwen-32b"  // best for code accuracy & bug detection
+        ? "openai/gpt-oss-120b"  // best for code accuracy & bug detection
         : "llama-3.3-70b-versatile";       // best for natural spoken responses
 
       // ─── Separate system prompts for coding vs spoken ────────
@@ -168,11 +186,41 @@ Rules:
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
+      // ─── Stream with <think> tag filter (DeepSeek R1 internal reasoning) ───
+      let insideThinkTag = false;
+      let buffer = "";
+
       for await (const chunk of stream) {
         const text = chunk.choices[0]?.delta?.content;
-        if (text) {
-          res.write(text);
+        if (!text) continue;
+
+        buffer += text;
+
+        // Entering <think> block — stop writing to client
+        if (buffer.includes("<think>")) {
+          insideThinkTag = true;
+          // Discard everything up to and including <think>
+          buffer = buffer.split("<think>").pop() ?? "";
+          continue;
         }
+
+        // Exiting </think> block — resume writing after the closing tag
+        if (insideThinkTag && buffer.includes("</think>")) {
+          insideThinkTag = false;
+          const afterThink = buffer.split("</think>").pop() ?? "";
+          buffer = afterThink;
+          if (afterThink) res.write(afterThink);
+          continue;
+        }
+
+        // Inside think block — skip silently
+        if (insideThinkTag) {
+          continue;
+        }
+
+        // Normal content — write to client
+        res.write(text);
+        buffer = "";
       }
 
       res.end();
