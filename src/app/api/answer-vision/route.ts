@@ -156,6 +156,7 @@ export async function POST(req: NextRequest) {
       responseLength = "coding",
       additionalContext = "",
       conversationHistory = [],   // ← NEW: previous messages for context
+      selectedModel = "gpt-oss-120b",
     } = await req.json();
 
     if (!images || !Array.isArray(images) || images.length === 0) {
@@ -169,13 +170,15 @@ export async function POST(req: NextRequest) {
     const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.coding;
     const isCoding = responseLength === "coding";
 
-    console.log(`[/api/answer-vision] Mode: ${responseLength} | Images: ${images.length} | History: ${conversationHistory.length} messages`);
+    console.log(`[/api/answer-vision] Mode: ${responseLength} | Images: ${images.length} | Model: ${selectedModel}`);
 
-    const model = "meta-llama/llama-4-scout-17b-16e-instruct";
+    // ====================================================================
+    // STEP 1: Extract Text from Image using Vision Model (llama-4-scout)
+    // ====================================================================
+    const visionModel = "meta-llama/llama-4-scout-17b-16e-instruct";
+    const visionPrompt = "Extract all text, code, and UI elements from these screenshots accurately. Transcribe everything you see. Do not solve the problem or provide answers.";
 
-    // ─── Build new user message with screenshots ─────────────
     const contentParts: any[] = [];
-
     for (const img of images) {
       contentParts.push({
         type: "image_url",
@@ -188,9 +191,87 @@ export async function POST(req: NextRequest) {
     contentParts.push({
       type: "text",
       text: additionalContext
-        ? `Look at the screenshot(s) carefully. The user says: "${additionalContext}". Based on what you see, provide the answer.`
-        : "Look at the screenshot(s) carefully. Read ALL visible text, code, and questions. Then provide a complete answer.",
+        ? `User added context: "${additionalContext}". Please include this in your extraction.`
+        : "Transcribe the screenshot.",
     });
+
+    let extractedText = "";
+    let visionSuccess = false;
+    let lastError: any;
+
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 10000;
+
+    console.log(`[/api/answer-vision] Step 1: Extracting text using ${visionModel}...`);
+
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      if (attempt > 0) await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+
+      for (let i = 0; i < apiKeys.length; i++) {
+        try {
+          const groq = new Groq({ apiKey: apiKeys[i] });
+          const response = await groq.chat.completions.create({
+            model: visionModel,
+            stream: false,
+            max_tokens: 2048,
+            messages: [
+              { role: "system", content: visionPrompt },
+              { role: "user", content: contentParts },
+            ],
+          });
+          extractedText = response.choices[0]?.message?.content || "";
+          visionSuccess = true;
+          break;
+        } catch (err) {
+          lastError = err;
+        }
+      }
+      if (visionSuccess) break;
+    }
+
+    if (!visionSuccess && openRouterKey) {
+      console.log(`[/api/answer-vision] Groq vision failed. Trying OpenRouter...`);
+      try {
+        const openrouter = new OpenAI({
+          baseURL: "https://openrouter.ai/api/v1",
+          apiKey: openRouterKey,
+        });
+        const response = await openrouter.chat.completions.create({
+          model: "meta-llama/llama-4-scout:free",
+          stream: false,
+          max_tokens: 2048,
+          messages: [
+            { role: "system", content: visionPrompt },
+            { role: "user", content: contentParts },
+          ],
+        });
+        extractedText = response.choices[0]?.message?.content || "";
+        visionSuccess = true;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    if (!visionSuccess) {
+      throw new Error("Vision extraction failed: " + (lastError?.message || "Unknown error"));
+    }
+
+    console.log(`[/api/answer-vision] ✓ Step 1 Complete. Extracted ${extractedText.length} characters.`);
+
+    // ====================================================================
+    // STEP 2: Generate Final Answer using Selected Model
+    // ====================================================================
+    const MODEL_MAP: Record<string, { groq: string; openrouter: string }> = {
+      "gpt-oss-120b": { groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
+      "qwen3-coder-480b": { groq: "qwen/qwen3-coder-480b", openrouter: "qwen/qwen3-coder-480b" },
+      "deepseek-r1": { groq: "deepseek-r1-distill-llama-70b", openrouter: "deepseek/deepseek-r1:free" },
+      "nemotron-3-120b": { groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
+      "llama-3.3-nemotron-49b": { groq: "nvidia/llama-3.3-nemotron-super-49b-v1", openrouter: "nvidia/llama-3.3-nemotron-super-49b-v1" },
+    };
+
+    const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
+    const groqModel = modelConfig.groq;
+    const openrouterModel = modelConfig.openrouter;
 
     const systemPrompt = isCoding
       ? `You are an expert programmer helping a candidate during a technical interview.
@@ -200,109 +281,82 @@ The candidate is interviewing for this role:
 ${jobDescription}
 ---
 
-The candidate will share screenshot(s) of problems they see on screen.
-Read all visible text and code from the screenshots carefully.
-If multiple screenshots show the same problem, combine context from all of them.
-You have access to previous screenshots and answers in the conversation history — use them for context.
+${lengthInstruction}
 
-${lengthInstruction}`
-
-      : `You are generating spoken responses for an interviewee. The candidate is interviewing for:
+You have access to previous questions and answers in the conversation history — use them for context.`
+      : `You are generating spoken responses for an interviewee. The candidate is interviewing for a role with the following job description:
 
 ---
 ${jobDescription}
 ---
 
-The candidate will share screenshot(s) of questions they see on screen.
-Read the question from the screenshot and write the EXACT words they should speak in response.
-Write in the first person ("I"). Sound natural and conversational — never robotic.
-NEVER use bullet points, numbered lists, bold text, or headers.
-You have access to previous screenshots and answers in the conversation history — use them for context.
+Write the EXACT words they should speak in response. Write in the first person ("I").
+CRITICAL: Sound like a human speaking naturally — conversational, thoughtful, and unscripted.
+NEVER use bullet points, numbered lists, bold text, or headers. The candidate will be reading this aloud.
+You have access to previous questions and answers in the conversation history — use them for context.
 
 ${lengthInstruction}
 
-${images && images.length > 1
-        ? `Note: The candidate has shared ${images.length} screenshots. Treat them as parts of one task — connect context across all of them.`
-        : ""
-      }
-
 Rules:
 - Be technically accurate
+- Do NOT repeat the question back
 - Jump straight into the answer
-- Avoid overly formal phrasing`;
+- Avoid robotic or overly formal phrasing`;
 
-    // ─── Keep last 6 history messages to avoid token overflow ─
+    const finalTranscript = `[Screenshot Transcription]:\n${extractedText}\n\n[User Context]: ${additionalContext || "None"}`;
     const trimmedHistory = conversationHistory.slice(-10);
 
     let stream: any;
-    let lastError: any;
-    const MAX_RETRIES = 3;
-    const RETRY_DELAY_MS = 10000; // 10 seconds
+    let finalError: any;
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      if (attempt > 0) {
-        console.log(`[/api/answer-vision] ⏳ All keys rate-limited. Waiting ${RETRY_DELAY_MS / 1000}s before retry ${attempt + 1}/${MAX_RETRIES}...`);
-        await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
-      }
+      if (attempt > 0) await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
 
       for (let i = 0; i < apiKeys.length; i++) {
-        const apiKey = apiKeys[i];
         try {
-          console.log(`[/api/answer-vision] Trying key ${i + 1}/${apiKeys.length} (attempt ${attempt + 1}) (ending: ...${apiKey.slice(-4)})`);
-          const groq = new Groq({ apiKey });
+          console.log(`[/api/answer-vision] Step 2: Trying key ${i + 1} with ${groqModel}...`);
+          const groq = new Groq({ apiKey: apiKeys[i] });
           stream = await groq.chat.completions.create({
-            model,
+            model: groqModel,
             stream: true,
             max_tokens: 2048,
             messages: [
               { role: "system", content: systemPrompt },
               ...trimmedHistory,
-              { role: "user", content: contentParts },
+              { role: "user", content: finalTranscript },
             ],
           });
-          console.log(`[/api/answer-vision] ✓ Stream created with key ${i + 1}`);
           break;
-        } catch (error: any) {
-          lastError = error;
-          console.error(`[/api/answer-vision] ✗ Key ${i + 1} failed — status: ${error?.status}, message: ${error?.message?.slice(0, 100)}`);
-          if (error?.status === 429) {
-            console.warn(`[/api/answer-vision] Rate limit on key ${i + 1}, trying next...`);
-            continue;
-          }
-          throw error;
+        } catch (err) {
+          finalError = err;
         }
       }
-
-      if (stream) break; // success — exit retry loop
+      if (stream) break;
     }
 
-    if (!stream) {
-      // ─── OpenRouter fallback ────────────────────────────────
-      if (openRouterKey) {
-        console.log(`[/api/answer-vision] 🔄 All Groq keys failed. Trying OpenRouter...`);
-        try {
-          const openrouter = new OpenAI({
-            baseURL: "https://openrouter.ai/api/v1",
-            apiKey: openRouterKey,
-          });
-          stream = await openrouter.chat.completions.create({
-            model: "deepseek/deepseek-r1:free",
-            stream: true,
-            max_tokens: 2048,
-            messages: [
-              { role: "system", content: systemPrompt },
-              ...trimmedHistory,
-              { role: "user", content: contentParts },
-            ],
-          });
-          console.log(`[/api/answer-vision] ✓ OpenRouter stream created`);
-        } catch (orErr: any) {
-          console.error(`[/api/answer-vision] ✗ OpenRouter also failed:`, orErr?.message?.slice(0, 100));
-        }
+    if (!stream && openRouterKey) {
+      console.log(`[/api/answer-vision] Step 2: Groq failed. Trying OpenRouter with ${openrouterModel}...`);
+      try {
+        const openrouter = new OpenAI({
+          baseURL: "https://openrouter.ai/api/v1",
+          apiKey: openRouterKey,
+        });
+        stream = await openrouter.chat.completions.create({
+          model: openrouterModel,
+          stream: true,
+          max_tokens: 2048,
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...trimmedHistory,
+            { role: "user", content: finalTranscript },
+          ],
+        });
+      } catch (err) {
+        finalError = err;
       }
     }
 
-    if (!stream) throw lastError;
+    if (!stream) throw finalError || new Error("All API keys failed for selected model.");
 
     // ─── Stream with <think> tag filter ───────────────────────
     const encoder = new TextEncoder();

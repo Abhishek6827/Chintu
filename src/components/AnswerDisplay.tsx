@@ -220,6 +220,14 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                     {entry.model}
                   </span>
                 )}
+                {entry.timeTaken !== undefined && (
+                  <span className="text-[0.55rem] font-medium tracking-wide text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100/50 opacity-70 flex items-center gap-0.5">
+                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {entry.timeTaken.toFixed(1)}s
+                  </span>
+                )}
               </div>
             </div>
           </div>

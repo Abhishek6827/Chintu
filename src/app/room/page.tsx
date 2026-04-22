@@ -12,6 +12,8 @@ interface AnswerEntry {
   isStreaming: boolean;
   mode?: string;
   model?: string;
+  startTime?: number;
+  timeTaken?: number;
 }
 
 interface SpeechRecognitionEvent extends Event {
@@ -26,7 +28,8 @@ const MODELS = [
   { key: "gpt-oss-120b", name: "GPT-OSS 120B" },
   { key: "qwen3-coder-480b", name: "Qwen3 Coder 480B" },
   { key: "deepseek-r1", name: "DeepSeek R1" },
-  { key: "nemotron-super", name: "Nemotron Super" },
+  { key: "nemotron-3-120b", name: "Nemotron 3 (120B)" },
+  { key: "llama-3.3-nemotron-49b", name: "Llama 3.3 Nemotron (49B)" },
 ] as const;
 
 type ModelKey = typeof MODELS[number]["key"];
@@ -508,8 +511,9 @@ export default function RoomPage() {
 
     const fullTranscript = transcript + aiContext;
 
+    const startTime = Date.now();
     const modelName = MODELS.find(m => m.key === selectedModelRef.current)?.name || selectedModelRef.current;
-    setAnswers((prev) => [...prev, { id: entryId, question: transcript, answer: "", isStreaming: true, mode: responseLengthRef.current, model: modelName }]);
+    setAnswers((prev) => [...prev, { id: entryId, question: transcript, answer: "", isStreaming: true, mode: responseLengthRef.current, model: modelName, startTime }]);
     setAiSpeechBubbles([]);
 
     const historyToSend = [...chatConversationHistory];
@@ -539,7 +543,7 @@ export default function RoomPage() {
         fullResponse += chunk;
         setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: a.answer + chunk } : a));
       }
-      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, isStreaming: false } : a));
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, isStreaming: false, timeTaken: (Date.now() - startTime) / 1000 } : a));
 
       // ─── Save this exchange to chat history ──────────────
       setChatConversationHistory((prev) => {
@@ -575,8 +579,9 @@ export default function RoomPage() {
 
     const fullTranscript = textToUse + aiContext;
 
+    const startTime = Date.now();
     const modelName = MODELS.find(m => m.key === selectedModelRef.current)?.name || selectedModelRef.current;
-    setAnswers((prev) => [...prev, { id: entryId, question: textToUse, answer: "", isStreaming: true, mode: responseLengthRef.current, model: modelName }]);
+    setAnswers((prev) => [...prev, { id: entryId, question: textToUse, answer: "", isStreaming: true, mode: responseLengthRef.current, model: modelName, startTime }]);
     setAiSpeechBubbles([]);
 
     const historyToSend = [...chatConversationHistory];
@@ -606,7 +611,7 @@ export default function RoomPage() {
         fullResponse += chunk;
         setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: a.answer + chunk } : a));
       }
-      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, isStreaming: false } : a));
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, isStreaming: false, timeTaken: (Date.now() - startTime) / 1000 } : a));
 
       // ─── Save this exchange to chat history ──────────────
       setChatConversationHistory((prev) => {
@@ -726,7 +731,9 @@ export default function RoomPage() {
     const questionText = `📸 Screenshot${capturedScreenshots.length > 1 ? "s" : ""} (${capturedScreenshots.length})`;
     const contextText = inputText.trim();
 
-    setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true, mode: responseLengthRef.current, model: "Llama 4 Scout (Vision)" }]);
+    const startTime = Date.now();
+    const modelName = MODELS.find(m => m.key === selectedModelRef.current)?.name || selectedModelRef.current;
+    setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true, mode: responseLengthRef.current, model: `Scout + ${modelName}`, startTime }]);
 
     // ─── Snapshot current screenshots & context before clearing ─
     const screenshotsToSend = [...capturedScreenshots];
@@ -741,7 +748,8 @@ export default function RoomPage() {
           jobDescription,
           responseLength: responseLengthRef.current,
           additionalContext: contextText,
-          conversationHistory: historyToSend,  // ← send history for context
+          conversationHistory: historyToSend,
+          selectedModel: selectedModelRef.current,
         }),
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Vision failed"); }
@@ -759,7 +767,7 @@ export default function RoomPage() {
         setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: a.answer + chunk } : a));
       }
 
-      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, isStreaming: false } : a));
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, isStreaming: false, timeTaken: (Date.now() - startTime) / 1000 } : a));
 
       // ─── Save this exchange to vision history ──────────────
       // Keep last 6 messages (3 exchanges) to avoid token overflow
