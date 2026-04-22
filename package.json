@@ -10,6 +10,7 @@
     "lint": "next lint",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:build": "next build && electron-builder --win --publish never",
+    "electron:publish": "next build && electron-builder --win -p always",
     "electron:preview": "next build && electron . --preview"
   },
   "dependencies": {
@@ -25,8 +26,7 @@
     "react-dom": "^18",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^16.1.1",
-    "remark-gfm": "^4.0.1",
-    "electron-updater": "^6.3.9"
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -54,7 +54,9 @@
       "electron/**/*",
       "out/**/*",
       "node_modules/**/*",
-      "package.json"
+      "package.json",
+      ".env",
+      ".env.local"
     ],
     "win": {
       "target": "nsis",
@@ -69,7 +71,8 @@
     "publish": {
       "provider": "github",
       "owner": "Abhishek6827",
-      "repo": "Chintu"
+      "repo": "Chintu",
+      "private": true
     },
     "forceCodeSigning": false
   }
