@@ -330,23 +330,10 @@ app.whenReady().then(async () => {
 
 // ─── Auto-Updater Setup ───────────────────────────────────
 function setupAutoUpdater() {
-  try {
-    // Check for token in config.json first
-    const configPath = path.join(__dirname, "config.json");
-    if (require("fs").existsSync(configPath)) {
-      const config = JSON.parse(require("fs").readFileSync(configPath, "utf-8"));
-      if (config.GH_TOKEN) {
-        process.env.GH_TOKEN = config.GH_TOKEN;
-      }
-    }
-    
-    // Fallback: If GH_PAT exists in env (from .env.local), use it as GH_TOKEN
-    if (!process.env.GH_TOKEN && process.env.GH_PAT) {
-      process.env.GH_TOKEN = process.env.GH_PAT;
-      console.log("[AutoUpdater] Using GH_PAT from environment as GH_TOKEN");
-    }
-  } catch (err) {
-    console.error("[AutoUpdater] Config load error:", err.message);
+  // Map GH_PAT from .env.local to GH_TOKEN for electron-updater
+  if (process.env.GH_PAT) {
+    process.env.GH_TOKEN = process.env.GH_PAT;
+    console.log("[AutoUpdater] Using GH_PAT from environment");
   }
 
   // Enable logging for debugging
