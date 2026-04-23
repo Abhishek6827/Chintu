@@ -103,7 +103,8 @@ export default function RoomPage() {
   const [liveTranscript, setLiveTranscript] = useState("");
   const [responseLength, setResponseLength] = useState<ResponseLength>("balanced");
   const [showSettings, setShowSettings] = useState(false);
-  const [isWindowHidden, setIsWindowHidden] = useState(false);
+  const [isWindowHidden, setIsWindowHidden] = useState(true);
+  const [showUnhidePrompt, setShowUnhidePrompt] = useState(false);
   const [inputText, setInputText] = useState("");
   const [mounted, setMounted] = useState(false);
   const [windowOpacity, setWindowOpacity] = useState(1);
@@ -883,6 +884,18 @@ export default function RoomPage() {
 
   const handleHide = async () => {
     if (isElectron) {
+      if (isWindowHidden) {
+        setShowUnhidePrompt(true);
+      } else {
+        const hidden = await (window as any).electronAPI.hideToggle();
+        setIsWindowHidden(hidden);
+      }
+    }
+  };
+
+  const confirmUnhide = async () => {
+    setShowUnhidePrompt(false);
+    if (isElectron) {
       const hidden = await (window as any).electronAPI.hideToggle();
       setIsWindowHidden(hidden);
     }
@@ -898,7 +911,7 @@ export default function RoomPage() {
   }
 
   return (
-    <div className="app-container">
+    <div className="app-container" style={{ '--app-opacity': windowOpacity } as React.CSSProperties}>
       {/* Draggable title bar */}
       <div className="drag-region flex items-center justify-between px-2 sm:px-4 h-10 sm:h-12 shrink-0">
         <div className="flex items-center gap-2 no-drag">
@@ -919,14 +932,7 @@ export default function RoomPage() {
               >
                 ─
               </button>
-              <button 
-                onClick={handleHide} 
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                </svg>
-              </button>
+
               <button 
                 onClick={handleClose} 
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs"
@@ -1096,7 +1102,7 @@ export default function RoomPage() {
       </div>
 
       {/* Bottom toolbar */}
-      <div ref={controlsRef} className="toolbar px-2 sm:px-4 py-3 flex flex-wrap items-center justify-center gap-2 sm:justify-between shrink-0">
+      <div ref={controlsRef} className="toolbar px-2 sm:px-4 py-3 flex flex-wrap items-center justify-center gap-4 sm:gap-6 shrink-0">
         <button
           onClick={() => setShowSettings(true)}
           className="no-drag w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/70"
@@ -1190,62 +1196,34 @@ export default function RoomPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
             </svg>
           </button>
-        </div>
 
-        {/* Hide/Show toggle */}
-        <button
-          onClick={handleHide}
-          className={`
-            no-drag w-10 h-10 rounded-full flex items-center justify-center
-            ${isWindowHidden
-              ? "bg-emerald-500/30 text-emerald-300 ring-1 ring-emerald-500/50"
-              : "bg-white/10 text-white/70"
-            }
-            transition-all
-          `}
-        >
-          {isWindowHidden ? (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-            </svg>
-          )}
-        </button>
+          {/* Hide/Show toggle - Re-centered */}
+          <button
+            onClick={handleHide}
+            className={`
+              no-drag w-10 h-10 rounded-full flex items-center justify-center
+              ${isWindowHidden
+                ? "bg-emerald-500/30 text-emerald-300 ring-1 ring-emerald-500/50"
+                : "bg-white/10 text-white/70"
+              }
+              transition-all hover:scale-110 active:scale-95
+            `}
+          >
+            {isWindowHidden ? (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Floating side controls */}
-      {isElectron && (
-        <div className="floating-side-controls no-drag">
-          <div className="side-control-group">
-            <span className="side-control-label">🔍</span>
-            <input
-              type="range"
-              min="10"
-              max="100"
-              value={Math.round(windowOpacity * 100)}
-              onChange={(e) => handleOpacityChange(parseInt(e.target.value) / 100)}
-              className="side-slider"
-            />
-            <span className="side-control-value">{Math.round(windowOpacity * 100)}</span>
-          </div>
-          <div className="side-control-group">
-            <span className="side-control-label">Aa</span>
-            <input
-              type="range"
-              min="6"
-              max="22"
-              value={fontSize}
-              onChange={(e) => setFontSize(parseInt(e.target.value))}
-              className="side-slider"
-            />
-            <span className="side-control-value">{fontSize}</span>
-          </div>
-        </div>
-      )}
+
 
       {/* Settings Modal */}
       {showSettings && (
@@ -1384,6 +1362,67 @@ export default function RoomPage() {
           </div>
         </div>
       )}
+      {/* Unhide Prompt (Shocking/Animated) */}
+      {showUnhidePrompt && (
+        <div className="absolute inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-sm bg-black/40 animate-in fade-in duration-300">
+          <div className="unhide-prompt-card w-full max-w-xs bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 p-[2px] rounded-3xl shadow-[0_0_50px_rgba(249,115,22,0.4)] animate-in zoom-in-95 duration-300">
+            <div className="bg-gray-900 rounded-[22px] p-6 text-center">
+              <div className="w-16 h-16 bg-orange-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <svg className="w-10 h-10 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-black text-white mb-2 tracking-tight uppercase">Exit Ghost Mode?</h3>
+              <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                App will become <span className="text-orange-400 font-bold uppercase underline">visible</span> to screen recording tools. Proceed with caution!
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={confirmUnhide}
+                  className="w-full py-3 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-orange-500/20"
+                >
+                  YES, UNHIDE IT
+                </button>
+                <button
+                  onClick={() => setShowUnhidePrompt(false)}
+                  className="w-full py-3 bg-white/5 hover:bg-white/10 text-white/60 font-medium rounded-xl transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    {/* Floating side controls */}
+    {isElectron && (
+      <div className="floating-side-controls no-drag">
+        <div className="side-control-group">
+          <span className="side-control-label">🔍</span>
+          <input
+            type="range"
+            min="10"
+            max="100"
+            value={Math.round(windowOpacity * 100)}
+            onChange={(e) => handleOpacityChange(parseInt(e.target.value) / 100)}
+            className="side-slider"
+          />
+          <span className="side-control-value">{Math.round(windowOpacity * 100)}</span>
+        </div>
+        <div className="side-control-group">
+          <span className="side-control-label">Aa</span>
+          <input
+            type="range"
+            min="6"
+            max="22"
+            value={fontSize}
+            onChange={(e) => setFontSize(parseInt(e.target.value))}
+            className="side-slider"
+          />
+          <span className="side-control-value">{fontSize}</span>
+        </div>
+      </div>
+    )}
     </div>
   );
 }

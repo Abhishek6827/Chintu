@@ -81,7 +81,6 @@ function hideWindow() {
   if (!mainWindow) return;
   isHidden = true;
   // Ghost Mode: Visible to user, but hidden from taskbar and capture
-  mainWindow.setOpacity(userOpacity);
   mainWindow.setIgnoreMouseEvents(false);
   mainWindow.setSkipTaskbar(true);
   mainWindow.setContentProtection(true);
@@ -95,13 +94,19 @@ function showWindow() {
   isHidden = false;
   // Normal Mode: Visible to everyone and in taskbar
   mainWindow.setContentProtection(false);
-  mainWindow.setOpacity(userOpacity);
   mainWindow.setIgnoreMouseEvents(false);
   // Ensure window is actually rendered
   mainWindow.show();
   mainWindow.setSkipTaskbar(false);
   mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
   mainWindow.webContents.send("window-hidden-change", false);
+}
+
+// ─── Helper: Bring window to front WITHOUT changing hidden state ─
+function bringToFront() {
+  if (!mainWindow) return;
+  mainWindow.show();
+  mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
 }
 
 // ─── Create main window ───────────────────────────────────
@@ -189,12 +194,8 @@ function createTray() {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: "Show/Hide",
-      click: () => {
-        if (!mainWindow) return;
-        if (!isHidden) hideWindow();
-        else showWindow();
-      },
+      label: "Bring to Front",
+      click: () => bringToFront(),
     },
     { type: "separator" },
     {
@@ -209,11 +210,8 @@ function createTray() {
   tray.setToolTip("Chintu");
   tray.setContextMenu(contextMenu);
 
-  tray.on("click", () => {
-    if (!mainWindow) return;
-    if (!isHidden) hideWindow();
-    else showWindow();
-  });
+  // Tray click only brings window to front — NEVER changes hidden state
+  tray.on("click", () => bringToFront());
 }
 
 // ─── IPC handlers ────────────────────────────────────────
@@ -252,8 +250,8 @@ ipcMain.handle("capture-screenshot", async () => {
     });
 
     if (wasVisible) {
-      // Restore opacity; keep content protection OFF (user is in visible state)
-      mainWindow.setOpacity(userOpacity);
+      // Restore window to fully opaque (CSS handles visual opacity)
+      mainWindow.setOpacity(1);
       // Note: content protection stays OFF because window is in "shown" state
     }
 
@@ -263,7 +261,7 @@ ipcMain.handle("capture-screenshot", async () => {
     return `data:image/png;base64,${screenshot.toString("base64")}`;
   } catch (err) {
     console.error("[Screenshot] Error:", err);
-    if (mainWindow) mainWindow.setOpacity(userOpacity);
+    if (mainWindow) mainWindow.setOpacity(1);
     return null;
   }
 });
@@ -283,11 +281,10 @@ ipcMain.on("set-focusable", (event, b) => {
 });
 
 // ─── Opacity control ──────────────────────────────────────
+// Opacity is handled via CSS in the renderer, not window-level.
+// This just stores the value so it can be retrieved on page reload.
 ipcMain.on("set-opacity", (event, opacity) => {
   userOpacity = Math.max(0.1, Math.min(1, opacity));
-  if (mainWindow && !isHidden) {
-    mainWindow.setOpacity(userOpacity);
-  }
 });
 
 ipcMain.handle("get-opacity", () => userOpacity);

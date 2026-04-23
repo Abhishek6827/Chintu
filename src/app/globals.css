@@ -74,7 +74,12 @@ body {
 
 /* Main app container */
 .app-container {
-  background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  --app-opacity: 1;
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, var(--app-opacity)),
+    rgba(118, 75, 162, var(--app-opacity))
+  );
   border-radius: 20px;
   overflow: hidden;
   height: 100vh;
@@ -127,7 +132,7 @@ body {
 
 /* Toolbar */
 .toolbar {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, calc(0.15 * var(--app-opacity, 1)));
   backdrop-filter: blur(20px);
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
