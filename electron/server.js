@@ -146,6 +146,7 @@ function createServer(apiKeys, openRouterKey, staticDir) {
       const {
         transcript,
         jobDescription,
+        aboutYou = "",
         responseLength = "small",
         conversationHistory = [],
         selectedModel = "gpt-oss-120b",
@@ -173,6 +174,10 @@ function createServer(apiKeys, openRouterKey, staticDir) {
 
       console.log(`[/api/answer] Mode: ${responseLength} | Model: ${selectedModel} (groq: ${groqModel}) | History: ${conversationHistory.length} messages`);
 
+      const aboutYouBlock = aboutYou
+        ? `\n\nHere is the candidate's background — use this to personalize your answers with their real experience, projects, and skills. Speak as if YOU are this person:\n---\n${aboutYou}\n---`
+        : "";
+
       const systemPrompt = isCoding
         ? `You are an expert programmer helping a candidate during a technical interview.
 The candidate is interviewing for this role:
@@ -180,6 +185,7 @@ The candidate is interviewing for this role:
 ---
 ${jobDescription}
 ---
+${aboutYouBlock}
 
 ${lengthInstruction}
 
@@ -189,6 +195,7 @@ You have access to previous questions and answers in the conversation history �
 ---
 ${jobDescription}
 ---
+${aboutYouBlock}
 
 Write the EXACT words they should speak in response. Write in the first person ("I").
 CRITICAL: Sound like a human speaking naturally — conversational, thoughtful, and unscripted.
@@ -201,7 +208,8 @@ Rules:
 - Be technically accurate
 - Do NOT repeat the question back
 - Jump straight into the answer
-- Avoid robotic or overly formal phrasing`;
+- Avoid robotic or overly formal phrasing
+- When relevant, naturally reference the candidate's real projects, experience, and skills from their background`;
 
       // ─── Keep last 10 history messages to avoid token overflow ─
       const trimmedHistory = conversationHistory.slice(-10);
@@ -356,9 +364,10 @@ Rules:
       const {
         images,
         jobDescription,
+        aboutYou = "",
         responseLength = "coding",
         additionalContext = "",
-        conversationHistory = [],   // ← NEW: previous messages for context
+        conversationHistory = [],
         selectedModel = "gpt-oss-120b",
       } = req.body;
 
@@ -475,6 +484,10 @@ Rules:
       const groqModel = modelConfig.groq;
       const openrouterModel = modelConfig.openrouter;
 
+      const aboutYouBlock = aboutYou
+        ? `\n\nHere is the candidate's background — use this to personalize your answers with their real experience, projects, and skills. Speak as if YOU are this person:\n---\n${aboutYou}\n---`
+        : "";
+
       const systemPrompt = isCoding
         ? `You are an expert programmer helping a candidate during a technical interview.
 The candidate is interviewing for this role:
@@ -482,6 +495,7 @@ The candidate is interviewing for this role:
 ---
 ${jobDescription}
 ---
+${aboutYouBlock}
 
 ${lengthInstruction}
 
@@ -491,6 +505,7 @@ You have access to previous questions and answers in the conversation history �
 ---
 ${jobDescription}
 ---
+${aboutYouBlock}
 
 Write the EXACT words they should speak in response. Write in the first person ("I").
 CRITICAL: Sound like a human speaking naturally — conversational, thoughtful, and unscripted.
@@ -503,7 +518,8 @@ Rules:
 - Be technically accurate
 - Do NOT repeat the question back
 - Jump straight into the answer
-- Avoid robotic or overly formal phrasing`;
+- Avoid robotic or overly formal phrasing
+- When relevant, naturally reference the candidate's real projects, experience, and skills from their background`;
 
       const finalTranscript = `[Screenshot Transcription]:\n${extractedText}\n\n[User Context]: ${additionalContext || "None"}`;
       const trimmedHistory = conversationHistory.slice(-10);
@@ -684,6 +700,100 @@ Rules:
       }
       const message = error instanceof Error ? error.message : "Transcription failed";
       res.status(500).json({ error: message });
+    }
+  });
+
+  // ─── Refine Profile ────────────────────────────────────────
+  app.post("/api/refine-profile", async (req, res) => {
+    try {
+      const { rawText } = req.body;
+      if (!rawText || !rawText.trim()) {
+        return res.status(400).json({ error: "No text provided" });
+      }
+
+      const systemPrompt = `You are an expert resume/profile analyst. The user will paste raw text — likely from a resume, LinkedIn, or a rough self-description.
+
+Your job is to extract and organize this into a clean, structured JSON profile. Be thorough — cover everything.
+
+Return ONLY valid JSON (no markdown, no code fences, no explanation) with this exact structure:
+
+{
+  "name": "Full Name",
+  "title": "Current Role / Title",
+  "summary": "A 2-3 sentence professional summary in first person",
+  "experience": [{"role": "Job Title", "company": "Company", "duration": "Jan 2023 - Present", "highlights": ["achievement"]}],
+  "projects": [{"name": "Project", "description": "What it does", "tech": ["React"]}],
+  "skills": {"languages": [], "frameworks": [], "tools": [], "other": []},
+  "education": [{"degree": "B.Tech CS", "institution": "College", "year": "2020-2024"}],
+  "certifications": [],
+  "achievements": []
+}
+
+Rules: Extract EVERYTHING. Return ONLY the JSON object, nothing else.`;
+
+      let response = null;
+
+      // Try Groq keys
+      for (let i = 0; i < apiKeys.length; i++) {
+        try {
+          const groq = new Groq({ apiKey: apiKeys[i] });
+          response = await groq.chat.completions.create({
+            model: "qwen/qwen3-32b",
+            stream: false,
+            max_tokens: 4096,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: `Parse and structure this:\n\n---\n${rawText}\n---` },
+            ],
+          });
+          console.log(`[/api/refine-profile] ✓ Success with Groq key ${i + 1}`);
+          break;
+        } catch (err) {
+          console.error(`[/api/refine-profile] ✗ Groq key ${i + 1} failed:`, err?.message?.slice(0, 100));
+          if (err?.status !== 429) break;
+        }
+      }
+
+      // Fallback to OpenRouter
+      if (!response && openRouterKey) {
+        try {
+          const openrouter = new OpenAI({ baseURL: "https://openrouter.ai/api/v1", apiKey: openRouterKey });
+          response = await openrouter.chat.completions.create({
+            model: "qwen/qwen3-32b",
+            stream: false,
+            max_tokens: 4096,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: `Parse and structure this:\n\n---\n${rawText}\n---` },
+            ],
+          });
+          console.log(`[/api/refine-profile] ✓ Success with OpenRouter`);
+        } catch (err) {
+          console.error(`[/api/refine-profile] ✗ OpenRouter failed:`, err?.message?.slice(0, 100));
+        }
+      }
+
+      if (!response) return res.status(500).json({ error: "All API keys failed" });
+
+      let raw = response.choices[0]?.message?.content || "";
+      raw = raw.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+
+      // Strip markdown fences if present
+      const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (fenceMatch) raw = fenceMatch[1].trim();
+
+      try {
+        return res.json({ profile: JSON.parse(raw) });
+      } catch {
+        const objMatch = raw.match(/\{[\s\S]*\}/);
+        if (objMatch) {
+          try { return res.json({ profile: JSON.parse(objMatch[0]) }); } catch {}
+        }
+        return res.status(500).json({ error: "Failed to parse AI response", raw });
+      }
+    } catch (error) {
+      console.error("[/api/refine-profile] Error:", error);
+      res.status(500).json({ error: error.message || "Profile refinement failed" });
     }
   });
 
