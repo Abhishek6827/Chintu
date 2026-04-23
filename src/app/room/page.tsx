@@ -921,11 +921,6 @@ export default function RoomPage() {
     }
   };
 
-  const handleClose = () => {
-    if (isElectron) (window as any).electronAPI.close();
-    else router.push("/");
-  };
-
   if (!mounted) {
     return <div className="app-container" />;
   }
