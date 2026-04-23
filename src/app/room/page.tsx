@@ -934,7 +934,21 @@ export default function RoomPage() {
           <span className="text-white/90 text-sm font-bold">✦ Chintu</span>
         </div>
         <div className="flex items-center gap-1 no-drag">
-          {/* Profile button */}
+          {isScreenRecording && (
+            <div className="system-audio-badge mr-2">
+              <span className="system-audio-dot" style={{ background: "#f87171" }} />
+              <span className="text-[0.625rem] text-red-300 font-medium">REC</span>
+            </div>
+          )}
+          {isElectron && (
+            <button 
+              onClick={() => (window as any).electronAPI.minimize()} 
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs"
+            >
+              ─
+            </button>
+          )}
+          {/* Profile / Account button */}
           <button
             onClick={() => setShowProfile(true)}
             className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors ${
@@ -945,29 +959,6 @@ export default function RoomPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
             </svg>
           </button>
-          {isScreenRecording && (
-            <div className="system-audio-badge mr-2">
-              <span className="system-audio-dot" style={{ background: "#f87171" }} />
-              <span className="text-[0.625rem] text-red-300 font-medium">REC</span>
-            </div>
-          )}
-          {isElectron && (
-            <>
-              <button 
-                onClick={() => (window as any).electronAPI.minimize()} 
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs"
-              >
-                ─
-              </button>
-
-              <button 
-                onClick={handleClose} 
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs"
-              >
-                ✕
-              </button>
-            </>
-          )}
         </div>
       </div>
 

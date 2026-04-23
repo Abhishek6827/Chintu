@@ -88,14 +88,13 @@ function hideWindow() {
   mainWindow.webContents.send("window-hidden-change", true);
 }
 
-// ─── Helper: Show window (visible in screen + screenshots) ─
+// ─── Helper: Show window (visible to user, STILL invisible to screen capture) ─
 function showWindow() {
   if (!mainWindow) return;
   isHidden = false;
-  // Normal Mode: Visible to everyone and in taskbar
-  mainWindow.setContentProtection(false);
+  // Normal Mode: Visible to user but ALWAYS protected from screen capture
+  mainWindow.setContentProtection(true);  // NEVER disable — always invisible to screenshare
   mainWindow.setIgnoreMouseEvents(false);
-  // Ensure window is actually rendered
   mainWindow.show();
   mainWindow.setSkipTaskbar(false);
   mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
