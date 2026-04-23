@@ -35,6 +35,14 @@ const MODELS = [
 
 type ModelKey = typeof MODELS[number]["key"];
 
+// ─── Vision models (for screenshot processing) ─────────────
+const VISION_MODELS = [
+  { key: "llama-4-scout", name: "Llama 4 Scout" },
+  { key: "qwen3.6-plus", name: "Qwen3.6 Plus" },
+] as const;
+
+type VisionModelKey = typeof VISION_MODELS[number]["key"];
+
 // ─── Conversation history message type ────────────────────
 interface HistoryMessage {
   role: "user" | "assistant";
@@ -116,6 +124,8 @@ export default function RoomPage() {
   const [spaceMode, setSpaceMode] = useState<"hold" | "toggle">("hold");
   const [selectedModel, setSelectedModel] = useState<ModelKey>("gpt-oss-120b");
   const selectedModelRef = useRef<ModelKey>("gpt-oss-120b");
+  const [selectedVisionModel, setSelectedVisionModel] = useState<VisionModelKey>("llama-4-scout");
+  const selectedVisionModelRef = useRef<VisionModelKey>("llama-4-scout");
 
   // ─── Vision conversation history ──────────────────────────
   // Keeps track of previous screenshot exchanges so the model
@@ -832,6 +842,7 @@ export default function RoomPage() {
           additionalContext: contextText,
           conversationHistory: historyToSend,
           selectedModel: selectedModelRef.current,
+          selectedVisionModel: selectedVisionModelRef.current,
         }),
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Vision failed"); }
@@ -1085,6 +1096,63 @@ export default function RoomPage() {
         </div>
       )}
 
+      {/* Model Selectors Row */}
+      <div className="px-2 sm:px-4 pb-1.5 shrink-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Response Model Selector */}
+          <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
+            <span className="text-[0.5625rem] text-white/40 font-medium uppercase tracking-wider">💬</span>
+            <select
+              value={selectedModel}
+              onChange={(e) => {
+                setSelectedModel(e.target.value as ModelKey);
+                selectedModelRef.current = e.target.value as ModelKey;
+              }}
+              className="bg-transparent text-[0.6875rem] text-white/80 font-medium outline-none cursor-pointer appearance-none pr-3"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23999' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' }}
+            >
+              {MODELS.map(m => (
+                <option key={m.key} value={m.key} className="bg-gray-900 text-white">{m.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Vision Model Selector */}
+          <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
+            <span className="text-[0.5625rem] text-white/40 font-medium uppercase tracking-wider">📸</span>
+            <select
+              value={selectedVisionModel}
+              onChange={(e) => {
+                setSelectedVisionModel(e.target.value as VisionModelKey);
+                selectedVisionModelRef.current = e.target.value as VisionModelKey;
+              }}
+              className="bg-transparent text-[0.6875rem] text-white/80 font-medium outline-none cursor-pointer appearance-none pr-3"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23999' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' }}
+            >
+              {VISION_MODELS.map(m => (
+                <option key={m.key} value={m.key} className="bg-gray-900 text-white">{m.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Response Length Selector */}
+          <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
+            <span className="text-[0.5625rem] text-white/40 font-medium uppercase tracking-wider">📝</span>
+            <select
+              value={responseLength}
+              onChange={(e) => setResponseLength(e.target.value as ResponseLength)}
+              className="bg-transparent text-[0.6875rem] text-white/80 font-medium outline-none cursor-pointer appearance-none pr-3"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23999' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' }}
+            >
+              <option value="small" className="bg-gray-900 text-white">Small</option>
+              <option value="balanced" className="bg-gray-900 text-white">Balanced</option>
+              <option value="detailed" className="bg-gray-900 text-white">Detailed</option>
+              <option value="coding" className="bg-gray-900 text-white">Coding</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Text Input Row */}
       <div className="px-2 sm:px-4 pb-2 shrink-0">
         <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-white/10 transition-all">
@@ -1282,22 +1350,10 @@ export default function RoomPage() {
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <p className="text-sm font-semibold text-gray-700">AI Model</p>
-                  <p className="text-xs text-gray-400">Model used for text responses</p>
+              <p className="text-sm font-semibold text-gray-700">AI Model</p>
+                  <p className="text-xs text-gray-400">Select models from the input area</p>
                 </div>
-                <CustomSelect
-                  value={selectedModel}
-                  onChange={(val) => {
-                    setSelectedModel(val as ModelKey);
-                    selectedModelRef.current = val as ModelKey;
-                  }}
-                  options={MODELS.map(m => ({ key: m.key, name: m.name }))}
-                  className="w-44"
-                />
               </div>
-              <p className="text-[0.6875rem] text-gray-400 leading-relaxed">
-                Vision (screenshots) always uses Llama 4 Scout. This model is for text/coding responses only.
-              </p>
             </div>
 
             <div className="mb-5">
