@@ -96,6 +96,7 @@ const isElectron = typeof window !== "undefined" && !!(window as any).electronAP
 export default function RoomPage() {
   const router = useRouter();
   const [jobDescription, setJobDescription] = useState("");
+  const [aboutYou, setAboutYou] = useState("");
   const [status, setStatus] = useState<"idle" | "recording" | "generating">("idle");
   const [answers, setAnswers] = useState<AnswerEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -205,6 +206,8 @@ export default function RoomPage() {
     const jd = sessionStorage.getItem("jobDescription");
     if (!jd) { router.push("/"); return; }
     setJobDescription(jd);
+    const about = sessionStorage.getItem("aboutYou");
+    if (about) setAboutYou(about);
   }, [router]);
 
   // ─── Fullscreen change listener ─────────────────────────
@@ -576,6 +579,7 @@ export default function RoomPage() {
         body: JSON.stringify({
           transcript: fullTranscript,
           jobDescription,
+          aboutYou,
           responseLength: responseLengthRef.current,
           conversationHistory: historyToSend,
           selectedModel: selectedModelRef.current,
@@ -614,7 +618,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [jobDescription, liveTranscript, aiSpeechBubbles, stopWhisperRecordingAndTranscribe, chatConversationHistory]);
+  }, [jobDescription, aboutYou, liveTranscript, aiSpeechBubbles, stopWhisperRecordingAndTranscribe, chatConversationHistory]);
 
   const handleSendText = useCallback(async () => {
     if (!inputText.trim()) return;
@@ -647,6 +651,7 @@ export default function RoomPage() {
         body: JSON.stringify({
           transcript: fullTranscript,
           jobDescription,
+          aboutYou,
           responseLength: responseLengthRef.current,
           conversationHistory: historyToSend,
           selectedModel: selectedModelRef.current,
@@ -685,7 +690,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [inputText, status, jobDescription, aiSpeechBubbles, chatConversationHistory]);
+  }, [inputText, status, jobDescription, aboutYou, aiSpeechBubbles, chatConversationHistory]);
 
   const startRecordingRef = useRef(startRecording);
   const stopRecordingRef = useRef(stopRecordingAndGenerate);
@@ -809,6 +814,7 @@ export default function RoomPage() {
         body: JSON.stringify({
           images: screenshotsToSend,
           jobDescription,
+          aboutYou,
           responseLength: responseLengthRef.current,
           additionalContext: contextText,
           conversationHistory: historyToSend,
@@ -873,7 +879,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [capturedScreenshots, status, jobDescription, inputText, visionConversationHistory]);
+  }, [capturedScreenshots, status, jobDescription, aboutYou, inputText, visionConversationHistory]);
 
   const handleOpacityChange = (value: number) => {
     setWindowOpacity(value);

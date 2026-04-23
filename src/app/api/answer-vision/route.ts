@@ -154,6 +154,7 @@ export async function POST(req: NextRequest) {
     const {
       images,
       jobDescription,
+      aboutYou = "",
       responseLength = "coding",
       additionalContext = "",
       conversationHistory = [],   // ← NEW: previous messages for context
@@ -274,6 +275,10 @@ export async function POST(req: NextRequest) {
     const groqModel = modelConfig.groq;
     const openrouterModel = modelConfig.openrouter;
 
+    const aboutYouBlock = aboutYou
+      ? `\n\nHere is the candidate's background — use this to personalize your answers with their real experience, projects, and skills. Speak as if YOU are this person:\n---\n${aboutYou}\n---`
+      : "";
+
     const systemPrompt = isCoding
       ? `You are an expert programmer helping a candidate during a technical interview.
 The candidate is interviewing for this role:
@@ -281,6 +286,7 @@ The candidate is interviewing for this role:
 ---
 ${jobDescription}
 ---
+${aboutYouBlock}
 
 ${lengthInstruction}
 
@@ -290,6 +296,7 @@ You have access to previous questions and answers in the conversation history �
 ---
 ${jobDescription}
 ---
+${aboutYouBlock}
 
 Write the EXACT words they should speak in response. Write in the first person ("I").
 CRITICAL: Sound like a human speaking naturally — conversational, thoughtful, and unscripted.
@@ -302,7 +309,8 @@ Rules:
 - Be technically accurate
 - Do NOT repeat the question back
 - Jump straight into the answer
-- Avoid robotic or overly formal phrasing`;
+- Avoid robotic or overly formal phrasing
+- When relevant, naturally reference the candidate's real projects, experience, and skills from their background`;
 
     const finalTranscript = `[Screenshot Transcription]:\n${extractedText}\n\n[User Context]: ${additionalContext || "None"}`;
 

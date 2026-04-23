@@ -146,6 +146,7 @@ export async function POST(req: NextRequest) {
     const {
       transcript,
       jobDescription,
+      aboutYou = "",
       responseLength = "balanced",
       conversationHistory = [],
       selectedModel = "gpt-oss-120b",
@@ -173,6 +174,10 @@ export async function POST(req: NextRequest) {
 
     console.log(`[/api/answer] Mode: ${responseLength} | Model: ${selectedModel} (groq: ${groqModel}) | History: ${conversationHistory.length} messages`);
 
+    const aboutYouBlock = aboutYou
+      ? `\n\nHere is the candidate's background — use this to personalize your answers with their real experience, projects, and skills. Speak as if YOU are this person:\n---\n${aboutYou}\n---`
+      : "";
+
     // ─── Separate system prompts for coding vs spoken responses ───
     const systemPrompt = isCoding
       ? `You are an expert programmer helping a candidate during a technical interview.
@@ -181,6 +186,7 @@ The candidate is interviewing for this role:
 ---
 ${jobDescription}
 ---
+${aboutYouBlock}
 
 You have access to previous questions and answers in the conversation history — use them for context.
 
@@ -191,6 +197,7 @@ ${lengthInstruction}`
 ---
 ${jobDescription}
 ---
+${aboutYouBlock}
 
 Write the EXACT words they should speak in response. Write in the first person ("I").
 CRITICAL: Sound like a human speaking naturally — conversational, thoughtful, and unscripted.
@@ -203,7 +210,8 @@ Rules:
 - Be technically accurate
 - Do NOT repeat the question back
 - Jump straight into the answer
-- Avoid robotic or overly formal phrasing`;
+- Avoid robotic or overly formal phrasing
+- When relevant, naturally reference the candidate's real projects, experience, and skills from their background`;
 
     // ─── Keep last 10 history messages to avoid token overflow ─
     const trimmedHistory = conversationHistory.slice(-10);
