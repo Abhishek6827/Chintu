@@ -40,6 +40,56 @@ interface HistoryMessage {
   content: any; // string for assistant, array for user (with images)
 }
 
+// ─── Custom Select Component ─────────────────────────────
+function CustomSelect({ 
+  options, 
+  value, 
+  onChange, 
+  className = "" 
+}: { 
+  options: { key: string, name: string }[], 
+  value: string, 
+  onChange: (val: string) => void,
+  className?: string
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedOption = options.find(o => o.key === value);
+
+  return (
+    <div className={`relative ${className}`}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 flex items-center justify-between outline-none focus:ring-2 focus:ring-indigo-300"
+      >
+        <span className="truncate">{selectedOption?.name || value}</span>
+        <svg className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
+          <div className="absolute right-0 top-full mt-1 w-full min-w-[120px] bg-white border border-gray-200 rounded-lg shadow-xl z-[70] py-1 overflow-hidden">
+            {options.map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => {
+                  onChange(opt.key);
+                  setIsOpen(false);
+                }}
+                className={`w-full text-left px-4 py-2 text-sm hover:bg-indigo-50 transition-colors ${value === opt.key ? "text-indigo-600 font-semibold bg-indigo-50/50" : "text-gray-700"}`}
+              >
+                {opt.name}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // Check if running in Electron
 const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
@@ -863,8 +913,26 @@ export default function RoomPage() {
           )}
           {isElectron && (
             <>
-              <button onClick={handleHide} className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs">─</button>
-              <button onClick={handleClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs">✕</button>
+              <button 
+                onClick={() => (window as any).electronAPI.minimize()} 
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs"
+              >
+                ─
+              </button>
+              <button 
+                onClick={handleHide} 
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                </svg>
+              </button>
+              <button 
+                onClick={handleClose} 
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs"
+              >
+                ✕
+              </button>
             </>
           )}
         </div>
@@ -1133,6 +1201,7 @@ export default function RoomPage() {
               ? "bg-emerald-500/30 text-emerald-300 ring-1 ring-emerald-500/50"
               : "bg-white/10 text-white/70"
             }
+            transition-all
           `}
         >
           {isWindowHidden ? (
@@ -1201,16 +1270,17 @@ export default function RoomPage() {
                   <p className="text-sm font-semibold text-gray-700">Response Detail</p>
                   <p className="text-xs text-gray-400">How detailed answers should be</p>
                 </div>
-                <select
+                <CustomSelect
                   value={responseLength}
-                  onChange={(e) => setResponseLength(e.target.value as ResponseLength)}
-                  className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 outline-none"
-                >
-                  <option value="small">Small</option>
-                  <option value="balanced">Balanced</option>
-                  <option value="detailed">Detailed</option>
-                  <option value="coding">Coding</option>
-                </select>
+                  onChange={(val) => setResponseLength(val as ResponseLength)}
+                  options={[
+                    { key: "small", name: "Small" },
+                    { key: "balanced", name: "Balanced" },
+                    { key: "detailed", name: "Detailed" },
+                    { key: "coding", name: "Coding" },
+                  ]}
+                  className="w-32"
+                />
               </div>
             </div>
 
@@ -1220,18 +1290,15 @@ export default function RoomPage() {
                   <p className="text-sm font-semibold text-gray-700">AI Model</p>
                   <p className="text-xs text-gray-400">Model used for text responses</p>
                 </div>
-                <select
+                <CustomSelect
                   value={selectedModel}
-                  onChange={(e) => {
-                    setSelectedModel(e.target.value as ModelKey);
-                    selectedModelRef.current = e.target.value as ModelKey;
+                  onChange={(val) => {
+                    setSelectedModel(val as ModelKey);
+                    selectedModelRef.current = val as ModelKey;
                   }}
-                  className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 outline-none max-w-[10rem]"
-                >
-                  {MODELS.map((m) => (
-                    <option key={m.key} value={m.key}>{m.name}</option>
-                  ))}
-                </select>
+                  options={MODELS.map(m => ({ key: m.key, name: m.name }))}
+                  className="w-44"
+                />
               </div>
               <p className="text-[0.6875rem] text-gray-400 leading-relaxed">
                 Vision (screenshots) always uses Llama 4 Scout. This model is for text/coding responses only.
