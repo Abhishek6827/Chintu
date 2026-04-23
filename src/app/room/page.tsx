@@ -877,9 +877,10 @@ export default function RoomPage() {
 
   const handleOpacityChange = (value: number) => {
     setWindowOpacity(value);
-    if (isElectron && (window as any).electronAPI?.setOpacity) {
-      (window as any).electronAPI.setOpacity(value);
-    }
+    // NOTE: We intentionally do NOT call electronAPI.setOpacity here.
+    // Window-level opacity would make the floating controls transparent too,
+    // causing the sliders to visually "thin out". Instead we only change
+    // --app-opacity on the container, which only affects the background gradient.
   };
 
   const handleHide = async () => {
