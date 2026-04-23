@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AnswerDisplay from "@/components/AnswerDisplay";
+import ProfileModal, { getProfileContext, getStoredProfile } from "@/components/ProfileModal";
 
 interface AnswerEntry {
   id: string;
@@ -96,7 +97,9 @@ const isElectron = typeof window !== "undefined" && !!(window as any).electronAP
 export default function RoomPage() {
   const router = useRouter();
   const [jobDescription, setJobDescription] = useState("");
-  const [aboutYou, setAboutYou] = useState("");
+  const [profileContext, setProfileContext] = useState("");
+  const [showProfile, setShowProfile] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
   const [status, setStatus] = useState<"idle" | "recording" | "generating">("idle");
   const [answers, setAnswers] = useState<AnswerEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -206,9 +209,15 @@ export default function RoomPage() {
     const jd = sessionStorage.getItem("jobDescription");
     if (!jd) { router.push("/"); return; }
     setJobDescription(jd);
-    const about = sessionStorage.getItem("aboutYou");
-    if (about) setAboutYou(about);
+    // Load profile context
+    setProfileContext(getProfileContext());
+    setHasProfile(!!getStoredProfile());
   }, [router]);
+
+  const refreshProfile = () => {
+    setProfileContext(getProfileContext());
+    setHasProfile(!!getStoredProfile());
+  };
 
   // ─── Fullscreen change listener ─────────────────────────
   useEffect(() => {
@@ -579,7 +588,7 @@ export default function RoomPage() {
         body: JSON.stringify({
           transcript: fullTranscript,
           jobDescription,
-          aboutYou,
+          aboutYou: profileContext,
           responseLength: responseLengthRef.current,
           conversationHistory: historyToSend,
           selectedModel: selectedModelRef.current,
@@ -618,7 +627,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [jobDescription, aboutYou, liveTranscript, aiSpeechBubbles, stopWhisperRecordingAndTranscribe, chatConversationHistory]);
+  }, [jobDescription, profileContext, liveTranscript, aiSpeechBubbles, stopWhisperRecordingAndTranscribe, chatConversationHistory]);
 
   const handleSendText = useCallback(async () => {
     if (!inputText.trim()) return;
@@ -651,7 +660,7 @@ export default function RoomPage() {
         body: JSON.stringify({
           transcript: fullTranscript,
           jobDescription,
-          aboutYou,
+          aboutYou: profileContext,
           responseLength: responseLengthRef.current,
           conversationHistory: historyToSend,
           selectedModel: selectedModelRef.current,
@@ -690,7 +699,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [inputText, status, jobDescription, aboutYou, aiSpeechBubbles, chatConversationHistory]);
+  }, [inputText, status, jobDescription, profileContext, aiSpeechBubbles, chatConversationHistory]);
 
   const startRecordingRef = useRef(startRecording);
   const stopRecordingRef = useRef(stopRecordingAndGenerate);
@@ -814,7 +823,7 @@ export default function RoomPage() {
         body: JSON.stringify({
           images: screenshotsToSend,
           jobDescription,
-          aboutYou,
+          aboutYou: profileContext,
           responseLength: responseLengthRef.current,
           additionalContext: contextText,
           conversationHistory: historyToSend,
@@ -879,7 +888,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [capturedScreenshots, status, jobDescription, aboutYou, inputText, visionConversationHistory]);
+  }, [capturedScreenshots, status, jobDescription, profileContext, inputText, visionConversationHistory]);
 
   const handleOpacityChange = (value: number) => {
     setWindowOpacity(value);
@@ -925,6 +934,17 @@ export default function RoomPage() {
           <span className="text-white/90 text-sm font-bold">✦ Chintu</span>
         </div>
         <div className="flex items-center gap-1 no-drag">
+          {/* Profile button */}
+          <button
+            onClick={() => setShowProfile(true)}
+            className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors ${
+              hasProfile ? "text-indigo-300 bg-indigo-500/20" : "text-white/60 hover:text-white/80"
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+          </button>
           {isScreenRecording && (
             <div className="system-audio-badge mr-2">
               <span className="system-audio-dot" style={{ background: "#f87171" }} />
@@ -1368,6 +1388,10 @@ export default function RoomPage() {
             </div>
           </div>
         </div>
+      )}
+      {/* Profile Modal */}
+      {showProfile && (
+        <ProfileModal onClose={() => { setShowProfile(false); refreshProfile(); }} />
       )}
       {/* Unhide Prompt (Shocking/Animated) */}
       {showUnhidePrompt && (
