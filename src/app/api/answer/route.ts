@@ -159,20 +159,21 @@ export async function POST(req: NextRequest) {
     const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.balanced;
     const isCoding = responseLength === "coding";
 
-    // ─── Model mapping: key → { groq model ID, openrouter model ID } ─
-    const MODEL_MAP: Record<string, { groq: string; openrouter: string }> = {
-      "gpt-oss-120b": { groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
-      "qwen3-coder-480b": { groq: "qwen/qwen3-32b", openrouter: "qwen/qwen3-32b" },
-      "deepseek-r1": { groq: "deepseek-r1-distill-llama-70b", openrouter: "deepseek/deepseek-r1:free" },
-      "nemotron-3-120b": { groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
-      "llama-3.3-nemotron-49b": { groq: "nvidia/llama-3.3-nemotron-super-49b-v1", openrouter: "nvidia/llama-3.3-nemotron-super-49b-v1" },
+    // ─── Model mapping: key → { provider, groq model ID, openrouter model ID } ─
+    const MODEL_MAP: Record<string, { provider: string; groq?: string; openrouter?: string; dashscope?: string }> = {
+      "gpt-oss-120b": { provider: "groq", groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
+      "qwen3-coder-480b": { provider: "groq", groq: "qwen/qwen3-32b", openrouter: "qwen/qwen3-32b" },
+      "deepseek-r1": { provider: "groq", groq: "deepseek-r1-distill-llama-70b", openrouter: "deepseek/deepseek-r1:free" },
+      "nemotron-3-120b": { provider: "groq", groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
+      "llama-3.3-nemotron-49b": { provider: "dashscope", dashscope: "qwen3.6-plus" },
     };
 
     const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
-    const groqModel = modelConfig.groq;
-    const openrouterModel = modelConfig.openrouter;
+    const isDashScope = modelConfig.provider === "dashscope";
+    const groqModel = modelConfig.groq || "";
+    const openrouterModel = modelConfig.openrouter || "";
 
-    console.log(`[/api/answer] Mode: ${responseLength} | Model: ${selectedModel} (groq: ${groqModel}) | History: ${conversationHistory.length} messages`);
+    console.log(`[/api/answer] Mode: ${responseLength} | Model: ${selectedModel} | Provider: ${modelConfig.provider} | History: ${conversationHistory.length} messages`);
 
     const aboutYouBlock = aboutYou
       ? `\n\nHere is the candidate's background — use this to personalize your answers with their real experience, projects, and skills. Speak as if YOU are this person:\n---\n${aboutYou}\n---`
@@ -226,6 +227,34 @@ Rules:
       if (attempt > 0) {
         console.log(`[/api/answer] ⏳ All keys rate-limited. Waiting ${RETRY_DELAY_MS / 1000}s before retry ${attempt + 1}/${MAX_RETRIES}...`);
         await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+      }
+
+      // DashScope routing
+      if (isDashScope) {
+        try {
+          console.log(`[/api/answer] Using DashScope model: ${modelConfig.dashscope}`);
+          const dashscope = new OpenAI({
+            baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+            apiKey: process.env.DASHSCOPE_API_KEY || "",
+          });
+          stream = await dashscope.chat.completions.create({
+            model: modelConfig.dashscope!,
+            stream: true,
+            max_tokens: 2048,
+            messages: [
+              { role: "system", content: systemPrompt },
+              ...trimmedHistory,
+              { role: "user", content: transcript },
+            ],
+          });
+          actualModelUsed = selectedModel;
+          console.log(`[/api/answer] ✓ DashScope stream created`);
+          break;
+        } catch (error: any) {
+          lastError = error;
+          console.error(`[/api/answer] ✗ DashScope failed:`, error?.message?.slice(0, 100));
+        }
+        break;
       }
 
       for (let i = 0; i < apiKeys.length; i++) {

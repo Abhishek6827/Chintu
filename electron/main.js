@@ -33,11 +33,13 @@ function loadEnv() {
 function getAllApiKeys() {
   const keys = [];
   let openRouterKey = "";
+  let dashscopeKey = "";
 
   if (process.env.GROQ_API_KEY) keys.push(process.env.GROQ_API_KEY);
   if (process.env.GROQ_API_KEY_2) keys.push(process.env.GROQ_API_KEY_2);
   if (process.env.GROQ_API_KEY_3) keys.push(process.env.GROQ_API_KEY_3);
   if (process.env.OPENROUTER_API_KEY) openRouterKey = process.env.OPENROUTER_API_KEY;
+  if (process.env.DASHSCOPE_API_KEY) dashscopeKey = process.env.DASHSCOPE_API_KEY;
 
   if (keys.length === 0) {
     const configPath = path.join(__dirname, "config.json");
@@ -47,24 +49,25 @@ function getAllApiKeys() {
       if (config.GROQ_API_KEY_2) keys.push(config.GROQ_API_KEY_2);
       if (config.GROQ_API_KEY_3) keys.push(config.GROQ_API_KEY_3);
       if (!openRouterKey && config.OPENROUTER_API_KEY) openRouterKey = config.OPENROUTER_API_KEY;
+      if (!dashscopeKey && config.DASHSCOPE_API_KEY) dashscopeKey = config.DASHSCOPE_API_KEY;
     } catch {}
   }
 
-  console.log(`[Main] Groq keys found: ${keys.length}, OpenRouter: ${openRouterKey ? "yes" : "no"}`);
-  return { groqKeys: keys, openRouterKey };
+  console.log(`[Main] Groq keys: ${keys.length}, OpenRouter: ${openRouterKey ? "yes" : "no"}, DashScope: ${dashscopeKey ? "yes" : "no"}`);
+  return { groqKeys: keys, openRouterKey, dashscopeKey };
 }
 
 // ─── Start embedded Express server (production only) ──────
 function startServer() {
   return new Promise((resolve, reject) => {
-    const { groqKeys, openRouterKey } = getAllApiKeys();
+    const { groqKeys, openRouterKey, dashscopeKey } = getAllApiKeys();
     if (groqKeys.length === 0 && !openRouterKey) {
       reject(new Error("No API keys found. Add them to electron/config.json or a .env file next to the executable."));
       return;
     }
 
     const staticDir = path.join(__dirname, "..", "out");
-    const server = createServer(groqKeys, openRouterKey, staticDir);
+    const server = createServer(groqKeys, openRouterKey, dashscopeKey, staticDir);
 
     const listener = server.listen(0, "127.0.0.1", () => {
       serverPort = listener.address().port;

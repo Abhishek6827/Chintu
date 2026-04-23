@@ -263,17 +263,18 @@ export async function POST(req: NextRequest) {
     // ====================================================================
     // STEP 2: Generate Final Answer using Selected Model
     // ====================================================================
-    const MODEL_MAP: Record<string, { groq: string; openrouter: string }> = {
-      "gpt-oss-120b": { groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
-      "qwen3-coder-480b": { groq: "qwen/qwen3-32b", openrouter: "qwen/qwen3-32b" },
-      "deepseek-r1": { groq: "deepseek-r1-distill-llama-70b", openrouter: "deepseek/deepseek-r1:free" },
-      "nemotron-3-120b": { groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
-      "llama-3.3-nemotron-49b": { groq: "nvidia/llama-3.3-nemotron-super-49b-v1", openrouter: "nvidia/llama-3.3-nemotron-super-49b-v1" },
+    const MODEL_MAP: Record<string, { provider: string; groq?: string; openrouter?: string; dashscope?: string }> = {
+      "gpt-oss-120b": { provider: "groq", groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
+      "qwen3-coder-480b": { provider: "groq", groq: "qwen/qwen3-32b", openrouter: "qwen/qwen3-32b" },
+      "deepseek-r1": { provider: "groq", groq: "deepseek-r1-distill-llama-70b", openrouter: "deepseek/deepseek-r1:free" },
+      "nemotron-3-120b": { provider: "groq", groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
+      "llama-3.3-nemotron-49b": { provider: "dashscope", dashscope: "qwen3.6-plus" },
     };
 
     const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
-    const groqModel = modelConfig.groq;
-    const openrouterModel = modelConfig.openrouter;
+    const isDashScope = modelConfig.provider === "dashscope";
+    const groqModel = modelConfig.groq || "";
+    const openrouterModel = modelConfig.openrouter || "";
 
     const aboutYouBlock = aboutYou
       ? `\n\nHere is the candidate's background — use this to personalize your answers with their real experience, projects, and skills. Speak as if YOU are this person:\n---\n${aboutYou}\n---`
@@ -329,6 +330,34 @@ Rules:
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       if (attempt > 0) await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+
+      // DashScope routing for vision Step 2
+      if (isDashScope) {
+        try {
+          console.log(`[/api/answer-vision] Step 2: Using DashScope model: ${modelConfig.dashscope}`);
+          const dashscope = new OpenAI({
+            baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+            apiKey: process.env.DASHSCOPE_API_KEY || "",
+          });
+          stream = await dashscope.chat.completions.create({
+            model: modelConfig.dashscope!,
+            stream: true,
+            max_tokens: 2048,
+            messages: [
+              { role: "system", content: systemPrompt },
+              ...trimmedHistory,
+              { role: "user", content: finalTranscript },
+            ],
+          });
+          actualModelUsed = selectedModel;
+          console.log(`[/api/answer-vision] ✓ DashScope stream created`);
+          break;
+        } catch (err: any) {
+          finalError = err;
+          console.error(`[/api/answer-vision] ✗ DashScope failed:`, err?.message?.slice(0, 100));
+        }
+        break;
+      }
 
       for (let i = 0; i < apiKeys.length; i++) {
         try {
