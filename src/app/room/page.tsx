@@ -129,11 +129,15 @@ export default function RoomPage() {
 
   // ─── Auto-update status ───────────────────────────────────
   const [updateStatus, setUpdateStatus] = useState<{ status: string; version?: string; percent?: number } | null>(null);
+  const [appVersion, setAppVersion] = useState("");
 
   useEffect(() => {
     setMounted(true);
     if (isElectron && (window as any).electronAPI?.getOpacity) {
       (window as any).electronAPI.getOpacity().then((o: number) => setWindowOpacity(o));
+    }
+    if (isElectron && (window as any).electronAPI?.getVersion) {
+      (window as any).electronAPI.getVersion().then((v: string) => setAppVersion(v));
     }
   }, []);
 
@@ -1376,6 +1380,9 @@ export default function RoomPage() {
               <p className="text-[0.625rem] text-gray-300">
                 🔒 Window is invisible to screen sharing
               </p>
+              {appVersion && (
+                <p className="text-[0.5625rem] text-gray-300/60 mt-1">v{appVersion}</p>
+              )}
             </div>
           </div>
         </div>

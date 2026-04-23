@@ -287,6 +287,7 @@ ipcMain.on("set-opacity", (event, opacity) => {
 });
 
 ipcMain.handle("get-opacity", () => userOpacity);
+ipcMain.handle("get-app-version", () => app.getVersion());
 
 // ─── App lifecycle ────────────────────────────────────────
 app.whenReady().then(async () => {

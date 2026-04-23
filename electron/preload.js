@@ -16,6 +16,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     return () => ipcRenderer.removeListener("window-hidden-change", handler);
   },
   isElectron: true,
+  getVersion: () => ipcRenderer.invoke("get-app-version"),
   // System audio capture is handled via getDisplayMedia + desktopCapturer loopback
   // configured in main.js — no extra IPC needed.
   supportsSystemAudio: true,
