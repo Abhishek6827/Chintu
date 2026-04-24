@@ -49,55 +49,7 @@ interface HistoryMessage {
   content: any; // string for assistant, array for user (with images)
 }
 
-// ─── Custom Select Component ─────────────────────────────
-function CustomSelect({ 
-  options, 
-  value, 
-  onChange, 
-  className = "" 
-}: { 
-  options: { key: string, name: string }[], 
-  value: string, 
-  onChange: (val: string) => void,
-  className?: string
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectedOption = options.find(o => o.key === value);
 
-  return (
-    <div className={`relative ${className}`}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 flex items-center justify-between outline-none focus:ring-2 focus:ring-indigo-300"
-      >
-        <span className="truncate">{selectedOption?.name || value}</span>
-        <svg className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {isOpen && (
-        <>
-          <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 w-full min-w-[120px] bg-white border border-gray-200 rounded-lg shadow-xl z-[70] py-1 overflow-hidden">
-            {options.map((opt) => (
-              <button
-                key={opt.key}
-                onClick={() => {
-                  onChange(opt.key);
-                  setIsOpen(false);
-                }}
-                className={`w-full text-left px-4 py-2 text-sm hover:bg-indigo-50 transition-colors ${value === opt.key ? "text-indigo-600 font-semibold bg-indigo-50/50" : "text-gray-700"}`}
-              >
-                {opt.name}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
 
 // Check if running in Electron
 const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
