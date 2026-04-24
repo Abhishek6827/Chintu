@@ -942,6 +942,11 @@ export default function RoomPage() {
       <div className="drag-region flex items-center justify-between px-2 sm:px-4 h-10 sm:h-12 shrink-0">
         <div className="flex items-center gap-2 no-drag">
           <span className="text-white/90 text-sm font-bold">✦ Chintu</span>
+          {appVersion && (
+            <span className="bg-white/10 text-white/50 px-1.5 py-0.5 rounded text-[0.625rem] font-mono">
+              v{appVersion}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1 no-drag">
           {isScreenRecording && (
@@ -1096,66 +1101,48 @@ export default function RoomPage() {
         </div>
       )}
 
-      {/* Model Selectors Row */}
-      <div className="px-2 sm:px-4 pb-1.5 shrink-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Response Model Selector */}
-          <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
-            <span className="text-[0.5625rem] text-white/40 font-medium uppercase tracking-wider">💬</span>
+      {/* Text Input Row */}
+      <div className="px-2 sm:px-4 pb-2 shrink-0">
+        <div className="bg-white/5 border border-white/10 rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-white/10 transition-all">
+          {/* Inline selectors row */}
+          <div className="flex items-center gap-1.5 px-2 pt-1.5 flex-wrap">
             <select
               value={selectedModel}
               onChange={(e) => {
                 setSelectedModel(e.target.value as ModelKey);
                 selectedModelRef.current = e.target.value as ModelKey;
               }}
-              className="bg-transparent text-[0.6875rem] text-white/80 font-medium outline-none cursor-pointer appearance-none pr-3"
-              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23999' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' }}
+              className="bg-white/10 text-[0.625rem] text-white/70 font-medium rounded-lg px-1.5 py-0.5 outline-none cursor-pointer border border-white/10 hover:border-white/20"
             >
               {MODELS.map(m => (
-                <option key={m.key} value={m.key} className="bg-gray-900 text-white">{m.name}</option>
+                <option key={m.key} value={m.key} className="bg-gray-900 text-white text-xs">{m.name}</option>
               ))}
             </select>
-          </div>
-
-          {/* Vision Model Selector */}
-          <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
-            <span className="text-[0.5625rem] text-white/40 font-medium uppercase tracking-wider">📸</span>
             <select
               value={selectedVisionModel}
               onChange={(e) => {
                 setSelectedVisionModel(e.target.value as VisionModelKey);
                 selectedVisionModelRef.current = e.target.value as VisionModelKey;
               }}
-              className="bg-transparent text-[0.6875rem] text-white/80 font-medium outline-none cursor-pointer appearance-none pr-3"
-              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23999' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' }}
+              className="bg-white/10 text-[0.625rem] text-white/70 font-medium rounded-lg px-1.5 py-0.5 outline-none cursor-pointer border border-white/10 hover:border-white/20"
             >
               {VISION_MODELS.map(m => (
-                <option key={m.key} value={m.key} className="bg-gray-900 text-white">{m.name}</option>
+                <option key={m.key} value={m.key} className="bg-gray-900 text-white text-xs">📸 {m.name}</option>
               ))}
             </select>
-          </div>
-
-          {/* Response Length Selector */}
-          <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
-            <span className="text-[0.5625rem] text-white/40 font-medium uppercase tracking-wider">📝</span>
             <select
               value={responseLength}
               onChange={(e) => setResponseLength(e.target.value as ResponseLength)}
-              className="bg-transparent text-[0.6875rem] text-white/80 font-medium outline-none cursor-pointer appearance-none pr-3"
-              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23999' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' }}
+              className="bg-white/10 text-[0.625rem] text-white/70 font-medium rounded-lg px-1.5 py-0.5 outline-none cursor-pointer border border-white/10 hover:border-white/20"
             >
-              <option value="small" className="bg-gray-900 text-white">Small</option>
-              <option value="balanced" className="bg-gray-900 text-white">Balanced</option>
-              <option value="detailed" className="bg-gray-900 text-white">Detailed</option>
-              <option value="coding" className="bg-gray-900 text-white">Coding</option>
+              <option value="small" className="bg-gray-900 text-white text-xs">Small</option>
+              <option value="balanced" className="bg-gray-900 text-white text-xs">Balanced</option>
+              <option value="detailed" className="bg-gray-900 text-white text-xs">Detailed</option>
+              <option value="coding" className="bg-gray-900 text-white text-xs">Coding</option>
             </select>
           </div>
-        </div>
-      </div>
-
-      {/* Text Input Row */}
-      <div className="px-2 sm:px-4 pb-2 shrink-0">
-        <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-white/10 transition-all">
+          {/* Textarea */}
+          <div className="relative flex items-center">
           <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -1169,8 +1156,8 @@ export default function RoomPage() {
                 }
               }
             }}
-            placeholder={capturedScreenshots.length > 0 ? "Add context (optional) then press Enter or Analyze..." : "Ask a coding question or type..."}
-            className="w-full bg-transparent px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-white/90 placeholder-white/30 focus:outline-none pr-10 sm:pr-12 resize-none"
+            placeholder={capturedScreenshots.length > 0 ? "Add context (optional) then press Enter..." : "Ask a question or type..."}
+            className="w-full bg-transparent px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-white/90 placeholder-white/30 focus:outline-none pr-10 sm:pr-12 resize-none"
             rows={inputText.split('\n').length > 1 ? Math.min(inputText.split('\n').length, 5) : 1}
             disabled={status !== "idle"}
           />
@@ -1183,6 +1170,7 @@ export default function RoomPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.125A59.769 59.769 0 0121.485 12 59.768 59.768 0 013.27 20.875L5.999 12Zm0 0h7.5" />
             </svg>
           </button>
+          </div>
         </div>
       </div>
 
@@ -1317,7 +1305,7 @@ export default function RoomPage() {
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="text-lg font-bold text-gray-800">Settings</h2>
-                <p className="text-xs text-gray-400">AI preferences</p>
+                <p className="text-xs text-gray-400">Preferences</p>
               </div>
               <button
                 onClick={() => setShowSettings(false)}
@@ -1325,53 +1313,6 @@ export default function RoomPage() {
               >
                 ✕
               </button>
-            </div>
-
-            <div className="mb-5">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <p className="text-sm font-semibold text-gray-700">Response Detail</p>
-                  <p className="text-xs text-gray-400">How detailed answers should be</p>
-                </div>
-                <CustomSelect
-                  value={responseLength}
-                  onChange={(val) => setResponseLength(val as ResponseLength)}
-                  options={[
-                    { key: "small", name: "Small" },
-                    { key: "balanced", name: "Balanced" },
-                    { key: "detailed", name: "Detailed" },
-                    { key: "coding", name: "Coding" },
-                  ]}
-                  className="w-32"
-                />
-              </div>
-            </div>
-
-            <div className="mb-5">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-              <p className="text-sm font-semibold text-gray-700">AI Model</p>
-                  <p className="text-xs text-gray-400">Select models from the input area</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-5">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <p className="text-sm font-semibold text-gray-700">Speech Engine</p>
-                  <p className="text-xs text-gray-400">How your voice is transcribed</p>
-                </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${useWhisperFallback.current ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}`}>
-                  {useWhisperFallback.current ? "Whisper API" : "Web Speech"}
-                </span>
-              </div>
-              <p className="text-[0.6875rem] text-gray-400 leading-relaxed">
-                {useWhisperFallback.current
-                  ? "Using Groq Whisper API for transcription. Hold Space → speak → release to transcribe."
-                  : "Using browser's built-in speech recognition for real-time transcription."
-                }
-              </p>
             </div>
 
             <div className="mb-5">
@@ -1409,6 +1350,35 @@ export default function RoomPage() {
                   : "Press Space once to start recording, press again to stop."
                 }
               </p>
+            </div>
+
+            {/* Profile Management */}
+            <div className="mb-5">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">Profile</p>
+                  <p className="text-xs text-gray-400">{hasProfile ? "Your background info for AI" : "No profile set"}</p>
+                </div>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => { setShowSettings(false); setShowProfile(true); }}
+                    className="text-xs px-3 py-1.5 bg-indigo-100 text-indigo-600 rounded-lg font-medium hover:bg-indigo-200 transition-colors"
+                  >
+                    {hasProfile ? "View" : "Setup"}
+                  </button>
+                  {hasProfile && (
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem("chintu_user_profile");
+                        refreshProfile();
+                      }}
+                      className="text-xs px-3 py-1.5 bg-red-50 text-red-500 rounded-lg font-medium hover:bg-red-100 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="mb-4">
