@@ -339,6 +339,22 @@ function setupAutoUpdater() {
     console.log("[AutoUpdater] Using GH_PAT from environment");
   }
 
+  // Fallback: read GH_TOKEN from config.json (production builds)
+  if (!process.env.GH_TOKEN) {
+    try {
+      const configPath = path.join(__dirname, "config.json");
+      const config = JSON.parse(require("fs").readFileSync(configPath, "utf-8"));
+      if (config.GH_TOKEN) {
+        process.env.GH_TOKEN = config.GH_TOKEN;
+        console.log("[AutoUpdater] Using GH_TOKEN from config.json");
+      }
+    } catch {}
+  }
+
+  if (!process.env.GH_TOKEN) {
+    console.warn("[AutoUpdater] No GH_TOKEN found — updates for private repo will fail");
+  }
+
   // Enable logging for debugging
   autoUpdater.logger = require("electron-log");
   autoUpdater.logger.transports.file.level = "info";
