@@ -178,6 +178,35 @@ export default function RoomPage() {
     // Load profile context
     setProfileContext(getProfileContext());
     setHasProfile(!!getStoredProfile());
+
+    // Check if there's a pending raw profile that needs re-refining
+    const pendingRaw = sessionStorage.getItem("chintu_pending_raw_profile");
+    if (pendingRaw && !getStoredProfile()) {
+      // Background re-refine
+      (async () => {
+        try {
+          const res = await fetch("/api/refine-profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rawText: pendingRaw }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.profile && typeof data.profile === "object") {
+              localStorage.setItem("chintu_user_profile", JSON.stringify(data.profile));
+              setProfileContext(getProfileContext());
+              setHasProfile(true);
+              sessionStorage.removeItem("chintu_pending_raw_profile");
+            }
+          }
+        } catch {
+          // Silent fail — user can still paste in profile modal
+        }
+      })();
+    } else if (pendingRaw && getStoredProfile()) {
+      // Profile already exists from landing page, clean up pending
+      sessionStorage.removeItem("chintu_pending_raw_profile");
+    }
   }, [router]);
 
   const refreshProfile = () => {
@@ -538,7 +567,12 @@ export default function RoomPage() {
       ? "\n\n[AI Interviewer said]: " + aiSpeechBubbles.join(" ")
       : "";
 
-    const fullTranscript = transcript + aiContext;
+    // Add profile reminder for longer conversations so model doesn't forget
+    const profileReminder = profileContext && chatConversationHistory.length >= 6
+      ? "\n\n[REMINDER — Answer as this candidate, using their real background]\n"
+      : "";
+
+    const fullTranscript = transcript + aiContext + profileReminder;
 
     const startTime = Date.now();
     const modelName = MODELS.find(m => m.key === selectedModelRef.current)?.name || selectedModelRef.current;
@@ -583,7 +617,7 @@ export default function RoomPage() {
         const userMsg: HistoryMessage = { role: "user", content: fullTranscript };
         const assistantMsg: HistoryMessage = { role: "assistant", content: fullResponse };
         const updated = [...prev, userMsg, assistantMsg];
-        return updated.slice(-10); // keep last 10 messages = 5 exchanges
+        return updated.slice(-20); // keep last 20 messages = 10 exchanges
       });
 
       setStatus("idle");
@@ -610,7 +644,12 @@ export default function RoomPage() {
       ? "\n\n[AI Interviewer said]: " + aiSpeechBubbles.join(" ")
       : "";
 
-    const fullTranscript = textToUse + aiContext;
+    // Add profile reminder for longer conversations so model doesn't forget
+    const profileReminder = profileContext && chatConversationHistory.length >= 6
+      ? "\n\n[REMINDER — Answer as this candidate, using their real background]\n"
+      : "";
+
+    const fullTranscript = textToUse + aiContext + profileReminder;
 
     const startTime = Date.now();
     const modelName = MODELS.find(m => m.key === selectedModelRef.current)?.name || selectedModelRef.current;
@@ -655,7 +694,7 @@ export default function RoomPage() {
         const userMsg: HistoryMessage = { role: "user", content: fullTranscript };
         const assistantMsg: HistoryMessage = { role: "assistant", content: fullResponse };
         const updated = [...prev, userMsg, assistantMsg];
-        return updated.slice(-10); // keep last 10 messages = 5 exchanges
+        return updated.slice(-20); // keep last 20 messages = 10 exchanges
       });
 
       setStatus("idle");

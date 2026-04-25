@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
     console.log(`[/api/answer] Mode: ${responseLength} | Model: ${selectedModel} | Provider: ${modelConfig.provider} | History: ${conversationHistory.length} messages`);
 
     const aboutYouBlock = aboutYou
-      ? `\n\nHere is the candidate's background — use this to personalize your answers with their real experience, projects, and skills. Speak as if YOU are this person:\n---\n${aboutYou}\n---`
+      ? `\n\nHere is the candidate's background — you MUST use this to personalize EVERY answer with their real experience, projects, and skills. Speak as if YOU are this person. NEVER give generic answers when you have specific details from the candidate's background:\n---\n${aboutYou}\n---`
       : "";
 
     // ─── Separate system prompts for coding vs spoken responses ───
@@ -212,10 +212,12 @@ Rules:
 - Do NOT repeat the question back
 - Jump straight into the answer
 - Avoid robotic or overly formal phrasing
-- When relevant, naturally reference the candidate's real projects, experience, and skills from their background`;
+- CRITICAL: In EVERY answer, naturally reference the candidate's real projects, experience, and skills from their background above. NEVER give generic answers. Even for theoretical questions, connect your answer to the candidate's specific experience.
+- If the candidate has relevant project experience, mention it by name
+- If the candidate has specific tech skills, frame answers using those technologies`;
 
-    // ─── Keep last 10 history messages to avoid token overflow ─
-    const trimmedHistory = conversationHistory.slice(-10);
+    // ─── Keep last 20 history messages to maintain profile context ─
+    const trimmedHistory = conversationHistory.slice(-20);
 
     let actualModelUsed = selectedModel;
     let stream;

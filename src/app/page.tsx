@@ -22,9 +22,8 @@ export default function SetupPage() {
     if (!jd.trim()) return;
     sessionStorage.setItem("jobDescription", jd.trim());
 
-    // If user typed aboutMe and no profile exists, save it
+    // If user typed aboutMe and no profile exists, refine & save it
     if (aboutMe.trim() && !hasProfile) {
-      // Try to refine with AI first
       try {
         setIsRefining(true);
         const res = await fetch("/api/refine-profile", {
@@ -34,24 +33,32 @@ export default function SetupPage() {
         });
         if (res.ok) {
           const data = await res.json();
-          if (data.profile) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data.profile));
+          if (data.profile && typeof data.profile === "object") {
+            // Validate the profile has meaningful structured data
+            const p = data.profile;
+            const hasStructuredData = p.name || p.title || 
+              (p.experience && p.experience.length > 0) || 
+              (p.projects && p.projects.length > 0) ||
+              (p.skills && (p.skills.languages?.length > 0 || p.skills.frameworks?.length > 0));
+            
+            if (hasStructuredData) {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(data.profile));
+            } else {
+              // AI returned profile but couldn't extract structure — store raw text for re-refine
+              sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(data.profile));
+            }
+          } else {
+            // No profile in response — store raw text for background re-refine
+            sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
           }
+        } else {
+          // API failed — store raw text for background re-refine on room page
+          sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
         }
       } catch {
-        // If refine fails, store raw text as simple profile
-        const simpleProfile = {
-          name: "",
-          title: "",
-          summary: aboutMe.trim(),
-          experience: [],
-          projects: [],
-          skills: { languages: [], frameworks: [], tools: [], other: [] },
-          education: [],
-          certifications: [],
-          achievements: [],
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(simpleProfile));
+        // Network error — store raw text for background re-refine
+        sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
       } finally {
         setIsRefining(false);
       }
