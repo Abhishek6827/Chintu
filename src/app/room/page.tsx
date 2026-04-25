@@ -180,9 +180,10 @@ export default function RoomPage() {
     setHasProfile(!!getStoredProfile());
 
     // Check if there's a pending raw profile that needs re-refining
+    // (landing page saved a fallback profile with just the summary field)
     const pendingRaw = sessionStorage.getItem("chintu_pending_raw_profile");
-    if (pendingRaw && !getStoredProfile()) {
-      // Background re-refine
+    if (pendingRaw) {
+      // Background re-refine to get properly structured profile
       (async () => {
         try {
           const res = await fetch("/api/refine-profile", {
@@ -203,9 +204,6 @@ export default function RoomPage() {
           // Silent fail — user can still paste in profile modal
         }
       })();
-    } else if (pendingRaw && getStoredProfile()) {
-      // Profile already exists from landing page, clean up pending
-      sessionStorage.removeItem("chintu_pending_raw_profile");
     }
   }, [router]);
 

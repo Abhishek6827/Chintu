@@ -11,11 +11,18 @@ export default function SetupPage() {
   const [aboutMe, setAboutMe] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
   const [isRefining, setIsRefining] = useState(false);
+  const [statusText, setStatusText] = useState("");
   const router = useRouter();
 
+  // Check profile on mount AND on window focus (in case user comes back)
   useEffect(() => {
-    const stored = getStoredProfile();
-    setHasProfile(!!stored);
+    const checkProfile = () => {
+      const stored = getStoredProfile();
+      setHasProfile(!!stored);
+    };
+    checkProfile();
+    window.addEventListener("focus", checkProfile);
+    return () => window.removeEventListener("focus", checkProfile);
   }, []);
 
   const handleStart = async () => {
@@ -24,44 +31,53 @@ export default function SetupPage() {
 
     // If user typed aboutMe and no profile exists, refine & save it
     if (aboutMe.trim() && !hasProfile) {
+      setIsRefining(true);
+      setStatusText("✨ AI is structuring your profile...");
+
+      let profileSaved = false;
+
       try {
-        setIsRefining(true);
         const res = await fetch("/api/refine-profile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rawText: aboutMe.trim() }),
         });
+
         if (res.ok) {
           const data = await res.json();
           if (data.profile && typeof data.profile === "object") {
-            // Validate the profile has meaningful structured data
-            const p = data.profile;
-            const hasStructuredData = p.name || p.title || 
-              (p.experience && p.experience.length > 0) || 
-              (p.projects && p.projects.length > 0) ||
-              (p.skills && (p.skills.languages?.length > 0 || p.skills.frameworks?.length > 0));
-            
-            if (hasStructuredData) {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(data.profile));
-            } else {
-              // AI returned profile but couldn't extract structure — store raw text for re-refine
-              sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(data.profile));
-            }
-          } else {
-            // No profile in response — store raw text for background re-refine
-            sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
+            // Save the structured profile
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data.profile));
+            profileSaved = true;
+            setStatusText("✅ Profile saved! Starting session...");
           }
-        } else {
-          // API failed — store raw text for background re-refine on room page
-          sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
         }
       } catch {
-        // Network error — store raw text for background re-refine
-        sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
-      } finally {
-        setIsRefining(false);
+        // Network/API error — handled below
       }
+
+      // If API failed or returned bad data, save raw text as fallback profile
+      if (!profileSaved) {
+        const fallbackProfile = {
+          name: "",
+          title: "",
+          summary: aboutMe.trim(),
+          experience: [],
+          projects: [],
+          skills: { languages: [], frameworks: [], tools: [], other: [] },
+          education: [],
+          certifications: [],
+          achievements: [],
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackProfile));
+        // Also flag for background re-refine on room page
+        sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
+        setStatusText("Profile saved (will refine in background)...");
+      }
+
+      setIsRefining(false);
+      // Small delay so user sees the success message
+      await new Promise((r) => setTimeout(r, 400));
     }
 
     router.push("/room");
@@ -131,7 +147,7 @@ export default function SetupPage() {
               }
             `}
           >
-            {isRefining ? "✨ Setting up profile..." : "Start Session →"}
+            {isRefining ? statusText : "Start Session →"}
           </button>
         </div>
 
