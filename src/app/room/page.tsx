@@ -90,7 +90,7 @@ export default function RoomPage() {
   const [chatConversationHistory, setChatConversationHistory] = useState<HistoryMessage[]>([]);
 
   // ─── Auto-update status ───────────────────────────────────
-  const [updateStatus, setUpdateStatus] = useState<{ status: string; version?: string; percent?: number } | null>(null);
+  const [updateStatus, setUpdateStatus] = useState<{ status: string; version?: string; percent?: number; message?: string } | null>(null);
   const [appVersion, setAppVersion] = useState("");
 
   useEffect(() => {
