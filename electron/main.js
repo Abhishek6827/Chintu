@@ -433,20 +433,30 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.on("update-downloaded", (info) => {
+    console.log("[AutoUpdater] Update downloaded:", info.version);
+    
+    // Send status to renderer FIRST (before dialog blocks)
     if (mainWindow) {
       mainWindow.webContents.send("update-status", { status: "ready", version: info.version });
+      // Send again after 500ms to ensure UI receives it
+      setTimeout(() => {
+        mainWindow.webContents.send("update-status", { status: "ready", version: info.version });
+      }, 500);
     }
     
-    dialog.showMessageBox({
-      type: "info",
-      title: "Update Ready",
-      message: `Version ${info.version} has been downloaded and is ready to install.`,
-      buttons: ["Restart Now", "Later"]
-    }).then((result) => {
-      if (result.response === 0) {
-        autoUpdater.quitAndInstall(false, true);
-      }
-    });
+    // Show dialog after a short delay
+    setTimeout(() => {
+      dialog.showMessageBox({
+        type: "info",
+        title: "Update Ready",
+        message: `Version ${info.version} has been downloaded and is ready to install.`,
+        buttons: ["Restart Now", "Later"]
+      }).then((result) => {
+        if (result.response === 0) {
+          autoUpdater.quitAndInstall(false, true);
+        }
+      });
+    }, 200);
   });
 
   autoUpdater.on("update-not-available", (info) => {
