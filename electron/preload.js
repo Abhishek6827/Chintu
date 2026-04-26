@@ -29,5 +29,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
   restartForUpdate: () => ipcRenderer.send("restart-for-update"),
   checkForUpdates: () => ipcRenderer.send("check-for-updates"),
+  log: (msg, level = "info") => ipcRenderer.send("renderer-log", { msg, level }),
 });
 

@@ -1,7 +1,32 @@
 const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, desktopCapturer, session } = require("electron");
+const log = require("electron-log");
+
+// Configure logging first
+log.transports.file.level = "info";
+log.transports.console.level = "info";
+// This overrides the global console so console.log goes to the log file too
+Object.assign(console, log.functions);
+log.errorHandler.startCatching();
+
+log.info("[Main] Application starting...");
+log.info("[Main] Version:", app.getVersion());
 const path = require("path");
 const fs = require("fs");
 const { createServer } = require("./server");
+
+// Load token as early as possible for auto-updater
+const configPath = path.join(__dirname, "config.json");
+if (fs.existsSync(configPath)) {
+  try {
+    const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+    if (config.GH_TOKEN) {
+      process.env.GH_TOKEN = config.GH_TOKEN;
+    }
+  } catch (err) {
+    console.error("[Main] Error pre-loading config:", err.message);
+  }
+}
+
 const { autoUpdater } = require("electron-updater");
 
 let mainWindow = null;
@@ -306,10 +331,15 @@ ipcMain.on("restart-for-update", () => {
 
 // ─── Manual update check ──────────────────────────────────
 ipcMain.on("check-for-updates", () => {
-  console.log("[AutoUpdater] Manual check triggered");
+  log.info("[AutoUpdater] Manual check triggered");
   autoUpdater.checkForUpdatesAndNotify().catch(err => {
-    console.error("[AutoUpdater] Manual check error:", err);
+    log.error("[AutoUpdater] Manual check error:", err);
   });
+});
+
+ipcMain.on("renderer-log", (event, { msg, level }) => {
+  if (log[level]) log[level](`[Renderer] ${msg}`);
+  else log.info(`[Renderer] ${msg}`);
 });
 
 // ─── App lifecycle ────────────────────────────────────────
@@ -391,30 +421,19 @@ app.on("before-quit", () => {
 function setupAutoUpdater() {
   const { dialog } = require("electron");
 
-  // Fallback: read GH_TOKEN from config.json (production builds)
-  if (!process.env.GH_TOKEN) {
-    try {
-      const configPath = path.join(__dirname, "config.json");
-      if (fs.existsSync(configPath)) {
-        const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-        if (config.GH_TOKEN) {
-          process.env.GH_TOKEN = config.GH_TOKEN;
-          console.log("[AutoUpdater] Using GH_TOKEN from config.json");
-          
-          autoUpdater.requestHeaders = {
-            "Authorization": `token ${config.GH_TOKEN}`
-          };
-        }
-      }
-    } catch (err) {
-      console.error("[AutoUpdater] Error reading config.json:", err.message);
-    }
-  }
+  // Logger setup
+  autoUpdater.logger = log;
+  log.info("[AutoUpdater] Setup started");
 
-  autoUpdater.logger = require("electron-log");
-  autoUpdater.logger.transports.file.level = "info";
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
+
+  // Ensure headers are set if token exists
+  if (process.env.GH_TOKEN) {
+    autoUpdater.requestHeaders = {
+      "Authorization": `token ${process.env.GH_TOKEN}`
+    };
+  }
 
   autoUpdater.on("checking-for-update", () => {
     if (mainWindow) mainWindow.webContents.send("update-status", { status: "checking" });
@@ -467,11 +486,18 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.on("error", (err) => {
-    console.error("[AutoUpdater] Error:", err.message);
+    const errorMsg = err.message || String(err);
+    console.error("[AutoUpdater] Error:", errorMsg);
     if (mainWindow) {
-      mainWindow.webContents.send("update-status", { status: "error", message: err.message });
+      mainWindow.webContents.send("update-status", { 
+        status: "error", 
+        message: errorMsg 
+      });
     }
-    dialog.showErrorBox("Update Error", `Failed to check for updates: ${err.message}`);
+    // Only show dialog for non-auth errors to avoid annoying popups if token is just expired
+    if (!errorMsg.includes("401") && !errorMsg.includes("403")) {
+      dialog.showErrorBox("Update Error", `Failed to check for updates: ${errorMsg}`);
+    }
   });
 
   setTimeout(() => {

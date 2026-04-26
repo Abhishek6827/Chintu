@@ -16,6 +16,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "dotenv": "^16.6.1",
+    "electron-log": "^5.4.3",
     "electron-updater": "^6.8.3",
     "express": "^4.22.1",
     "groq-sdk": "^1.1.2",

@@ -1,4 +1,7 @@
 const express = require("express");
+const log = require("electron-log");
+// Override console for server logs too
+Object.assign(console, log.functions);
 const path = require("path");
 const fs = require("fs");
 const os = require("os");

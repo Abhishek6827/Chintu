@@ -126,6 +126,9 @@ export default function RoomPage() {
           updateCheckTimeoutRef.current = null;
         }
         setUpdateStatus(data);
+        if (isElectron) {
+          (window as any).electronAPI.log(`Update status: ${data.status} ${data.version || ""} ${data.message || ""}`);
+        }
       });
     }
   }, []);
@@ -535,6 +538,7 @@ export default function RoomPage() {
     setLiveTranscript("");
     finalTranscriptRef.current = "";
     liveTranscriptRef.current = "";
+    if (isElectron) (window as any).electronAPI.log("Recording started");
 
     if (useWhisperFallback.current) {
       await startWhisperRecording();
@@ -1080,9 +1084,11 @@ export default function RoomPage() {
                 <span>You&apos;re up to date! (v{updateStatus.version})</span>
               </span>
             ) : updateStatus.status === "error" ? (
-              <span title={updateStatus.message} className="flex items-center gap-2">
+              <span className="flex items-center gap-2 max-w-[80%] overflow-hidden">
                 <span>⚠️</span>
-                <span>Update check failed</span>
+                <span className="truncate" title={updateStatus.message}>
+                  {updateStatus.message || "Update check failed"}
+                </span>
               </span>
             ) : null}
             
@@ -1098,7 +1104,10 @@ export default function RoomPage() {
         <div className="px-4 pb-2">
           <div className="bg-red-500/20 rounded-xl px-4 py-2 text-red-200 text-xs flex items-center justify-between">
             <span>{error}</span>
-            <button onClick={() => setError(null)} className="text-red-300 ml-2">✕</button>
+            <button onClick={() => {
+              setError(null);
+              if (isElectron) (window as any).electronAPI.log(`User cleared error: ${error}`);
+            }} className="text-red-300 ml-2">✕</button>
           </div>
         </div>
       )}
