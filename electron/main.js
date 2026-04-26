@@ -147,6 +147,10 @@ function createWindow() {
   // Hidden by default from screen capture; removed when user unhides
   mainWindow.setContentProtection(true);
   mainWindow.setSkipTaskbar(true);
+  
+  // ─── Set initial hidden state ───────────────────────────
+  isHidden = true;
+  mainWindow.webContents.send("window-hidden-change", true);
 
   // ─── System Audio Loopback ──────────────────────────────
   session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {

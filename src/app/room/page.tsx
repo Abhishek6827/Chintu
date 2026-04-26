@@ -1447,6 +1447,7 @@ export default function RoomPage() {
               <button
                 onClick={() => {
                   if (updateCheckTimeoutRef.current) clearTimeout(updateCheckTimeoutRef.current);
+                  setShowSettings(false);
                   setUpdateStatus({ status: "checking" });
                   (window as any).electronAPI?.checkForUpdates();
                   updateCheckTimeoutRef.current = setTimeout(() => {
