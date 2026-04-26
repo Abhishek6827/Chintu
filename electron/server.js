@@ -6,9 +6,9 @@ const Groq = require("groq-sdk");
 const OpenAI = require("openai");
 const multer = require("multer");
 
-// ─── Response length presets ────────────────────────────────
 const RESPONSE_PROMPTS = {
   small: `Keep your answer very brief — about 3-4 short sentences. Speak naturally and conversationally, as if you are thinking on your feet. Do NOT use bullet points, headers, or lists. Make it sound like a natural, off-the-cuff spoken response.`,
+  
 
   balanced: `Keep your answer moderate in length — around 2-3 paragraphs. Use a natural, conversational tone with smooth transitions. Do NOT use bullet points, headers, or any special formatting. It MUST sound like a human speaking aloud in an interview, not reading from a script.`,
 
