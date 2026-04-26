@@ -161,7 +161,7 @@ function createServer(apiKeys, openRouterKey, dashscopeKey, staticDir) {
       // ─── Model mapping: key → { groq model ID, openrouter model ID } ─
       const MODEL_MAP = {
         "gpt-oss-120b":      { provider: "groq",       groq: "openai/gpt-oss-120b",      openrouter: "openai/gpt-oss-120b" },
-        "qwen3-coder-480b":  { provider: "groq",       groq: "qwen/qwen3-32b",           openrouter: "qwen/qwen3-32b" },
+        "qwen3-Coder":  { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
         "nemotron-3-120b":   { provider: "groq",       groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
         "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
       };
@@ -501,7 +501,7 @@ Rules:
       // ====================================================================
       const MODEL_MAP = {
         "gpt-oss-120b":      { provider: "groq",       groq: "openai/gpt-oss-120b",      openrouter: "openai/gpt-oss-120b" },
-        "qwen3-coder-480b":  { provider: "groq",       groq: "qwen/qwen3-32b",           openrouter: "qwen/qwen3-32b" },
+        "qwen3-Coder":  { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
         "nemotron-3-120b":   { provider: "groq",       groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
         "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
       };
@@ -816,7 +816,7 @@ Rules: Extract EVERYTHING. Return ONLY the JSON object, nothing else.`;
           try {
             const groq = new Groq({ apiKey: apiKeys[i] });
             response = await groq.chat.completions.create({
-              model: "qwen/qwen3-32b",
+              model: "qwen3-Coder",
               stream: false,
               max_tokens: 4096,
               messages: [
@@ -838,7 +838,7 @@ Rules: Extract EVERYTHING. Return ONLY the JSON object, nothing else.`;
         try {
           const openrouter = new OpenAI({ baseURL: "https://openrouter.ai/api/v1", apiKey: openRouterKey });
           response = await openrouter.chat.completions.create({
-            model: "qwen/qwen3-32b",
+            model: "qwen3-coder-480b-a35b-instruct",
             stream: false,
             max_tokens: 4096,
             messages: [

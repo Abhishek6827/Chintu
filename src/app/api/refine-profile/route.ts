@@ -106,10 +106,10 @@ Rules:
     if (!success) {
       for (let i = 0; i < apiKeys.length; i++) {
         try {
-          console.log(`[/api/refine-profile] Trying Groq key ${i + 1} with qwen/qwen3-32b...`);
+          console.log(`[/api/refine-profile] Trying Groq key ${i + 1} with qwen3-coder-480b-a35b-instruct...`);
           const groq = new Groq({ apiKey: apiKeys[i] });
           response = await groq.chat.completions.create({
-            model: "qwen/qwen3-32b",
+            model: "qwen3-coder-480b-a35b-instruct",
             stream: false,
             max_tokens: 4096,
             messages: [
@@ -130,13 +130,13 @@ Rules:
     // Fallback to OpenRouter
     if (!success && openRouterKey) {
       try {
-        console.log(`[/api/refine-profile] Trying OpenRouter with qwen/qwen3-32b...`);
+        console.log(`[/api/refine-profile] Trying OpenRouter with Qwen3-Coder...`);
         const openrouter = new OpenAI({
           baseURL: "https://openrouter.ai/api/v1",
           apiKey: openRouterKey,
         });
         response = await openrouter.chat.completions.create({
-          model: "qwen/qwen3-32b",
+          model: "qwen3-coder-480b-a35b-instruct",
           stream: false,
           max_tokens: 4096,
           messages: [

@@ -265,7 +265,7 @@ export async function POST(req: NextRequest) {
     // ====================================================================
     const MODEL_MAP: Record<string, { provider: string; groq?: string; openrouter?: string; dashscope?: string }> = {
       "gpt-oss-120b": { provider: "groq", groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
-      "qwen3-coder-480b": { provider: "groq", groq: "qwen/qwen3-32b", openrouter: "qwen/qwen3-32b" },
+      "qwen3-Coder": { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
       "nemotron-3-120b": { provider: "groq", groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
       "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
     };
