@@ -1133,6 +1133,7 @@ export default function RoomPage() {
                 <span className="text-lg">✨</span>
                 <span>You&apos;re up to date! (v{updateStatus.version})</span>
               </span>
+            ) : updateStatus.status === "error" ? (
               <div className="flex items-center justify-between w-full">
                 <span className="flex items-center gap-2 max-w-[70%] overflow-hidden">
                   <span>⚠️</span>
