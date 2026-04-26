@@ -196,7 +196,10 @@ export default function SetupPage() {
             <div className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
             <div className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "300ms" }}></div>
           </div>
-          <p className="mt-8 text-xs text-white/40 font-medium tracking-[0.2em] uppercase">Please wait • Making you look awesome</p>
+          <p className="mt-8 text-xs text-white/40 font-medium tracking-[0.2em] uppercase text-center max-w-xs leading-relaxed">
+            Please wait...<br />
+            <span className="text-white/30 text-[0.65rem] normal-case tracking-normal">This may take 5-10 minutes for the first time</span>
+          </p>
         </div>
       )}
     </div>

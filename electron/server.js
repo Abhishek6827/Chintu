@@ -790,28 +790,52 @@ Rules: Extract EVERYTHING. Return ONLY the JSON object, nothing else.`;
 
       let response = null;
 
-      // Try Groq keys
-      for (let i = 0; i < apiKeys.length; i++) {
+      // 1. Try DashScope first
+      if (dashscopeKey) {
         try {
-          const groq = new Groq({ apiKey: apiKeys[i] });
-          response = await groq.chat.completions.create({
-            model: "qwen/qwen3-32b",
+          console.log(`[/api/refine-profile] Trying DashScope with qwen3-vl-235b-a22b-thinking...`);
+          const dashscope = new OpenAI({
+            baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+            apiKey: dashscopeKey,
+          });
+          response = await dashscope.chat.completions.create({
+            model: "qwen3-vl-235b-a22b-thinking",
             stream: false,
-            max_tokens: 4096,
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: `Parse and structure this:\n\n---\n${rawText}\n---` },
             ],
           });
-          console.log(`[/api/refine-profile] ✓ Success with Groq key ${i + 1}`);
-          break;
+          console.log(`[/api/refine-profile] ✓ Success with DashScope`);
         } catch (err) {
-          console.error(`[/api/refine-profile] ✗ Groq key ${i + 1} failed:`, err?.message?.slice(0, 100));
-          if (err?.status !== 429) break;
+          console.error(`[/api/refine-profile] ✗ DashScope failed:`, err?.message?.slice(0, 100));
         }
       }
 
-      // Fallback to OpenRouter
+      // 2. Try Groq keys
+      if (!response) {
+        for (let i = 0; i < apiKeys.length; i++) {
+          try {
+            const groq = new Groq({ apiKey: apiKeys[i] });
+            response = await groq.chat.completions.create({
+              model: "qwen/qwen3-32b",
+              stream: false,
+              max_tokens: 4096,
+              messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: `Parse and structure this:\n\n---\n${rawText}\n---` },
+              ],
+            });
+            console.log(`[/api/refine-profile] ✓ Success with Groq key ${i + 1}`);
+            break;
+          } catch (err) {
+            console.error(`[/api/refine-profile] ✗ Groq key ${i + 1} failed:`, err?.message?.slice(0, 100));
+            if (err?.status !== 429) break;
+          }
+        }
+      }
+
+      // 3. Fallback to OpenRouter
       if (!response && openRouterKey) {
         try {
           const openrouter = new OpenAI({ baseURL: "https://openrouter.ai/api/v1", apiKey: openRouterKey });
