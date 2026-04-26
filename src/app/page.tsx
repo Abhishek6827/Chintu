@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getStoredProfile, loadProfileFromDisk, saveProfileToDisk } from "@/components/ProfileModal";
+import { loadProfileFromDisk, saveProfileToDisk } from "@/components/ProfileModal";
 
-const STORAGE_KEY = "chintu_user_profile";
 
 export default function SetupPage() {
   const [jd, setJd] = useState("");
