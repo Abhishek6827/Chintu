@@ -157,7 +157,6 @@ Rules:
 
     let rawContent = response.choices[0]?.message?.content || "";
 
-    // Strip <think>...</think> tags (Qwen3/DeepSeek thinking)
     rawContent = rawContent.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 
     // Try to extract JSON from response (handle markdown code fences)

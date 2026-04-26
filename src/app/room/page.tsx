@@ -28,7 +28,6 @@ type ResponseLength = "small" | "balanced" | "detailed" | "coding";
 const MODELS = [
   { key: "gpt-oss-120b", name: "GPT-OSS 120B" },
   { key: "qwen3-coder-480b", name: "Qwen3 Coder 480B" },
-  { key: "deepseek-r1", name: "DeepSeek R1" },
   { key: "nemotron-3-120b", name: "Nemotron 3 (120B)" },
   { key: "qwen3.6", name: "Qwen3.6 Plus" },
 ] as const;

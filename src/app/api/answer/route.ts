@@ -163,7 +163,6 @@ export async function POST(req: NextRequest) {
     const MODEL_MAP: Record<string, { provider: string; groq?: string; openrouter?: string; dashscope?: string }> = {
       "gpt-oss-120b": { provider: "groq", groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
       "qwen3-coder-480b": { provider: "groq", groq: "qwen/qwen3-32b", openrouter: "qwen/qwen3-32b" },
-      "deepseek-r1": { provider: "groq", groq: "deepseek-r1-distill-llama-70b", openrouter: "deepseek/deepseek-r1:free" },
       "nemotron-3-120b": { provider: "groq", groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
       "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
     };
@@ -348,7 +347,6 @@ Rules:
       throw lastError;
     }
 
-    // ─── Stream with <think> tag filter (DeepSeek R1 internal reasoning) ───
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({
       async start(controller) {
