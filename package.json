@@ -52,6 +52,7 @@
     "asar": true,
     "files": [
       "electron/**/*",
+      "electron/config.json",
       "out/**/*",
       "node_modules/**/*",
       "package.json",
@@ -67,9 +68,11 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Chintu"
+      "shortcutName": "Chintu",
+      "deleteAppDataOnUninstall": true
     },
     "publish": {
       "provider": "github",

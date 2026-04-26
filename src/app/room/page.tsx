@@ -66,7 +66,7 @@ export default function RoomPage() {
   const [liveTranscript, setLiveTranscript] = useState("");
   const [responseLength, setResponseLength] = useState<ResponseLength>("balanced");
   const [showSettings, setShowSettings] = useState(false);
-  const [isWindowHidden, setIsWindowHidden] = useState(true);
+  const [isWindowHidden, setIsWindowHidden] = useState(false);
   const [showUnhidePrompt, setShowUnhidePrompt] = useState(false);
   const [inputText, setInputText] = useState("");
   const [mounted, setMounted] = useState(false);
@@ -99,6 +99,11 @@ export default function RoomPage() {
     }
     if (isElectron && (window as any).electronAPI?.getVersion) {
       (window as any).electronAPI.getVersion().then((v: string) => setAppVersion(v));
+    }
+    if (isElectron && (window as any).electronAPI?.getHidden) {
+      (window as any).electronAPI.getHidden().then((hidden: boolean) => {
+        setIsWindowHidden(hidden);
+      });
     }
   }, []);
 
