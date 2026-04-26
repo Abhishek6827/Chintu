@@ -69,7 +69,9 @@ function startServer() {
     const staticDir = path.join(__dirname, "..", "out");
     const server = createServer(groqKeys, openRouterKey, dashscopeKey, staticDir);
 
-    const listener = server.listen(0, "127.0.0.1", () => {
+    // Use a fixed port in production to ensure localStorage persists across restarts
+    const FIXED_PORT = 52431;
+    const listener = server.listen(FIXED_PORT, "127.0.0.1", () => {
       serverPort = listener.address().port;
       console.log(`[Server] Running on http://127.0.0.1:${serverPort}`);
       resolve(serverPort);
