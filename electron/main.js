@@ -445,12 +445,18 @@ function setupAutoUpdater() {
     });
   });
 
+  autoUpdater.on("update-not-available", (info) => {
+    console.log("[AutoUpdater] No update available. Current version:", info.version);
+    if (mainWindow) {
+      mainWindow.webContents.send("update-status", { status: "up-to-date", version: info.version });
+    }
+  });
+
   autoUpdater.on("error", (err) => {
     console.error("[AutoUpdater] Error:", err.message);
     if (mainWindow) {
       mainWindow.webContents.send("update-status", { status: "error", message: err.message });
     }
-    // Show a real dialog so we can see the error in the .exe
     dialog.showErrorBox("Update Error", `Failed to check for updates: ${err.message}`);
   });
 

@@ -111,9 +111,15 @@ export default function RoomPage() {
   }, []);
 
   // ─── Listen for auto-update events ────────────────────────
+  const updateCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     if (isElectron && (window as any).electronAPI?.onUpdateStatus) {
       return (window as any).electronAPI.onUpdateStatus((data: any) => {
+        if (updateCheckTimeoutRef.current) {
+          clearTimeout(updateCheckTimeoutRef.current);
+          updateCheckTimeoutRef.current = null;
+        }
         setUpdateStatus(data);
       });
     }
@@ -1025,24 +1031,37 @@ export default function RoomPage() {
 
       {/* Auto-update notification */}
       {updateStatus && (
-        <div className="px-4 pb-2">
-          <div className={`rounded-xl px-4 py-2 text-xs flex items-center justify-between border ${
+        <div className="px-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className={`rounded-xl px-4 py-3 text-xs flex items-center justify-between border ${
             updateStatus.status === "error" 
               ? "bg-red-500/20 border-red-500/30 text-red-200" 
               : updateStatus.status === "checking"
               ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-200"
+              : updateStatus.status === "up-to-date"
+              ? "bg-green-500/20 border-green-500/30 text-green-200"
               : "bg-emerald-500/20 border-emerald-500/30 text-emerald-200"
           }`}>
             {updateStatus.status === "checking" ? (
               <span className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></div>
+                <svg className="animate-spin h-4 w-4 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
                 Checking for updates...
               </span>
             ) : updateStatus.status === "downloading" ? (
-              <span>⬇️ Downloading v{updateStatus.version}... {updateStatus.percent ? `${updateStatus.percent}%` : "Starting..."}</span>
+              <span className="flex items-center gap-2">
+                <div className="w-full bg-gray-700 rounded-full h-1.5 flex-1">
+                  <div className="bg-emerald-400 h-1.5 rounded-full transition-all duration-300" style={{ width: `${updateStatus.percent || 0}%` }}></div>
+                </div>
+                <span className="text-emerald-300 font-medium">{updateStatus.percent || 0}%</span>
+              </span>
             ) : updateStatus.status === "ready" ? (
               <>
-                <span>✅ v{updateStatus.version} ready!</span>
+                <span className="flex items-center gap-2">
+                  <span className="text-lg">✅</span>
+                  <span>v{updateStatus.version} ready!</span>
+                </span>
                 <button
                   onClick={() => (window as any).electronAPI?.restartForUpdate()}
                   className="ml-2 px-3 py-1 bg-emerald-500/40 rounded-lg text-emerald-100 font-medium hover:bg-emerald-500/60 transition-colors"
@@ -1050,12 +1069,20 @@ export default function RoomPage() {
                   Restart & Update
                 </button>
               </>
+            ) : updateStatus.status === "up-to-date" ? (
+              <span className="flex items-center gap-2">
+                <span className="text-lg">✨</span>
+                <span>You're up to date! (v{updateStatus.version})</span>
+              </span>
             ) : updateStatus.status === "error" ? (
-              <span title={updateStatus.message}>⚠️ Update Check Failed (Private Repo)</span>
+              <span title={updateStatus.message} className="flex items-center gap-2">
+                <span>⚠️</span>
+                <span>Update check failed</span>
+              </span>
             ) : null}
             
-            {(updateStatus.status === "error" || updateStatus.status === "checking") && (
-               <button onClick={() => setUpdateStatus(null)} className="ml-2 opacity-50 hover:opacity-100">✕</button>
+            {(updateStatus.status === "error" || updateStatus.status === "up-to-date" || updateStatus.status === "ready") && (
+               <button onClick={() => setUpdateStatus(null)} className="ml-2 opacity-50 hover:opacity-100 transition-opacity">✕</button>
             )}
           </div>
         </div>
@@ -1414,8 +1441,13 @@ export default function RoomPage() {
               )}
               <button
                 onClick={() => {
+                  if (updateCheckTimeoutRef.current) clearTimeout(updateCheckTimeoutRef.current);
                   setUpdateStatus({ status: "checking" });
                   (window as any).electronAPI?.checkForUpdates();
+                  updateCheckTimeoutRef.current = setTimeout(() => {
+                    setUpdateStatus({ status: "error", message: "Check timed out" });
+                    updateCheckTimeoutRef.current = null;
+                  }, 15000);
                 }}
                 className="text-[0.625rem] text-indigo-400 hover:text-indigo-300 mt-2 transition-colors"
               >
