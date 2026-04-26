@@ -352,3 +352,13 @@ body {
   border: 1px solid rgba(6, 182, 212, 0.25);
   backdrop-filter: blur(8px);
 }
+
+/* Shimmer animation for progress bar */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}

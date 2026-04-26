@@ -89,8 +89,24 @@ export default function RoomPage() {
   const [chatConversationHistory, setChatConversationHistory] = useState<HistoryMessage[]>([]);
 
   // ─── Auto-update status ───────────────────────────────────
-  const [updateStatus, setUpdateStatus] = useState<{ status: string; version?: string; percent?: number; message?: string } | null>(null);
+  const [updateStatus, setUpdateStatus] = useState<{ 
+    status: string; 
+    version?: string; 
+    percent?: number; 
+    message?: string;
+    transferred?: number;
+    total?: number;
+    speed?: number;
+  } | null>(null);
   const [appVersion, setAppVersion] = useState("");
+
+  const formatBytes = (bytes: number) => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -1059,12 +1075,46 @@ export default function RoomPage() {
                 Checking for updates...
               </span>
             ) : updateStatus.status === "downloading" ? (
-              <span className="flex items-center gap-2">
-                <div className="w-full bg-gray-700 rounded-full h-1.5 flex-1">
-                  <div className="bg-emerald-400 h-1.5 rounded-full transition-all duration-300" style={{ width: `${updateStatus.percent || 0}%` }}></div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-emerald-300 font-bold tracking-tight">Downloading Update...</span>
+                  </span>
+                  <span className="text-emerald-300 font-mono text-[0.625rem] bg-emerald-500/20 px-1.5 py-0.5 rounded-md">
+                    {updateStatus.percent || 0}%
+                  </span>
                 </div>
-                <span className="text-emerald-300 font-medium">{updateStatus.percent || 0}%</span>
-              </span>
+                
+                <div className="relative w-full bg-white/5 rounded-full h-2.5 overflow-hidden border border-white/5">
+                  {/* Progress Bar with Glow */}
+                  <div 
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 rounded-full transition-all duration-500 ease-out shadow-[0_0_12px_rgba(52,211,153,0.5)]" 
+                    style={{ width: `${updateStatus.percent || 0}%` }}
+                  >
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.3)_50%,transparent_100%)] animate-shimmer" />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-2 text-[0.5625rem] text-emerald-300/60 font-medium">
+                  <div className="flex items-center gap-3">
+                    <span>
+                      {updateStatus.transferred ? formatBytes(updateStatus.transferred) : "0 MB"} 
+                      <span className="mx-1 opacity-30">/</span> 
+                      {updateStatus.total ? formatBytes(updateStatus.total) : "0 MB"}
+                    </span>
+                    {updateStatus.speed && (
+                      <span className="flex items-center gap-1">
+                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                        {formatBytes(updateStatus.speed)}/s
+                      </span>
+                    )}
+                  </div>
+                  <span className="italic opacity-40">Crunching bits...</span>
+                </div>
+              </div>
             ) : updateStatus.status === "ready" ? (
               <>
                 <span className="flex items-center gap-2">
@@ -1083,13 +1133,23 @@ export default function RoomPage() {
                 <span className="text-lg">✨</span>
                 <span>You&apos;re up to date! (v{updateStatus.version})</span>
               </span>
-            ) : updateStatus.status === "error" ? (
-              <span className="flex items-center gap-2 max-w-[80%] overflow-hidden">
-                <span>⚠️</span>
-                <span className="truncate" title={updateStatus.message}>
-                  {updateStatus.message || "Update check failed"}
+              <div className="flex items-center justify-between w-full">
+                <span className="flex items-center gap-2 max-w-[70%] overflow-hidden">
+                  <span>⚠️</span>
+                  <span className="truncate" title={updateStatus.message}>
+                    {updateStatus.message || "Update check failed"}
+                  </span>
                 </span>
-              </span>
+                <button
+                  onClick={() => {
+                    setUpdateStatus({ status: "checking" });
+                    (window as any).electronAPI?.checkForUpdates();
+                  }}
+                  className="px-2 py-0.5 bg-red-500/30 hover:bg-red-500/50 rounded text-[0.625rem] font-bold transition-colors"
+                >
+                  RETRY
+                </button>
+              </div>
             ) : null}
             
             {(updateStatus.status === "error" || updateStatus.status === "up-to-date" || updateStatus.status === "ready") && (

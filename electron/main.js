@@ -447,7 +447,13 @@ function setupAutoUpdater() {
 
   autoUpdater.on("download-progress", (progress) => {
     if (mainWindow) {
-      mainWindow.webContents.send("update-status", { status: "downloading", percent: Math.round(progress.percent) });
+      mainWindow.webContents.send("update-status", { 
+        status: "downloading", 
+        percent: Math.round(progress.percent),
+        transferred: progress.transferred,
+        total: progress.total,
+        speed: progress.bytesPerSecond
+      });
     }
   });
 
