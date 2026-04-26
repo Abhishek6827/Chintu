@@ -436,9 +436,27 @@ function setupAutoUpdater() {
     if (mainWindow) {
       mainWindow.webContents.send("update-status", { status: "error", message: err.message });
     }
+    // Show a real dialog so we can see the error in the .exe
+    dialog.showErrorBox("Update Error", `Failed to check for updates: ${err.message}`);
   });
 
   setTimeout(() => {
-    autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.checkForUpdatesAndNotify().catch(err => {
+      console.error("[AutoUpdater] Check error:", err);
+    });
   }, 5000);
+
+  // ─── Debug Shortcut for Updates ─────────────────────────
+  globalShortcut.register("CommandOrControl+Shift+U", () => {
+    const tokenPresent = !!process.env.GH_TOKEN;
+    const version = app.getVersion();
+    const packaged = app.isPackaged;
+    
+    dialog.showMessageBox({
+      title: "Update Debug Info",
+      message: `Version: ${version}\nPackaged: ${packaged}\nToken Present: ${tokenPresent}\n\nChecking for updates now...`,
+      buttons: ["OK"]
+    });
+    autoUpdater.checkForUpdatesAndNotify();
+  });
 }
