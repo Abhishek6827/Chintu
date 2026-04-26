@@ -11,8 +11,9 @@ export async function POST(req: NextRequest) {
     ].filter(Boolean) as string[];
 
     const openRouterKey = process.env.OPENROUTER_API_KEY || "";
+    const dashscopeKey = process.env.DASHSCOPE_API_KEY || "";
 
-    if (apiKeys.length === 0 && !openRouterKey) {
+    if (apiKeys.length === 0 && !openRouterKey && !dashscopeKey) {
       return NextResponse.json({ error: "No API keys configured" }, { status: 500 });
     }
 
@@ -78,26 +79,51 @@ Rules:
     let response: any;
     let success = false;
 
-    // Try Groq first with best available model
-    for (let i = 0; i < apiKeys.length; i++) {
+    // Try DashScope first (using qwen-max for best performance as requested)
+    if (dashscopeKey) {
       try {
-        console.log(`[/api/refine-profile] Trying Groq key ${i + 1} with qwen/qwen3-32b...`);
-        const groq = new Groq({ apiKey: apiKeys[i] });
-        response = await groq.chat.completions.create({
-          model: "qwen/qwen3-32b",
+        console.log(`[/api/refine-profile] Trying DashScope with qwen3-vl-235b-a22b-thinking...`);
+        const dashscope = new OpenAI({
+          baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+          apiKey: dashscopeKey,
+        });
+        response = await dashscope.chat.completions.create({
+          model: "qwen3-vl-235b-a22b-thinking", // qwen-max is the most advanced model available on DashScope
           stream: false,
-          max_tokens: 4096,
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userMessage },
           ],
         });
         success = true;
-        console.log(`[/api/refine-profile] ✓ Success with Groq key ${i + 1}`);
-        break;
+        console.log(`[/api/refine-profile] ✓ Success with DashScope`);
       } catch (err: any) {
-        console.error(`[/api/refine-profile] ✗ Groq key ${i + 1} failed:`, err?.message?.slice(0, 100));
-        if (err?.status !== 429) break; // Only retry on rate limit
+        console.error(`[/api/refine-profile] ✗ DashScope failed:`, err?.message?.slice(0, 100));
+      }
+    }
+
+    // Try Groq fallback
+    if (!success) {
+      for (let i = 0; i < apiKeys.length; i++) {
+        try {
+          console.log(`[/api/refine-profile] Trying Groq key ${i + 1} with qwen/qwen3-32b...`);
+          const groq = new Groq({ apiKey: apiKeys[i] });
+          response = await groq.chat.completions.create({
+            model: "qwen/qwen3-32b",
+            stream: false,
+            max_tokens: 4096,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userMessage },
+            ],
+          });
+          success = true;
+          console.log(`[/api/refine-profile] ✓ Success with Groq key ${i + 1}`);
+          break;
+        } catch (err: any) {
+          console.error(`[/api/refine-profile] ✗ Groq key ${i + 1} failed:`, err?.message?.slice(0, 100));
+          if (err?.status !== 429) break; // Only retry on rate limit
+        }
       }
     }
 
@@ -130,10 +156,10 @@ Rules:
     }
 
     let rawContent = response.choices[0]?.message?.content || "";
-    
+
     // Strip <think>...</think> tags (Qwen3/DeepSeek thinking)
     rawContent = rawContent.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
-    
+
     // Try to extract JSON from response (handle markdown code fences)
     let jsonStr = rawContent;
     const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]*?)```/);

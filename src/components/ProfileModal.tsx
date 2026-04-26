@@ -259,6 +259,29 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </div>
+
+      {/* Full Page Loading Animation */}
+      {isRefining && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0a0a0a]/95 backdrop-blur-2xl" onClick={e => e.stopPropagation()}>
+          <div className="relative flex items-center justify-center w-32 h-32 mb-8">
+            <div className="absolute inset-0 rounded-full border-[3px] border-indigo-500/30 animate-[spin_3s_linear_infinite]"></div>
+            <div className="absolute inset-2 rounded-full border-[3px] border-t-purple-500 border-purple-500/20 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
+            <div className="absolute inset-4 rounded-full border-[3px] border-b-cyan-400 border-cyan-400/20 animate-[spin_2s_linear_infinite]"></div>
+            <div className="absolute inset-0 flex items-center justify-center text-4xl animate-pulse">
+              ✨
+            </div>
+          </div>
+          <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 animate-pulse tracking-wide mb-3 text-center px-4">
+            AI is structuring your profile...
+          </h2>
+          <div className="flex gap-1.5 items-center">
+            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "0ms" }}></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "300ms" }}></div>
+          </div>
+          <p className="mt-8 text-xs text-white/40 font-medium tracking-[0.2em] uppercase">Please wait • Making you look awesome</p>
+        </div>
+      )}
     </div>
   );
 }
