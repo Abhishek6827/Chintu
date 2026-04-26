@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
       transcript,
       jobDescription,
       aboutYou = "",
-      responseLength = "balanced",
+      responseLength = "small",
       conversationHistory = [],
       selectedModel = "gpt-oss-120b",
     } = await req.json();
