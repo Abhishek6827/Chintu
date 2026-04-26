@@ -27,7 +27,7 @@ type ResponseLength = "small" | "balanced" | "detailed" | "coding";
 // ─── Available models ─────────────────────────────────────────
 const MODELS = [
   { key: "gpt-oss-120b", name: "GPT-OSS 120B" },
-  { key: "qwen3-coder-480b-a35b-instruct", name: "Qwen3 Coder 480B" },
+  { key: "qwen3-Coder", name: "Qwen3 Coder 480B" },
   { key: "nemotron-3-120b", name: "Nemotron 3 (120B)" },
   { key: "qwen3.6", name: "Qwen3.6 Plus" },
 ] as const;
@@ -162,8 +162,8 @@ export default function RoomPage() {
   // Auto-switch model when coding mode is selected
   useEffect(() => {
     if (responseLength === "coding") {
-      setSelectedModel("qwen3-coder-480b-a35b-instruct");
-      selectedModelRef.current = "qwen3-coder-480b-a35b-instruct";
+      setSelectedModel("qwen3-Coder");
+      selectedModelRef.current = "qwen3-Coder";
     } else {
       setSelectedModel("gpt-oss-120b");
       selectedModelRef.current = "gpt-oss-120b";
