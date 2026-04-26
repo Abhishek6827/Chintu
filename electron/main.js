@@ -343,19 +343,24 @@ function setupAutoUpdater() {
   if (!process.env.GH_TOKEN) {
     try {
       const configPath = path.join(__dirname, "config.json");
-      const config = JSON.parse(require("fs").readFileSync(configPath, "utf-8"));
-      if (config.GH_TOKEN) {
-        process.env.GH_TOKEN = config.GH_TOKEN;
-        console.log("[AutoUpdater] Using GH_TOKEN from config.json");
+      if (fs.existsSync(configPath)) {
+        const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+        if (config.GH_TOKEN) {
+          process.env.GH_TOKEN = config.GH_TOKEN;
+          console.log("[AutoUpdater] Using GH_TOKEN from config.json (Token present)");
+          
+          // For private repos, sometimes we need to set the token in request headers explicitly
+          autoUpdater.requestHeaders = {
+            "Authorization": `token ${config.GH_TOKEN}`
+          };
+        }
       }
-    } catch {}
+    } catch (err) {
+      console.error("[AutoUpdater] Error reading config.json:", err.message);
+    }
   }
 
-  if (!process.env.GH_TOKEN) {
-    console.warn("[AutoUpdater] No GH_TOKEN found — updates for private repo will fail");
-  }
-
-  // Enable logging for debugging
+  // Enable logging
   autoUpdater.logger = require("electron-log");
   autoUpdater.logger.transports.file.level = "info";
   console.log("[AutoUpdater] Current version:", app.getVersion());
@@ -365,23 +370,30 @@ function setupAutoUpdater() {
 
   autoUpdater.on("checking-for-update", () => {
     console.log("[AutoUpdater] Checking for updates...");
+    if (mainWindow) {
+      mainWindow.webContents.send("update-status", { status: "checking" });
+    }
   });
 
   autoUpdater.on("update-available", (info) => {
     console.log("[AutoUpdater] Update available:", info.version);
     if (mainWindow) {
-      mainWindow.webContents.send("update-status", { status: "downloading", version: info.version });
+      mainWindow.webContents.send("update-status", { status: "downloading", version: info.version, percent: 0 });
     }
   });
 
   autoUpdater.on("update-not-available", () => {
     console.log("[AutoUpdater] App is up to date.");
+    if (mainWindow) {
+      mainWindow.webContents.send("update-status", null); // Clear status if up to date
+    }
   });
 
   autoUpdater.on("download-progress", (progress) => {
-    console.log(`[AutoUpdater] Download: ${Math.round(progress.percent)}%`);
+    const percent = Math.round(progress.percent);
+    console.log(`[AutoUpdater] Download: ${percent}%`);
     if (mainWindow) {
-      mainWindow.webContents.send("update-status", { status: "downloading", percent: Math.round(progress.percent) });
+      mainWindow.webContents.send("update-status", { status: "downloading", percent });
     }
   });
 
@@ -394,11 +406,16 @@ function setupAutoUpdater() {
 
   autoUpdater.on("error", (err) => {
     console.error("[AutoUpdater] Error:", err.message);
+    if (mainWindow) {
+      mainWindow.webContents.send("update-status", { status: "error", message: err.message });
+    }
   });
 
+  // Initial check after 5 seconds
   setTimeout(() => {
+    console.log("[AutoUpdater] Triggering initial check...");
     autoUpdater.checkForUpdatesAndNotify().catch((err) => {
-      console.warn("[AutoUpdater] Check failed:", err.message);
+      console.error("[AutoUpdater] Initial check failed:", err.message);
     });
   }, 5000);
 }

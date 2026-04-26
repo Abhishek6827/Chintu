@@ -1024,9 +1024,20 @@ export default function RoomPage() {
       {/* Auto-update notification */}
       {updateStatus && (
         <div className="px-4 pb-2">
-          <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-xl px-4 py-2 text-emerald-200 text-xs flex items-center justify-between">
-            {updateStatus.status === "downloading" ? (
-              <span>⬇️ Downloading v{updateStatus.version}... {updateStatus.percent ? `${updateStatus.percent}%` : ""}</span>
+          <div className={`rounded-xl px-4 py-2 text-xs flex items-center justify-between border ${
+            updateStatus.status === "error" 
+              ? "bg-red-500/20 border-red-500/30 text-red-200" 
+              : updateStatus.status === "checking"
+              ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-200"
+              : "bg-emerald-500/20 border-emerald-500/30 text-emerald-200"
+          }`}>
+            {updateStatus.status === "checking" ? (
+              <span className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></div>
+                Checking for updates...
+              </span>
+            ) : updateStatus.status === "downloading" ? (
+              <span>⬇️ Downloading v{updateStatus.version}... {updateStatus.percent ? `${updateStatus.percent}%` : "Starting..."}</span>
             ) : updateStatus.status === "ready" ? (
               <>
                 <span>✅ v{updateStatus.version} ready!</span>
@@ -1037,7 +1048,13 @@ export default function RoomPage() {
                   Restart & Update
                 </button>
               </>
+            ) : updateStatus.status === "error" ? (
+              <span title={updateStatus.message}>⚠️ Update Check Failed (Private Repo)</span>
             ) : null}
+            
+            {(updateStatus.status === "error" || updateStatus.status === "checking") && (
+               <button onClick={() => setUpdateStatus(null)} className="ml-2 opacity-50 hover:opacity-100">✕</button>
+            )}
           </div>
         </div>
       )}
