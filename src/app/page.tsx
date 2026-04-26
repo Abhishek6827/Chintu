@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getStoredProfile } from "@/components/ProfileModal";
+import { getStoredProfile, loadProfileFromDisk, saveProfileToDisk } from "@/components/ProfileModal";
 
 const STORAGE_KEY = "chintu_user_profile";
 
@@ -22,8 +22,8 @@ export default function SetupPage() {
     const draftJd = localStorage.getItem("chintu_draft_jd");
     if (draftJd) setJd(draftJd);
 
-    const checkProfile = () => {
-      const stored = getStoredProfile();
+    const checkProfile = async () => {
+      const stored = await loadProfileFromDisk();
       setHasProfile(!!stored);
     };
     checkProfile();
@@ -69,7 +69,7 @@ export default function SetupPage() {
           const data = await res.json();
           if (data.profile && typeof data.profile === "object") {
             // Save the structured profile
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data.profile));
+            await saveProfileToDisk(data.profile);
             localStorage.removeItem("chintu_draft_about_me");
             profileSaved = true;
             setStatusText("✅ Profile saved! Starting session...");
@@ -92,7 +92,7 @@ export default function SetupPage() {
           certifications: [],
           achievements: [],
         };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackProfile));
+        await saveProfileToDisk(fallbackProfile);
         // Also flag for background re-refine on room page
         sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
         setStatusText("Profile saved (will refine in background)...");

@@ -333,98 +333,28 @@ app.whenReady().then(async () => {
   });
 });
 
-// ─── Auto-Updater Setup ───────────────────────────────────
-function setupAutoUpdater() {
-  // Map GH_PAT from .env.local to GH_TOKEN for electron-updater
-  if (process.env.GH_PAT) {
-    process.env.GH_TOKEN = process.env.GH_PAT;
-    console.log("[AutoUpdater] Using GH_PAT from environment");
+// ─── Profile Storage (File-based for persistence) ────────
+const PROFILE_FILE = path.join(app.getPath("userData"), "profile.json");
+
+ipcMain.handle("save-profile", (event, profile) => {
+  try {
+    fs.writeFileSync(PROFILE_FILE, JSON.stringify(profile, null, 2));
+    return true;
+  } catch (err) {
+    console.error("Error saving profile:", err);
+    return false;
   }
+});
 
-  // Fallback: read GH_TOKEN from config.json (production builds)
-  if (!process.env.GH_TOKEN) {
-    try {
-      const configPath = path.join(__dirname, "config.json");
-      if (fs.existsSync(configPath)) {
-        const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-        if (config.GH_TOKEN) {
-          process.env.GH_TOKEN = config.GH_TOKEN;
-          console.log("[AutoUpdater] Using GH_TOKEN from config.json (Token present)");
-          
-          // For private repos, sometimes we need to set the token in request headers explicitly
-          autoUpdater.requestHeaders = {
-            "Authorization": `token ${config.GH_TOKEN}`
-          };
-        }
-      }
-    } catch (err) {
-      console.error("[AutoUpdater] Error reading config.json:", err.message);
+ipcMain.handle("load-profile", () => {
+  try {
+    if (fs.existsSync(PROFILE_FILE)) {
+      return JSON.parse(fs.readFileSync(PROFILE_FILE, "utf-8"));
     }
+  } catch (err) {
+    console.error("Error loading profile:", err);
   }
-
-  // Enable logging
-  autoUpdater.logger = require("electron-log");
-  autoUpdater.logger.transports.file.level = "info";
-  console.log("[AutoUpdater] Current version:", app.getVersion());
-
-  autoUpdater.autoDownload = true;
-  autoUpdater.autoInstallOnAppQuit = true;
-
-  autoUpdater.on("checking-for-update", () => {
-    console.log("[AutoUpdater] Checking for updates...");
-    if (mainWindow) {
-      mainWindow.webContents.send("update-status", { status: "checking" });
-    }
-  });
-
-  autoUpdater.on("update-available", (info) => {
-    console.log("[AutoUpdater] Update available:", info.version);
-    if (mainWindow) {
-      mainWindow.webContents.send("update-status", { status: "downloading", version: info.version, percent: 0 });
-    }
-  });
-
-  autoUpdater.on("update-not-available", () => {
-    console.log("[AutoUpdater] App is up to date.");
-    if (mainWindow) {
-      mainWindow.webContents.send("update-status", null); // Clear status if up to date
-    }
-  });
-
-  autoUpdater.on("download-progress", (progress) => {
-    const percent = Math.round(progress.percent);
-    console.log(`[AutoUpdater] Download: ${percent}%`);
-    if (mainWindow) {
-      mainWindow.webContents.send("update-status", { status: "downloading", percent });
-    }
-  });
-
-  autoUpdater.on("update-downloaded", (info) => {
-    console.log("[AutoUpdater] Update downloaded:", info.version);
-    if (mainWindow) {
-      mainWindow.webContents.send("update-status", { status: "ready", version: info.version });
-    }
-  });
-
-  autoUpdater.on("error", (err) => {
-    console.error("[AutoUpdater] Error:", err.message);
-    if (mainWindow) {
-      mainWindow.webContents.send("update-status", { status: "error", message: err.message });
-    }
-  });
-
-  // Initial check after 5 seconds
-  setTimeout(() => {
-    console.log("[AutoUpdater] Triggering initial check...");
-    autoUpdater.checkForUpdatesAndNotify().catch((err) => {
-      console.error("[AutoUpdater] Initial check failed:", err.message);
-    });
-  }, 5000);
-}
-
-// ─── IPC: Restart to apply update ────────────────────────
-ipcMain.on("restart-for-update", () => {
-  autoUpdater.quitAndInstall(false, true);
+  return null;
 });
 
 app.on("window-all-closed", () => {
@@ -438,3 +368,77 @@ app.on("activate", () => {
 app.on("before-quit", () => {
   app.isQuitting = true;
 });
+
+// ─── Auto-Updater Setup ───────────────────────────────────
+function setupAutoUpdater() {
+  const { dialog } = require("electron");
+
+  // Fallback: read GH_TOKEN from config.json (production builds)
+  if (!process.env.GH_TOKEN) {
+    try {
+      const configPath = path.join(__dirname, "config.json");
+      if (fs.existsSync(configPath)) {
+        const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+        if (config.GH_TOKEN) {
+          process.env.GH_TOKEN = config.GH_TOKEN;
+          console.log("[AutoUpdater] Using GH_TOKEN from config.json");
+          
+          autoUpdater.requestHeaders = {
+            "Authorization": `token ${config.GH_TOKEN}`
+          };
+        }
+      }
+    } catch (err) {
+      console.error("[AutoUpdater] Error reading config.json:", err.message);
+    }
+  }
+
+  autoUpdater.logger = require("electron-log");
+  autoUpdater.logger.transports.file.level = "info";
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on("checking-for-update", () => {
+    if (mainWindow) mainWindow.webContents.send("update-status", { status: "checking" });
+  });
+
+  autoUpdater.on("update-available", (info) => {
+    if (mainWindow) {
+      mainWindow.webContents.send("update-status", { status: "downloading", version: info.version, percent: 0 });
+    }
+  });
+
+  autoUpdater.on("download-progress", (progress) => {
+    if (mainWindow) {
+      mainWindow.webContents.send("update-status", { status: "downloading", percent: Math.round(progress.percent) });
+    }
+  });
+
+  autoUpdater.on("update-downloaded", (info) => {
+    if (mainWindow) {
+      mainWindow.webContents.send("update-status", { status: "ready", version: info.version });
+    }
+    
+    dialog.showMessageBox({
+      type: "info",
+      title: "Update Ready",
+      message: `Version ${info.version} has been downloaded and is ready to install.`,
+      buttons: ["Restart Now", "Later"]
+    }).then((result) => {
+      if (result.response === 0) {
+        autoUpdater.quitAndInstall(false, true);
+      }
+    });
+  });
+
+  autoUpdater.on("error", (err) => {
+    console.error("[AutoUpdater] Error:", err.message);
+    if (mainWindow) {
+      mainWindow.webContents.send("update-status", { status: "error", message: err.message });
+    }
+  });
+
+  setTimeout(() => {
+    autoUpdater.checkForUpdatesAndNotify();
+  }, 5000);
+}

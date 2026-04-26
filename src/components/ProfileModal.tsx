@@ -23,6 +23,26 @@ export function getStoredProfile(): ProfileData | null {
   } catch { return null; }
 }
 
+const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
+
+export async function saveProfileToDisk(profile: ProfileData) {
+  if (isElectron && (window as any).electronAPI?.saveProfile) {
+    await (window as any).electronAPI.saveProfile(profile);
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+}
+
+export async function loadProfileFromDisk(): Promise<ProfileData | null> {
+  if (isElectron && (window as any).electronAPI?.loadProfile) {
+    const diskProfile = await (window as any).electronAPI.loadProfile();
+    if (diskProfile) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(diskProfile));
+      return diskProfile;
+    }
+  }
+  return getStoredProfile();
+}
+
 export function getProfileContext(): string {
   const p = getStoredProfile();
   if (!p) return "";
@@ -65,8 +85,9 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
   const [editJson, setEditJson] = useState("");
 
   useEffect(() => {
-    const stored = getStoredProfile();
-    if (stored) setProfile(stored);
+    loadProfileFromDisk().then(p => {
+      if (p) setProfile(p);
+    });
   }, []);
 
   const handleRefine = async () => {
@@ -83,7 +104,7 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
       const data = await res.json();
       if (data.profile) {
         setProfile(data.profile);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data.profile));
+        await saveProfileToDisk(data.profile);
         setRawText("");
       }
     } catch (err: any) {
@@ -92,8 +113,11 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
     setIsRefining(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     localStorage.removeItem(STORAGE_KEY);
+    if (isElectron && (window as any).electronAPI?.saveProfile) {
+      await (window as any).electronAPI.saveProfile(null);
+    }
     setProfile(null);
     setEditMode(false);
   };
@@ -107,7 +131,7 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
     try {
       const parsed = JSON.parse(editJson);
       setProfile(parsed);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      saveProfileToDisk(parsed);
       setEditMode(false);
       setError("");
     } catch {

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AnswerDisplay from "@/components/AnswerDisplay";
-import ProfileModal, { getProfileContext, getStoredProfile } from "@/components/ProfileModal";
+import ProfileModal, { getProfileContext, getStoredProfile, loadProfileFromDisk, saveProfileToDisk } from "@/components/ProfileModal";
 
 interface AnswerEntry {
   id: string;
@@ -175,9 +175,12 @@ export default function RoomPage() {
     const jd = sessionStorage.getItem("jobDescription");
     if (!jd) { router.push("/"); return; }
     setJobDescription(jd);
-    // Load profile context
-    setProfileContext(getProfileContext());
-    setHasProfile(!!getStoredProfile());
+    const initProfile = async () => {
+      const p = await loadProfileFromDisk();
+      setProfileContext(getProfileContext());
+      setHasProfile(!!p);
+    };
+    initProfile();
 
     // Check if there's a pending raw profile that needs re-refining
     // (landing page saved a fallback profile with just the summary field)
@@ -194,7 +197,7 @@ export default function RoomPage() {
           if (res.ok) {
             const data = await res.json();
             if (data.profile && typeof data.profile === "object") {
-              localStorage.setItem("chintu_user_profile", JSON.stringify(data.profile));
+              await saveProfileToDisk(data.profile);
               setProfileContext(getProfileContext());
               setHasProfile(true);
               sessionStorage.removeItem("chintu_pending_raw_profile");
