@@ -1,5 +1,5 @@
 {
-  "name": "interview-copilot",
+  "name": "chintu",
   "version": "1.0.16",
   "private": true,
   "main": "electron/main.js",
@@ -44,7 +44,7 @@
     "wait-on": "^9.0.4"
   },
   "build": {
-    "appId": "com.interviewcopilot.app",
+    "appId": "com.chintu.app",
     "productName": "Chintu",
     "directories": {
       "output": "dist-electron"
