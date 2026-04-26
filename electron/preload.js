@@ -28,5 +28,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     return () => ipcRenderer.removeListener("update-status", handler);
   },
   restartForUpdate: () => ipcRenderer.send("restart-for-update"),
+  checkForUpdates: () => ipcRenderer.send("check-for-updates"),
 });
 

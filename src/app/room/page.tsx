@@ -1412,6 +1412,15 @@ export default function RoomPage() {
               {appVersion && (
                 <p className="text-[0.5625rem] text-gray-300/60 mt-1">v{appVersion}</p>
               )}
+              <button
+                onClick={() => {
+                  setUpdateStatus({ status: "checking" });
+                  (window as any).electronAPI?.checkForUpdates();
+                }}
+                className="text-[0.625rem] text-indigo-400 hover:text-indigo-300 mt-2 transition-colors"
+              >
+                Check for Updates
+              </button>
             </div>
           </div>
         </div>

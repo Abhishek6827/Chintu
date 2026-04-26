@@ -1,5 +1,6 @@
 const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, desktopCapturer, session } = require("electron");
 const path = require("path");
+const fs = require("fs");
 const { createServer } = require("./server");
 const { autoUpdater } = require("electron-updater");
 
@@ -294,6 +295,19 @@ ipcMain.on("set-opacity", (event, opacity) => {
 ipcMain.handle("get-opacity", () => userOpacity);
 ipcMain.handle("get-app-version", () => app.getVersion());
 
+// ─── Restart for update ───────────────────────────────────
+ipcMain.on("restart-for-update", () => {
+  autoUpdater.quitAndInstall(false, true);
+});
+
+// ─── Manual update check ──────────────────────────────────
+ipcMain.on("check-for-updates", () => {
+  console.log("[AutoUpdater] Manual check triggered");
+  autoUpdater.checkForUpdatesAndNotify().catch(err => {
+    console.error("[AutoUpdater] Manual check error:", err);
+  });
+});
+
 // ─── App lifecycle ────────────────────────────────────────
 app.whenReady().then(async () => {
   loadEnv();
@@ -445,6 +459,14 @@ function setupAutoUpdater() {
       console.error("[AutoUpdater] Check error:", err);
     });
   }, 5000);
+
+  // ─── Periodic update check every 30 minutes ─────────────
+  setInterval(() => {
+    console.log("[AutoUpdater] Periodic check for updates...");
+    autoUpdater.checkForUpdatesAndNotify().catch(err => {
+      console.error("[AutoUpdater] Periodic check error:", err);
+    });
+  }, 30 * 60 * 1000);
 
   // ─── Debug Shortcut for Updates ─────────────────────────
   globalShortcut.register("CommandOrControl+Shift+U", () => {
