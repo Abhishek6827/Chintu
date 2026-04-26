@@ -1072,7 +1072,7 @@ export default function RoomPage() {
             ) : updateStatus.status === "up-to-date" ? (
               <span className="flex items-center gap-2">
                 <span className="text-lg">✨</span>
-                <span>You're up to date! (v{updateStatus.version})</span>
+                <span>You&apos;re up to date! (v{updateStatus.version})</span>
               </span>
             ) : updateStatus.status === "error" ? (
               <span title={updateStatus.message} className="flex items-center gap-2">
