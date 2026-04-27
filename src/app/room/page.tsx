@@ -1040,8 +1040,10 @@ export default function RoomPage() {
       {status !== "idle" && (
         <div className="px-4 pb-2">
           <div className={`
-            text-center py-1.5 rounded-full text-xs font-semibold
-            ${status === "recording" ? "bg-red-500/20 text-red-100" : "bg-white/10 text-white/80"}
+            text-center py-1.5 rounded-full text-xs font-semibold border
+            ${status === "recording" 
+              ? "bg-red-500/10 border-red-500/20 text-red-500" 
+              : "bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-main)]"}
           `}>
             {status === "recording" ? "🔴 Recording..." : "✨ Generating answer..."}
           </div>
@@ -1051,7 +1053,7 @@ export default function RoomPage() {
       {/* Live transcript */}
       {status === "recording" && liveTranscript && (
         <div className="px-4 pb-2">
-          <div className="bg-white/10 rounded-xl px-4 py-2 text-white/70 text-sm italic">
+          <div className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-2 text-[var(--text-dim)] text-sm italic">
             &quot;{liveTranscript}&quot;
           </div>
         </div>
@@ -1067,7 +1069,7 @@ export default function RoomPage() {
               </svg>
               <span className="text-[0.625rem] text-cyan-400 font-semibold uppercase tracking-wider">AI Interviewer</span>
             </div>
-            <p className="text-[0.8125rem] text-cyan-100/90 leading-relaxed">
+            <p className="text-[0.8125rem] text-[var(--text-main)] opacity-90 leading-relaxed">
               {aiSpeechBubbles[aiSpeechBubbles.length - 1]}
             </p>
           </div>
@@ -1096,12 +1098,12 @@ export default function RoomPage() {
         <div className="px-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className={`rounded-xl px-4 py-3 text-xs flex items-center justify-between border ${
             updateStatus.status === "error" 
-              ? "bg-red-500/20 border-red-500/30 text-red-200" 
+              ? "bg-red-500/10 border-red-500/20 text-red-600" 
               : updateStatus.status === "checking"
-              ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-200"
+              ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-600"
               : updateStatus.status === "up-to-date"
-              ? "bg-green-500/20 border-green-500/30 text-green-200"
-              : "bg-emerald-500/20 border-emerald-500/30 text-emerald-200"
+              ? "bg-green-500/10 border-green-500/20 text-green-600"
+              : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"
           }`}>
             {updateStatus.status === "checking" ? (
               <span className="flex items-center gap-2">
@@ -1116,14 +1118,14 @@ export default function RoomPage() {
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-emerald-300 font-bold tracking-tight">Downloading Update...</span>
+                    <span className="text-emerald-600 font-bold tracking-tight">Downloading Update...</span>
                   </span>
-                  <span className="text-emerald-300 font-mono text-[0.625rem] bg-emerald-500/20 px-1.5 py-0.5 rounded-md">
+                  <span className="text-emerald-600 font-mono text-[0.625rem] bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
                     {updateStatus.percent || 0}%
                   </span>
                 </div>
                 
-                <div className="relative w-full bg-white/5 rounded-full h-2.5 overflow-hidden border border-white/5">
+                <div className="relative w-full bg-[var(--input-bg)] rounded-full h-2.5 overflow-hidden border border-[var(--glass-border)]">
                   {/* Progress Bar with Glow */}
                   <div 
                     className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 rounded-full transition-all duration-500 ease-out shadow-[0_0_12px_rgba(52,211,153,0.5)]" 
@@ -1133,7 +1135,7 @@ export default function RoomPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mt-2 text-[0.5625rem] text-emerald-300/60 font-medium">
+                <div className="flex items-center justify-between mt-2 text-[0.5625rem] text-emerald-600 font-medium">
                   <div className="flex items-center gap-3">
                     <span>
                       {updateStatus.transferred ? formatBytes(updateStatus.transferred) : "0 MB"} 
@@ -1160,7 +1162,7 @@ export default function RoomPage() {
                 </span>
                 <button
                   onClick={() => (window as any).electronAPI?.restartForUpdate()}
-                  className="ml-2 px-3 py-1 bg-emerald-500/40 rounded-lg text-emerald-100 font-medium hover:bg-emerald-500/60 transition-colors"
+                  className="ml-2 px-3 py-1 bg-emerald-600 rounded-lg text-white font-black uppercase text-[10px] tracking-widest hover:bg-emerald-500 transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
                 >
                   Restart & Update
                 </button>
