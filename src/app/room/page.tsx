@@ -18,6 +18,13 @@ interface AnswerEntry {
   timeTaken?: number;
 }
 
+interface HistorySession {
+  id: string;
+  timestamp: number;
+  title: string;
+  answers: AnswerEntry[];
+}
+
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
   resultIndex: number;
@@ -100,6 +107,56 @@ export default function RoomPage() {
     speed?: number;
   } | null>(null);
   const [appVersion, setAppVersion] = useState("");
+  const [history, setHistory] = useState<HistorySession[]>([]);
+
+  useEffect(() => {
+    const savedHistory = localStorage.getItem("chintu_history");
+    if (savedHistory) {
+      try {
+        setHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error("Failed to load history", e);
+      }
+    }
+  }, []);
+
+  const saveToHistory = useCallback(() => {
+    if (answers.length === 0) return;
+    
+    const newSession: HistorySession = {
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+      title: answers[0].question.slice(0, 40) + (answers[0].question.length > 40 ? "..." : ""),
+      answers: [...answers]
+    };
+
+    const updatedHistory = [newSession, ...history].slice(0, 50); // Keep last 50
+    setHistory(updatedHistory);
+    localStorage.setItem("chintu_history", JSON.stringify(updatedHistory));
+  }, [answers, history]);
+
+  const clearHistory = () => {
+    if (confirm("Clear all conversation history?")) {
+      setHistory([]);
+      localStorage.removeItem("chintu_history");
+    }
+  };
+
+  const deleteSession = (id: string) => {
+    const updatedHistory = history.filter(s => s.id !== id);
+    setHistory(updatedHistory);
+    localStorage.setItem("chintu_history", JSON.stringify(updatedHistory));
+  };
+
+  const exportHistory = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("download", `chintu_history_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 B";
@@ -1334,17 +1391,23 @@ export default function RoomPage() {
           <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
         </button>
         
-        {/* Button 2: Clear */}
+        {/* Button 2: New Conversation / Clear */}
         <button
           onClick={() => {
+            if (answers.length > 0) {
+              saveToHistory();
+            }
             setAnswers([]);
             setAiSpeechBubbles([]);
             setVisionConversationHistory([]);
             setChatConversationHistory([]);
+            setCapturedScreenshots([]);
+            setInputText("");
+            setLiveTranscript("");
           }}
           className="no-drag w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-red-500/20 hover:text-red-400 transition-all active:scale-90"
         >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </button>
 
         {/* Button 3: Mic (The Core) */}
@@ -1441,70 +1504,168 @@ export default function RoomPage() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-6" onClick={() => setShowSettings(false)}>
-          <div className="settings-panel w-full max-w-sm p-8 space-y-8" onClick={(e) => e.stopPropagation()}>
+        <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowSettings(false)}>
+          <div 
+            className="settings-panel w-full relative" 
+            style={{ 
+              maxWidth: 'clamp(140px, 95vw, 400px)',
+              padding: 'clamp(10px, 4vw, 24px)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'clamp(10px, 4vw, 24px)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.4em] mb-1">System</h2>
-                <h3 className="text-2xl font-black text-[var(--text-main)] uppercase tracking-tight">Settings</h3>
+                <h2 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-[0.4em] mb-1">System</h2>
+                <h3 style={{ fontSize: 'clamp(12px, 4vw, 24px)' }} className="font-black text-[var(--text-main)] uppercase tracking-tight">Settings</h3>
               </div>
               <button
                 onClick={() => setShowSettings(false)}
-                className="w-12 h-12 rounded-2xl bg-[var(--input-bg)] text-[var(--text-dim)] flex items-center justify-center hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all"
+                className="rounded-2xl bg-[var(--input-bg)] text-[var(--text-dim)] flex items-center justify-center hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all"
+                style={{ width: 'clamp(28px, 8vw, 48px)', height: 'clamp(28px, 8vw, 48px)' }}
               >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                <svg style={{ width: 'clamp(14px, 4vw, 24px)', height: 'clamp(14px, 4vw, 24px)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
 
             <div className="space-y-6">
               {/* Space Mode */}
-              <div className="bg-[var(--panel-bg)] rounded-2xl p-5 border border-[var(--glass-border)]">
+              <div 
+                className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
+                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+              >
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">Input Strategy</h4>
+                  <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest">Input Strategy</h4>
                   <div className="flex bg-[var(--input-bg)] rounded-xl p-1">
                     <button
                       onClick={() => setSpaceMode("hold")}
-                      className={`text-[10px] px-4 py-2 rounded-lg font-black uppercase tracking-widest transition-all ${
+                      className={`rounded-lg font-black uppercase tracking-widest transition-all ${
                         spaceMode === "hold" ? "bg-[var(--text-main)] text-[var(--panel-bg)]" : "text-[var(--text-dim)]"
                       }`}
+                      style={{ fontSize: 'clamp(6px, 1.2vw, 9px)', padding: 'clamp(4px, 1vw, 10px) clamp(6px, 1.5vw, 16px)' }}
                     >
                       Hold
                     </button>
                     <button
                       onClick={() => setSpaceMode("toggle")}
-                      className={`text-[10px] px-4 py-2 rounded-lg font-black uppercase tracking-widest transition-all ${
+                      className={`rounded-lg font-black uppercase tracking-widest transition-all ${
                         spaceMode === "toggle" ? "bg-[var(--text-main)] text-[var(--panel-bg)]" : "text-[var(--text-dim)]"
                       }`}
+                      style={{ fontSize: 'clamp(6px, 1.2vw, 9px)', padding: 'clamp(4px, 1vw, 10px) clamp(6px, 1.5vw, 16px)' }}
                     >
                       Toggle
                     </button>
                   </div>
                 </div>
-                <p className="text-[10px] text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
+                <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
                   {spaceMode === "hold" ? "Hold space to speak, release to send" : "Tap space to start/stop recording"}
                 </p>
               </div>
 
               {/* Profile Section */}
-              <div className="bg-[var(--input-bg)] rounded-2xl p-5 border border-[var(--glass-border)] flex items-center justify-between">
+              <div 
+                className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)] flex items-center justify-between"
+                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+              >
                 <div>
-                  <h4 className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Neural Profile</h4>
-                  <p className="text-xs font-bold text-[var(--text-main)] uppercase tracking-tight">{hasProfile ? "Identity Loaded" : "No Profile"}</p>
+                  <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">User Profile</h4>
+                  <p style={{ fontSize: 'clamp(8px, 2vw, 12px)' }} className="font-bold text-[var(--text-main)] uppercase tracking-tight">{hasProfile ? "Identity Loaded" : "No Profile"}</p>
                 </div>
                 <button
                   onClick={() => { setShowSettings(false); setShowProfile(true); }}
-                  className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition-all active:scale-95"
+                  className="bg-indigo-600 text-white rounded-xl font-black uppercase tracking-widest hover:bg-indigo-500 transition-all active:scale-95 shadow-lg shadow-indigo-500/20"
+                  style={{ fontSize: 'clamp(6px, 1.5vw, 10px)', padding: 'clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 20px)' }}
                 >
                   {hasProfile ? "Open Vault" : "Setup"}
                 </button>
               </div>
 
-              {/* Update Section */}
-              <div className="bg-[var(--input-bg)] rounded-2xl p-5 border border-[var(--glass-border)] space-y-4">
+              {/* History Section */}
+              <div 
+                className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)]"
+                style={{ padding: 'clamp(8px, 3vw, 20px)', display: 'flex', flexDirection: 'column', gap: 'clamp(8px, 2vw, 16px)' }}
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Software</h4>
-                    <p className="text-xs font-bold text-[var(--text-main)] uppercase tracking-tight">Version {appVersion || "1.0.0"}</p>
+                    <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">History</h4>
+                    <p style={{ fontSize: 'clamp(8px, 2vw, 12px)' }} className="font-bold text-[var(--text-main)] uppercase tracking-tight">{history.length} Sessions</p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <button
+                      onClick={exportHistory}
+                      className="rounded-xl bg-[var(--glass-bg)] text-[var(--text-main)] flex items-center justify-center hover:bg-indigo-500/20 transition-all border border-[var(--glass-border)]"
+                      style={{ width: 'clamp(24px, 6vw, 40px)', height: 'clamp(24px, 6vw, 40px)' }}
+                      title="Export History"
+                    >
+                      <svg style={{ width: 'clamp(12px, 3vw, 20px)', height: 'clamp(12px, 3vw, 20px)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    </button>
+                    <button
+                      onClick={clearHistory}
+                      className="rounded-xl bg-[var(--glass-bg)] text-red-400 flex items-center justify-center hover:bg-red-500/20 transition-all border border-[var(--glass-border)]"
+                      style={{ width: 'clamp(24px, 6vw, 40px)', height: 'clamp(24px, 6vw, 40px)' }}
+                      title="Clear History"
+                    >
+                      <svg style={{ width: 'clamp(12px, 3vw, 20px)', height: 'clamp(12px, 3vw, 20px)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </div>
+                </div>
+                
+                {history.length > 0 && (
+                  <div 
+                    className="overflow-y-auto space-y-1.5 pr-1.5 custom-scrollbar"
+                    style={{ maxHeight: 'clamp(80px, 25vh, 200px)' }}
+                  >
+                    {history.map((session) => (
+                      <button
+                        key={session.id}
+                        onClick={() => {
+                          if (answers.length > 0) {
+                            saveToHistory();
+                          }
+                          setAnswers(session.answers);
+                          setAiSpeechBubbles([]);
+                          setVisionConversationHistory([]);
+                          setChatConversationHistory([]);
+                          setShowSettings(false);
+                        }}
+                        className="w-full text-left rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] hover:border-indigo-500/50 transition-all group flex items-center justify-between"
+                        style={{ padding: 'clamp(6px, 1.5vw, 12px)' }}
+                      >
+                        <div className="flex-1 min-w-0 pr-2">
+                          <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="font-bold text-[var(--text-main)] truncate">{session.title}</p>
+                          <p style={{ fontSize: 'clamp(6px, 1.2vw, 8px)' }} className="text-[var(--text-dim)] uppercase tracking-tighter mt-0.5">
+                            {new Date(session.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm("Delete this session?")) {
+                              deleteSession(session.id);
+                            }
+                          }}
+                          className="rounded-lg bg-red-500/10 text-red-400 opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                          style={{ width: 'clamp(20px, 5vw, 32px)', height: 'clamp(20px, 5vw, 32px)' }}
+                        >
+                          <svg style={{ width: 'clamp(10px, 2.5vw, 16px)', height: 'clamp(10px, 2.5vw, 16px)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Update Section */}
+              <div 
+                className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)]"
+                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Software</h4>
+                    <p style={{ fontSize: 'clamp(8px, 2vw, 12px)' }} className="font-bold text-[var(--text-main)] uppercase tracking-tight">v{appVersion || "1.0.0"}</p>
                   </div>
                   <button
                     onClick={() => {
@@ -1513,7 +1674,8 @@ export default function RoomPage() {
                       setUpdateStatus({ status: "checking" });
                       (window as any).electronAPI?.checkForUpdates();
                     }}
-                    className="px-5 py-2.5 bg-[var(--text-main)] text-[var(--panel-bg)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95"
+                    className="bg-[var(--text-main)] text-[var(--panel-bg)] rounded-xl font-black uppercase tracking-widest transition-all active:scale-95"
+                    style={{ fontSize: 'clamp(6px, 1.5vw, 10px)', padding: 'clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 20px)' }}
                   >
                     Check
                   </button>

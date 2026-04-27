@@ -32,7 +32,7 @@
 
 /* Global fluid scaling */
 html {
-  font-size: 16px;
+  font-size: clamp(14px, 1.2vw, 18px);
 }
 
 * {
@@ -142,13 +142,44 @@ textarea {
   color: inherit;
 }
 
-/* ─── Responsive Adjustments ─────────────────────────── */
-.toolbar {
-  flex-wrap: nowrap !important;
-  gap: 8px !important;
-  justify-content: center !important;
-  padding: 6px 12px !important;
-  min-height: fit-content;
+/* ─── Extreme Mini Responsiveness ─────────────────── */
+@media (max-width: 300px) {
+  .toolbar {
+    gap: 4px !important;
+    padding: 4px 8px !important;
+  }
+  .toolbar button {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  /* Hide labels in settings at ultra-small widths */
+  .settings-panel h2, .settings-panel p {
+    letter-spacing: 0.1em !important;
+  }
+}
+
+@media (max-width: 200px) {
+  .toolbar {
+    gap: 2px !important;
+  }
+  .toolbar button {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+/* Ensure settings panel doesn't overflow vertically */
+.settings-overlay {
+  overflow-y: auto !important;
+  align-items: flex-start !important;
+  padding-top: 2vh !important;
+  padding-bottom: 2vh !important;
+}
+
+.settings-panel {
+  margin: auto !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
   width: 100% !important;
   min-width: 0 !important;
 }
@@ -464,4 +495,19 @@ input[type="range"]::-moz-range-thumb {
 .animate-gradient {
   background-size: 200% auto;
   animation: gradient 3s ease infinite;
+}
+/* Custom scrollbar for history list */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }

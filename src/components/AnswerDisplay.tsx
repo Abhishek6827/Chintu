@@ -69,7 +69,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
           }} 
           className="font-black uppercase mb-1 sm:mb-2 text-[var(--text-main)] text-center px-4"
         >
-          Neural Link Ready
+          Chintu is Ready
         </p>
         <p 
           style={{ 
@@ -84,13 +84,27 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
   }
 
   return (
-    <div className="space-y-10 px-4 pb-12">
+    <div 
+      className="pb-12"
+      style={{ 
+        gap: 'clamp(20px, 5vh, 40px)', 
+        display: 'flex', 
+        flexDirection: 'column',
+        paddingLeft: 'clamp(8px, 3vw, 24px)',
+        paddingRight: 'clamp(8px, 3vw, 24px)'
+      }}
+    >
       {answers.map((entry, idx) => (
         <div key={entry.id} className="animate-fade-in relative group">
           
           {/* Question bubble - Elegant Minimalist */}
-          <div className="flex justify-end mb-5">
-            <div className="max-w-[80%] bg-[var(--bubble-bg)] border border-[var(--glass-border)] rounded-2xl px-6 py-4 backdrop-blur-md shadow-xl">
+          <div className="flex justify-end mb-4">
+            <div 
+              className="max-w-[85%] bg-[var(--bubble-bg)] border border-[var(--glass-border)] rounded-2xl backdrop-blur-md shadow-xl"
+              style={{ 
+                padding: 'clamp(12px, 2vh, 20px) clamp(16px, 3vw, 24px)' 
+              }}
+            >
               <p style={{ fontSize: `calc(${Math.max(10, fontSize - 1) / 14} * 1rem)` }} className="text-[var(--text-main)] opacity-80 leading-relaxed font-medium">
                 {entry.question}
               </p>
@@ -102,15 +116,23 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
             <div className={`w-full max-w-[95%] relative transition-opacity duration-500 ${entry.isStreaming && idx === 0 ? "opacity-100" : "opacity-90"}`}>
               
               {/* Header Info */}
-              <div className="flex items-center gap-3 mb-3 ml-2">
-                <div className="w-6 h-6 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center">
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <div className="flex items-center gap-2 mb-3 ml-2">
+                <div 
+                  className="rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center"
+                  style={{ width: 'clamp(18px, 3vh, 28px)', height: 'clamp(18px, 3vh, 28px)' }}
+                >
+                  <Sparkles style={{ width: 'clamp(10px, 1.8vh, 16px)', height: 'clamp(10px, 1.8vh, 16px)' }} className="text-indigo-400" />
                 </div>
-                <span className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">Neural Response</span>
+                <span style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">Chintu Response</span>
               </div>
 
               {/* Main Content Bubble */}
-              <div className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-[2.5rem] px-4 py-6 sm:p-8 backdrop-blur-3xl shadow-2xl shadow-black/10 relative overflow-hidden">
+              <div 
+                className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-[2.5rem] backdrop-blur-3xl shadow-2xl shadow-black/10 relative overflow-hidden"
+                style={{ 
+                  padding: 'clamp(16px, 4vh, 32px) clamp(16px, 4vw, 32px)' 
+                }}
+              >
                 <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-indigo-500/50 via-purple-500/20 to-transparent" />
                 
                 <div className="markdown-answer" style={{ fontSize: `calc(${fontSize / 14} * 1rem)` }}>
@@ -131,14 +153,26 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                     return (
                       <>
                         {think && (
-                          <div className="mb-8 overflow-hidden rounded-3xl border border-[var(--glass-border)] bg-[var(--panel-bg)]">
+                          <div className="mb-6 overflow-hidden rounded-3xl border border-[var(--glass-border)] bg-[var(--panel-bg)]">
                             <details className="group" open={isThinking}>
-                              <summary className="cursor-pointer px-5 py-4 bg-[var(--glass-bg)] text-indigo-300 font-black text-[10px] uppercase tracking-[0.3em] hover:bg-[var(--input-bg)] transition-all flex items-center gap-4 select-none">
-                                <Info className="w-4 h-4" />
-                                {isThinking ? "Recursive Reasoning..." : "Neural Chain Protocol"}
-                                <ChevronDown className="w-4 h-4 ml-auto group-open:rotate-180 transition-transform" />
+                              <summary 
+                                className="cursor-pointer bg-[var(--glass-bg)] text-indigo-300 font-black uppercase tracking-[0.3em] hover:bg-[var(--input-bg)] transition-all flex items-center gap-4 select-none"
+                                style={{ 
+                                  padding: 'clamp(10px, 2vh, 16px) clamp(12px, 2.5vw, 20px)',
+                                  fontSize: 'clamp(8px, 1.2vh, 10px)'
+                                }}
+                              >
+                                <Info style={{ width: 'clamp(12px, 1.8vh, 18px)', height: 'clamp(12px, 1.8vh, 18px)' }} />
+                                {isThinking ? "Recursive Reasoning..." : "Thinking Process"}
+                                <ChevronDown style={{ width: 'clamp(12px, 1.8vh, 18px)', height: 'clamp(12px, 1.8vh, 18px)' }} className="ml-auto group-open:rotate-180 transition-transform" />
                               </summary>
-                              <div className="p-6 text-[var(--text-dim)] whitespace-pre-wrap border-t border-[var(--glass-border)] font-mono text-[12px] leading-relaxed italic opacity-80">
+                              <div 
+                                className="text-[var(--text-dim)] whitespace-pre-wrap border-t border-[var(--glass-border)] font-mono leading-relaxed italic opacity-80"
+                                style={{ 
+                                  padding: 'clamp(12px, 3vh, 24px)',
+                                  fontSize: 'clamp(10px, 1.4vh, 12px)'
+                                }}
+                              >
                                 {think}
                               </div>
                             </details>
@@ -235,34 +269,44 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                 </div>
                 
                 {/* Footer Actions */}
-                <div className="mt-8 flex items-center justify-between gap-4 border-t border-[var(--glass-border)] pt-6">
-                  <div className="flex gap-2.5">
+                <div 
+                  className="flex items-center justify-between gap-4 border-t border-[var(--glass-border)]"
+                  style={{ 
+                    marginTop: 'clamp(16px, 4vh, 32px)',
+                    paddingTop: 'clamp(12px, 3vh, 24px)'
+                  }}
+                >
+                  <div className="flex gap-2">
                     {entry.model && (
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--input-bg)] border border-[var(--glass-border)]">
-                        <Cpu className="w-3 h-3 text-indigo-400" />
-                        <span className="text-[9px] font-black text-[var(--text-dim)] uppercase tracking-[0.2em]">{entry.model}</span>
+                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--input-bg)] border border-[var(--glass-border)]">
+                        <Cpu style={{ width: 'clamp(10px, 1.4vh, 12px)', height: 'clamp(10px, 1.4vh, 12px)' }} className="text-indigo-400" />
+                        <span style={{ fontSize: 'clamp(7px, 1vh, 9px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-[0.2em]">{entry.model}</span>
                       </div>
                     )}
                     {entry.timeTaken !== undefined && (
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--input-bg)] border border-[var(--glass-border)]">
-                        <Clock className="w-3 h-3 text-[var(--text-dim)]" />
-                        <span className="text-[9px] font-black text-[var(--text-dim)] uppercase tracking-widest">{entry.timeTaken.toFixed(1)}s</span>
+                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--input-bg)] border border-[var(--glass-border)]">
+                        <Clock style={{ width: 'clamp(10px, 1.4vh, 12px)', height: 'clamp(10px, 1.4vh, 12px)' }} className="text-[var(--text-dim)]" />
+                        <span style={{ fontSize: 'clamp(7px, 1vh, 9px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest">{entry.timeTaken.toFixed(1)}s</span>
                       </div>
                     )}
                   </div>
 
                   <button
                     onClick={() => handleCopy(entry.id, entry.answer)}
-                    className="flex items-center gap-3 text-[10px] font-black tracking-[0.2em] uppercase px-5 py-2.5 rounded-2xl transition-all duration-300 border bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)]"
+                    className="flex items-center gap-2 font-black tracking-[0.2em] uppercase rounded-2xl transition-all duration-300 border bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)]"
+                    style={{ 
+                      padding: 'clamp(8px, 1.5vh, 12px) clamp(12px, 2vw, 20px)',
+                      fontSize: 'clamp(8px, 1.2vh, 10px)'
+                    }}
                   >
                     {copiedId === entry.id ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <Check style={{ width: 'clamp(12px, 1.8vh, 16px)', height: 'clamp(12px, 1.8vh, 16px)' }} className="text-emerald-400" />
                         <span className="text-emerald-400">Archived</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="w-3.5 h-3.5" />
+                        <Copy style={{ width: 'clamp(12px, 1.8vh, 16px)', height: 'clamp(12px, 1.8vh, 16px)' }} />
                         <span>Extract</span>
                       </>
                     )}

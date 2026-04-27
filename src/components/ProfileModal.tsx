@@ -169,7 +169,7 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
         {/* No profile — show paste area */}
         {!profile && !editMode && (
           <div className="space-y-4 animate-in fade-in duration-500">
-            <p className="text-xs text-[var(--text-dim)] leading-relaxed font-medium">Paste your resume, LinkedIn summary, or a brief bio. Our AI will structure it into your neural profile.</p>
+            <p className="text-xs text-[var(--text-dim)] leading-relaxed font-medium">Paste your resume, LinkedIn summary, or a brief bio. Our AI will structure it into your profile.</p>
             <textarea
               value={rawText}
               onChange={e => setRawText(e.target.value)}
@@ -185,7 +185,7 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
                   : "bg-[var(--glass-bg)] text-[var(--text-dim)] cursor-not-allowed"
               }`}
             >
-              {isRefining ? "✨ Optimizing Profile..." : "✨ Build Neural Identity"}
+              {isRefining ? "✨ Optimizing Profile..." : "✨ Build Profile"}
             </button>
           </div>
         )}
@@ -249,7 +249,7 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
             {/* Skills */}
             {profile.skills && (
               <div className="space-y-2">
-                <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">🛠 Neural Skills</p>
+                <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">Skills</p>
                 <div className="bg-[var(--input-bg)] rounded-2xl px-4 py-4 border border-[var(--glass-border)]">
                   {[
                     profile.skills.languages,
