@@ -162,9 +162,9 @@ export default function RoomPage() {
   const [capturedScreenshots, setCapturedScreenshots] = useState<string[]>([]);
   const [isLightMode, setIsLightMode] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("chintu_theme") === "light";
+      return localStorage.getItem("chintu_theme") !== "dark";
     }
-    return false;
+    return true;
   });
 
   useEffect(() => {
