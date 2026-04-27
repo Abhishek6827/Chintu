@@ -135,98 +135,53 @@ textarea {
 
 /* ─── Responsive Adjustments ─────────────────────────── */
 .toolbar {
-  flex-wrap: nowrap !important; /* Force single line */
+  flex-wrap: wrap !important; /* Allow wrapping on very small screens */
   gap: 4px !important;
   justify-content: center !important;
   padding: 6px 8px !important;
-  overflow: hidden;
+  min-height: fit-content;
 }
 
 .toolbar button {
-  min-width: 0 !important;
-  flex: 1 1 auto !important;
+  min-width: 32px !important;
+  flex: 0 1 auto !important;
 }
 
-/* Hide side controls if window is too narrow */
-@media (max-width: 350px) {
+/* Hide side controls only if window is extremely narrow */
+@media (max-width: 300px) {
   .floating-side-controls {
     display: none !important;
   }
 }
 
-@media (max-width: 300px) {
+@media (max-width: 350px) {
   .toolbar {
+    padding: 4px !important;
     gap: 2px !important;
-    padding: 4px 4px !important;
+  }
+  .toolbar button {
+    height: 34px !important;
+    padding: 0 8px !important;
+  }
+  .toolbar button span {
+    display: none !important; /* Hide text on small width */
+  }
+}
+
+@media (max-height: 600px) {
+  .toolbar {
+    padding: 4px !important;
   }
   .toolbar button {
     height: 32px !important;
-    border-radius: 8px !important;
-  }
-  .toolbar button svg {
-    width: 14px !important;
-    height: 14px !important;
   }
 }
 
-@media (max-width: 200px) {
-  .toolbar {
-    gap: 1px !important;
-  }
-  .toolbar button {
-    height: 28px !important;
-    padding: 0 !important;
-  }
-  .toolbar button svg {
-    width: 12px !important;
-    height: 12px !important;
-  }
-}
-
-@media (max-height: 750px) {
-  .toolbar {
-    padding: 10px 14px !important;
-  }
-  .toolbar button.h-14 {
-    height: 44px !important;
-  }
-}
-
-@media (max-height: 550px) {
-  .toolbar {
-    padding: 6px 10px !important;
-    gap: 6px !important;
-  }
-  .toolbar button.h-14, 
-  .toolbar .h-12, 
-  .toolbar .h-10 {
-    height: 34px !important;
-    padding: 0 10px !important;
-  }
-  .toolbar button.w-11, 
-  .toolbar button.w-12,
-  .toolbar .w-10 {
-    width: 30px !important;
-    height: 30px !important;
-    padding: 0 !important;
-  }
-  .toolbar button svg {
-    width: 14px !important;
-    height: 14px !important;
-  }
-}
-
-@media (max-width: 450px) {
-  .toolbar button.h-14 span,
-  .toolbar .h-12 span {
-    display: none !important; /* Hide text on small width */
-  }
-  .toolbar button.h-14,
-  .toolbar .h-12 {
-    flex: 0 1 auto !important;
-    width: 38px !important;
-    min-width: 38px !important;
-  }
+/* Ensure chat area doesn't collapse */
+.chat-area-container {
+  min-height: 100px;
+  flex: 1 1 auto;
+  overflow-y: auto;
 }
 
 /* Aggressive Input Shrinking */
@@ -238,29 +193,10 @@ textarea {
   .markdown-answer {
     font-size: 11px !important;
   }
-  .app-container {
-    border-radius: 12px !important;
-  }
   textarea {
-    padding-top: 2px !important;
-    padding-bottom: 2px !important;
-    padding-left: 8px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
     font-size: 11px !important;
-    min-height: 28px !important;
-    line-height: 1.2 !important;
-  }
-}
-
-@media (max-width: 350px) {
-  .floating-side-controls {
-    display: none !important;
-  }
-  .app-container {
-    border-radius: 0 !important;
-  }
-  textarea {
-    padding-left: 4px !important;
-    font-size: 10px !important;
   }
 }
 

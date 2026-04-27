@@ -1213,7 +1213,7 @@ export default function RoomPage() {
       )}
 
       {/* Chat area */}
-      <div className="flex-1 overflow-y-auto py-3" style={{ scrollbarGutter: "stable" }}>
+      <div className="flex-1 overflow-y-auto py-3 chat-area-container" style={{ scrollbarGutter: "stable" }}>
         <AnswerDisplay answers={answers} fontSize={fontSize} />
         <div ref={chatEndRef} />
       </div>
