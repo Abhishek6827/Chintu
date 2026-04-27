@@ -120,7 +120,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                           remarkPlugins={[remarkGfm]}
                           components={{
                             code(props: any) {
-                              const { children, className, node, ...rest } = props;
+                              const { children, className, ...rest } = props;
                               const match = /language-(\w+)/.exec(className || "");
                               const isBlock = match || String(children).includes("\n");
                               const language = match ? match[1] : "javascript";
