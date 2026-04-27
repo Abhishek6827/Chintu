@@ -38,7 +38,7 @@ type ModelKey = typeof MODELS[number]["key"];
 // ─── Vision models (for screenshot processing) ─────────────
 const VISION_MODELS = [
   { key: "llama-4-scout", name: "Llama 4 Scout" },
-  { key: "qwen3.6-plus", name: "Qwen3.6 Plus" },
+  { key: "qwen3.6", name: "Qwen3.6 Plus" },
 ] as const;
 
 type VisionModelKey = typeof VISION_MODELS[number]["key"];

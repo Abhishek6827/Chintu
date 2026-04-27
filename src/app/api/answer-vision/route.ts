@@ -135,6 +135,35 @@ Global Rules:
 - Be precise — no unnecessary explanation`,
 };
 
+// ─── Qwen Rotation Lists ─────────────────────────────────────
+const QWEN_PRIORITY = [
+  "qwen3.6-plus",
+  "qwen3-vl-235b-a22b-thinking",
+  "qwen3-vl-30b-a3b-thinking",
+  "qwen3.6-flash",
+  "qwen-vl-plus",
+  "qwen3.5-35b-a3b",
+  "qwen3-vl-8b-thinking",
+  "qwen3.5-flash-2026-02-23",
+  "qwen3-next-80b-a3b-thinking",
+  "qwen3.5-27b"
+];
+
+const QWEN_FALLBACK = [
+  "qwen2.5-vl-72b-instruct",
+  "qwen-vl-plus-2025-05-07",
+  "qwen-vl-plus-latest",
+  "qwen-vl-max-2025-08-13",
+  "qwen3-coder-plus",
+  "qwen3-max-preview",
+  "qwen3-vl-flash-2025-10-15",
+  "qwen-plus",
+  "qwen-turbo",
+  "qwen3-coder-flash",
+  "qwen-vl-plus-2025-08-15",
+  "qwen3-vl-flash"
+];
+
 export async function POST(req: NextRequest) {
   try {
     const apiKeys = [
@@ -268,6 +297,7 @@ export async function POST(req: NextRequest) {
       "qwen3-Coder": { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
       "nemotron-3-120b": { provider: "groq", groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
       "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
+      "qwen3.6-plus": { provider: "dashscope", dashscope: "qwen3.6-plus" },
     };
 
     const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
@@ -332,29 +362,37 @@ Rules:
 
       // DashScope routing for vision Step 2
       if (isDashScope) {
-        try {
-          console.log(`[/api/answer-vision] Step 2: Using DashScope model: ${modelConfig.dashscope}`);
-          const dashscope = new OpenAI({
-            baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-            apiKey: process.env.DASHSCOPE_API_KEY || "",
-          });
-          stream = await dashscope.chat.completions.create({
-            model: modelConfig.dashscope!,
-            stream: true,
-            max_tokens: 2048,
-            messages: [
-              { role: "system", content: systemPrompt },
-              ...trimmedHistory,
-              { role: "user", content: finalTranscript },
-            ],
-          });
-          actualModelUsed = selectedModel;
-          console.log(`[/api/answer-vision] ✓ DashScope stream created`);
-          break;
-        } catch (err: any) {
-          finalError = err;
-          console.error(`[/api/answer-vision] ✗ DashScope failed:`, err?.message?.slice(0, 100));
+        const modelsToTry = (selectedModel === "qwen3.6" || selectedModel === "qwen3.6-plus")
+          ? [...QWEN_PRIORITY, ...QWEN_FALLBACK]
+          : [modelConfig.dashscope!];
+
+        for (const modelId of modelsToTry) {
+          try {
+            console.log(`[/api/answer-vision] Step 2: Using DashScope model: ${modelId}`);
+            const dashscope = new OpenAI({
+              baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+              apiKey: process.env.DASHSCOPE_API_KEY || "",
+            });
+            stream = await dashscope.chat.completions.create({
+              model: modelId,
+              stream: true,
+              max_tokens: 2048,
+              messages: [
+                { role: "system", content: systemPrompt },
+                ...trimmedHistory,
+                { role: "user", content: finalTranscript },
+              ],
+            });
+            actualModelUsed = modelId;
+            console.log(`[/api/answer-vision] ✓ DashScope stream created with ${modelId}`);
+            break;
+          } catch (err: any) {
+            finalError = err;
+            console.error(`[/api/answer-vision] ✗ DashScope model ${modelId} failed:`, err?.message?.slice(0, 100));
+            continue;
+          }
         }
+        if (stream) break;
         break;
       }
 

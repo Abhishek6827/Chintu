@@ -127,6 +127,35 @@ Global Rules:
 - Be precise — no unnecessary explanation`,
 };
 
+// ─── Qwen Rotation Lists ─────────────────────────────────────
+const QWEN_PRIORITY = [
+  "qwen3.6-plus",
+  "qwen3-vl-235b-a22b-thinking",
+  "qwen3-vl-30b-a3b-thinking",
+  "qwen3.6-flash",
+  "qwen-vl-plus",
+  "qwen3.5-35b-a3b",
+  "qwen3-vl-8b-thinking",
+  "qwen3.5-flash-2026-02-23",
+  "qwen3-next-80b-a3b-thinking",
+  "qwen3.5-27b"
+];
+
+const QWEN_FALLBACK = [
+  "qwen2.5-vl-72b-instruct",
+  "qwen-vl-plus-2025-05-07",
+  "qwen-vl-plus-latest",
+  "qwen-vl-max-2025-08-13",
+  "qwen3-coder-plus",
+  "qwen3-max-preview",
+  "qwen3-vl-flash-2025-10-15",
+  "qwen-plus",
+  "qwen-turbo",
+  "qwen3-coder-flash",
+  "qwen-vl-plus-2025-08-15",
+  "qwen3-vl-flash"
+];
+
 export async function POST(req: NextRequest) {
   try {
     const apiKeys = [
@@ -232,29 +261,40 @@ Rules:
 
       // DashScope routing
       if (isDashScope) {
-        try {
-          console.log(`[/api/answer] Using DashScope model: ${modelConfig.dashscope}`);
-          const dashscope = new OpenAI({
-            baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-            apiKey: process.env.DASHSCOPE_API_KEY || "",
-          });
-          stream = await dashscope.chat.completions.create({
-            model: modelConfig.dashscope!,
-            stream: true,
-            max_tokens: 2048,
-            messages: [
-              { role: "system", content: systemPrompt },
-              ...trimmedHistory,
-              { role: "user", content: transcript },
-            ],
-          });
-          actualModelUsed = selectedModel;
-          console.log(`[/api/answer] ✓ DashScope stream created`);
-          break;
-        } catch (error: any) {
-          lastError = error;
-          console.error(`[/api/answer] ✗ DashScope failed:`, error?.message?.slice(0, 100));
+        const modelsToTry = selectedModel === "qwen3.6" 
+          ? [...QWEN_PRIORITY, ...QWEN_FALLBACK]
+          : [modelConfig.dashscope!];
+
+        for (const modelId of modelsToTry) {
+          try {
+            console.log(`[/api/answer] Using DashScope model: ${modelId}`);
+            const dashscope = new OpenAI({
+              baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+              apiKey: process.env.DASHSCOPE_API_KEY || "",
+            });
+            stream = await dashscope.chat.completions.create({
+              model: modelId,
+              stream: true,
+              max_tokens: 2048,
+              messages: [
+                { role: "system", content: systemPrompt },
+                ...trimmedHistory,
+                { role: "user", content: transcript },
+              ],
+            });
+            actualModelUsed = modelId;
+            console.log(`[/api/answer] ✓ DashScope stream created with ${modelId}`);
+            break;
+          } catch (error: any) {
+            lastError = error;
+            console.error(`[/api/answer] ✗ DashScope model ${modelId} failed:`, error?.message?.slice(0, 100));
+            // Try next model if this one hits a limit or fails
+            continue;
+          }
         }
+        if (stream) break;
+        // If all Qwen models fail, don't fall back to Groq immediately if it's explicitly a DashScope request
+        // But the original code had 'break' here, so I'll keep it.
         break;
       }
 
