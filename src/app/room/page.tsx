@@ -214,6 +214,13 @@ export default function RoomPage() {
   useEffect(() => { selectedModelRef.current = selectedModel; }, [selectedModel]);
 
   useEffect(() => {
+    document.documentElement.style.setProperty('--app-opacity', windowOpacity.toString());
+    if (isElectron && (window as any).electronAPI?.setOpacity) {
+      (window as any).electronAPI.setOpacity(windowOpacity);
+    }
+  }, [windowOpacity]);
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "auto" });
   }, [answers]);
 
