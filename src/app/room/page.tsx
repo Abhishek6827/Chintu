@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Mic, Sun, Moon } from "lucide-react";
 import AnswerDisplay from "@/components/AnswerDisplay";
 import ProfileModal, { getProfileContext, getStoredProfile, loadProfileFromDisk, saveProfileToDisk } from "@/components/ProfileModal";
 
@@ -159,6 +160,22 @@ export default function RoomPage() {
 
   // ─── Screenshot Capture State ──────────────────────────
   const [capturedScreenshots, setCapturedScreenshots] = useState<string[]>([]);
+  const [isLightMode, setIsLightMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("chintu_theme") === "light";
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isLightMode) {
+      document.body.classList.add("light-mode");
+      localStorage.setItem("chintu_theme", "light");
+    } else {
+      document.body.classList.remove("light-mode");
+      localStorage.setItem("chintu_theme", "dark");
+    }
+  }, [isLightMode]);
   const [isCapturing, setIsCapturing] = useState(false);
 
   // ─── AI Speech tracking ─────────────────────────────────
@@ -960,10 +977,17 @@ export default function RoomPage() {
 
   return (
     <div className="app-container" style={{ '--app-opacity': windowOpacity } as React.CSSProperties}>
+      {/* Neural Mesh Background */}
+      <div className="neural-mesh">
+        <div className="mesh-orb w-[400px] h-[400px] bg-indigo-600/30 -top-20 -left-20 animate-pulse" />
+        <div className="mesh-orb w-[300px] h-[300px] bg-purple-600/20 bottom-10 right-10 animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="mesh-orb w-[250px] h-[250px] bg-blue-600/20 top-1/2 left-1/3" style={{ animationDelay: '5s' }} />
+      </div>
+
       {/* Draggable title bar */}
-      <div className="drag-region flex items-center justify-between px-2 sm:px-4 h-10 sm:h-12 shrink-0">
+      <div className="drag-region flex items-center justify-between px-2 sm:px-4 h-10 sm:h-12 shrink-0 relative z-10">
         <div className="flex items-center gap-2 no-drag">
-          <span className="text-white/90 text-sm font-bold">✦ Chintu</span>
+          <span className="text-[var(--text-main)] text-sm font-bold">✦ Chintu</span>
           {appVersion && (
             <span className="bg-white/10 text-white/50 px-1.5 py-0.5 rounded text-[0.625rem] font-mono">
               v{appVersion}
@@ -977,10 +1001,16 @@ export default function RoomPage() {
               <span className="text-[0.625rem] text-red-300 font-medium">REC</span>
             </div>
           )}
+          <button
+            onClick={() => setIsLightMode(!isLightMode)}
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-dim)] hover:text-[var(--text-main)] transition-all"
+          >
+            {isLightMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </button>
           {isElectron && (
             <button 
               onClick={() => (window as any).electronAPI.minimize()} 
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 text-xs"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-dim)] text-xs"
             >
               ─
             </button>
@@ -989,7 +1019,7 @@ export default function RoomPage() {
           <button
             onClick={() => setShowProfile(true)}
             className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors ${
-              hasProfile ? "text-indigo-300 bg-indigo-500/20" : "text-white/60 hover:text-white/80"
+              hasProfile ? "text-indigo-300 bg-indigo-500/20" : "text-[var(--text-dim)] hover:text-[var(--text-main)]"
             }`}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -1213,19 +1243,19 @@ export default function RoomPage() {
 
       {/* Text Input Row */}
       <div className="px-2 sm:px-4 pb-2 shrink-0">
-        <div className="bg-white/5 border border-white/10 rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-white/10 transition-all">
+        <div className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-[var(--glass-bg)] transition-all">
           {/* Inline selectors row */}
-          <div className="flex items-center gap-1.5 px-2 pt-1.5 flex-wrap">
+          <div className="flex items-center gap-1 px-1.5 pt-1.5 flex-nowrap overflow-hidden">
             <select
               value={selectedModel}
               onChange={(e) => {
                 setSelectedModel(e.target.value as ModelKey);
                 selectedModelRef.current = e.target.value as ModelKey;
               }}
-              className="bg-white/10 text-[0.625rem] text-white/70 font-medium rounded-lg px-1.5 py-0.5 outline-none cursor-pointer border border-white/10 hover:border-white/20"
+              className="bg-[var(--input-bg)] text-[0.55rem] sm:text-[0.625rem] text-[var(--text-main)] font-medium rounded-lg px-1 py-0.5 outline-none cursor-pointer border border-[var(--glass-border)] hover:border-white/20 flex-1 min-w-0"
             >
               {MODELS.map(m => (
-                <option key={m.key} value={m.key} className="bg-gray-900 text-white text-xs">{m.name}</option>
+                <option key={m.key} value={m.key} className="bg-[var(--panel-bg)] text-[var(--text-main)] text-[10px]">{m.name}</option>
               ))}
             </select>
             <select
@@ -1234,21 +1264,21 @@ export default function RoomPage() {
                 setSelectedVisionModel(e.target.value as VisionModelKey);
                 selectedVisionModelRef.current = e.target.value as VisionModelKey;
               }}
-              className="bg-white/10 text-[0.625rem] text-white/70 font-medium rounded-lg px-1.5 py-0.5 outline-none cursor-pointer border border-white/10 hover:border-white/20"
+              className="bg-[var(--input-bg)] text-[0.55rem] sm:text-[0.625rem] text-[var(--text-main)] font-medium rounded-lg px-1 py-0.5 outline-none cursor-pointer border border-[var(--glass-border)] hover:border-white/20 flex-1 min-w-0"
             >
               {VISION_MODELS.map(m => (
-                <option key={m.key} value={m.key} className="bg-gray-900 text-white text-xs">📸 {m.name}</option>
+                <option key={m.key} value={m.key} className="bg-[var(--panel-bg)] text-[var(--text-main)] text-[10px]">📸 {m.name}</option>
               ))}
             </select>
             <select
               value={responseLength}
               onChange={(e) => setResponseLength(e.target.value as ResponseLength)}
-              className="bg-white/10 text-[0.625rem] text-white/70 font-medium rounded-lg px-1.5 py-0.5 outline-none cursor-pointer border border-white/10 hover:border-white/20"
+              className="bg-[var(--input-bg)] text-[0.55rem] sm:text-[0.625rem] text-[var(--text-main)] font-medium rounded-lg px-1 py-0.5 outline-none cursor-pointer border border-[var(--glass-border)] hover:border-white/20 flex-1 min-w-0"
             >
-              <option value="small" className="bg-gray-900 text-white text-xs">Small</option>
-              <option value="balanced" className="bg-gray-900 text-white text-xs">Balanced</option>
-              <option value="detailed" className="bg-gray-900 text-white text-xs">Detailed</option>
-              <option value="coding" className="bg-gray-900 text-white text-xs">Coding</option>
+              <option value="small" className="bg-[var(--panel-bg)] text-[var(--text-main)] text-[10px]">Small</option>
+              <option value="balanced" className="bg-[var(--panel-bg)] text-[var(--text-main)] text-[10px]">Balanced</option>
+              <option value="detailed" className="bg-[var(--panel-bg)] text-[var(--text-main)] text-[10px]">Detailed</option>
+              <option value="coding" className="bg-[var(--panel-bg)] text-[var(--text-main)] text-[10px]">Coding</option>
             </select>
           </div>
           {/* Textarea */}
@@ -1267,7 +1297,7 @@ export default function RoomPage() {
               }
             }}
             placeholder={capturedScreenshots.length > 0 ? "Add context (optional) then press Enter..." : "Ask a question or type..."}
-            className="w-full bg-transparent px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-white/90 placeholder-white/30 focus:outline-none pr-10 sm:pr-12 resize-none"
+            className="w-full bg-transparent px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder-[var(--text-dim)] focus:outline-none pr-10 sm:pr-12 resize-none"
             rows={inputText.split('\n').length > 1 ? Math.min(inputText.split('\n').length, 5) : 1}
             disabled={status !== "idle"}
           />
@@ -1285,250 +1315,207 @@ export default function RoomPage() {
       </div>
 
       {/* Bottom toolbar */}
-      <div ref={controlsRef} className="toolbar px-2 sm:px-4 py-3 flex flex-wrap items-center justify-center gap-4 sm:gap-6 shrink-0">
+      <div ref={controlsRef} className="toolbar px-1 sm:px-6 py-2 sm:py-3 flex flex-nowrap items-center justify-center gap-1 sm:gap-4 shrink-0 relative z-10">
+        
+        {/* Button 1: Settings */}
         <button
           onClick={() => setShowSettings(true)}
-          className="no-drag w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/70"
+          className="no-drag w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        </button>
+        
+        {/* Button 2: Clear */}
+        <button
+          onClick={() => {
+            setAnswers([]);
+            setAiSpeechBubbles([]);
+            setVisionConversationHistory([]);
+            setChatConversationHistory([]);
+          }}
+          className="no-drag w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-red-500/20 hover:text-red-400 transition-all active:scale-90"
+        >
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
         </button>
 
-        <div className="flex items-center justify-center gap-1 sm:gap-2 md:gap-3 flex-wrap">
-          {/* Screen Record toggle */}
-          <button
-            onClick={isScreenRecording ? stopScreenRecording : startScreenRecording}
-            className={`
-              no-drag w-10 h-10 rounded-full flex items-center justify-center
-              ${isScreenRecording
-                ? "bg-red-500/30 text-red-300 ring-2 ring-red-400/50 shadow-lg shadow-red-500/20 mic-recording"
-                : "bg-white/10 text-white/50"
-              }
-            `}
-          >
-            {isScreenRecording ? (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <rect x="6" y="6" width="12" height="12" rx="2" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="8" />
-              </svg>
-            )}
-          </button>
-
-          {/* Screenshot capture */}
-          {isElectron && (
-            <button
-              onClick={captureScreenshot}
-              disabled={isCapturing || status === "generating"}
-              className={`
-                no-drag w-10 h-10 rounded-full flex items-center justify-center relative
-                ${capturedScreenshots.length > 0
-                  ? "bg-cyan-500/30 text-cyan-300 ring-1 ring-cyan-500/50"
-                  : "bg-white/10 text-white/50"
-                }
-              `}
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-              </svg>
-              {capturedScreenshots.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-cyan-500 text-white text-[0.625rem] font-bold rounded-full flex items-center justify-center">
-                  {capturedScreenshots.length}
-                </span>
-              )}
-            </button>
-          )}
-
-          {/* Mic button */}
-          <button
-            onClick={handleMicButton}
-            disabled={!micReady || status === "generating"}
-            className={`
-              no-drag w-14 h-14 rounded-full flex items-center justify-center
-              ${status === "recording"
-                ? "bg-red-500 text-white shadow-lg shadow-red-500/40 scale-110 mic-recording"
-                : "bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30"
-              }
-            `}
-          >
+        {/* Button 3: Mic (The Core) */}
+        <button
+          onClick={handleMicButton}
+          disabled={!micReady || status === "generating"}
+          className={`
+            no-drag flex-initial w-auto min-w-[40px] sm:min-w-[120px] h-10 sm:h-14 px-3 sm:px-6 rounded-xl sm:rounded-3xl flex items-center justify-center gap-2 sm:gap-3 relative transition-all duration-500 active:scale-95 overflow-hidden group
+            ${status === "recording"
+              ? "bg-red-500 text-white shadow-[0_0_50px_rgba(239,68,68,0.4)]"
+              : "bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 animate-gradient text-white shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:shadow-[0_25px_50px_rgba(99,102,241,0.5)]"
+            }
+          `}
+        >
+          <div className="relative z-10 flex items-center gap-2">
             {status === "recording" ? (
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+              <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-white rounded-sm animate-pulse" />
             ) : (
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-              </svg>
+              <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             )}
-          </button>
+            <span className="hidden sm:inline text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-white">
+              {status === "recording" ? "REC" : "Analysis"}
+            </span>
+          </div>
+          {status === "recording" && (
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.2)_0%,transparent_70%)] animate-pulse" />
+          )}
+        </button>
 
-          {/* Clear answers — also clears vision history */}
-          <button
-            onClick={() => {
-              setAnswers([]);
-              setAiSpeechBubbles([]);
-              setVisionConversationHistory([]);
-              setChatConversationHistory([]); // ← clear all history
-            }}
-            className="no-drag w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/70"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+        {/* Button 4: Screen Recording */}
+        <button
+          onClick={isScreenRecording ? stopScreenRecording : startScreenRecording}
+          className={`
+            no-drag w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all active:scale-90
+            ${isScreenRecording
+              ? "bg-red-500 text-white shadow-[0_0_30px_rgba(239,68,68,0.4)]"
+              : "bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)]"
+            }
+          `}
+        >
+          {isScreenRecording ? (
+            <div className="flex items-center justify-center">
+              <div className="w-4 h-4 bg-white rounded-sm animate-pulse" />
+            </div>
+          ) : (
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
             </svg>
-          </button>
+          )}
+        </button>
 
-          {/* Hide/Show toggle - Re-centered */}
+        {/* Button 5: Screenshot */}
+        {isElectron && (
           <button
-            onClick={handleHide}
+            onClick={captureScreenshot}
+            disabled={isCapturing || status === "generating"}
             className={`
-              no-drag w-10 h-10 rounded-full flex items-center justify-center
-              ${isWindowHidden
-                ? "bg-emerald-500/30 text-emerald-300 ring-1 ring-emerald-500/50"
-                : "bg-white/10 text-white/70"
+              no-drag w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center relative transition-all active:scale-90
+              ${capturedScreenshots.length > 0
+                ? "bg-indigo-500 text-white shadow-[0_0_30px_rgba(99,102,241,0.4)]"
+                : "bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)]"
               }
-              transition-all hover:scale-110 active:scale-95
             `}
           >
-            {isWindowHidden ? (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-              </svg>
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>
+            {capturedScreenshots.length > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white text-indigo-600 text-[10px] font-black rounded-full flex items-center justify-center shadow-lg">
+                {capturedScreenshots.length}
+              </span>
             )}
           </button>
-        </div>
+        )}
+
+        {/* Button 6: Hide */}
+        <button
+          onClick={handleHide}
+          className={`
+            no-drag w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all active:scale-90
+            ${isWindowHidden
+              ? "bg-emerald-500 text-white shadow-[0_0_30px_rgba(16,185,129,0.4)]"
+              : "bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)]"
+            }
+          `}
+        >
+          {isWindowHidden ? (
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          ) : (
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+          )}
+        </button>
       </div>
 
 
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-2 sm:p-6" onClick={() => setShowSettings(false)}>
-          <div className="settings-panel w-full max-w-sm p-4 sm:p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-5">
+        <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-6" onClick={() => setShowSettings(false)}>
+          <div className="settings-panel w-full max-w-sm p-8 space-y-8" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-bold text-gray-800">Settings</h2>
-                <p className="text-xs text-gray-400">Preferences</p>
+                <h2 className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.4em] mb-1">System</h2>
+                <h3 className="text-2xl font-black text-[var(--text-main)] uppercase tracking-tight">Settings</h3>
               </div>
               <button
                 onClick={() => setShowSettings(false)}
-                className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold"
+                className="w-12 h-12 rounded-2xl bg-[var(--input-bg)] text-[var(--text-dim)] flex items-center justify-center hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all"
               >
-                ✕
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
 
-            <div className="mb-5">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <p className="text-sm font-semibold text-gray-700">Space Key Mode</p>
-                  <p className="text-xs text-gray-400">How Space triggers recording</p>
-                </div>
-                <div className="flex bg-gray-100 rounded-lg p-0.5">
-                  <button
-                    onClick={() => setSpaceMode("hold")}
-                    className={`text-xs px-3 py-1.5 rounded-md font-medium ${
-                      spaceMode === "hold"
-                        ? "bg-indigo-500 text-white shadow-sm"
-                        : "text-gray-500"
-                    }`}
-                  >
-                    Hold
-                  </button>
-                  <button
-                    onClick={() => setSpaceMode("toggle")}
-                    className={`text-xs px-3 py-1.5 rounded-md font-medium ${
-                      spaceMode === "toggle"
-                        ? "bg-indigo-500 text-white shadow-sm"
-                        : "text-gray-500"
-                    }`}
-                  >
-                    Toggle
-                  </button>
-                </div>
-              </div>
-              <p className="text-[0.6875rem] text-gray-400 leading-relaxed">
-                {spaceMode === "hold"
-                  ? "Hold Space to record, release to stop and generate answer."
-                  : "Press Space once to start recording, press again to stop."
-                }
-              </p>
-            </div>
-
-            {/* Profile Management */}
-            <div className="mb-5">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <p className="text-sm font-semibold text-gray-700">Profile</p>
-                  <p className="text-xs text-gray-400">{hasProfile ? "Your background info for AI" : "No profile set"}</p>
-                </div>
-                <div className="flex gap-1.5">
-                  <button
-                    onClick={() => { setShowSettings(false); setShowProfile(true); }}
-                    className="text-xs px-3 py-1.5 bg-indigo-100 text-indigo-600 rounded-lg font-medium hover:bg-indigo-200 transition-colors"
-                  >
-                    {hasProfile ? "View" : "Setup"}
-                  </button>
-                  {hasProfile && (
+            <div className="space-y-6">
+              {/* Space Mode */}
+              <div className="bg-[var(--panel-bg)] rounded-2xl p-5 border border-[var(--glass-border)]">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">Input Strategy</h4>
+                  <div className="flex bg-[var(--input-bg)] rounded-xl p-1">
                     <button
-                      onClick={() => {
-                        localStorage.removeItem("chintu_user_profile");
-                        refreshProfile();
-                      }}
-                      className="text-xs px-3 py-1.5 bg-red-50 text-red-500 rounded-lg font-medium hover:bg-red-100 transition-colors"
+                      onClick={() => setSpaceMode("hold")}
+                      className={`text-[10px] px-4 py-2 rounded-lg font-black uppercase tracking-widest transition-all ${
+                        spaceMode === "hold" ? "bg-[var(--text-main)] text-[var(--panel-bg)]" : "text-[var(--text-dim)]"
+                      }`}
                     >
-                      Delete
+                      Hold
                     </button>
-                  )}
+                    <button
+                      onClick={() => setSpaceMode("toggle")}
+                      className={`text-[10px] px-4 py-2 rounded-lg font-black uppercase tracking-widest transition-all ${
+                        spaceMode === "toggle" ? "bg-[var(--text-main)] text-[var(--panel-bg)]" : "text-[var(--text-dim)]"
+                      }`}
+                    >
+                      Toggle
+                    </button>
+                  </div>
+                </div>
+                <p className="text-[10px] text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
+                  {spaceMode === "hold" ? "Hold space to speak, release to send" : "Tap space to start/stop recording"}
+                </p>
+              </div>
+
+              {/* Profile Section */}
+              <div className="bg-[var(--input-bg)] rounded-2xl p-5 border border-[var(--glass-border)] flex items-center justify-between">
+                <div>
+                  <h4 className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Neural Profile</h4>
+                  <p className="text-xs font-bold text-[var(--text-main)] uppercase tracking-tight">{hasProfile ? "Identity Loaded" : "No Profile"}</p>
+                </div>
+                <button
+                  onClick={() => { setShowSettings(false); setShowProfile(true); }}
+                  className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition-all active:scale-95"
+                >
+                  {hasProfile ? "Open Vault" : "Setup"}
+                </button>
+              </div>
+
+              {/* Update Section */}
+              <div className="bg-[var(--input-bg)] rounded-2xl p-5 border border-[var(--glass-border)] space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Software</h4>
+                    <p className="text-xs font-bold text-[var(--text-main)] uppercase tracking-tight">Version {appVersion || "1.0.0"}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (updateCheckTimeoutRef.current) clearTimeout(updateCheckTimeoutRef.current);
+                      setShowSettings(false);
+                      setUpdateStatus({ status: "checking" });
+                      (window as any).electronAPI?.checkForUpdates();
+                    }}
+                    className="px-5 py-2.5 bg-[var(--text-main)] text-[var(--panel-bg)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95"
+                  >
+                    Check
+                  </button>
                 </div>
               </div>
             </div>
 
-            <div className="mb-4">
-              <p className="text-sm font-semibold text-gray-700 mb-2">Shortcuts</p>
-              <div className="space-y-2 text-xs text-gray-500">
-                <div className="flex justify-between">
-                  <span>Record</span>
-                  <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600 font-mono">
-                    {spaceMode === "hold" ? "Space (hold)" : "Space (toggle)"}
-                  </kbd>
-                </div>
-                <div className="flex justify-between">
-                  <span>Hide window</span>
-                  <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600 font-mono">Tray icon</kbd>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <p className="text-[0.625rem] text-gray-300">
-                🔒 Window is invisible to screen sharing
+            <div className="pt-4 text-center">
+              <p className="text-[9px] font-black text-[var(--text-dim)] opacity-50 uppercase tracking-[0.3em]">
+                Secure Mode Active • Invisible to Screen Sharing
               </p>
-              {appVersion && (
-                <p className="text-[0.5625rem] text-gray-300/60 mt-1">v{appVersion}</p>
-              )}
-              <button
-                onClick={() => {
-                  if (updateCheckTimeoutRef.current) clearTimeout(updateCheckTimeoutRef.current);
-                  setShowSettings(false);
-                  setUpdateStatus({ status: "checking" });
-                  (window as any).electronAPI?.checkForUpdates();
-                  updateCheckTimeoutRef.current = setTimeout(() => {
-                    setUpdateStatus({ status: "error", message: "Check timed out" });
-                    updateCheckTimeoutRef.current = null;
-                  }, 15000);
-                }}
-                className="text-[0.625rem] text-indigo-400 hover:text-indigo-300 mt-2 transition-colors"
-              >
-                Check for Updates
-              </button>
             </div>
           </div>
         </div>

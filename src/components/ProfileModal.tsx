@@ -140,90 +140,92 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
   };
 
   const SkillTag = ({ text }: { text: string }) => (
-    <span className="inline-block px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[0.6875rem] rounded-md font-medium mr-1 mb-1">{text}</span>
+    <span className="inline-block px-2 py-0.5 bg-[var(--glass-bg)] text-[var(--text-main)] text-[0.6875rem] rounded-md font-medium mr-1 mb-1 border border-[var(--glass-border)]">{text}</span>
   );
 
   return (
     <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-2 sm:p-4" onClick={onClose}>
-      <div className="settings-panel w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-5" onClick={e => e.stopPropagation()}>
+      <div className="settings-panel w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 bg-[var(--panel-bg)] backdrop-filter blur(32px) border border-[var(--glass-border)] rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.3)]" onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-lg font-bold text-gray-800">
+            <h2 className="text-xl font-black text-[var(--text-main)] uppercase tracking-tight">
               {profile ? "👤 Your Profile" : "👤 Setup Profile"}
             </h2>
-            <p className="text-xs text-gray-400">AI uses this to personalize answers</p>
+            <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.2em] mt-1">Personalized Intelligence</p>
           </div>
-          <button onClick={onClose} className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">✕</button>
+          <button onClick={onClose} className="w-10 h-10 rounded-2xl bg-[var(--glass-bg)] text-[var(--text-dim)] flex items-center justify-center hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
         </div>
 
         {error && (
-          <div className="mb-3 bg-red-50 border border-red-200 text-red-600 text-xs px-3 py-2 rounded-xl flex items-center justify-between">
-            <span>{error}</span>
-            <button onClick={() => setError("")} className="ml-2 text-red-400">✕</button>
+          <div className="mb-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs px-4 py-3 rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+            <span className="font-bold">{error}</span>
+            <button onClick={() => setError("")} className="ml-2 text-red-500/40 hover:text-red-400 transition-colors">✕</button>
           </div>
         )}
 
         {/* No profile — show paste area */}
         {!profile && !editMode && (
-          <div>
-            <p className="text-sm text-gray-500 mb-3">Paste your resume text, LinkedIn summary, or anything about yourself. AI will structure it perfectly.</p>
+          <div className="space-y-4 animate-in fade-in duration-500">
+            <p className="text-xs text-[var(--text-dim)] leading-relaxed font-medium">Paste your resume, LinkedIn summary, or a brief bio. Our AI will structure it into your neural profile.</p>
             <textarea
               value={rawText}
               onChange={e => setRawText(e.target.value)}
-              placeholder="Paste your resume or describe yourself here... (experience, projects, skills, education — everything)"
-              className="w-full h-40 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"
+              placeholder="Experience, projects, skills... Paste it all here."
+              className="w-full h-48 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-sm text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all resize-none font-medium"
             />
             <button
               onClick={handleRefine}
               disabled={!rawText.trim() || isRefining}
-              className={`w-full mt-3 py-3 rounded-xl text-sm font-bold transition-all ${
+              className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${
                 rawText.trim() && !isRefining
-                  ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg hover:shadow-xl hover:scale-[1.01]"
-                  : "bg-gray-100 text-gray-300 cursor-not-allowed"
+                  ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-[var(--text-main)] shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.01]"
+                  : "bg-[var(--glass-bg)] text-[var(--text-dim)] cursor-not-allowed"
               }`}
             >
-              {isRefining ? "✨ AI is structuring your profile..." : "✨ Refine with AI"}
+              {isRefining ? "✨ Optimizing Profile..." : "✨ Build Neural Identity"}
             </button>
           </div>
         )}
 
         {/* Edit mode */}
         {editMode && (
-          <div>
-            <p className="text-xs text-gray-400 mb-2">Edit the JSON directly. Be careful with syntax.</p>
+          <div className="space-y-4 animate-in fade-in">
+            <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">Manual JSON Override</p>
             <textarea
               value={editJson}
               onChange={e => setEditJson(e.target.value)}
-              className="w-full h-60 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-xs text-gray-700 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"
+              className="w-full h-80 bg-black/40 border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-xs text-indigo-300 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all resize-none"
             />
-            <div className="flex gap-2 mt-3">
-              <button onClick={handleSaveEdit} className="flex-1 py-2.5 bg-indigo-500 text-white rounded-xl text-sm font-bold">Save</button>
-              <button onClick={() => setEditMode(false)} className="flex-1 py-2.5 bg-gray-100 text-gray-500 rounded-xl text-sm font-medium">Cancel</button>
+            <div className="flex gap-3">
+              <button onClick={handleSaveEdit} className="flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-[var(--text-main)] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20 active:scale-95">Save Changes</button>
+              <button onClick={() => setEditMode(false)} className="flex-1 py-3.5 bg-[var(--glass-bg)] hover:bg-white/10 text-[var(--text-dim)] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95">Cancel</button>
             </div>
           </div>
         )}
 
         {/* Profile display */}
         {profile && !editMode && (
-          <div className="space-y-3">
+          <div className="space-y-6 animate-in fade-in duration-500">
             {/* Name & Title */}
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl px-4 py-3">
-              <h3 className="text-base font-bold text-gray-800">{profile.name || "—"}</h3>
-              {profile.title && <p className="text-sm text-indigo-600 font-medium">{profile.title}</p>}
-              {profile.summary && <p className="text-xs text-gray-500 mt-1 leading-relaxed">{profile.summary}</p>}
+            <div className="bg-gradient-to-br from-white/10 to-transparent rounded-2xl px-5 py-4 border border-[var(--glass-border)]">
+              <h3 className="text-xl font-black text-[var(--text-main)] uppercase tracking-tight leading-none mb-1">{profile.name || "—"}</h3>
+              {profile.title && <p className="text-xs text-indigo-400 font-black uppercase tracking-widest mb-2">{profile.title}</p>}
+              {profile.summary && <p className="text-xs text-[var(--text-dim)] leading-relaxed font-medium">{profile.summary}</p>}
             </div>
 
             {/* Experience */}
             {profile.experience?.length > 0 && (
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">💼 Experience</p>
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">💼 Experience</p>
                 {profile.experience.map((exp, i) => (
-                  <div key={i} className="bg-gray-50 rounded-lg px-3 py-2 mb-1.5">
-                    <p className="text-sm font-semibold text-gray-700">{exp.role}</p>
-                    <p className="text-xs text-gray-400">{exp.company} • {exp.duration}</p>
+                  <div key={i} className="bg-[var(--input-bg)] rounded-2xl px-4 py-3 border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] transition-colors group">
+                    <p className="text-sm font-bold text-[var(--text-main)]">{exp.role}</p>
+                    <p className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-widest mt-0.5">{exp.company} • {exp.duration}</p>
                     {exp.highlights?.map((h, j) => (
-                      <p key={j} className="text-xs text-gray-500 mt-0.5">• {h}</p>
+                      <p key={j} className="text-xs text-[var(--text-dim)] mt-1 leading-relaxed">• {h}</p>
                     ))}
                   </div>
                 ))}
@@ -232,13 +234,13 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
 
             {/* Projects */}
             {profile.projects?.length > 0 && (
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">🚀 Projects</p>
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">🚀 Projects</p>
                 {profile.projects.map((pr, i) => (
-                  <div key={i} className="bg-gray-50 rounded-lg px-3 py-2 mb-1.5">
-                    <p className="text-sm font-semibold text-gray-700">{pr.name}</p>
-                    <p className="text-xs text-gray-500">{pr.description}</p>
-                    {pr.tech?.length > 0 && <div className="mt-1">{pr.tech.map((t, j) => <SkillTag key={j} text={t} />)}</div>}
+                  <div key={i} className="bg-[var(--input-bg)] rounded-2xl px-4 py-3 border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] transition-colors">
+                    <p className="text-sm font-bold text-[var(--text-main)]">{pr.name}</p>
+                    <p className="text-xs text-[var(--text-dim)] mt-0.5 mb-2">{pr.description}</p>
+                    {pr.tech?.length > 0 && <div className="flex flex-wrap">{pr.tech.map((t, j) => <SkillTag key={j} text={t} />)}</div>}
                   </div>
                 ))}
               </div>
@@ -246,38 +248,46 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
 
             {/* Skills */}
             {profile.skills && (
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">🛠 Skills</p>
-                <div className="bg-gray-50 rounded-lg px-3 py-2">
-                  {profile.skills.languages?.length > 0 && <div className="mb-1">{profile.skills.languages.map((s, i) => <SkillTag key={i} text={s} />)}</div>}
-                  {profile.skills.frameworks?.length > 0 && <div className="mb-1">{profile.skills.frameworks.map((s, i) => <SkillTag key={i} text={s} />)}</div>}
-                  {profile.skills.tools?.length > 0 && <div className="mb-1">{profile.skills.tools.map((s, i) => <SkillTag key={i} text={s} />)}</div>}
-                  {profile.skills.other?.length > 0 && <div>{profile.skills.other.map((s, i) => <SkillTag key={i} text={s} />)}</div>}
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">🛠 Neural Skills</p>
+                <div className="bg-[var(--input-bg)] rounded-2xl px-4 py-4 border border-[var(--glass-border)]">
+                  {[
+                    profile.skills.languages,
+                    profile.skills.frameworks,
+                    profile.skills.tools,
+                    profile.skills.other
+                  ].map((list, i) => (
+                    list?.length > 0 && (
+                      <div key={i} className="flex flex-wrap mb-1 last:mb-0">
+                        {list.map((s, j) => <SkillTag key={j} text={s} />)}
+                      </div>
+                    )
+                  ))}
                 </div>
               </div>
             )}
 
             {/* Education */}
             {profile.education?.length > 0 && (
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">🎓 Education</p>
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">🎓 Education</p>
                 {profile.education.map((ed, i) => (
-                  <div key={i} className="bg-gray-50 rounded-lg px-3 py-2 mb-1.5">
-                    <p className="text-sm font-semibold text-gray-700">{ed.degree}</p>
-                    <p className="text-xs text-gray-400">{ed.institution} • {ed.year}</p>
+                  <div key={i} className="bg-[var(--input-bg)] rounded-2xl px-4 py-3 border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] transition-colors">
+                    <p className="text-sm font-bold text-[var(--text-main)]">{ed.degree}</p>
+                    <p className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-widest mt-0.5">{ed.institution} • {ed.year}</p>
                   </div>
                 ))}
               </div>
             )}
 
             {/* Action buttons */}
-            <div className="flex gap-2 pt-2">
-              <button onClick={handleEdit} className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-semibold transition-colors">✏️ Edit</button>
+            <div className="flex gap-3 pt-2">
+              <button onClick={handleEdit} className="flex-1 py-3.5 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-[var(--glass-border)]">✏️ Edit</button>
               <button
                 onClick={() => { handleDelete(); }}
-                className="flex-1 py-2.5 bg-red-50 hover:bg-red-100 text-red-500 rounded-xl text-xs font-semibold transition-colors"
+                className="flex-1 py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-red-500/10"
               >
-                🗑 Delete & Re-paste
+                🗑 Clear Profile
               </button>
             </div>
           </div>
@@ -286,7 +296,7 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
 
       {/* Full Page Loading Animation */}
       {isRefining && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0a0a0a]/95 backdrop-blur-2xl" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--bg-app)] backdrop-blur-2xl" onClick={e => e.stopPropagation()}>
           <div className="relative flex items-center justify-center w-32 h-32 mb-8">
             <div className="absolute inset-0 rounded-full border-[3px] border-indigo-500/30 animate-[spin_3s_linear_infinite]"></div>
             <div className="absolute inset-2 rounded-full border-[3px] border-t-purple-500 border-purple-500/20 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
@@ -303,9 +313,9 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
             <div className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
             <div className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "300ms" }}></div>
           </div>
-          <p className="mt-8 text-xs text-white/40 font-medium tracking-[0.2em] uppercase text-center max-w-xs leading-relaxed">
+          <p className="mt-8 text-xs text-[var(--text-dim)] font-medium tracking-[0.2em] uppercase text-center max-w-xs leading-relaxed">
             Please wait • Making you look awesome<br />
-            <span className="text-white/30 text-[0.65rem] normal-case tracking-normal">This may take 5-10 minutes for the first time</span>
+            <span className="text-[var(--text-dim)] opacity-80 text-[0.65rem] normal-case tracking-normal">This may take a few moments</span>
           </p>
         </div>
       )}
