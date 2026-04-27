@@ -197,6 +197,7 @@ function createServer(apiKeys, openRouterKey, dashscopeKey, staticDir) {
         "nemotron-3-120b":   { provider: "groq",       groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
         "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
         "qwen3.6-plus": { provider: "dashscope", dashscope: "qwen3.6-plus" },
+        "llama-3.3-70b": { provider: "groq", groq: "llama-3.3-70b-versatile", openrouter: "meta-llama/llama-3.3-70b-instruct" },
       };
 
       const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
@@ -543,6 +544,7 @@ Rules:
         "nemotron-3-120b":   { provider: "groq",       groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
         "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
         "qwen3.6-plus": { provider: "dashscope", dashscope: "qwen3.6-plus" },
+        "llama-3.3-70b": { provider: "groq", groq: "llama-3.3-70b-versatile", openrouter: "meta-llama/llama-3.3-70b-instruct" },
       };
 
       const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
