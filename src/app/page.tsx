@@ -11,7 +11,7 @@ export default function SetupPage() {
   const [hasProfile, setHasProfile] = useState(false);
   const [isRefining, setIsRefining] = useState(false);
   const [statusText, setStatusText] = useState("");
-  const [isLightMode, setIsLightMode] = useState(() => {
+  const [isLightMode] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("chintu_theme") !== "dark";
     }
