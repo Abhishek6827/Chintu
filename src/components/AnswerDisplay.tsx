@@ -95,7 +95,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                             <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
                             <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" />
                           </div>
-                          <span className="text-indigo-400/50 font-black text-[10px] uppercase tracking-[0.4em] ml-3">Synthesizing Logic...</span>
+                          <span className="text-indigo-400 opacity-60 font-black text-[10px] uppercase tracking-[0.4em] ml-3">Synthesizing Logic...</span>
                         </div>
                       );
                     }
@@ -126,12 +126,12 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                               const language = match ? match[1] : "javascript";
 
                               return isBlock ? (
-                                <div className="relative my-8 rounded-3xl overflow-hidden border border-white/[0.1] shadow-2xl bg-black/40 group/code">
-                                  <div className="bg-white/[0.03] px-6 py-3 border-b border-white/[0.05] flex justify-between items-center">
-                                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">{language}</span>
+                                <div className="relative my-8 rounded-3xl overflow-hidden border border-[var(--glass-border)] shadow-2xl bg-black/40 group/code">
+                                  <div className="bg-[var(--glass-bg)] px-6 py-3 border-b border-[var(--glass-border)] flex justify-between items-center">
+                                    <span className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">{language}</span>
                                     <button 
                                       onClick={() => handleCopy(entry.id + "-code", String(children))}
-                                      className="text-white/20 hover:text-white/60 transition-colors"
+                                      className="text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors"
                                     >
                                       <Copy className="w-4 h-4" />
                                     </button>
@@ -153,7 +153,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                                 </div>
                               ) : (
                                 <code
-                                  className={`${className || ""} bg-white/5 text-indigo-300 px-2 py-0.5 rounded-md font-mono border border-white/10`}
+                                  className={`${className || ""} bg-[var(--glass-bg)] text-indigo-300 px-2 py-0.5 rounded-md font-mono border border-[var(--glass-border)]`}
                                   style={{ fontSize: `calc(${Math.max(10, fontSize - 1) / 14} * 1rem)` }}
                                   {...rest}
                                 >
@@ -174,11 +174,11 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                               return <li className="pl-2 leading-relaxed text-[var(--text-main)]">{children}</li>;
                             },
                             hr() {
-                              return <hr className="border-white/5 my-8" />;
+                              return <hr className="border-[var(--glass-border)] my-8" />;
                             },
                             table({ children }) {
                               return (
-                                <div className="overflow-x-auto my-8 rounded-3xl border border-white/[0.08] shadow-2xl bg-black/20">
+                                <div className="overflow-x-auto my-8 rounded-3xl border border-[var(--glass-border)] shadow-2xl bg-black/20">
                                   <table className="min-w-full text-left border-collapse text-[13px]">
                                     {children}
                                   </table>
@@ -186,7 +186,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                               );
                             },
                             thead({ children }) {
-                              return <thead className="bg-white/[0.03] text-indigo-300 font-black uppercase tracking-widest border-b border-white/[0.08]">{children}</thead>;
+                              return <thead className="bg-[var(--glass-bg)] text-indigo-400 font-black uppercase tracking-widest border-b border-[var(--glass-border)]">{children}</thead>;
                             },
                             th({ children }) {
                               return <th className="px-6 py-4">{children}</th>;
