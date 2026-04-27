@@ -1221,7 +1221,7 @@ export default function RoomPage() {
       {/* Screenshot preview strip */}
       {capturedScreenshots.length > 0 && (
         <div className="px-2 sm:px-4 pb-2 shrink-0">
-          <div className="bg-white/5 border border-cyan-500/20 rounded-2xl p-3">
+          <div className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl p-3">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-cyan-300 text-xs font-medium">📸 {capturedScreenshots.length}/20 screenshot{capturedScreenshots.length > 1 ? "s" : ""}</span>
               <div className="flex-1" />
@@ -1535,7 +1535,7 @@ export default function RoomPage() {
       )}
       {/* Unhide Prompt (Shocking/Animated) */}
       {showUnhidePrompt && (
-        <div className="absolute inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-sm bg-black/40 animate-in fade-in duration-300">
+        <div className="absolute inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-sm bg-[var(--panel-bg)] animate-in fade-in duration-300">
           <div className="unhide-prompt-card w-full max-w-xs bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 p-[2px] rounded-3xl shadow-[0_0_50px_rgba(249,115,22,0.4)] animate-in zoom-in-95 duration-300">
             <div className="bg-gray-900 rounded-[22px] p-6 text-center">
               <div className="w-16 h-16 bg-orange-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-bounce">

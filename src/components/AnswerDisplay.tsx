@@ -45,12 +45,40 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
 
   if (answers.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center py-2 text-[var(--text-dim)]">
-        <div className="w-10 h-10 sm:w-20 sm:h-20 rounded-xl sm:rounded-[2rem] bg-[var(--input-bg)] border border-[var(--glass-border)] flex items-center justify-center mb-2 sm:mb-6">
-            <Sparkles className="w-5 h-5 sm:w-10 sm:h-10 opacity-20" />
+      <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-dim)]">
+        <div 
+          className="rounded-2xl sm:rounded-[2.5rem] bg-[var(--input-bg)] border border-[var(--glass-border)] flex items-center justify-center transition-all duration-300 shadow-2xl"
+          style={{ 
+            width: 'clamp(40px, 12vh, 120px)', 
+            height: 'clamp(40px, 12vh, 120px)',
+            marginBottom: 'clamp(8px, 3vh, 32px)'
+          }}
+        >
+            <Sparkles 
+              style={{ 
+                width: 'clamp(20px, 6vh, 60px)', 
+                height: 'clamp(20px, 6vh, 60px)' 
+              }} 
+              className="opacity-20" 
+            />
         </div>
-        <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.5em] mb-0.5 sm:mb-2 text-[var(--text-main)] text-center px-4">Neural Link Ready</p>
-        <p className="text-[7px] sm:text-[9px] font-bold uppercase tracking-widest opacity-40 italic text-center px-4">Hold Space to initiate synthesis</p>
+        <p 
+          style={{ 
+            fontSize: 'clamp(8px, 1.8vh, 14px)',
+            letterSpacing: '0.4em'
+          }} 
+          className="font-black uppercase mb-1 sm:mb-2 text-[var(--text-main)] text-center px-4"
+        >
+          Neural Link Ready
+        </p>
+        <p 
+          style={{ 
+            fontSize: 'clamp(7px, 1.5vh, 12px)'
+          }} 
+          className="font-bold uppercase tracking-widest opacity-40 italic text-center px-4"
+        >
+          Hold Space to initiate synthesis
+        </p>
       </div>
     );
   }
@@ -62,7 +90,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
           
           {/* Question bubble - Elegant Minimalist */}
           <div className="flex justify-end mb-5">
-            <div className="max-w-[80%] bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl px-6 py-4 backdrop-blur-md shadow-xl">
+            <div className="max-w-[80%] bg-[var(--bubble-bg)] border border-[var(--glass-border)] rounded-2xl px-6 py-4 backdrop-blur-md shadow-xl">
               <p style={{ fontSize: `calc(${Math.max(10, fontSize - 1) / 14} * 1rem)` }} className="text-[var(--text-main)] opacity-80 leading-relaxed font-medium">
                 {entry.question}
               </p>
@@ -126,7 +154,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                               const language = match ? match[1] : "javascript";
 
                               return isBlock ? (
-                                <div className="relative my-8 rounded-3xl overflow-hidden border border-[var(--glass-border)] shadow-2xl bg-black/40 group/code">
+                                <div className="relative my-8 rounded-3xl overflow-hidden border border-[var(--glass-border)] shadow-2xl bg-[var(--panel-bg)] group/code">
                                   <div className="bg-[var(--glass-bg)] px-6 py-3 border-b border-[var(--glass-border)] flex justify-between items-center">
                                     <span className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">{language}</span>
                                     <button 

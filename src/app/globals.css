@@ -6,27 +6,28 @@
 
 :root {
   /* Default Dark Mode (Ghost) */
-  --text-main: #ffffff;
-  --text-dim: rgba(255, 255, 255, 0.4);
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --bubble-bg: rgba(255, 255, 255, 0.04);
+  --app-opacity: 1;
+  --text-main: rgba(255, 255, 255, var(--app-opacity, 1));
+  --text-dim: rgba(255, 255, 255, calc(0.4 * var(--app-opacity, 1)));
+  --glass-bg: rgba(255, 255, 255, calc(0.03 * var(--app-opacity, 1)));
+  --glass-border: rgba(255, 255, 255, calc(0.08 * var(--app-opacity, 1)));
+  --bubble-bg: rgba(255, 255, 255, calc(0.04 * var(--app-opacity, 1)));
   --accent: #818cf8;
-  --accent-glow: rgba(129, 140, 248, 0.5);
-  --panel-bg: rgba(15, 15, 25, 0.8);
-  --input-bg: rgba(255, 255, 255, 0.05);
+  --accent-glow: rgba(129, 140, 248, calc(0.5 * var(--app-opacity, 1)));
+  --panel-bg: rgba(15, 15, 25, calc(0.8 * var(--app-opacity, 1)));
+  --input-bg: rgba(255, 255, 255, calc(0.05 * var(--app-opacity, 1)));
 }
 
 .light-mode {
-  --text-main: #1a1a2e;
-  --text-dim: rgba(26, 26, 46, 0.5);
-  --glass-bg: rgba(0, 0, 0, 0.02);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --bubble-bg: rgba(255, 255, 255, 0.9);
+  --text-main: rgba(26, 26, 46, var(--app-opacity, 1));
+  --text-dim: rgba(26, 26, 46, calc(0.5 * var(--app-opacity, 1)));
+  --glass-bg: rgba(0, 0, 0, calc(0.02 * var(--app-opacity, 1)));
+  --glass-border: rgba(0, 0, 0, calc(0.08 * var(--app-opacity, 1)));
+  --bubble-bg: rgba(255, 255, 255, calc(0.9 * var(--app-opacity, 1)));
   --accent: #4f46e5;
-  --accent-glow: rgba(79, 70, 229, 0.2);
-  --panel-bg: rgba(255, 255, 255, 0.95);
-  --input-bg: rgba(0, 0, 0, 0.04);
+  --accent-glow: rgba(79, 70, 229, calc(0.2 * var(--app-opacity, 1)));
+  --panel-bg: rgba(255, 255, 255, calc(0.95 * var(--app-opacity, 1)));
+  --input-bg: rgba(0, 0, 0, calc(0.04 * var(--app-opacity, 1)));
 }
 
 /* Global fluid scaling */
@@ -223,6 +224,15 @@ textarea {
   }
 }
 
+/* Override Tailwind backdrop-blur classes to scale with --app-opacity */
+.backdrop-blur-sm { backdrop-filter: blur(calc(4px * var(--app-opacity, 1))) !important; }
+.backdrop-blur { backdrop-filter: blur(calc(8px * var(--app-opacity, 1))) !important; }
+.backdrop-blur-md { backdrop-filter: blur(calc(12px * var(--app-opacity, 1))) !important; }
+.backdrop-blur-lg { backdrop-filter: blur(calc(24px * var(--app-opacity, 1))) !important; }
+.backdrop-blur-xl { backdrop-filter: blur(calc(40px * var(--app-opacity, 1))) !important; }
+.backdrop-blur-2xl { backdrop-filter: blur(calc(64px * var(--app-opacity, 1))) !important; }
+.backdrop-blur-3xl { backdrop-filter: blur(calc(100px * var(--app-opacity, 1))) !important; }
+
 /* Ensure chat area doesn't collapse */
 .chat-area-container {
   min-height: 100px;
@@ -294,7 +304,7 @@ input[type="range"]::-moz-range-thumb {
 
 .settings-overlay {
   background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(calc(12px * var(--app-opacity, 1)));
 }
 
 .settings-panel {
@@ -422,7 +432,7 @@ input[type="range"]::-moz-range-thumb {
 .ai-speech-container {
   background: linear-gradient(135deg, rgba(129, 140, 248, 0.15), rgba(129, 140, 248, 0.05));
   border: 1px solid rgba(129, 140, 248, 0.2);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(calc(12px * var(--app-opacity, 1)));
   box-shadow: 0 8px 32px rgba(129, 140, 248, 0.1);
 }
 
