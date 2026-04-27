@@ -1312,41 +1312,58 @@ export default function RoomPage() {
       <div className="px-2 sm:px-4 pb-2 shrink-0">
         <div className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-[var(--glass-bg)] transition-all">
           {/* Inline selectors row */}
-          <div className="flex items-center gap-1 px-1.5 pt-1.5 flex-wrap overflow-hidden">
-            <select
-              value={selectedModel}
-              onChange={(e) => {
-                setSelectedModel(e.target.value as ModelKey);
-                selectedModelRef.current = e.target.value as ModelKey;
-              }}
-              className="bg-[var(--input-bg)] text-[0.55rem] sm:text-[0.625rem] text-[var(--text-main)] font-medium rounded-lg px-1 py-0.5 outline-none cursor-pointer border border-[var(--glass-border)] hover:border-white/20 flex-1 min-w-0"
-            >
-              {MODELS.map(m => (
-                <option key={m.key} value={m.key} className="bg-[var(--panel-bg)] text-[var(--text-main)] text-[10px]">{m.name}</option>
-              ))}
-            </select>
-            <select
-              value={selectedVisionModel}
-              onChange={(e) => {
-                setSelectedVisionModel(e.target.value as VisionModelKey);
-                selectedVisionModelRef.current = e.target.value as VisionModelKey;
-              }}
-              className="bg-[var(--input-bg)] text-[0.55rem] sm:text-[0.625rem] text-[var(--text-main)] font-medium rounded-lg px-1 py-0.5 outline-none cursor-pointer border border-[var(--glass-border)] hover:border-white/20 flex-1 min-w-0"
-            >
-              {VISION_MODELS.map(m => (
-                <option key={m.key} value={m.key} className="bg-[var(--panel-bg)] text-[var(--text-main)] text-[10px]">📸 {m.name}</option>
-              ))}
-            </select>
-            <select
-              value={responseLength}
-              onChange={(e) => setResponseLength(e.target.value as ResponseLength)}
-              className="bg-[var(--input-bg)] text-[0.55rem] sm:text-[0.625rem] text-[var(--text-main)] font-medium rounded-lg px-1 py-0.5 outline-none cursor-pointer border border-[var(--glass-border)] hover:border-white/20 flex-1 min-w-0"
-            >
-              <option value="small" className="bg-[var(--panel-bg)] text-[var(--text-main)] text-[10px]">Small</option>
-              <option value="balanced" className="bg-[var(--panel-bg)] text-[var(--text-main)] text-[10px]">Balanced</option>
-              <option value="detailed" className="bg-[var(--panel-bg)] text-[var(--text-main)] text-[10px]">Detailed</option>
-              <option value="coding" className="bg-[var(--panel-bg)] text-[var(--text-main)] text-[10px]">Coding</option>
-            </select>
+          <div className="flex items-center gap-2 px-2 pt-2 flex-wrap">
+            <div className="premium-select-container">
+              <select
+                value={selectedModel}
+                onChange={(e) => {
+                  setSelectedModel(e.target.value as ModelKey);
+                  selectedModelRef.current = e.target.value as ModelKey;
+                }}
+                className="premium-select no-drag"
+              >
+                {MODELS.map(m => (
+                  <option key={m.key} value={m.key}>{m.name}</option>
+                ))}
+              </select>
+              <svg className="premium-select-icon w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            <div className="premium-select-container">
+              <select
+                value={selectedVisionModel}
+                onChange={(e) => {
+                  setSelectedVisionModel(e.target.value as VisionModelKey);
+                  selectedVisionModelRef.current = e.target.value as VisionModelKey;
+                }}
+                className="premium-select no-drag"
+              >
+                {VISION_MODELS.map(m => (
+                  <option key={m.key} value={m.key}>📸 {m.name}</option>
+                ))}
+              </select>
+              <svg className="premium-select-icon w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            <div className="premium-select-container">
+              <select
+                value={responseLength}
+                onChange={(e) => setResponseLength(e.target.value as ResponseLength)}
+                className="premium-select no-drag"
+              >
+                <option value="small">Small</option>
+                <option value="balanced">Balanced</option>
+                <option value="detailed">Detailed</option>
+                <option value="coding">Coding</option>
+              </select>
+              <svg className="premium-select-icon w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
           {/* Textarea */}
           <div className="relative flex items-center">

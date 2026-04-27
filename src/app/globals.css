@@ -511,3 +511,66 @@ input[type="range"]::-moz-range-thumb {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
 }
+/* Premium Dropdown Styling */
+.premium-select-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.premium-select {
+  appearance: none;
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-size: clamp(9px, 1.2vw, 11px);
+  font-weight: 600;
+  padding: 6px 28px 6px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  cursor: pointer !important;
+  width: 100%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  backdrop-filter: blur(8px);
+}
+
+.premium-select:hover {
+  background: var(--glass-bg);
+  border-color: rgba(129, 140, 248, 0.4);
+  box-shadow: 0 0 15px rgba(129, 140, 248, 0.1);
+}
+
+.premium-select:focus {
+  border-color: var(--accent);
+  background: var(--glass-bg);
+  box-shadow: 0 0 20px rgba(129, 140, 248, 0.2);
+}
+
+.premium-select-icon {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  color: var(--text-dim);
+  transition: color 0.3s ease;
+}
+
+.premium-select:hover + .premium-select-icon,
+.premium-select:focus + .premium-select-icon {
+  color: var(--text-main);
+}
+
+.premium-select option {
+  background: #1a1a2e; /* Hardcoded dark background for options to ensure readability */
+  color: white;
+  padding: 10px;
+}
+
+.light-mode .premium-select option {
+  background: white;
+  color: #1a1a2e;
+}
