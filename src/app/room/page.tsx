@@ -1213,7 +1213,7 @@ export default function RoomPage() {
       )}
 
       {/* Chat area */}
-      <div className="flex-1 overflow-y-auto py-3 chat-area-container" style={{ scrollbarGutter: "stable" }}>
+      <div className="flex-1 overflow-y-auto py-3 chat-area-container flex flex-col" style={{ scrollbarGutter: "stable" }}>
         <AnswerDisplay answers={answers} fontSize={fontSize} />
         <div ref={chatEndRef} />
       </div>
@@ -1254,7 +1254,7 @@ export default function RoomPage() {
       <div className="px-2 sm:px-4 pb-2 shrink-0">
         <div className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-[var(--glass-bg)] transition-all">
           {/* Inline selectors row */}
-          <div className="flex items-center gap-1 px-1.5 pt-1.5 flex-nowrap overflow-hidden">
+          <div className="flex items-center gap-1 px-1.5 pt-1.5 flex-wrap overflow-hidden">
             <select
               value={selectedModel}
               onChange={(e) => {
