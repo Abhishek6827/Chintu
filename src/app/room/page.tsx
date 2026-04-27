@@ -80,7 +80,7 @@ export default function RoomPage() {
   const [inputText, setInputText] = useState("");
   const [mounted, setMounted] = useState(false);
   const [windowOpacity, setWindowOpacity] = useState(1);
-  const [fontSize, setFontSize] = useState(14);
+  const [fontSize, setFontSize] = useState(10);
   const [spaceMode, setSpaceMode] = useState<"hold" | "toggle">("hold");
   const [selectedModel, setSelectedModel] = useState<ModelKey>("gpt-oss-120b");
   const selectedModelRef = useRef<ModelKey>("gpt-oss-120b");
