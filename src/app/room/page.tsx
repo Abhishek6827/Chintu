@@ -916,6 +916,27 @@ export default function RoomPage() {
     setCapturedScreenshots((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleUndo = useCallback((id: string, question: string) => {
+    setAnswers((prev) => {
+      const idx = prev.findIndex((a) => a.id === id);
+      if (idx === -1) return prev;
+      // Remove everything from this index onwards
+      const newAnswers = prev.slice(0, idx);
+      
+      // Restore question to input field (unless it's a screenshot indicator)
+      if (!question.includes("📸 Screenshot")) {
+        setInputText(question);
+      }
+      
+      // Sync histories: Each answer corresponds to 2 messages (user + assistant)
+      setChatConversationHistory((h) => h.slice(0, newAnswers.length * 2));
+      setVisionConversationHistory((h) => h.slice(0, newAnswers.length * 2));
+      setAiSpeechBubbles((s) => s.slice(0, newAnswers.length));
+      
+      return newAnswers;
+    });
+  }, []);
+
   const sendScreenshots = useCallback(async () => {
     if (capturedScreenshots.length === 0) return;
     if (status !== "idle") return;
@@ -1261,19 +1282,24 @@ export default function RoomPage() {
       {/* Error */}
       {error && (
         <div className="px-4 pb-2">
-          <div className="bg-red-500/20 rounded-xl px-4 py-2 text-red-200 text-xs flex items-center justify-between">
+          <div className={`
+            rounded-xl px-4 py-2 text-xs flex items-center justify-between border
+            ${isLightMode 
+              ? "bg-red-50 text-red-600 border-red-200" 
+              : "bg-red-500/20 text-red-200 border-red-500/30"}
+          `}>
             <span>{error}</span>
             <button onClick={() => {
               setError(null);
               if (isElectron) (window as any).electronAPI.log(`User cleared error: ${error}`);
-            }} className="text-red-300 ml-2">✕</button>
+            }} className={`${isLightMode ? "text-red-400" : "text-red-300"} ml-2 hover:scale-110 transition-transform`}>✕</button>
           </div>
         </div>
       )}
 
       {/* Chat area */}
       <div className="flex-1 overflow-y-auto py-3 chat-area-container flex flex-col" style={{ scrollbarGutter: "stable" }}>
-        <AnswerDisplay answers={answers} fontSize={fontSize} />
+        <AnswerDisplay answers={answers} fontSize={fontSize} isLightMode={isLightMode} onUndo={handleUndo} />
         <div ref={chatEndRef} />
       </div>
 

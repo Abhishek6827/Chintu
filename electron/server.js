@@ -10,10 +10,10 @@ const OpenAI = require("openai");
 const multer = require("multer");
 
 const RESPONSE_PROMPTS = {
-  small: `Keep your answer very brief — about 3-4 short sentences. Speak naturally and conversationally, as if you are thinking on your feet. Do NOT use bullet points, headers, or lists. Make it sound like a natural, off-the-cuff spoken response.`,
+  small: `Keep your answer very brief — about 3-4 short sentences. Speak naturally and conversationally, as if you are thinking on your feet. If a coding question is asked, use JavaScript as the default language. Do NOT use bullet points, headers, or lists. Make it sound like a natural, off-the-cuff spoken response.`,
   
 
-  balanced: `Keep your answer moderate in length — around 2-3 paragraphs. Use a natural, conversational tone with smooth transitions. Do NOT use bullet points, headers, or any special formatting. It MUST sound like a human speaking aloud in an interview, not reading from a script.`,
+  balanced: `Keep your answer moderate in length — around 2-3 paragraphs. Use a natural, conversational tone with smooth transitions. If a coding question is asked, use JavaScript as the default language. Do NOT use bullet points, headers, or any special formatting. It MUST sound like a human speaking aloud in an interview, not reading from a script.`,
 
   detailed: `Determine the context first — are you looking at screenshot(s) or answering a spoken question?
 
@@ -35,6 +35,7 @@ If multiple screenshots are given:
 
 ─── If responding to a SPOKEN question ───
 Give a thorough but conversational answer. Tell a cohesive story with natural phrasing.
+If a coding question is asked, use JavaScript as the default language.
 Do NOT use bullet points, headers, or numbered lists.
 Use a natural speaking style that sounds authentic when spoken aloud.
 Aim for about 4-5 paragraphs.`,

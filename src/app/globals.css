@@ -376,11 +376,16 @@ input[type="range"]::-moz-range-thumb {
 .markdown-answer code {
   user-select: text !important;
   cursor: text !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
 }
 
 .markdown-answer pre > div {
   border-radius: 16px !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid var(--glass-border) !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
 }
 
 /* Toolbar */

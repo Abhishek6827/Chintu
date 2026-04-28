@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Copy, Check, Info, ChevronDown, Sparkles, Cpu, Clock } from "lucide-react";
+import { vscDarkPlus, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Copy, Check, Info, ChevronDown, Sparkles, Cpu, Clock, RotateCcw } from "lucide-react";
 
 interface AnswerEntry {
   id: string;
@@ -21,6 +21,8 @@ interface AnswerEntry {
 interface AnswerDisplayProps {
   answers: AnswerEntry[];
   fontSize?: number;
+  isLightMode?: boolean;
+  onUndo?: (id: string, question: string) => void;
 }
 
 const parseAnswer = (text: string) => {
@@ -34,7 +36,7 @@ const parseAnswer = (text: string) => {
   return { think, main, isThinking };
 };
 
-export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayProps) {
+export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = false, onUndo }: AnswerDisplayProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleCopy = (id: string, text: string) => {
@@ -98,7 +100,16 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
         <div key={entry.id} className="animate-fade-in relative group">
           
           {/* Question bubble - Elegant Minimalist */}
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-end items-center gap-2 mb-4 group/q">
+            {onUndo && (
+              <button
+                onClick={() => onUndo(entry.id, entry.question)}
+                className="opacity-0 group-hover/q:opacity-100 p-2 rounded-xl bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:text-red-400 hover:bg-red-500/10 transition-all active:scale-90"
+                title="Rollback and Edit"
+              >
+                <RotateCcw style={{ width: 'clamp(12px, 1.8vh, 16px)', height: 'clamp(12px, 1.8vh, 16px)' }} />
+              </button>
+            )}
             <div 
               className="max-w-[85%] bg-[var(--bubble-bg)] border border-[var(--glass-border)] rounded-2xl backdrop-blur-md shadow-xl"
               style={{ 
@@ -135,7 +146,7 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-indigo-500/50 via-purple-500/20 to-transparent" />
                 
-                <div className="markdown-answer" style={{ fontSize: `calc(${fontSize / 14} * 1rem)` }}>
+                <div className="markdown-answer" style={{ fontSize: `clamp(9px, calc(${fontSize / 14} * 1rem), 20px)` }}>
                   {(() => {
                     if (entry.isStreaming && !entry.answer) {
                       return (
@@ -199,14 +210,15 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                                     </button>
                                   </div>
                                   <SyntaxHighlighter
-                                    style={vscDarkPlus as any}
+                                    style={(isLightMode ? oneLight : vscDarkPlus) as any}
                                     language={language}
                                     PreTag="div"
                                     customStyle={{
                                       margin: 0,
                                       background: "transparent",
-                                      padding: "24px",
-                                      fontSize: `calc(${Math.max(10, fontSize - 2) / 14} * 1rem)`,
+                                      padding: "clamp(12px, 3vh, 24px)",
+                                      fontSize: `clamp(9px, calc(${Math.max(10, fontSize - 2) / 14} * 1rem), 16px)`,
+                                      lineHeight: "1.5"
                                     }}
                                     {...rest}
                                   >
@@ -291,26 +303,28 @@ export default function AnswerDisplay({ answers, fontSize = 14 }: AnswerDisplayP
                     )}
                   </div>
 
-                  <button
-                    onClick={() => handleCopy(entry.id, entry.answer)}
-                    className="flex items-center gap-2 font-black tracking-[0.2em] uppercase rounded-2xl transition-all duration-300 border bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)]"
-                    style={{ 
-                      padding: 'clamp(8px, 1.5vh, 12px) clamp(12px, 2vw, 20px)',
-                      fontSize: 'clamp(8px, 1.2vh, 10px)'
-                    }}
-                  >
-                    {copiedId === entry.id ? (
-                      <>
-                        <Check style={{ width: 'clamp(12px, 1.8vh, 16px)', height: 'clamp(12px, 1.8vh, 16px)' }} className="text-emerald-400" />
-                        <span className="text-emerald-400">Archived</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy style={{ width: 'clamp(12px, 1.8vh, 16px)', height: 'clamp(12px, 1.8vh, 16px)' }} />
-                        <span>Extract</span>
-                      </>
-                    )}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleCopy(entry.id, entry.answer)}
+                      className="flex items-center gap-2 font-black tracking-[0.2em] uppercase rounded-2xl transition-all duration-300 border bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)]"
+                      style={{ 
+                        padding: 'clamp(8px, 1.5vh, 12px) clamp(12px, 2vw, 20px)',
+                        fontSize: 'clamp(8px, 1.2vh, 10px)'
+                      }}
+                    >
+                      {copiedId === entry.id ? (
+                        <>
+                          <Check style={{ width: 'clamp(12px, 1.8vh, 16px)', height: 'clamp(12px, 1.8vh, 16px)' }} className="text-emerald-400" />
+                          <span className="text-emerald-400">Archived</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy style={{ width: 'clamp(12px, 1.8vh, 16px)', height: 'clamp(12px, 1.8vh, 16px)' }} />
+                          <span>Extract</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
