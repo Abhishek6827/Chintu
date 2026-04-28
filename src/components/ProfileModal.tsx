@@ -83,6 +83,7 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [editJson, setEditJson] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     loadProfileFromDisk().then(p => {
@@ -120,6 +121,7 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
     }
     setProfile(null);
     setEditMode(false);
+    setShowDeleteConfirm(false);
   };
 
   const handleEdit = () => {
@@ -284,7 +286,7 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
             <div className="flex gap-3 pt-2">
               <button onClick={handleEdit} className="flex-1 py-3.5 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-[var(--glass-border)]">✏️ Edit</button>
               <button
-                onClick={() => { handleDelete(); }}
+                onClick={() => setShowDeleteConfirm(true)}
                 className="flex-1 py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-red-500/10"
               >
                 🗑 Clear Profile
@@ -317,6 +319,38 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
             Please wait • Making you look awesome<br />
             <span className="text-[var(--text-dim)] opacity-80 text-[0.65rem] normal-case tracking-normal">This may take a few moments</span>
           </p>
+        </div>
+      )}
+      {/* Profile Delete Confirmation */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-md bg-black/40 animate-in fade-in duration-300" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-xs bg-gradient-to-br from-red-500 via-rose-600 to-pink-700 p-[1.5px] rounded-[32px] shadow-[0_20px_50px_rgba(225,29,72,0.3)] animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-[var(--panel-bg)] backdrop-blur-2xl rounded-[30px] p-6 text-center">
+              <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-black text-[var(--text-main)] mb-2 uppercase tracking-tight">Delete Profile?</h3>
+              <p className="text-[var(--text-dim)] text-xs mb-6 leading-relaxed font-medium">
+                This will wipe your personalized background, skills, and experience. AI will no longer be able to personalize its answers for you.
+              </p>
+              <div className="flex flex-col gap-2.5">
+                <button
+                  onClick={handleDelete}
+                  className="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-red-600/20"
+                >
+                  Confirm Delete
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="w-full py-3.5 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl transition-all border border-[var(--glass-border)]"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

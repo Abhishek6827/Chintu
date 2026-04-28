@@ -110,6 +110,8 @@ export default function RoomPage() {
   } | null>(null);
   const [appVersion, setAppVersion] = useState("");
   const [history, setHistory] = useState<HistorySession[]>([]);
+  const [showClearHistoryConfirm, setShowClearHistoryConfirm] = useState(false);
+  const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const savedHistory = localStorage.getItem("chintu_history");
@@ -138,10 +140,9 @@ export default function RoomPage() {
   }, [answers, history]);
 
   const clearHistory = () => {
-    if (confirm("Clear all conversation history?")) {
-      setHistory([]);
-      localStorage.removeItem("chintu_history");
-    }
+    setHistory([]);
+    localStorage.removeItem("chintu_history");
+    setShowClearHistoryConfirm(false);
   };
 
   const deleteSession = (id: string) => {
@@ -1622,7 +1623,7 @@ export default function RoomPage() {
                       <svg style={{ width: 'clamp(12px, 3vw, 20px)', height: 'clamp(12px, 3vw, 20px)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                     </button>
                     <button
-                      onClick={clearHistory}
+                      onClick={() => setShowClearHistoryConfirm(true)}
                       className="rounded-xl bg-[var(--glass-bg)] text-red-400 flex items-center justify-center hover:bg-red-500/20 transition-all border border-[var(--glass-border)]"
                       style={{ width: 'clamp(24px, 6vw, 40px)', height: 'clamp(24px, 6vw, 40px)' }}
                       title="Clear History"
@@ -1662,9 +1663,7 @@ export default function RoomPage() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (confirm("Delete this session?")) {
-                              deleteSession(session.id);
-                            }
+                            setSessionToDelete(session.id);
                           }}
                           className="rounded-lg bg-red-500/10 text-red-400 opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
                           style={{ width: 'clamp(20px, 5vw, 32px)', height: 'clamp(20px, 5vw, 32px)' }}
@@ -1747,6 +1746,7 @@ export default function RoomPage() {
           </div>
         </div>
       )}
+
     {/* Floating side controls */}
     {isElectron && (
       <div className="floating-side-controls no-drag">
@@ -1773,6 +1773,72 @@ export default function RoomPage() {
             className="side-slider"
           />
           <span className="side-control-value">{fontSize}</span>
+        </div>
+      </div>
+    )}
+
+    {/* Clear History Confirmation Modal */}
+    {showClearHistoryConfirm && (
+      <div className="absolute inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-md bg-black/40 animate-in fade-in duration-300">
+        <div className="w-full max-w-xs bg-gradient-to-br from-red-500 via-rose-600 to-pink-700 p-[1.5px] rounded-[32px] shadow-[0_20px_50px_rgba(225,29,72,0.3)] animate-in zoom-in-95 duration-300">
+          <div className="bg-[var(--panel-bg)] backdrop-blur-2xl rounded-[30px] p-6 text-center">
+            <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-black text-[var(--text-main)] mb-2 uppercase tracking-tight">Wipe History?</h3>
+            <p className="text-[var(--text-dim)] text-xs mb-6 leading-relaxed font-medium">
+              This will permanently delete <span className="text-red-500 font-bold underline">{history.length}</span> conversation sessions. This action cannot be undone.
+            </p>
+            <div className="flex flex-col gap-2.5">
+              <button
+                onClick={clearHistory}
+                className="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-red-600/20"
+              >
+                Delete Everything
+              </button>
+              <button
+                onClick={() => setShowClearHistoryConfirm(false)}
+                className="w-full py-3.5 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl transition-all border border-[var(--glass-border)]"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Single Session Delete Confirmation */}
+    {sessionToDelete && (
+      <div className="absolute inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-md bg-black/40 animate-in fade-in duration-300">
+        <div className="w-full max-w-xs bg-gradient-to-br from-orange-500 via-red-500 to-rose-600 p-[1.5px] rounded-[32px] shadow-[0_20px_50px_rgba(244,63,94,0.3)] animate-in zoom-in-95 duration-300">
+          <div className="bg-[var(--panel-bg)] backdrop-blur-2xl rounded-[30px] p-6 text-center">
+            <div className="w-14 h-14 bg-orange-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-orange-500/20">
+              <svg className="w-7 h-7 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h3 className="text-base font-black text-[var(--text-main)] mb-2 uppercase tracking-tight">Delete Session?</h3>
+            <p className="text-[var(--text-dim)] text-[10px] mb-6 leading-relaxed font-bold uppercase tracking-wide">
+              &quot;{history.find(s => s.id === sessionToDelete)?.title || "This session"}&quot;
+            </p>
+            <div className="flex gap-2.5">
+              <button
+                onClick={() => setSessionToDelete(null)}
+                className="flex-1 py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] font-black uppercase text-[9px] tracking-widest rounded-xl transition-all border border-[var(--glass-border)]"
+              >
+                No
+              </button>
+              <button
+                onClick={() => deleteSession(sessionToDelete)}
+                className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 shadow-lg shadow-red-600/20"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     )}
