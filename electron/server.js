@@ -192,9 +192,9 @@ function createServer(apiKeys, openRouterKey, dashscopeKey, staticDir) {
 
       // ─── Model mapping: key → { groq model ID, openrouter model ID } ─
       const MODEL_MAP = {
-        "gpt-oss-120b":      { provider: "groq",       groq: "openai/gpt-oss-120b",      openrouter: "openai/gpt-oss-120b" },
-        "qwen3-Coder":  { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
-        "nemotron-3-120b":   { provider: "groq",       groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
+        "gpt-oss-120b": { provider: "groq", groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
+        "qwen3-Coder": { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
+        "nemotron-3-120b": { provider: "openrouter", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
         "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
         "qwen3.6-plus": { provider: "dashscope", dashscope: "qwen3.6-plus" },
         "llama-3.3-70b": { provider: "groq", groq: "llama-3.3-70b-versatile", openrouter: "meta-llama/llama-3.3-70b-instruct" },
@@ -294,7 +294,12 @@ Rules:
           break; // Don't retry with Groq keys for DashScope model
         }
 
-        for (let i = 0; i < apiKeys.length; i++) {
+        // If explicitly using OpenRouter, skip Groq
+        if (modelConfig.provider === "openrouter") {
+          console.log(`[/api/answer] Explicitly using OpenRouter for ${selectedModel}`);
+          break;
+        } else {
+          for (let i = 0; i < apiKeys.length; i++) {
           const key = apiKeys[i];
           try {
             console.log(`[/api/answer] Trying key ${i + 1}/${apiKeys.length} (attempt ${attempt + 1}) (ending: ...${key.slice(-4)})`);
@@ -319,9 +324,9 @@ Rules:
               console.warn(`[/api/answer] Rate limit on key ${i + 1}, trying next...`);
               continue;
             }
-            throw error;
           }
         }
+      }
 
         if (stream) break; // success — exit retry loop
       }
@@ -417,9 +422,9 @@ Rules:
       res.end();
     } catch (error) {
       console.error("[/api/answer] Error:", error);
-      const message = error instanceof Error ? error.message : "Answer generation failed";
+      const userFriendlyMessage = "Please try again in a moment.";
       if (!res.headersSent) {
-        res.status(500).json({ error: message });
+        res.status(500).json({ error: userFriendlyMessage });
       } else {
         res.end();
       }
@@ -539,9 +544,9 @@ Rules:
 
       // ─── Model mapping ────────────────────────────────────
       const MODEL_MAP = {
-        "gpt-oss-120b":      { provider: "groq",       groq: "openai/gpt-oss-120b",      openrouter: "openai/gpt-oss-120b" },
-        "qwen3-Coder":  { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
-        "nemotron-3-120b":   { provider: "groq",       groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
+        "gpt-oss-120b": { provider: "groq", groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
+        "qwen3-Coder": { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
+        "nemotron-3-120b": { provider: "openrouter", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
         "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
         "qwen3.6-plus": { provider: "dashscope", dashscope: "qwen3.6-plus" },
         "llama-3.3-70b": { provider: "groq", groq: "llama-3.3-70b-versatile", openrouter: "meta-llama/llama-3.3-70b-instruct" },
@@ -634,7 +639,12 @@ Rules:
           break;
         }
 
-        for (let i = 0; i < apiKeys.length; i++) {
+        // If explicitly using OpenRouter, skip Groq
+        if (modelConfig.provider === "openrouter") {
+          console.log(`[/api/answer-vision] Explicitly using OpenRouter for ${selectedModel}`);
+          break;
+        } else {
+          for (let i = 0; i < apiKeys.length; i++) {
           try {
             console.log(`[/api/answer-vision] Step 2: Trying key ${i + 1} with ${groqModel}...`);
             const groq = new Groq({ apiKey: apiKeys[i] });
@@ -652,6 +662,7 @@ Rules:
             break;
           } catch (err) {
             finalError = err;
+          }
           }
         }
         if (stream) break;
@@ -742,9 +753,9 @@ Rules:
       res.end();
     } catch (error) {
       console.error("[/api/answer-vision] Error:", error);
-      const message = error instanceof Error ? error.message : "Vision answer failed";
+      const userFriendlyMessage = "All vision models are busy. Please try again in a moment.";
       if (!res.headersSent) {
-        res.status(500).json({ error: message });
+        res.status(500).json({ error: userFriendlyMessage });
       } else {
         res.end();
       }

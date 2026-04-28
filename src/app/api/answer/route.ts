@@ -192,7 +192,7 @@ export async function POST(req: NextRequest) {
     const MODEL_MAP: Record<string, { provider: string; groq?: string; openrouter?: string; dashscope?: string }> = {
       "gpt-oss-120b": { provider: "groq", groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
       "qwen3-Coder": { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
-      "nemotron-3-120b": { provider: "groq", groq: "nvidia/nemotron-3-super-120b-a12b:free", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
+      "nemotron-3-120b": { provider: "openrouter", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
       "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
       "llama-3.3-70b": { provider: "groq", groq: "llama-3.3-70b-versatile", openrouter: "meta-llama/llama-3.3-70b-instruct" },
     };
@@ -262,7 +262,7 @@ Rules:
 
       // DashScope routing
       if (isDashScope) {
-        const modelsToTry = selectedModel === "qwen3.6" 
+        const modelsToTry = selectedModel === "qwen3.6"
           ? [...QWEN_PRIORITY, ...QWEN_FALLBACK]
           : [modelConfig.dashscope!];
 
@@ -299,32 +299,37 @@ Rules:
         break;
       }
 
-      for (let i = 0; i < apiKeys.length; i++) {
-        const apiKey = apiKeys[i];
-        try {
-          console.log(`[/api/answer] Trying key ${i + 1}/${apiKeys.length} (attempt ${attempt + 1}) (ending: ...${apiKey.slice(-4)})`);
-          const groq = new Groq({ apiKey });
-          stream = await groq.chat.completions.create({
-            model: groqModel,
-            stream: true,
-            max_tokens: 2048,
-            messages: [
-              { role: "system", content: systemPrompt },
-              ...trimmedHistory,
-              { role: "user", content: transcript },
-            ],
-          });
-          actualModelUsed = selectedModel;
-          console.log(`[/api/answer] ✓ Stream created with key ${i + 1}`);
-          break; // Success, exit key loop
-        } catch (error: any) {
-          lastError = error;
-          console.error(`[/api/answer] ✗ Key ${i + 1} failed — status: ${error?.status}, message: ${error?.message?.slice(0, 100)}`);
-          if (error?.status === 429) {
-            console.warn(`[/api/answer] Rate limit on key ${i + 1}, trying next...`);
-            continue; // Try next key
+      if (modelConfig.provider === "openrouter") {
+        console.log(`[/api/answer] Explicitly using OpenRouter for ${selectedModel}`);
+        break; // Exit retry loop and go straight to OpenRouter
+      } else {
+        for (let i = 0; i < apiKeys.length; i++) {
+          const apiKey = apiKeys[i];
+          try {
+            console.log(`[/api/answer] Trying key ${i + 1}/${apiKeys.length} (attempt ${attempt + 1}) (ending: ...${apiKey.slice(-4)})`);
+            const groq = new Groq({ apiKey });
+            stream = await groq.chat.completions.create({
+              model: groqModel,
+              stream: true,
+              max_tokens: 2048,
+              messages: [
+                { role: "system", content: systemPrompt },
+                ...trimmedHistory,
+                { role: "user", content: transcript },
+              ],
+            });
+            actualModelUsed = selectedModel;
+            console.log(`[/api/answer] ✓ Stream created with key ${i + 1}`);
+            break; // Success, exit key loop
+          } catch (error: any) {
+            lastError = error;
+            console.error(`[/api/answer] ✗ Key ${i + 1} failed — status: ${error?.status}, message: ${error?.message?.slice(0, 100)}`);
+            if (error?.status === 429) {
+              console.warn(`[/api/answer] Rate limit on key ${i + 1}, trying next...`);
+              continue; // Try next key
+            }
+            throw error; // Throw non-rate-limit errors immediately
           }
-          throw error; // Throw non-rate-limit errors immediately
         }
       }
 
@@ -442,7 +447,7 @@ Rules:
     });
   } catch (error) {
     console.error("[/api/answer] Error:", error);
-    const message = error instanceof Error ? error.message : "Answer generation failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const userFriendlyMessage = "Please try again in a moment.";
+    return NextResponse.json({ error: userFriendlyMessage }, { status: 500 });
   }
 }
