@@ -41,7 +41,7 @@ Do NOT use bullet points, headers, or numbered lists.
 Use a natural speaking style that sounds authentic when spoken aloud.
 Aim for about 4-5 paragraphs.`,
 
-  coding: `You are an expert programmer assisting in a technical interview.
+  coding: `You are an expert programmer assisting in a technical interview. If a coding question is asked and no specific language is mentioned, use JavaScript as the default language.
 
 FIRST — detect the intent from the screenshot(s):
 

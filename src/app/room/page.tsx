@@ -1117,18 +1117,15 @@ export default function RoomPage() {
       </div>
 
       {/* Status bar */}
-      {status !== "idle" && (
+      {status === "recording" && (
         <div className="px-4 pb-2">
-          <div className={`
-            text-center py-1.5 rounded-full text-xs font-semibold border
-            ${status === "recording" 
-              ? "bg-red-500/10 border-red-500/20 text-red-500" 
-              : "bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-main)]"}
-          `}>
-            {status === "recording" ? "🔴 Recording..." : "✨ Generating answer..."}
+          <div className="text-center py-1.5 rounded-full text-xs font-semibold border bg-red-500/10 border-red-500/20 text-red-500 animate-pulse">
+            🔴 Recording...
           </div>
         </div>
       )}
+
+
 
       {/* Live transcript */}
       {status === "recording" && liveTranscript && (

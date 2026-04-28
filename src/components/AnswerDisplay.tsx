@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Copy, Check, Info, ChevronDown, Sparkles, Cpu, Clock, RotateCcw } from "lucide-react";
+import AIProcessing from "./AIProcessing";
 
 interface AnswerEntry {
   id: string;
@@ -150,13 +151,8 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                   {(() => {
                     if (entry.isStreaming && !entry.answer) {
                       return (
-                        <div className="flex items-center gap-3 py-6">
-                          <div className="flex gap-1.5">
-                            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" />
-                          </div>
-                          <span className="text-indigo-400 opacity-60 font-black text-[10px] uppercase tracking-[0.4em] ml-3">Synthesizing Logic...</span>
+                        <div className="py-2">
+                          <AIProcessing />
                         </div>
                       );
                     }
@@ -227,7 +223,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                                 </div>
                               ) : (
                                 <code
-                                  className={`${className || ""} bg-[var(--glass-bg)] text-indigo-300 px-2 py-0.5 rounded-md font-mono border border-[var(--glass-border)]`}
+                                  className={`${className || ""} ${isLightMode ? "text-indigo-700 bg-indigo-50" : "text-indigo-300 bg-[var(--glass-bg)]"} px-2 py-0.5 rounded-md font-mono border border-[var(--glass-border)]`}
                                   style={{ fontSize: `calc(${Math.max(10, fontSize - 1) / 14} * 1rem)` }}
                                   {...rest}
                                 >
