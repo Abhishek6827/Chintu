@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Mic, Sun, Moon } from "lucide-react";
 import AnswerDisplay from "@/components/AnswerDisplay";
 import ProfileModal, { getProfileContext, getStoredProfile, loadProfileFromDisk, saveProfileToDisk } from "@/components/ProfileModal";
+import CustomDropdown from "@/components/CustomDropdown";
 
 interface AnswerEntry {
   id: string;
@@ -1313,57 +1314,35 @@ export default function RoomPage() {
         <div className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-[var(--glass-bg)] transition-all">
           {/* Inline selectors row */}
           <div className="flex items-center gap-2 px-2 pt-2 flex-wrap">
-            <div className="premium-select-container">
-              <select
-                value={selectedModel}
-                onChange={(e) => {
-                  setSelectedModel(e.target.value as ModelKey);
-                  selectedModelRef.current = e.target.value as ModelKey;
-                }}
-                className="premium-select no-drag"
-              >
-                {MODELS.map(m => (
-                  <option key={m.key} value={m.key}>{m.name}</option>
-                ))}
-              </select>
-              <svg className="premium-select-icon w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
+            <CustomDropdown
+              options={MODELS}
+              value={selectedModel}
+              onChange={(val) => {
+                setSelectedModel(val as ModelKey);
+                selectedModelRef.current = val as ModelKey;
+              }}
+            />
 
-            <div className="premium-select-container">
-              <select
-                value={selectedVisionModel}
-                onChange={(e) => {
-                  setSelectedVisionModel(e.target.value as VisionModelKey);
-                  selectedVisionModelRef.current = e.target.value as VisionModelKey;
-                }}
-                className="premium-select no-drag"
-              >
-                {VISION_MODELS.map(m => (
-                  <option key={m.key} value={m.key}>📸 {m.name}</option>
-                ))}
-              </select>
-              <svg className="premium-select-icon w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
+            <CustomDropdown
+              options={VISION_MODELS}
+              value={selectedVisionModel}
+              onChange={(val) => {
+                setSelectedVisionModel(val as VisionModelKey);
+                selectedVisionModelRef.current = val as VisionModelKey;
+              }}
+              icon={<span className="text-[10px]">📸</span>}
+            />
 
-            <div className="premium-select-container">
-              <select
-                value={responseLength}
-                onChange={(e) => setResponseLength(e.target.value as ResponseLength)}
-                className="premium-select no-drag"
-              >
-                <option value="small">Small</option>
-                <option value="balanced">Balanced</option>
-                <option value="detailed">Detailed</option>
-                <option value="coding">Coding</option>
-              </select>
-              <svg className="premium-select-icon w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
+            <CustomDropdown
+              options={[
+                { key: "small", name: "Small" },
+                { key: "balanced", name: "Balanced" },
+                { key: "detailed", name: "Detailed" },
+                { key: "coding", name: "Coding" },
+              ]}
+              value={responseLength}
+              onChange={(val) => setResponseLength(val as ResponseLength)}
+            />
           </div>
           {/* Textarea */}
           <div className="relative flex items-center">
