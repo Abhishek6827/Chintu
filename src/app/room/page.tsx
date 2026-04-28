@@ -112,6 +112,8 @@ export default function RoomPage() {
   const [history, setHistory] = useState<HistorySession[]>([]);
   const [showClearHistoryConfirm, setShowClearHistoryConfirm] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
+  const [showReadingGuide, setShowReadingGuide] = useState(false);
+  const [isPip, setIsPip] = useState(false);
 
   useEffect(() => {
     const savedHistory = localStorage.getItem("chintu_history");
@@ -122,6 +124,14 @@ export default function RoomPage() {
         console.error("Failed to load history", e);
       }
     }
+
+    const savedReadingGuide = localStorage.getItem("chintu_reading_guide");
+    if (savedReadingGuide) setShowReadingGuide(savedReadingGuide === "true");
+
+    const handleResize = () => setIsPip(window.innerWidth < 400 || window.innerHeight < 400);
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const saveToHistory = useCallback(() => {
@@ -1077,7 +1087,7 @@ export default function RoomPage() {
         <div className="flex items-center gap-2 no-drag">
           <span className="text-[var(--text-main)] text-sm font-bold">✦ Chintu</span>
           {appVersion && (
-            <span className="bg-white/10 text-white/50 px-1.5 py-0.5 rounded text-[0.625rem] font-mono">
+            <span className="bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] px-1.5 py-0.5 rounded text-[0.625rem] font-mono shadow-sm">
               v{appVersion}
             </span>
           )}
@@ -1295,9 +1305,14 @@ export default function RoomPage() {
         </div>
       )}
 
-      {/* Chat area */}
       <div className="flex-1 overflow-y-auto py-3 chat-area-container flex flex-col" style={{ scrollbarGutter: "stable" }}>
-        <AnswerDisplay answers={answers} fontSize={fontSize} isLightMode={isLightMode} onUndo={handleUndo} />
+        <AnswerDisplay 
+          answers={answers} 
+          fontSize={fontSize} 
+          isLightMode={isLightMode} 
+          onUndo={handleUndo} 
+          showReadingGuide={showReadingGuide}
+        />
         <div ref={chatEndRef} />
       </div>
 
@@ -1583,6 +1598,29 @@ export default function RoomPage() {
                 <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
                   {spaceMode === "hold" ? "Hold space to speak, release to send" : "Tap space to start/stop recording"}
                 </p>
+              </div>
+
+              {/* Reading Guide Toggle */}
+              <div 
+                className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
+                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Reading Focus</h4>
+                    <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">Highlight text as it arrives</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const newVal = !showReadingGuide;
+                      setShowReadingGuide(newVal);
+                      localStorage.setItem("chintu_reading_guide", newVal.toString());
+                    }}
+                    className={`w-12 h-6 rounded-full transition-all relative ${showReadingGuide ? "bg-indigo-600" : "bg-gray-600/30"}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${showReadingGuide ? "left-7" : "left-1"}`} />
+                  </button>
+                </div>
               </div>
 
               {/* Profile Section */}

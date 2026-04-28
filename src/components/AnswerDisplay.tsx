@@ -24,6 +24,7 @@ interface AnswerDisplayProps {
   fontSize?: number;
   isLightMode?: boolean;
   onUndo?: (id: string, question: string) => void;
+  showReadingGuide?: boolean;
 }
 
 const parseAnswer = (text: string) => {
@@ -37,7 +38,7 @@ const parseAnswer = (text: string) => {
   return { think, main, isThinking };
 };
 
-export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = false, onUndo }: AnswerDisplayProps) {
+export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = false, onUndo, showReadingGuide = false }: AnswerDisplayProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleCopy = (id: string, text: string) => {
@@ -117,7 +118,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                 padding: 'clamp(12px, 2vh, 20px) clamp(16px, 3vw, 24px)' 
               }}
             >
-              <p style={{ fontSize: `calc(${Math.max(10, fontSize - 1) / 14} * 1rem)` }} className="text-[var(--text-main)] opacity-80 leading-relaxed font-medium">
+              <p style={{ fontSize: `calc(${Math.max(10, fontSize - 1) / 14} * 1rem)` }} className="text-[var(--text-main)] opacity-100 leading-relaxed font-bold">
                 {entry.question}
               </p>
             </div>
@@ -147,7 +148,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-indigo-500/50 via-purple-500/20 to-transparent" />
                 
-                <div className="markdown-answer" style={{ fontSize: `clamp(9px, calc(${fontSize / 14} * 1rem), 20px)` }}>
+                <div className={`markdown-answer ${showReadingGuide && entry.isStreaming ? 'reading-guide-active' : ''}`} style={{ fontSize: `clamp(9px, calc(${fontSize / 14} * 1rem), 20px)` }}>
                   {(() => {
                     if (entry.isStreaming && !entry.answer) {
                       return (
@@ -232,7 +233,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                               );
                             },
                             p({ children }) {
-                              return <p className="mb-5 last:mb-0 leading-relaxed text-[var(--text-main)] opacity-90">{children}</p>;
+                              return <p className="mb-5 last:mb-0 leading-relaxed text-[var(--text-main)] font-semibold opacity-100">{children}</p>;
                             },
                             strong({ children }) {
                               return <strong className="font-black text-[var(--text-main)]">{children}</strong>;
@@ -241,7 +242,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                               return <ul className="list-disc list-outside ml-7 mb-6 space-y-3 text-[var(--text-dim)]">{children}</ul>;
                             },
                             li({ children }) {
-                              return <li className="pl-2 leading-relaxed text-[var(--text-main)]">{children}</li>;
+                              return <li className="pl-2 leading-relaxed text-[var(--text-main)] font-semibold opacity-100">{children}</li>;
                             },
                             hr() {
                               return <hr className="border-[var(--glass-border)] my-8" />;
