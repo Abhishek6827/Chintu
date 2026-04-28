@@ -45,12 +45,7 @@ const MODELS = [
 type ModelKey = typeof MODELS[number]["key"];
 
 // ─── Vision models (for screenshot processing) ─────────────
-const VISION_MODELS = [
-  { key: "llama-4-scout", name: "Llama 4 Scout" },
-  { key: "qwen3.6", name: "Qwen3.6 Plus" },
-] as const;
-
-type VisionModelKey = typeof VISION_MODELS[number]["key"];
+// (Removed: Scout is default for everything except Qwen3.6 Plus which is Native)
 
 // ─── Conversation history message type ────────────────────
 interface HistoryMessage {
@@ -85,8 +80,6 @@ export default function RoomPage() {
   const [spaceMode, setSpaceMode] = useState<"hold" | "toggle">("hold");
   const [selectedModel, setSelectedModel] = useState<ModelKey>("gpt-oss-120b");
   const selectedModelRef = useRef<ModelKey>("gpt-oss-120b");
-  const [selectedVisionModel, setSelectedVisionModel] = useState<VisionModelKey>("llama-4-scout");
-  const selectedVisionModelRef = useRef<VisionModelKey>("llama-4-scout");
 
   // ─── Vision conversation history ──────────────────────────
   // Keeps track of previous screenshot exchanges so the model
@@ -291,8 +284,15 @@ export default function RoomPage() {
   }, [windowOpacity]);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "auto" });
-  }, [answers]);
+    // Only auto-scroll when a new message starts, so the user sees the top of the new answer
+    if (answers.length > 0 && status === "generating") {
+      const lastAnswer = answers[answers.length - 1];
+      // Only scroll at the very beginning of a stream
+      if (lastAnswer.isStreaming && lastAnswer.answer.length < 50) {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [answers.length, status]);
 
   useEffect(() => {
     const jd = sessionStorage.getItem("jobDescription");
@@ -1360,16 +1360,6 @@ export default function RoomPage() {
                 setSelectedModel(val as ModelKey);
                 selectedModelRef.current = val as ModelKey;
               }}
-            />
-
-            <CustomDropdown
-              options={VISION_MODELS}
-              value={selectedVisionModel}
-              onChange={(val) => {
-                setSelectedVisionModel(val as VisionModelKey);
-                selectedVisionModelRef.current = val as VisionModelKey;
-              }}
-              icon={<span className="text-[10px]">📸</span>}
             />
 
             <CustomDropdown
