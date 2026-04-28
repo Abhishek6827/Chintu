@@ -463,9 +463,11 @@ Rules:
       // ====================================================================
       const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
       const isDashScope = modelConfig.provider === "dashscope";
+      // ONLY use Native Vision for Qwen3.6 Plus.
+      const isNativeVisionSupported = selectedModel === "qwen3.6" || selectedModel === "qwen3.6-plus";
       
-      // Native Vision Path for DashScope models
-      if (isDashScope) {
+      // Native Vision Path
+      if (isNativeVisionSupported) {
         console.log(`[/api/answer-vision] Native Vision requested for DashScope model: ${selectedModel}`);
         
         const systemPrompt = isCoding

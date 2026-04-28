@@ -979,7 +979,6 @@ export default function RoomPage() {
           additionalContext: contextText,
           conversationHistory: historyToSend,
           selectedModel: selectedModelRef.current,
-          selectedVisionModel: selectedVisionModelRef.current,
         }),
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Vision failed"); }
