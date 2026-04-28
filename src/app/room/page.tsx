@@ -34,11 +34,11 @@ type ResponseLength = "small" | "balanced" | "detailed" | "coding";
 
 // ─── Available models ─────────────────────────────────────────
 const MODELS = [
+  { key: "llama-3.3-70b", name: "Llama 3.3 70B" },
   { key: "gpt-oss-120b", name: "GPT-OSS 120B" },
   { key: "qwen3-Coder", name: "Qwen3 Coder 480B" },
   { key: "nemotron-3-120b", name: "Nemotron 3 (120B)" },
-  { key: "qwen3.6", name: "Qwen3.6 Plus" },
-  { key: "llama-3.3-70b", name: "Llama 3.3 70B" },
+  { key: "qwen3.6", name: "Qwen3.6 Plus" }
 ] as const;
 
 type ModelKey = typeof MODELS[number]["key"];
