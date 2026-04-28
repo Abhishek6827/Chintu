@@ -1,6 +1,6 @@
 {
   "name": "chintu",
-  "version": "1.0.56",
+  "version": "1.0.57",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
