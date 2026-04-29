@@ -3,37 +3,25 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { loadProfileFromDisk, saveProfileToDisk } from "@/components/ProfileModal";
-
+import { UserButton, useUser } from "@clerk/nextjs";
 
 export default function SetupPage() {
+  const { isLoaded, isSignedIn, user } = useUser();
   const [jd, setJd] = useState("");
   const [aboutMe, setAboutMe] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
   const [isRefining, setIsRefining] = useState(false);
   const [statusText, setStatusText] = useState("");
-  const [isLightMode] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("chintu_theme") !== "dark";
-    }
-    return true;
-  });
+  const [mounted, setMounted] = useState(false);
+  
   const router = useRouter();
 
+  // Handle hydration
   useEffect(() => {
-    if (isLightMode) {
-      document.body.classList.add("light-mode");
-      localStorage.setItem("chintu_theme", "light");
-    } else {
-      document.body.classList.remove("light-mode");
-      localStorage.setItem("chintu_theme", "dark");
-    }
-  }, [isLightMode]);
-
-  // Check profile on mount AND on window focus (in case user comes back)
-  useEffect(() => {
-    const draft = localStorage.getItem("chintu_draft_about_me");
-    if (draft) setAboutMe(draft);
-
+    setMounted(true);
+    const draftAbout = localStorage.getItem("chintu_draft_about_me");
+    if (draftAbout) setAboutMe(draftAbout);
+    
     const draftJd = localStorage.getItem("chintu_draft_jd");
     if (draftJd) setJd(draftJd);
 
@@ -42,35 +30,36 @@ export default function SetupPage() {
       setHasProfile(!!stored);
     };
     checkProfile();
-    window.addEventListener("focus", checkProfile);
-    return () => window.removeEventListener("focus", checkProfile);
   }, []);
 
   useEffect(() => {
-    if (aboutMe.trim()) {
-      localStorage.setItem("chintu_draft_about_me", aboutMe);
-    } else {
-      localStorage.removeItem("chintu_draft_about_me");
-    }
+    if (aboutMe.trim()) localStorage.setItem("chintu_draft_about_me", aboutMe);
+    else localStorage.removeItem("chintu_draft_about_me");
   }, [aboutMe]);
 
   useEffect(() => {
-    if (jd.trim()) {
-      localStorage.setItem("chintu_draft_jd", jd);
-    } else {
-      localStorage.removeItem("chintu_draft_jd");
-    }
+    if (jd.trim()) localStorage.setItem("chintu_draft_jd", jd);
+    else localStorage.removeItem("chintu_draft_jd");
   }, [jd]);
+
+  // If not mounted or Clerk not loaded yet, show empty shell
+  if (!mounted || !isLoaded) {
+    return <div className="min-h-screen bg-[#0a0a0c]" />;
+  }
+
+  // Double check auth (Middleware should handle this, but for safety)
+  if (!isSignedIn) {
+    router.push("/sign-in");
+    return null;
+  }
 
   const handleStart = async () => {
     if (!jd.trim()) return;
     sessionStorage.setItem("jobDescription", jd.trim());
 
-    // If user typed aboutMe and no profile exists, refine & save it
     if (aboutMe.trim() && !hasProfile) {
       setIsRefining(true);
       setStatusText("✨ AI is structuring your profile...");
-
       let profileSaved = false;
 
       try {
@@ -82,22 +71,19 @@ export default function SetupPage() {
 
         if (res.ok) {
           const data = await res.json();
-          if (data.profile && typeof data.profile === "object") {
-            // Save the structured profile
+          if (data.profile) {
             await saveProfileToDisk(data.profile);
             localStorage.removeItem("chintu_draft_about_me");
             profileSaved = true;
-            setStatusText("✅ Profile saved! Starting session...");
           }
         }
-      } catch {
-        // Network/API error — handled below
+      } catch (err) {
+        console.error("Profile refinement failed", err);
       }
 
-      // If API failed or returned bad data, save raw text as fallback profile
       if (!profileSaved) {
-        const fallbackProfile = {
-          name: "",
+        const fallback = {
+          name: user?.fullName || "",
           title: "",
           summary: aboutMe.trim(),
           experience: [],
@@ -107,116 +93,99 @@ export default function SetupPage() {
           certifications: [],
           achievements: [],
         };
-        await saveProfileToDisk(fallbackProfile);
-        // Also flag for background re-refine on room page
-        sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
-        setStatusText("Profile saved (will refine in background)...");
+        await saveProfileToDisk(fallback);
       }
-
       setIsRefining(false);
-      // Small delay so user sees the success message
-      await new Promise((r) => setTimeout(r, 400));
     }
-
     router.push("/room");
   };
 
   return (
-    <div className="app-container">
-      {/* Draggable header */}
-      <div className="drag-region h-10 shrink-0" />
-
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8 overflow-y-auto">
-        {/* Logo */}
-        <div className="mb-5 text-center shrink-0">
-          <div className="w-14 h-14 rounded-2xl bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl flex items-center justify-center mx-auto mb-2 shadow-lg">
-            <span className="text-2xl text-[var(--text-main)]">✦</span>
-          </div>
-          <h1 className="text-xl font-bold text-[var(--text-main)]">Chintu</h1>
-          <b className="text-xs text-[var(--text-dim)] mt-1 block">Dalaali shuru Karein??</b>
+    <div className="flex flex-col min-h-screen bg-[#0a0a0c] text-white overflow-hidden">
+      {/* Header / Drag Region */}
+      <div className="drag-region h-10 w-full shrink-0 flex items-center justify-between px-6">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">System Online</span>
         </div>
-
-        <div className="w-full max-w-sm shrink-0 flex flex-col min-h-0 gap-3">
-          {/* About Me — only if no profile stored */}
-          {!hasProfile && (
-            <div>
-              <label className="block text-xs font-semibold text-[var(--text-dim)] mb-1.5 uppercase tracking-wider">
-                About Me
-              </label>
-              <textarea
-                value={aboutMe}
-                onChange={(e) => setAboutMe(e.target.value)}
-                placeholder="Paste your resume, LinkedIn summary, or tell about yourself..."
-                className="w-full h-24 md:h-32 bg-[var(--input-bg)] backdrop-blur-xl border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-[var(--text-main)] text-sm placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
-              />
-              <p className="text-[0.5625rem] text-[var(--text-dim)] mt-1">AI will structure this into your profile. You can edit it later in Settings → Profile.</p>
-            </div>
-          )}
-
-          {/* Profile exists indicator */}
-          {hasProfile && (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-4 py-2.5 flex items-center gap-2">
-              <span className="text-emerald-500 text-sm">✓</span>
-              <span className="text-emerald-600 text-xs font-medium">Profile loaded — AI will personalize answers for you</span>
-            </div>
-          )}
-
-          {/* Job Description */}
-          <div>
-            <label className="block text-xs font-semibold text-[var(--text-dim)] mb-1.5 uppercase tracking-wider">
-              Job Description
-            </label>
-            <textarea
-              value={jd}
-              onChange={(e) => setJd(e.target.value)}
-              placeholder="Paste the job description here..."
-              className="w-full h-28 md:h-40 bg-[var(--input-bg)] backdrop-blur-xl border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-[var(--text-main)] text-sm placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
-            />
-          </div>
-
-          <button
-            onClick={handleStart}
-            disabled={!jd.trim() || (!hasProfile && !aboutMe.trim()) || isRefining}
-            className={`
-              w-full py-3.5 rounded-2xl text-sm font-bold transition-all duration-200 shrink-0
-              ${jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.02]"
-                : "bg-[var(--input-bg)] text-[var(--text-dim)] cursor-not-allowed border border-[var(--glass-border)]"
-              }
-            `}
-          >
-            {isRefining ? statusText : "Start Session →"}
-          </button>
+        <div className="no-drag">
+          <UserButton afterSignOutUrl="/sign-in" />
         </div>
-
-        <p className="text-[0.625rem] text-[var(--text-dim)] mt-5">🔒 Invisible to screen sharing</p>
       </div>
 
-      {/* Full Page Loading Animation */}
-      {isRefining && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--bg-app)] backdrop-blur-2xl">
-          <div className="relative flex items-center justify-center w-32 h-32 mb-8">
-            <div className="absolute inset-0 rounded-full border-[3px] border-indigo-500/30 animate-[spin_3s_linear_infinite]"></div>
-            <div className="absolute inset-2 rounded-full border-[3px] border-t-purple-500 border-purple-500/20 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
-            <div className="absolute inset-4 rounded-full border-[3px] border-b-cyan-400 border-cyan-400/20 animate-[spin_2s_linear_infinite]"></div>
-            <div className="absolute inset-0 flex items-center justify-center text-4xl animate-pulse">
-              ✨
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12 overflow-y-auto">
+        <div className="w-full max-w-sm">
+          {/* Logo Section */}
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 p-[1px] mx-auto mb-4 shadow-2xl shadow-indigo-500/20">
+              <div className="w-full h-full bg-[#0f0f12] rounded-[23px] flex items-center justify-center">
+                <span className="text-3xl text-indigo-400">✦</span>
+              </div>
             </div>
+            <h1 className="text-2xl font-black tracking-tight uppercase">Chintu</h1>
+            <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] mt-1 text-center">AI Interview Assistant</p>
           </div>
-          <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 animate-pulse tracking-wide mb-3 text-center px-4">
-            {statusText || "AI is structuring your profile..."}
-          </h2>
-          <div className="flex gap-1.5 items-center">
-            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "0ms" }}></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "300ms" }}></div>
+
+          <div className="space-y-5">
+            {/* Profile Section */}
+            {!hasProfile ? (
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Candidate Profile</label>
+                <textarea
+                  value={aboutMe}
+                  onChange={(e) => setAboutMe(e.target.value)}
+                  placeholder="Paste your resume or tell about your experience..."
+                  className="w-full h-32 bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none placeholder:text-white/20"
+                />
+              </div>
+            ) : (
+              <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <span className="text-emerald-500 text-lg">✓</span>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest">Profile Status</p>
+                  <p className="text-sm font-bold text-emerald-500">Identity Successfully Loaded</p>
+                </div>
+              </div>
+            )}
+
+            {/* Job Description Section */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Job Description</label>
+              <textarea
+                value={jd}
+                onChange={(e) => setJd(e.target.value)}
+                placeholder="Paste the job description you are interviewing for..."
+                className="w-full h-40 bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none placeholder:text-white/20"
+              />
+            </div>
+
+            {/* Action Button */}
+            <button
+              onClick={handleStart}
+              disabled={!jd.trim() || (!hasProfile && !aboutMe.trim()) || isRefining}
+              className={`
+                w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative overflow-hidden group
+                ${jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining
+                  ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95"
+                  : "bg-white/5 text-white/20 border border-white/5 cursor-not-allowed"
+                }
+              `}
+            >
+              <span className="relative z-10">{isRefining ? statusText : "Initiate Session →"}</span>
+              {jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
+              )}
+            </button>
           </div>
-          <p className="mt-8 text-xs text-[var(--text-dim)] font-medium tracking-[0.2em] uppercase text-center max-w-xs leading-relaxed">
-            Please wait...<br />
-            <span className="text-[var(--text-dim)] opacity-70 text-[0.65rem] normal-case tracking-normal">This may take 5-10 minutes for the first time</span>
-          </p>
         </div>
-      )}
+      </div>
+
+      {/* Footer info */}
+      <div className="p-6 text-center opacity-30">
+        <p className="text-[9px] font-bold uppercase tracking-[0.4em]">Secure Mode • Ghost Overlay Active</p>
+      </div>
     </div>
   );
 }
