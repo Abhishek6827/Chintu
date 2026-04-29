@@ -477,28 +477,27 @@ function setupAutoUpdater() {
   autoUpdater.on("update-downloaded", (info) => {
     console.log("[AutoUpdater] Update downloaded:", info.version);
     
-    // Send status to renderer FIRST (before dialog blocks)
     if (mainWindow) {
       mainWindow.webContents.send("update-status", { status: "ready", version: info.version });
-      // Send again after 500ms to ensure UI receives it
-      setTimeout(() => {
-        mainWindow.webContents.send("update-status", { status: "ready", version: info.version });
-      }, 500);
     }
     
-    // Show dialog after a short delay
+    // Instead of an immediate blocking dialog, we show it after a tiny delay
+    // to let the UI finish any current animations.
     setTimeout(() => {
-      dialog.showMessageBox({
-        type: "info",
-        title: "Update Ready",
-        message: `Version ${info.version} has been downloaded and is ready to install.`,
-        buttons: ["Restart Now", "Later"]
+      dialog.showMessageBox(mainWindow, {
+        type: "question",
+        title: "Update Available",
+        message: `Version ${info.version} is ready. Would you like to restart and install now?`,
+        buttons: ["Restart Now", "Later"],
+        defaultId: 0,
+        cancelId: 1
       }).then((result) => {
         if (result.response === 0) {
+          app.isQuitting = true; // Prevent the 'close' event from hiding the window
           autoUpdater.quitAndInstall(false, true);
         }
       });
-    }, 200);
+    }, 1000);
   });
 
   autoUpdater.on("update-not-available", (info) => {

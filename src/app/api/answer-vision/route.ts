@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import OpenAI from "openai";
+import { auth } from "@clerk/nextjs/server";
+import { createAdminClient } from "@/utils/supabase/server";
 
 // ─── Increase body size limit for large screenshot payloads ─
 export const maxDuration = 60; // seconds
@@ -166,7 +168,31 @@ const QWEN_FALLBACK = [
 ];
 
 export async function POST(req: NextRequest) {
+  const { userId } = auth();
+  const supabaseAdmin = createAdminClient();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
+    // ─── Credit Check ─────────────────────────────────────────
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .select("credits")
+      .eq("id", userId)
+      .single();
+
+    if (profileError || !profile) {
+      console.error("[/api/answer-vision] Profile fetch error:", profileError);
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    if (profile.credits <= 0) {
+      return NextResponse.json({ 
+        error: "Insufficient credits. Please upgrade your plan.",
+        code: "OUT_OF_CREDITS"
+      }, { status: 403 });
+    }
     const apiKeys = [
       process.env.GROQ_API_KEY,
       process.env.GROQ_API_KEY_2,
@@ -475,6 +501,12 @@ Rules:
     }
 
     if (!stream) throw finalError || new Error("All API keys failed for selected model.");
+
+    // ─── Deduct Credit ────────────────────────────────────────
+    await supabaseAdmin
+      .from("profiles")
+      .update({ credits: profile.credits - 1 })
+      .eq("id", userId);
 
     // ─── Stream with <think> tag filter ───────────────────────
     const encoder = new TextEncoder();

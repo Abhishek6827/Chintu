@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import OpenAI from "openai";
+import { auth } from "@clerk/nextjs/server";
+import { createAdminClient } from "@/utils/supabase/server";
 
 // ─── Response length presets ────────────────────────────────
 const RESPONSE_PROMPTS: Record<string, string> = {
@@ -158,7 +160,32 @@ const QWEN_FALLBACK = [
 ];
 
 export async function POST(req: NextRequest) {
+  const { userId } = auth();
+  const supabaseAdmin = createAdminClient();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
+    // ─── Credit Check ─────────────────────────────────────────
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .select("credits")
+      .eq("id", userId)
+      .single();
+
+    if (profileError || !profile) {
+      console.error("[/api/answer] Profile fetch error:", profileError);
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    if (profile.credits <= 0) {
+      return NextResponse.json({ 
+        error: "Insufficient credits. Please upgrade your plan.",
+        code: "OUT_OF_CREDITS"
+      }, { status: 403 });
+    }
+
     const apiKeys = [
       process.env.GROQ_API_KEY,
       process.env.GROQ_API_KEY_2,
@@ -166,8 +193,6 @@ export async function POST(req: NextRequest) {
     ].filter(Boolean) as string[];
 
     const openRouterKey = process.env.OPENROUTER_API_KEY || "";
-
-    console.log(`[/api/answer] Groq keys: ${apiKeys.length} | OpenRouter: ${openRouterKey ? "yes" : "no"}`);
 
     if (apiKeys.length === 0 && !openRouterKey) {
       return NextResponse.json({ error: "No API keys configured" }, { status: 500 });
@@ -394,6 +419,12 @@ Rules:
     if (!stream) {
       throw lastError;
     }
+
+    // ─── Deduct Credit ────────────────────────────────────────
+    await supabaseAdmin
+      .from("profiles")
+      .update({ credits: profile.credits - 1 })
+      .eq("id", userId);
 
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({
