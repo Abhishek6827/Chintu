@@ -41,30 +41,36 @@ export async function POST(req: Request) {
   }
 
   const eventType = evt.type;
+  const supabase = createAdminClient();
 
   if (eventType === 'user.created') {
     const { id, email_addresses } = evt.data;
     const email = email_addresses[0]?.email_address;
 
-    const supabase = createAdminClient();
-    if (!supabase) {
-      console.error('Supabase Admin client not initialized');
-      return new Response('Internal Server Error', { status: 500 });
-    }
+    // --- Generate Standard Display ID ---
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-GB').replace(/\//g, '-'); // 29-04-2026
+    const timeStr = now.getHours().toString().padStart(2, '0') + now.getMinutes().toString().padStart(2, '0');
+    
+    // Extract provider safely
+    const provider = (evt.data as any).external_accounts?.[0]?.provider || 'email';
+    const displayId = `CHINTU-${provider.toUpperCase()}-${dateStr}-${timeStr}`;
+
+    console.log(`[/api/webhooks/clerk] Syncing user ${id} with Display ID ${displayId}`);
 
     const { error } = await supabase
       .from('profiles')
       .upsert({
         id: id,
         email: email,
+        display_id: displayId,
         credits: 10,
         plan: 'free',
-        updated_at: new Date().toISOString()
+        updated_at: now.toISOString()
       }, { onConflict: 'id' });
 
     if (error) {
       console.error('Error syncing user to Supabase:', error);
-      // We continue to telegram even if DB fails for notification purposes
     }
 
     // --- Send Telegram Notification ---
@@ -74,7 +80,13 @@ export async function POST(req: Request) {
       
       if (tgToken && tgChatId) {
         console.log(`[/api/webhooks/clerk] Attempting to send Telegram notification to ${tgChatId}...`);
-        const message = `🎉 *New User Joined!*\n\n📧 Email: ${email}\n🆔 ID: ${id}\n✨ 10 Credits added to their profile.`;
+        
+        // Use HTML instead of Markdown to avoid underscore (_) errors
+        const message = `🎉 <b>New User Joined!</b>\n\n` +
+                        `📧 <b>Email:</b> ${email}\n` +
+                        `🆔 <b>ID:</b> <code>${id}</code>\n` +
+                        `🏷️ <b>Display ID:</b> <code>${displayId}</code>\n` +
+                        `✨ 10 Credits added to their profile.`;
         
         const tgRes = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
           method: 'POST',
@@ -82,7 +94,7 @@ export async function POST(req: Request) {
           body: JSON.stringify({
             chat_id: tgChatId,
             text: message,
-            parse_mode: 'Markdown'
+            parse_mode: 'HTML'
           }),
         });
         console.log(`[/api/webhooks/clerk] Telegram response status: ${tgRes.status}`);
@@ -91,7 +103,6 @@ export async function POST(req: Request) {
       }
     } catch (tgErr) {
       console.error('Telegram notification failed:', tgErr);
-      // Don't fail the whole webhook if telegram fails
     }
 
     return new Response('User synced successfully', { status: 200 });
