@@ -44,7 +44,7 @@ export default function SetupPage() {
       }
     };
     if (isLoaded && isSignedIn) checkProfile();
-  }, [isLoaded, isSignedIn, user?.id]);
+  }, [isLoaded, isSignedIn, user?.id, supabase]);
 
   // If not mounted or Clerk not loaded yet, show empty shell
   if (!mounted || !isLoaded) {
@@ -141,7 +141,7 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f9fa] text-gray-900 overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-[#f8f9fa] text-gray-900 overflow-x-hidden overflow-y-auto">
       {/* Header / Drag Region */}
       <div className="drag-region h-10 w-full shrink-0 flex items-center justify-between px-6">
         <div className="flex items-center gap-2">
@@ -157,10 +157,8 @@ export default function SetupPage() {
         <div className="w-full max-w-sm">
           {/* Logo Section */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 p-[1px] mx-auto mb-4 shadow-2xl shadow-indigo-500/10">
-              <div className="w-full h-full bg-white rounded-[23px] flex items-center justify-center">
-                <span className="text-3xl text-indigo-600">✦</span>
-              </div>
+            <div className="w-20 h-20 mx-auto mb-4 drop-shadow-2xl">
+              <img src="/icon.png" alt="Chintu" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-2xl font-black tracking-tight uppercase text-gray-900">Chintu</h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1 text-center">AI Interview Assistant</p>

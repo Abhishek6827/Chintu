@@ -113,28 +113,15 @@ export default function RoomPage() {
   const [showClearHistoryConfirm, setShowClearHistoryConfirm] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [showReadingGuide, setShowReadingGuide] = useState(false);
-  const [credits, setCredits] = useState<number | null>(null);
+
   const supabase = createClient();
 
-
-  const fetchCredits = async () => {
-    if (!user?.id) return;
-    const { data } = await supabase
-      .from('profiles')
-      .select('credits')
-      .eq('id', user.id)
-      .single();
-    if (data) setCredits(data.credits);
-  };
 
   useEffect(() => {
     const initRoom = async () => {
       if (!isLoaded || !isSignedIn || !user?.id) return;
       
-      // 1. Fetch Credits
-      fetchCredits();
-      
-      // 2. Fetch History from Supabase
+      // 1. Fetch History from Supabase
       const { data } = await supabase
         .from('profiles')
         .select('history')
@@ -147,7 +134,7 @@ export default function RoomPage() {
     };
     
     initRoom();
-  }, [isLoaded, isSignedIn, user?.id]);
+  }, [isLoaded, isSignedIn, user?.id, supabase]);
 
   const saveToHistory = useCallback(async () => {
     if (answers.length === 0 || !user?.id) return;
@@ -167,7 +154,7 @@ export default function RoomPage() {
       .from('profiles')
       .update({ history: updatedHistory })
       .eq('id', user.id);
-  }, [answers, history, user?.id]);
+  }, [answers, history, user?.id, supabase]);
 
   const clearHistory = async () => {
     if (!user?.id) return;
@@ -845,7 +832,6 @@ export default function RoomPage() {
       });
 
       setStatus("idle");
-      fetchCredits(); // Refresh credits after answer
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error";
       setError(msg);
@@ -1056,13 +1042,11 @@ export default function RoomPage() {
       setCapturedScreenshots([]);
       setInputText("");
       setStatus("idle");
-      fetchCredits(); // Refresh credits after vision answer
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error";
       setError(msg);
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
-      fetchCredits();
     }
   }, [capturedScreenshots, status, jobDescription, profileContext, inputText, visionConversationHistory]);
 
@@ -1109,7 +1093,10 @@ export default function RoomPage() {
       {/* Draggable title bar */}
       <div className="drag-region flex items-center justify-between px-2 sm:px-4 h-10 sm:h-12 shrink-0 relative z-10">
         <div className="flex items-center gap-2 no-drag">
-          <span className="text-[var(--text-main)] text-sm font-bold">✦ Chintu</span>
+          <div className="flex items-center gap-2">
+            <img src="/icon.png" alt="" className="w-5 h-5 object-contain" />
+            <span className="text-[var(--text-main)] text-sm font-bold tracking-tight">Chintu</span>
+          </div>
           {appVersion && (
             <span className="bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] px-1.5 py-0.5 rounded text-[0.625rem] font-mono shadow-sm">
               v{appVersion}
@@ -1744,18 +1731,8 @@ export default function RoomPage() {
                   </p>
                   <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] truncate flex items-center gap-2">
                     {user?.primaryEmailAddress?.emailAddress}
-                    {user?.externalAccounts && user.externalAccounts.length > 0 && (
-                      <span className="opacity-60 grayscale hover:grayscale-0 transition-all">
-                        {(user.externalAccounts[0].provider as string) === 'oauth_google' && (
-                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.908 3.147-1.744 3.984-1.072 1.072-2.736 2.248-6.104 2.248-5.392 0-9.672-4.384-9.672-9.776s4.28-9.776 9.672-9.776c2.928 0 5.144 1.152 6.664 2.592l2.312-2.312C19.456.88 16.512 0 12.48 0 5.68 0 0 5.68 0 12.48s5.68 12.48 12.48 12.48c3.704 0 6.504-1.216 8.712-3.52 2.272-2.272 2.992-5.464 2.992-8.088 0-.584-.048-1.136-.144-1.64h-11.56z"/></svg>
-                        )}
-                        {(user.externalAccounts[0].provider as string) === 'oauth_github' && (
-                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                        )}
-
-                      </span>
-                    )}
                   </p>
+
 
                 </div>
 

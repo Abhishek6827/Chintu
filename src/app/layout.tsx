@@ -16,6 +16,9 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
+        <head>
+          <link rel="icon" href="/icon.png" />
+        </head>
         <body className="bg-transparent">
           {children}
         </body>

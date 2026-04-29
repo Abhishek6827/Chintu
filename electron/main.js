@@ -179,8 +179,9 @@ function createWindow() {
   mainWindow.setSkipTaskbar(true);
   
   // ─── Set initial hidden state ───────────────────────────
-  isHidden = true;
-  mainWindow.webContents.send("window-hidden-change", true);
+  isHidden = false;
+  mainWindow.setContentProtection(false);
+  mainWindow.webContents.send("window-hidden-change", false);
 
   // ─── System Audio Loopback ──────────────────────────────
   session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
@@ -210,7 +211,6 @@ function createWindow() {
     }
   });
 
-  // --- Navigation & Stuck fix ---
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if (input.key === 'Escape' && input.type === 'keyDown') {
       if (mainWindow.webContents.canGoBack()) {
@@ -219,6 +219,27 @@ function createWindow() {
         event.preventDefault();
       }
     }
+    // Alt + H or Ctrl + H for Home
+    if ((input.key === 'h' || input.key === 'H') && input.type === 'keyDown' && (input.alt || input.control)) {
+      console.log("[Main] Home shortcut pressed, returning to app root...");
+      mainWindow.loadURL(isDev ? "http://localhost:3000" : VERCEL_URL);
+      event.preventDefault();
+    }
+  });
+
+  // Context menu for navigation
+  mainWindow.webContents.on('context-menu', (e, props) => {
+    const menu = Menu.buildFromTemplate([
+      { label: 'Back', accelerator: 'Alt+Left', click: () => mainWindow.webContents.goBack(), enabled: mainWindow.webContents.canGoBack() },
+      { label: 'Forward', accelerator: 'Alt+Right', click: () => mainWindow.webContents.goForward(), enabled: mainWindow.webContents.canGoForward() },
+      { type: 'separator' },
+      { label: 'Reload', accelerator: 'CmdOrCtrl+R', click: () => mainWindow.webContents.reload() },
+      { type: 'separator' },
+      { label: 'Return to Chintu Home', accelerator: 'Alt+H', click: () => mainWindow.loadURL(isDev ? "http://localhost:3000" : VERCEL_URL) },
+      { type: 'separator' },
+      { label: 'Inspect Element', click: () => mainWindow.webContents.inspectElement(props.x, props.y) }
+    ]);
+    menu.popup(mainWindow);
   });
 
   mainWindow.on("closed", () => {
@@ -236,6 +257,60 @@ function createWindow() {
     if (!isAlwaysOnTop && mainWindow && !isHidden) {
       mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
     }
+  });
+
+  // ─── External Auth Popup Handler ────────────────────────
+  // Intercept any navigation that leaves the app's origin
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    const isAppUrl = url.startsWith("http://localhost") || url.startsWith("http://127.0.0.1") || url.startsWith(VERCEL_URL);
+    
+    console.log(`[Main] Will navigate to: ${url} (isAppUrl: ${isAppUrl})`);
+
+    if (!isAppUrl) {
+      event.preventDefault();
+      console.log(`[Main] External navigation detected. Opening popup for: ${url}`);
+      
+      const authWindow = new BrowserWindow({
+        width: 500,
+        height: 750,
+        parent: mainWindow,
+        modal: true,
+        show: true,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true
+        }
+      });
+      
+      authWindow.loadURL(url);
+      
+      const handleRedirect = (ev, newUrl) => {
+        const isBackInApp = newUrl.startsWith("http://localhost") || newUrl.startsWith("http://127.0.0.1") || newUrl.startsWith(VERCEL_URL);
+        console.log(`[Popup] Navigated to: ${newUrl} (isBackInApp: ${isBackInApp})`);
+        
+        if (isBackInApp) {
+          console.log(`[Popup] Auth success/callback detected. Closing popup and updating main window...`);
+          mainWindow.loadURL(newUrl);
+          authWindow.destroy();
+        }
+      };
+
+      authWindow.webContents.on('did-navigate', handleRedirect);
+      authWindow.webContents.on('will-navigate', handleRedirect);
+    }
+  });
+
+  // Also handle window.open calls
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    console.log(`[Main] window.open requested for: ${url}`);
+    const isAppUrl = url.startsWith("http://localhost") || url.startsWith("http://127.0.0.1") || url.startsWith(VERCEL_URL);
+    
+    if (isAppUrl) return { action: 'allow' };
+    
+    // Open external links in system browser, but keep auth in popup if needed?
+    // For now, let's just open in system browser for safety
+    require('electron').shell.openExternal(url);
+    return { action: 'deny' };
   });
 }
 
