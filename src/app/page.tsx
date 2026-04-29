@@ -176,10 +176,10 @@ export default function SetupPage() {
 
           <button
             onClick={handleStart}
-            disabled={!jd.trim() || isRefining}
+            disabled={!jd.trim() || (!hasProfile && !aboutMe.trim()) || isRefining}
             className={`
               w-full py-3.5 rounded-2xl text-sm font-bold transition-all duration-200 shrink-0
-              ${jd.trim() && !isRefining
+              ${jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining
                 ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.02]"
                 : "bg-[var(--input-bg)] text-[var(--text-dim)] cursor-not-allowed border border-[var(--glass-border)]"
               }
