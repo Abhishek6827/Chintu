@@ -454,6 +454,10 @@ app.whenReady().then(async () => {
     }
   }
 
+  // ─── App Setup ──────────────────────────────────────────
+  app.setAppUserModelId("com.chintu.app");
+  app.name = "Chintu";
+
   createWindow();
   createTray();
 

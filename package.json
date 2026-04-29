@@ -69,7 +69,7 @@
     "win": {
       "target": "nsis",
       "icon": "electron/icon.png",
-      "signAndEditExecutable": false
+      "signAndEditExecutable": true
     },
     "nsis": {
       "oneClick": true,
