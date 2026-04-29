@@ -47,6 +47,10 @@ export async function POST(req: Request) {
     const email = email_addresses[0]?.email_address;
 
     const supabase = createAdminClient();
+    if (!supabase) {
+      console.error('Supabase Admin client not initialized');
+      return new Response('Internal Server Error', { status: 500 });
+    }
 
     const { error } = await supabase
       .from('profiles')
