@@ -10,6 +10,23 @@ const nextConfig = {
       bodySizeLimit: "50mb",
     },
   },
+  // Allow external images (like Clerk profile photos)
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.googleusercontent.com',
+      }
+    ],
+  },
 };
 
 export default nextConfig;

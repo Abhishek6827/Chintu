@@ -1121,7 +1121,7 @@ export default function RoomPage() {
               hasProfile ? "ring-1 ring-indigo-500/50 shadow-lg shadow-indigo-500/10" : "bg-[var(--input-bg)] hover:bg-[var(--glass-bg)]"
             }`}
           >
-            {user?.imageUrl ? (
+            {user?.imageUrl && typeof user.imageUrl === 'string' && user.imageUrl.startsWith('http') ? (
                <Image src={user.imageUrl} alt="Profile" width={28} height={28} className="w-full h-full object-cover" />
             ) : (
               <svg className="w-4 h-4 text-[var(--text-dim)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
