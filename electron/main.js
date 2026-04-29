@@ -35,6 +35,9 @@ let isHidden = false;
 let serverPort = null;
 let userOpacity = 1;
 
+// ─── Production Vercel URL ───────────────────────────────
+const VERCEL_URL = "https://chintu-ai.vercel.app"; // REPLACE WITH YOUR ACTUAL VERCEL URL
+
 // ─── Determine runtime mode ───────────────────────────────
 const isPreview = process.argv.includes("--preview");
 const isDev = !app.isPackaged && !isPreview;
@@ -190,7 +193,8 @@ function createWindow() {
   if (isDev) {
     mainWindow.loadURL("http://localhost:3000/room");
   } else {
-    mainWindow.loadURL(`http://127.0.0.1:${serverPort}/room`);
+    // In production, we load the remote Vercel URL for SaaS functionality
+    mainWindow.loadURL(`${VERCEL_URL}/room`);
   }
 
   // Set window position (bottom-right corner)
@@ -350,7 +354,7 @@ app.whenReady().then(async () => {
   loadEnv();
 
 
-  if (!isDev) {
+  if (!isDev && false) { // Disabled local server for SaaS mode
     try {
       await startServer();
     } catch (err) {
