@@ -111,7 +111,7 @@ export default function RoomPage() {
   const [showClearHistoryConfirm, setShowClearHistoryConfirm] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [showReadingGuide, setShowReadingGuide] = useState(false);
-  const [isPip, setIsPip] = useState(false);
+
 
   useEffect(() => {
     const savedHistory = localStorage.getItem("chintu_history");
@@ -126,10 +126,7 @@ export default function RoomPage() {
     const savedReadingGuide = localStorage.getItem("chintu_reading_guide");
     if (savedReadingGuide) setShowReadingGuide(savedReadingGuide === "true");
 
-    const handleResize = () => setIsPip(window.innerWidth < 400 || window.innerHeight < 400);
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => window.removeEventListener("resize", handleResize);
+
   }, []);
 
   const saveToHistory = useCallback(() => {
