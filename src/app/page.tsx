@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { loadProfileFromDisk, saveProfileToDisk } from "@/components/ProfileModal";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { createClient } from "@/utils/supabase/client";
 
@@ -15,6 +14,7 @@ export default function SetupPage() {
   const [isRefining, setIsRefining] = useState(false);
   const [statusText, setStatusText] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const router = useRouter();
 
@@ -22,6 +22,10 @@ export default function SetupPage() {
   useEffect(() => {
     setMounted(true);
     
+    // Clear any previous session context on landing page mount
+    sessionStorage.removeItem("jobDescription");
+    sessionStorage.removeItem("chintu_pending_raw_profile");
+
     const checkProfile = async () => {
       if (!user?.id) return;
       
@@ -32,15 +36,11 @@ export default function SetupPage() {
         .eq('id', user.id)
         .single();
 
-      if (profileRow?.profile_data && Object.keys(profileRow.profile_data).length > 0) {
+      if (profileRow?.profile_data && typeof profileRow.profile_data === 'object' && Object.keys(profileRow.profile_data).length > 0) {
         setHasProfile(true);
-        // Save to local disk as cache
-        await saveProfileToDisk(profileRow.profile_data);
         if (profileRow.raw_profile) setAboutMe(profileRow.raw_profile);
       } else {
-        // Fallback to Local Disk
-        const stored = await loadProfileFromDisk();
-        setHasProfile(!!stored);
+        setHasProfile(false);
       }
     };
     if (isLoaded && isSignedIn) checkProfile();
@@ -76,23 +76,19 @@ export default function SetupPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.profile) {
-            // 1. Save to Local Disk (Cache)
-            await saveProfileToDisk(data.profile);
-            
-            // 2. Save to Supabase Cloud
+            // Save to Supabase Cloud ONLY
             const { error: upsertError } = await supabase
               .from('profiles')
-              .update({
+              .upsert({
+                id: user.id,
                 profile_data: data.profile,
-                raw_profile: aboutMe.trim()
-              })
-              .eq('id', user.id);
+                raw_profile: aboutMe.trim(),
+                updated_at: new Date().toISOString()
+              });
 
             if (upsertError) {
               console.error("Failed to sync profile to Cloud:", upsertError);
             }
-
-            localStorage.removeItem("chintu_draft_about_me");
             profileSaved = true;
           }
         }
@@ -101,41 +97,12 @@ export default function SetupPage() {
       }
 
       if (!profileSaved) {
-        const fallback = {
-          name: user?.fullName || "",
-          title: "",
-          summary: aboutMe.trim(),
-          experience: [],
-          projects: [],
-          skills: { languages: [], frameworks: [], tools: [], other: [] },
-          education: [],
-          certifications: [],
-          achievements: [],
-        };
-        await saveProfileToDisk(fallback);
-        
-        // ─── Sync fallback to Supabase ──────────────────────
-        await supabase.from('profiles').upsert({
-          id: user?.id,
-          email: user?.primaryEmailAddress?.emailAddress,
-          profile_data: fallback,
-          raw_profile: aboutMe.trim(),
-          updated_at: new Date().toISOString()
-        });
-      } else {
-        // ─── Sync structured profile to Supabase ────────────
-        const stored = await loadProfileFromDisk();
-        if (stored) {
-          await supabase.from('profiles').upsert({
-            id: user?.id,
-            email: user?.primaryEmailAddress?.emailAddress,
-            profile_data: stored,
-            raw_profile: aboutMe.trim(),
-            updated_at: new Date().toISOString()
-          });
-        }
+        setIsRefining(false);
+        setError("Could not structure your profile. Please try again with more detail.");
+        return;
       }
       setIsRefining(false);
+      setHasProfile(true);
     }
     router.push("/room");
   };

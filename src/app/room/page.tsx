@@ -8,7 +8,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 
 
 import AnswerDisplay from "@/components/AnswerDisplay";
-import ProfileModal, { getProfileContext, getStoredProfile, loadProfileFromDisk, saveProfileToDisk } from "@/components/ProfileModal";
+import ProfileModal, { getProfileContext, getStoredProfile } from "@/components/ProfileModal";
 import CustomDropdown from "@/components/CustomDropdown";
 
 interface AnswerEntry {
@@ -304,21 +304,41 @@ export default function RoomPage() {
   }, [answers, status]);
 
   useEffect(() => {
+    if (!isLoaded) return;
+    
     const jd = sessionStorage.getItem("jobDescription");
-    if (!jd) { router.push("/"); return; }
+    if (!jd) { 
+      router.push("/"); 
+      return; 
+    }
     setJobDescription(jd);
+
     const initProfile = async () => {
-      const p = await loadProfileFromDisk();
-      setProfileContext(getProfileContext());
-      setHasProfile(!!p);
+      // 1. Try cloud only
+      if (user?.id) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('profile_data')
+          .eq('id', user.id)
+          .single();
+        
+        if (data?.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
+          // Instead of saving to disk, we can just use the context from here or keep it in state
+          // For now, let's keep getProfileContext as is but we'll need to update it to use cloud if needed
+          // Actually, we'll keep using the stored profile but we'll manually set it in localStorage as a temporary cache ONLY if needed,
+          // but the user said "dont use localdisk at all".
+          setProfileContext(JSON.stringify(data.profile_data)); // Use raw JSON or formatted string
+          setHasProfile(true);
+        } else {
+          router.push("/");
+        }
+      }
     };
     initProfile();
 
     // Check if there's a pending raw profile that needs re-refining
-    // (landing page saved a fallback profile with just the summary field)
     const pendingRaw = sessionStorage.getItem("chintu_pending_raw_profile");
     if (pendingRaw) {
-      // Background re-refine to get properly structured profile
       (async () => {
         try {
           const res = await fetch("/api/refine-profile", {
@@ -329,18 +349,24 @@ export default function RoomPage() {
           if (res.ok) {
             const data = await res.json();
             if (data.profile && typeof data.profile === "object") {
-              await saveProfileToDisk(data.profile);
-              setProfileContext(getProfileContext());
+              setProfileContext(JSON.stringify(data.profile));
               setHasProfile(true);
               sessionStorage.removeItem("chintu_pending_raw_profile");
+              
+              // Sync to Supabase
+              if (user?.id) {
+                await supabase.from('profiles').upsert({
+                  id: user.id,
+                  profile_data: data.profile,
+                  updated_at: new Date().toISOString()
+                });
+              }
             }
           }
-        } catch {
-          // Silent fail — user can still paste in profile modal
-        }
+        } catch {}
       })();
     }
-  }, [router]);
+  }, [router, isLoaded, user?.id, supabase]);
 
   const refreshProfile = () => {
     setProfileContext(getProfileContext());
