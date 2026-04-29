@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { loadProfileFromDisk, saveProfileToDisk } from "@/components/ProfileModal";
 import { UserButton, useUser } from "@clerk/nextjs";
+import { createClient } from "@/utils/supabase/client";
 
 export default function SetupPage() {
   const { isLoaded, isSignedIn, user } = useUser();
+  const supabase = createClient();
   const [jd, setJd] = useState("");
   const [aboutMe, setAboutMe] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
@@ -26,11 +28,28 @@ export default function SetupPage() {
     if (draftJd) setJd(draftJd);
 
     const checkProfile = async () => {
-      const stored = await loadProfileFromDisk();
-      setHasProfile(!!stored);
+      if (!user?.id) return;
+      
+      // 1. Try Supabase first (Cloud)
+      const { data: profileRow } = await supabase
+        .from('profiles')
+        .select('profile_data, raw_profile')
+        .eq('id', user.id)
+        .single();
+
+      if (profileRow?.profile_data && Object.keys(profileRow.profile_data).length > 0) {
+        setHasProfile(true);
+        // Save to local disk as cache
+        await saveProfileToDisk(profileRow.profile_data);
+        if (profileRow.raw_profile) setAboutMe(profileRow.raw_profile);
+      } else {
+        // 2. Fallback to Local Disk
+        const stored = await loadProfileFromDisk();
+        setHasProfile(!!stored);
+      }
     };
-    checkProfile();
-  }, []);
+    if (isLoaded && isSignedIn) checkProfile();
+  }, [isLoaded, isSignedIn, user?.id]);
 
   useEffect(() => {
     if (aboutMe.trim()) localStorage.setItem("chintu_draft_about_me", aboutMe);
@@ -94,6 +113,27 @@ export default function SetupPage() {
           achievements: [],
         };
         await saveProfileToDisk(fallback);
+        
+        // ─── Sync fallback to Supabase ──────────────────────
+        await supabase.from('profiles').upsert({
+          id: user?.id,
+          email: user?.primaryEmailAddress?.emailAddress,
+          profile_data: fallback,
+          raw_profile: aboutMe.trim(),
+          updated_at: new Date().toISOString()
+        });
+      } else {
+        // ─── Sync structured profile to Supabase ────────────
+        const stored = await loadProfileFromDisk();
+        if (stored) {
+          await supabase.from('profiles').upsert({
+            id: user?.id,
+            email: user?.primaryEmailAddress?.emailAddress,
+            profile_data: stored,
+            raw_profile: aboutMe.trim(),
+            updated_at: new Date().toISOString()
+          });
+        }
       }
       setIsRefining(false);
     }
@@ -186,6 +226,32 @@ export default function SetupPage() {
       <div className="p-6 text-center opacity-30">
         <p className="text-[9px] font-bold uppercase tracking-[0.4em]">Secure Mode • Ghost Overlay Active</p>
       </div>
+
+      {/* Full Page Loading Animation — RESTORED */}
+      {isRefining && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0a0a0c] backdrop-blur-2xl">
+          <div className="relative flex items-center justify-center w-32 h-32 mb-8">
+            <div className="absolute inset-0 rounded-full border-[3px] border-indigo-500/30 animate-[spin_3s_linear_infinite]"></div>
+            <div className="absolute inset-2 rounded-full border-[3px] border-t-purple-500 border-purple-500/20 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
+            <div className="absolute inset-4 rounded-full border-[3px] border-b-cyan-400 border-cyan-400/20 animate-[spin_2s_linear_infinite]"></div>
+            <div className="absolute inset-0 flex items-center justify-center text-4xl animate-pulse">
+              ✨
+            </div>
+          </div>
+          <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 animate-pulse tracking-wide mb-3 text-center px-4">
+            {statusText || "AI is structuring your profile..."}
+          </h2>
+          <div className="flex gap-1.5 items-center">
+            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "0ms" }}></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "300ms" }}></div>
+          </div>
+          <p className="mt-8 text-xs text-white/30 font-medium tracking-[0.2em] uppercase text-center max-w-xs leading-relaxed">
+            Please wait...<br />
+            <span className="text-white/20 opacity-70 text-[0.65rem] normal-case tracking-normal">Structuring your background for personalized answers</span>
+          </p>
+        </div>
+      )}
     </div>
   );
 }
