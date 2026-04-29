@@ -62,6 +62,29 @@ export async function POST(req: Request) {
       return new Response('Error syncing user', { status: 500 });
     }
 
+    // --- Send Telegram Notification ---
+    try {
+      const tgToken = process.env.TELEGRAM_BOT_TOKEN;
+      const tgChatId = process.env.TELEGRAM_CHAT_ID;
+      
+      if (tgToken && tgChatId) {
+        const message = `🎉 *New User Joined!*\n\n📧 Email: ${email}\n🆔 ID: ${id}\n✨ 10 Credits added to their profile.`;
+        
+        await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: tgChatId,
+            text: message,
+            parse_mode: 'Markdown'
+          }),
+        });
+      }
+    } catch (tgErr) {
+      console.error('Telegram notification failed:', tgErr);
+      // Don't fail the whole webhook if telegram fails
+    }
+
     return new Response('User synced successfully', { status: 200 });
   }
 
