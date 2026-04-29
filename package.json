@@ -14,7 +14,10 @@
     "electron:preview": "next build && electron . --preview"
   },
   "dependencies": {
+    "@clerk/nextjs": "^5.7.6",
     "@google/generative-ai": "^0.24.1",
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.105.1",
     "dotenv": "^16.6.1",
     "electron-log": "^5.4.3",
     "electron-updater": "^6.8.3",
@@ -28,7 +31,8 @@
     "react-dom": "^18",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^16.1.1",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "stripe": "^22.1.0"
   },
   "devDependencies": {
     "@types/node": "^20",

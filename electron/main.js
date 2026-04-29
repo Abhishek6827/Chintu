@@ -158,7 +158,9 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
+    title: "Chintu",
     icon: path.join(__dirname, "icon.png"),
+
   });
 
   mainWindow.once("ready-to-show", () => {
@@ -344,7 +346,9 @@ ipcMain.on("renderer-log", (event, { msg, level }) => {
 
 // ─── App lifecycle ────────────────────────────────────────
 app.whenReady().then(async () => {
+  app.setAppUserModelId("com.chintu.app");
   loadEnv();
+
 
   if (!isDev) {
     try {
@@ -394,7 +398,16 @@ ipcMain.handle("save-profile", (event, profile) => {
   }
 });
 
+ipcMain.on("window-minimize", () => {
+  if (mainWindow) mainWindow.minimize();
+});
+
+ipcMain.on("window-close", () => {
+  if (mainWindow) mainWindow.close();
+});
+
 ipcMain.handle("load-profile", () => {
+
   try {
     if (fs.existsSync(PROFILE_FILE)) {
       return JSON.parse(fs.readFileSync(PROFILE_FILE, "utf-8"));

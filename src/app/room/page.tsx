@@ -4,6 +4,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Mic, Sun, Moon } from "lucide-react";
+import { UserButton, useUser } from "@clerk/nextjs";
+
+
 import AnswerDisplay from "@/components/AnswerDisplay";
 import ProfileModal, { getProfileContext, getStoredProfile, loadProfileFromDisk, saveProfileToDisk } from "@/components/ProfileModal";
 import CustomDropdown from "@/components/CustomDropdown";
@@ -59,7 +62,9 @@ interface HistoryMessage {
 const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
 export default function RoomPage() {
+  const { user } = useUser();
   const router = useRouter();
+
   const [jobDescription, setJobDescription] = useState("");
   const [profileContext, setProfileContext] = useState("");
   const [showProfile, setShowProfile] = useState(false);
@@ -1115,14 +1120,19 @@ export default function RoomPage() {
           {/* Profile / Account button */}
           <button
             onClick={() => setShowProfile(true)}
-            className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors ${
-              hasProfile ? "text-indigo-300 bg-indigo-500/20" : "text-[var(--text-dim)] hover:text-[var(--text-main)]"
+            className={`w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center transition-all ${
+              hasProfile ? "ring-1 ring-indigo-500/50 shadow-lg shadow-indigo-500/10" : "bg-[var(--input-bg)] hover:bg-[var(--glass-bg)]"
             }`}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-            </svg>
+            {user?.imageUrl ? (
+              <img src={user.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <svg className="w-4 h-4 text-[var(--text-dim)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
+            )}
           </button>
+
         </div>
       </div>
 
@@ -1703,11 +1713,44 @@ export default function RoomPage() {
                 )}
               </div>
 
+              {/* Account Section */}
+              <div 
+                className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)] flex items-center justify-between"
+                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+              >
+                <div className="flex-1 min-w-0 pr-4">
+                  <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Account</h4>
+                  <p style={{ fontSize: 'clamp(8px, 2vw, 12px)' }} className="font-bold text-[var(--text-main)] uppercase tracking-tight truncate">
+                    {user?.fullName || "User"}
+                  </p>
+                  <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] truncate flex items-center gap-2">
+                    {user?.primaryEmailAddress?.emailAddress}
+                    {user?.externalAccounts && user.externalAccounts.length > 0 && (
+                      <span className="opacity-60 grayscale hover:grayscale-0 transition-all">
+                        {(user.externalAccounts[0].provider as string) === 'oauth_google' && (
+                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.908 3.147-1.744 3.984-1.072 1.072-2.736 2.248-6.104 2.248-5.392 0-9.672-4.384-9.672-9.776s4.28-9.776 9.672-9.776c2.928 0 5.144 1.152 6.664 2.592l2.312-2.312C19.456.88 16.512 0 12.48 0 5.68 0 0 5.68 0 12.48s5.68 12.48 12.48 12.48c3.704 0 6.504-1.216 8.712-3.52 2.272-2.272 2.992-5.464 2.992-8.088 0-.584-.048-1.136-.144-1.64h-11.56z"/></svg>
+                        )}
+                        {(user.externalAccounts[0].provider as string) === 'oauth_github' && (
+                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        )}
+
+                      </span>
+                    )}
+                  </p>
+
+                </div>
+
+                <UserButton afterSignOutUrl="/sign-in" />
+
+              </div>
+
+
               {/* Update Section */}
               <div 
                 className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)]"
                 style={{ padding: 'clamp(8px, 3vw, 20px)' }}
               >
+
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Software</h4>
