@@ -132,6 +132,14 @@ export default function SetupPage() {
           </div>
 
           <div className="space-y-5">
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-100 rounded-2xl p-4 text-xs text-red-600 font-bold animate-in fade-in slide-in-from-top-2">
+                ⚠️ {error}
+                <button onClick={() => setError(null)} className="ml-2 opacity-50 hover:opacity-100">✕</button>
+              </div>
+            )}
+
             {/* Profile Section */}
             {!hasProfile ? (
               <div className="space-y-2">
