@@ -54,16 +54,17 @@ export async function POST(req: Request) {
 
     const { error } = await supabase
       .from('profiles')
-      .insert({
+      .upsert({
         id: id,
         email: email,
         credits: 10,
-        plan: 'free'
-      });
+        plan: 'free',
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
 
     if (error) {
-      console.error('Error inserting user into Supabase:', error);
-      return new Response('Error syncing user', { status: 500 });
+      console.error('Error syncing user to Supabase:', error);
+      // We continue to telegram even if DB fails for notification purposes
     }
 
     // --- Send Telegram Notification ---
@@ -72,9 +73,10 @@ export async function POST(req: Request) {
       const tgChatId = process.env.TELEGRAM_CHAT_ID;
       
       if (tgToken && tgChatId) {
+        console.log(`[/api/webhooks/clerk] Attempting to send Telegram notification to ${tgChatId}...`);
         const message = `🎉 *New User Joined!*\n\n📧 Email: ${email}\n🆔 ID: ${id}\n✨ 10 Credits added to their profile.`;
         
-        await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+        const tgRes = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -83,6 +85,9 @@ export async function POST(req: Request) {
             parse_mode: 'Markdown'
           }),
         });
+        console.log(`[/api/webhooks/clerk] Telegram response status: ${tgRes.status}`);
+      } else {
+        console.warn(`[/api/webhooks/clerk] Telegram variables missing: Token? ${!!tgToken}, ChatId? ${!!tgChatId}`);
       }
     } catch (tgErr) {
       console.error('Telegram notification failed:', tgErr);
