@@ -210,6 +210,17 @@ function createWindow() {
     }
   });
 
+  // --- Navigation & Stuck fix ---
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'Escape' && input.type === 'keyDown') {
+      if (mainWindow.webContents.canGoBack()) {
+        console.log("[Main] Escape pressed, navigating back...");
+        mainWindow.webContents.goBack();
+        event.preventDefault();
+      }
+    }
+  });
+
   mainWindow.on("closed", () => {
     mainWindow = null;
   });

@@ -81,12 +81,16 @@ export async function POST(req: Request) {
       if (tgToken && tgChatId) {
         console.log(`[/api/webhooks/clerk] Attempting to send Telegram notification to ${tgChatId}...`);
         
-        // Use HTML instead of Markdown to avoid underscore (_) errors
-        const message = `🎉 <b>New User Joined!</b>\n\n` +
-                        `📧 <b>Email:</b> ${email}\n` +
-                        `🆔 <b>ID:</b> <code>${id}</code>\n` +
-                        `🏷️ <b>Display ID:</b> <code>${displayId}</code>\n` +
-                        `✨ 10 Credits added to their profile.`;
+        // --- PREMIUM TELEGRAM ALERT ---
+        const message = 
+          `🚀 <b>STRATEGIC ALERT: NEW USER ACQUISITION</b>\n\n` +
+          `✨ <b>Status:</b> <code>Success / Verified</code>\n` +
+          `👤 <b>User:</b> <code>${email}</code>\n` +
+          `🆔 <b>Clerk ID:</b> <code>${id}</code>\n` +
+          `🏷️ <b>Internal ID:</b> <code>${displayId}</code>\n` +
+          `🛡️ <b>Auth Provider:</b> <code>${provider.toUpperCase()}</code>\n\n` +
+          `💰 <b>Onboarding Reward:</b> <code>10 Credits Provisioned</code>\n\n` +
+          `📈 <i>Chintu AI Ecosystem Growth +1</i>`;
         
         const tgRes = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
           method: 'POST',

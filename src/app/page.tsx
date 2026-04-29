@@ -18,19 +18,14 @@ export default function SetupPage() {
   
   const router = useRouter();
 
-  // Handle hydration
+  // Handle hydration / Initial load
   useEffect(() => {
     setMounted(true);
-    const draftAbout = localStorage.getItem("chintu_draft_about_me");
-    if (draftAbout) setAboutMe(draftAbout);
     
-    const draftJd = localStorage.getItem("chintu_draft_jd");
-    if (draftJd) setJd(draftJd);
-
     const checkProfile = async () => {
       if (!user?.id) return;
       
-      // 1. Try Supabase first (Cloud)
+      // Try Supabase first (Cloud)
       const { data: profileRow } = await supabase
         .from('profiles')
         .select('profile_data, raw_profile')
@@ -43,23 +38,13 @@ export default function SetupPage() {
         await saveProfileToDisk(profileRow.profile_data);
         if (profileRow.raw_profile) setAboutMe(profileRow.raw_profile);
       } else {
-        // 2. Fallback to Local Disk
+        // Fallback to Local Disk
         const stored = await loadProfileFromDisk();
         setHasProfile(!!stored);
       }
     };
     if (isLoaded && isSignedIn) checkProfile();
   }, [isLoaded, isSignedIn, user?.id]);
-
-  useEffect(() => {
-    if (aboutMe.trim()) localStorage.setItem("chintu_draft_about_me", aboutMe);
-    else localStorage.removeItem("chintu_draft_about_me");
-  }, [aboutMe]);
-
-  useEffect(() => {
-    if (jd.trim()) localStorage.setItem("chintu_draft_jd", jd);
-    else localStorage.removeItem("chintu_draft_jd");
-  }, [jd]);
 
   // If not mounted or Clerk not loaded yet, show empty shell
   if (!mounted || !isLoaded) {
@@ -91,7 +76,22 @@ export default function SetupPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.profile) {
+            // 1. Save to Local Disk (Cache)
             await saveProfileToDisk(data.profile);
+            
+            // 2. Save to Supabase Cloud
+            const { error: upsertError } = await supabase
+              .from('profiles')
+              .update({
+                profile_data: data.profile,
+                raw_profile: aboutMe.trim()
+              })
+              .eq('id', user.id);
+
+            if (upsertError) {
+              console.error("Failed to sync profile to Cloud:", upsertError);
+            }
+
             localStorage.removeItem("chintu_draft_about_me");
             profileSaved = true;
           }
@@ -141,12 +141,12 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0a0a0c] text-white overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-[#f8f9fa] text-gray-900 overflow-hidden">
       {/* Header / Drag Region */}
       <div className="drag-region h-10 w-full shrink-0 flex items-center justify-between px-6">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">System Online</span>
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">System Online</span>
         </div>
         <div className="no-drag">
           <UserButton afterSignOutUrl="/sign-in" />
@@ -157,47 +157,47 @@ export default function SetupPage() {
         <div className="w-full max-w-sm">
           {/* Logo Section */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 p-[1px] mx-auto mb-4 shadow-2xl shadow-indigo-500/20">
-              <div className="w-full h-full bg-[#0f0f12] rounded-[23px] flex items-center justify-center">
-                <span className="text-3xl text-indigo-400">✦</span>
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 p-[1px] mx-auto mb-4 shadow-2xl shadow-indigo-500/10">
+              <div className="w-full h-full bg-white rounded-[23px] flex items-center justify-center">
+                <span className="text-3xl text-indigo-600">✦</span>
               </div>
             </div>
-            <h1 className="text-2xl font-black tracking-tight uppercase">Chintu</h1>
-            <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] mt-1 text-center">AI Interview Assistant</p>
+            <h1 className="text-2xl font-black tracking-tight uppercase text-gray-900">Chintu</h1>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1 text-center">AI Interview Assistant</p>
           </div>
 
           <div className="space-y-5">
             {/* Profile Section */}
             {!hasProfile ? (
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Candidate Profile</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Candidate Profile</label>
                 <textarea
                   value={aboutMe}
                   onChange={(e) => setAboutMe(e.target.value)}
                   placeholder="Paste your resume or tell about your experience..."
-                  className="w-full h-32 bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none placeholder:text-white/20"
+                  className="w-full h-32 bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none placeholder:text-gray-300 shadow-sm"
                 />
               </div>
             ) : (
-              <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                  <span className="text-emerald-500 text-lg">✓</span>
+              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <span className="text-emerald-600 text-lg">✓</span>
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest">Profile Status</p>
-                  <p className="text-sm font-bold text-emerald-500">Identity Successfully Loaded</p>
+                  <p className="text-[10px] font-black text-emerald-600/60 uppercase tracking-widest">Profile Status</p>
+                  <p className="text-sm font-bold text-emerald-700">Identity Successfully Loaded</p>
                 </div>
               </div>
             )}
 
             {/* Job Description Section */}
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Job Description</label>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Job Description</label>
               <textarea
                 value={jd}
                 onChange={(e) => setJd(e.target.value)}
                 placeholder="Paste the job description you are interviewing for..."
-                className="w-full h-40 bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none placeholder:text-white/20"
+                className="w-full h-40 bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none placeholder:text-gray-300 shadow-sm"
               />
             </div>
 
@@ -209,13 +209,13 @@ export default function SetupPage() {
                 w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative overflow-hidden group
                 ${jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining
                   ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95"
-                  : "bg-white/5 text-white/20 border border-white/5 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
                 }
               `}
             >
               <span className="relative z-10">{isRefining ? statusText : "Initiate Session →"}</span>
               {jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
               )}
             </button>
           </div>
@@ -223,8 +223,8 @@ export default function SetupPage() {
       </div>
 
       {/* Footer info */}
-      <div className="p-6 text-center opacity-30">
-        <p className="text-[9px] font-bold uppercase tracking-[0.4em]">Secure Mode • Ghost Overlay Active</p>
+      <div className="p-6 text-center opacity-40">
+        <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-gray-500">Secure Mode • Ghost Overlay Active</p>
       </div>
 
       {/* Full Page Loading Animation — RESTORED */}
