@@ -78,40 +78,38 @@ export default function SetupPage() {
       setStatusText("✨ AI is structuring your profile...");
 
       try {
-        localStorage.setItem("chintu_profile_refining", "true");
-        window.dispatchEvent(new Event("chintu_profile_refining"));
-
-        // Fire the API without awaiting it, so it runs in background
-        fetch("/api/refine-profile", {
+        await fetch("/api/refine-profile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rawText: aboutMe.trim() }),
-          keepalive: true,
-        }).finally(() => {
-          localStorage.removeItem("chintu_profile_refining");
-          window.dispatchEvent(new Event("chintu_profile_refining"));
         });
         
-        // Navigate IMMEDIATELY to room
         setStatusText("🎯 Finalizing workspace...");
-        window.location.href = "/room?jd=" + encodeURIComponent(jd.trim());
+        router.push("/room?jd=" + encodeURIComponent(jd.trim()));
       } catch (err) {
         console.error("Failed to start refinement:", err);
-        localStorage.removeItem("chintu_profile_refining");
-        window.dispatchEvent(new Event("chintu_profile_refining"));
-        // Even if refine start fails, try to go to room
-        window.location.href = "/room?jd=" + encodeURIComponent(jd.trim());
+        router.push("/room?jd=" + encodeURIComponent(jd.trim()));
       }
     } else {
-      // Direct navigation if no profile to refine
       setStatusText("🎯 Synchronizing with neural network...");
-      window.location.href = "/room?jd=" + encodeURIComponent(jd.trim());
+      router.push("/room?jd=" + encodeURIComponent(jd.trim()));
     }
   };
 
   const handleSkipAndStart = () => {
     setStatusText("🎯 Synchronizing with neural network...");
-    window.location.href = "/room?jd=" + encodeURIComponent(jd.trim());
+    
+    // Start refinement in background
+    if (aboutMe.trim() && !hasProfile) {
+      fetch("/api/refine-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rawText: aboutMe.trim() }),
+      });
+      router.push("/room?jd=" + encodeURIComponent(jd.trim()) + "&refining=true");
+    } else {
+      router.push("/room?jd=" + encodeURIComponent(jd.trim()));
+    }
   };
 
   return (
@@ -286,10 +284,7 @@ export default function SetupPage() {
           {/* Skip Button — navigate immediately, refining continues in background */}
           {isRefining && jd.trim() && (
             <button
-              onClick={() => {
-                // Profile refine fetch is already fire-and-forget, just navigate
-                window.location.href = "/room?jd=" + encodeURIComponent(jd.trim());
-              }}
+              onClick={handleSkipAndStart}
               className="mt-8 px-8 py-3.5 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all active:scale-95 shadow-sm flex flex-col items-center gap-1"
             >
               <span>Skip & Start Interview</span>

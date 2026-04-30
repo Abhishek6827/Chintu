@@ -11,7 +11,6 @@ import AnswerDisplay from "@/components/AnswerDisplay";
 import ProfileModal, { formatProfileContext } from "@/components/ProfileModal";
 import CustomDropdown from "@/components/CustomDropdown";
 import OnboardingModal from "@/components/OnboardingModal";
-import { HelpCircle } from "lucide-react";
 
 interface AnswerEntry {
   id: string;
@@ -122,16 +121,43 @@ export default function RoomPage() {
   const [isBackgroundRefining, setIsBackgroundRefining] = useState(false);
 
   useEffect(() => {
-    const checkRefining = () => {
-      setIsBackgroundRefining(localStorage.getItem("chintu_profile_refining") === "true");
-    };
-    checkRefining();
-    window.addEventListener("chintu_profile_refining", checkRefining);
-    const interval = setInterval(checkRefining, 2000); // Poll occasionally just in case
-    return () => {
-      window.removeEventListener("chintu_profile_refining", checkRefining);
-      clearInterval(interval);
-    };
+    // Check if refining from URL
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("refining") === "true") {
+      setIsBackgroundRefining(true);
+      
+      // Clean up URL without reloading
+      const url = new URL(window.location.href);
+      url.searchParams.delete("refining");
+      window.history.replaceState({}, "", url.toString());
+      
+      // Start polling
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        if (attempts > 40) { // 2 minutes (3s * 40)
+          clearInterval(poll);
+          setIsBackgroundRefining(false);
+          return;
+        }
+        
+        try {
+          const res = await fetch("/api/profile");
+          if (res.ok) {
+            const { profile } = await res.json();
+            if (profile?.profile_data && Object.keys(profile.profile_data).length > 0) {
+              clearInterval(poll);
+              setIsBackgroundRefining(false);
+              setToast({ message: "Profile successfully optimized!", type: "success" });
+              setProfileContext(formatProfileContext(profile.profile_data));
+              setHasProfile(true);
+            }
+          }
+        } catch {}
+      }, 3000);
+      
+      return () => clearInterval(poll);
+    }
   }, []);
 
   const supabase = createClient();
@@ -172,10 +198,22 @@ export default function RoomPage() {
             if (profile.theme) {
               const cloudTheme = profile.theme === 'light';
               setIsLightMode(cloudTheme);
-              localStorage.setItem("chintu_theme", cloudTheme ? "light" : "dark");
             }
 
-            // Set Plan & Gating
+            // Set Reading Guide
+            if (profile.reading_guide !== undefined) {
+              setShowReadingGuide(profile.reading_guide);
+            }
+
+            // Onboarding Check
+            if (profile.has_seen_onboarding === false || profile.has_seen_onboarding === undefined) {
+              setShowOnboarding(true);
+              fetch('/api/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ has_seen_onboarding: true })
+              });
+            }
             const plan = profile.plan || 'free';
             setUserPlan(plan);
             if (plan === 'free') {
@@ -267,12 +305,6 @@ export default function RoomPage() {
 
   useEffect(() => {
     setMounted(true);
-    // Check if user has seen onboarding
-    const hasSeenOnboarding = localStorage.getItem("chintu_onboarding_seen");
-    if (!hasSeenOnboarding) {
-      setShowOnboarding(true);
-      localStorage.setItem("chintu_onboarding_seen", "true");
-    }
 
     if (isElectron && (window as any).electronAPI?.getOpacity) {
       (window as any).electronAPI.getOpacity().then((o: number) => setWindowOpacity(o));
@@ -326,12 +358,6 @@ export default function RoomPage() {
   const [isLightMode, setIsLightMode] = useState(true);
 
   useEffect(() => {
-    // Initial local fallback while cloud loads
-    const localTheme = localStorage.getItem("chintu_theme");
-    if (localTheme) setIsLightMode(localTheme === 'light');
-  }, []);
-
-  useEffect(() => {
     if (isLightMode) {
       document.body.classList.add("light-mode");
     } else {
@@ -342,7 +368,6 @@ export default function RoomPage() {
   const toggleTheme = async () => {
     const newTheme = !isLightMode;
     setIsLightMode(newTheme);
-    localStorage.setItem("chintu_theme", newTheme ? "light" : "dark");
     if (user?.id) {
       try {
         await fetch('/api/profile', {
@@ -1242,7 +1267,7 @@ export default function RoomPage() {
       )}
 
       {/* Draggable title bar */}
-      <div className="drag-region flex items-center justify-between px-2 sm:px-4 h-10 sm:h-12 shrink-0 relative z-10">
+      <div className="drag-region flex items-center justify-between px-2 sm:px-4 h-10 sm:h-12 shrink-0 relative z-[60]">
         <div className="flex items-center gap-2 no-drag">
           <div className="flex items-center gap-2">
             <Image src="/icon.png" alt="" className="w-5 h-5 object-contain" width={40} height={40} unoptimized />
@@ -1278,37 +1303,34 @@ export default function RoomPage() {
               <span className="text-[8px] text-red-500 font-black uppercase tracking-widest">REC</span>
             </div>
           )}
-          <button
-            onClick={() => {
-              if (userPlan === 'free') {
-                router.push("/pricing");
-                return;
-              }
-              toggleTheme();
-            }}
-            className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
-              userPlan === 'free' 
-                ? 'opacity-30 grayscale cursor-pointer hover:opacity-50' 
-                : 'text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            {isLightMode ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
-          </button>
           {isElectron && (
-            <button 
-              onClick={() => (window as any).electronAPI.minimize()} 
-              className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
-              title="Minimize"
-            >
-              <Minus className="w-3.5 h-3.5" />
-            </button>
+            <>
+              <button
+                onClick={handleHide}
+                className={`
+                  w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90
+                  ${isWindowHidden
+                    ? "bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+                    : "bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)]"
+                  }
+                `}
+                title={isWindowHidden ? "Ghost Mode Active" : "Ghost Mode Inactive"}
+              >
+                {isWindowHidden ? (
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                ) : (
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+                )}
+              </button>
+              <button 
+                onClick={() => (window as any).electronAPI.minimize()} 
+                className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
+                title="Minimize"
+              >
+                <Minus className="w-3.5 h-3.5" />
+              </button>
+            </>
           )}
-          <button 
-            onClick={() => setShowOnboarding(true)} 
-            className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
-          >
-            <HelpCircle className="w-3.5 h-3.5" />
-          </button>
           {/* Profile / Account button */}
           <div className={`rounded-lg overflow-hidden flex items-center justify-center transition-all ${hasProfile ? "ring-2 ring-indigo-500/50 shadow-lg shadow-indigo-500/20" : "ring-1 ring-[var(--glass-border)]"}`}>
             <UserButton 
@@ -1320,6 +1342,11 @@ export default function RoomPage() {
                   label="Manage AI Profile" 
                   labelIcon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>} 
                   onClick={() => setShowProfile(true)} 
+                />
+                <UserButton.Action 
+                  label="Support" 
+                  labelIcon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>} 
+                  onClick={() => router.push('/support')} 
                 />
               </UserButton.MenuItems>
             </UserButton>
@@ -1744,23 +1771,7 @@ export default function RoomPage() {
           </button>
         )}
 
-        {/* Button 6: Hide */}
-        <button
-          onClick={handleHide}
-          className={`
-            no-drag w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all active:scale-90
-            ${isWindowHidden
-              ? "bg-emerald-500 text-white shadow-[0_0_30px_rgba(16,185,129,0.4)]"
-              : "bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)]"
-            }
-          `}
-        >
-          {isWindowHidden ? (
-            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-          ) : (
-            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
-          )}
-        </button>
+        {/* Toolbar Ends */}
       </div>
 
 
@@ -1794,6 +1805,38 @@ export default function RoomPage() {
             </div>
 
             <div className="space-y-6">
+              {/* Theme Toggle */}
+              <div 
+                className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
+                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest">Theme</h4>
+                      {userPlan === 'free' && (
+                        <span className="bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase px-1.5 py-0.5 rounded tracking-widest">PRO</span>
+                      )}
+                    </div>
+                    <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">Toggle dark/light mode</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (userPlan === 'free') {
+                        router.push("/pricing");
+                        return;
+                      }
+                      toggleTheme();
+                    }}
+                    className={`w-12 h-6 rounded-full transition-all relative ${!isLightMode ? "bg-indigo-600" : "bg-gray-600/30"} ${userPlan === 'free' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all flex items-center justify-center ${!isLightMode ? "left-7" : "left-1"}`}>
+                       {!isLightMode ? <Moon className="w-2.5 h-2.5 text-indigo-600" /> : <Sun className="w-2.5 h-2.5 text-gray-600" />}
+                    </div>
+                  </button>
+                </div>
+              </div>
+
               {/* Space Mode */}
               <div 
                 className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
@@ -1963,7 +2006,7 @@ export default function RoomPage() {
       )}
       {/* Profile Modal */}
       {showProfile && (
-        <ProfileModal onClose={() => { setShowProfile(false); refreshProfile(); }} />
+        <ProfileModal onClose={() => { setShowProfile(false); refreshProfile(); }} onSuccess={() => setToast({ message: "Profile successfully optimized!", type: "success" })} />
       )}
       {/* Unhide Prompt (Shocking/Animated) */}
       {showUnhidePrompt && (

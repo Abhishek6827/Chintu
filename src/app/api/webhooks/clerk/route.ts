@@ -48,8 +48,9 @@ export async function POST(req: Request) {
   const supabase = createAdminClient();
 
   if (eventType === 'user.created') {
-    const { id, email_addresses } = evt.data;
+    const { id, email_addresses, first_name, last_name } = evt.data;
     const email = email_addresses[0]?.email_address;
+    const fullName = [first_name, last_name].filter(Boolean).join(" ") || "Unknown User";
 
     // Safety Check: If no email is found, it might be a partial signup or a failed attempt
     if (!email) {
@@ -60,41 +61,47 @@ export async function POST(req: Request) {
     // --- Generate Standard Display ID ---
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-GB').replace(/\//g, '-'); // 29-04-2026
-    const timeStr = now.getHours().toString().padStart(2, '0') + now.getMinutes().toString().padStart(2, '0');
+    const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+    const displayTimeStr = now.getHours().toString().padStart(2, '0') + now.getMinutes().toString().padStart(2, '0');
     
     // Extract provider safely
     const externalAccounts = (evt.data as any).external_accounts || [];
     const provider = externalAccounts[0]?.provider || 'email';
-    const displayId = `CHINTU-${provider.toUpperCase()}-${dateStr}-${timeStr}`;
+    const displayId = `CHINTU-${provider.toUpperCase()}-${dateStr}-${displayTimeStr}`;
 
     console.log(`[/api/webhooks/clerk] Syncing user ${id} with Display ID ${displayId}`);
 
-    // Check if user already exists to prevent duplicate notifications
+    // Check if user already exists to prevent duplicate notifications (for sequential retries)
     const { data: existingProfile } = await supabase
       .from('profiles')
       .select('id')
       .eq('id', id)
       .maybeSingle();
 
+    if (existingProfile) {
+      console.log(`[/api/webhooks/clerk] User ${id} already exists. Skipping duplicate notifications.`);
+      return new Response('User already exists, notifications skipped', { status: 200 });
+    }
+
+    // Use INSERT instead of UPSERT to prevent concurrent race conditions
     const { error } = await supabase
       .from('profiles')
-      .upsert({
+      .insert({
         id: id,
         email: email,
         display_id: displayId,
         credits: 10,
         plan: 'free',
         updated_at: now.toISOString()
-      }, { onConflict: 'id' });
+      });
 
     if (error) {
+      // 23505 is PostgreSQL unique violation code
+      if (error.code === '23505') {
+        console.log(`[/api/webhooks/clerk] User ${id} concurrently inserted. Skipping duplicate notifications.`);
+        return new Response('User concurrently inserted, notifications skipped', { status: 200 });
+      }
       console.error('Error syncing user to Supabase:', error);
-    }
-
-    // If user already existed, skip notifications
-    if (existingProfile) {
-      console.log(`[/api/webhooks/clerk] User ${id} already exists. Skipping duplicate notifications.`);
-      return new Response('User already exists, notifications skipped', { status: 200 });
     }
 
     // --- Send Telegram Notification ---
@@ -109,10 +116,13 @@ export async function POST(req: Request) {
         const message = 
           `🚀 <b>STRATEGIC ALERT: NEW USER ACQUISITION</b>\n\n` +
           `✨ <b>Status:</b> <code>Success / Verified</code>\n` +
-          `👤 <b>User:</b> <code>${email}</code>\n` +
+          `👤 <b>Name:</b> <code>${fullName}</code>\n` +
+          `📧 <b>Email:</b> <code>${email}</code>\n` +
           `🆔 <b>Clerk ID:</b> <code>${id}</code>\n` +
           `🏷️ <b>Internal ID:</b> <code>${displayId}</code>\n` +
-          `🛡️ <b>Auth Provider:</b> <code>${provider.toUpperCase()}</code>\n\n` +
+          `🛡️ <b>Auth Provider:</b> <code>${provider.toUpperCase()}</code>\n` +
+          `📅 <b>Date:</b> <code>${dateStr}</code>\n` +
+          `⏰ <b>Time:</b> <code>${timeStr}</code>\n\n` +
           `💰 <b>Onboarding Reward:</b> <code>10 Credits Provisioned</code>\n\n` +
           `📈 <i>Chintu AI Ecosystem Growth +1</i>`;
         
@@ -190,12 +200,18 @@ export async function POST(req: Request) {
       const tgChatId = process.env.TELEGRAM_CHAT_ID;
 
       if (tgToken && tgChatId) {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-GB').replace(/\//g, '-');
+        const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+
         const message =
           `🗑️ <b>USER DELETED</b>\n\n` +
           `👤 <b>Clerk ID:</b> <code>${id}</code>\n` +
           (profile ? `📧 <b>Email:</b> <code>${profile.email}</code>\n` : '') +
           (profile ? `🏷️ <b>Display ID:</b> <code>${profile.display_id}</code>\n` : '') +
           (profile ? `💎 <b>Plan was:</b> <code>${profile.plan?.toUpperCase()}</code>\n` : '') +
+          `📅 <b>Date:</b> <code>${dateStr}</code>\n` +
+          `⏰ <b>Time:</b> <code>${timeStr}</code>\n` +
           `\n⚠️ <i>Profile removed from Supabase</i>`;
 
         await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {

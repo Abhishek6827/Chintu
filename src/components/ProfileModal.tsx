@@ -47,7 +47,7 @@ export function formatProfileContext(p: any): string {
   return lines.join("\n");
 }
 
-export default function ProfileModal({ onClose }: { onClose: () => void }) {
+export default function ProfileModal({ onClose, onSuccess }: { onClose: () => void, onSuccess?: () => void }) {
   const { user } = useUser();
   const supabase = createClient();
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -71,8 +71,6 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
     if (!rawText.trim()) return;
     setIsRefining(true);
     setError("");
-    localStorage.setItem("chintu_profile_refining", "true");
-    window.dispatchEvent(new Event("chintu_profile_refining"));
 
     try {
       const res = await fetch("/api/refine-profile", {
@@ -98,8 +96,9 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
       setError(err.message || "Failed to refine profile");
     } finally {
       setIsRefining(false);
-      localStorage.removeItem("chintu_profile_refining");
-      window.dispatchEvent(new Event("chintu_profile_refining"));
+      if (!error && onSuccess) {
+         onSuccess();
+      }
     }
   };
 

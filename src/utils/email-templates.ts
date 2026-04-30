@@ -75,6 +75,9 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
           <!-- Footer -->
           <tr>
             <td style="padding: 30px; background-color: #fcfcfd; border-top: 1px solid #f1f3f5; text-align: center;">
+              <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: 500; color: #6b7280;">
+                Need assistance? Contact us at <a href="mailto:support@getchintu.com" style="color: #6366f1; text-decoration: none;">support@getchintu.com</a>
+              </p>
               <p style="margin: 0; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">
                 © 2026 Chintu AI Ecosystem • Stealth Mode Active
               </p>
@@ -165,6 +168,9 @@ export const getPaymentEmailHtml = (plan: string, credits: number, appUrl: strin
           <!-- Footer -->
           <tr>
             <td style="padding: 30px; background-color: #fcfcfd; border-top: 1px solid #f1f3f5; text-align: center;">
+              <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: 500; color: #6b7280;">
+                Need assistance? Contact us at <a href="mailto:support@getchintu.com" style="color: #6366f1; text-decoration: none;">support@getchintu.com</a>
+              </p>
               <p style="margin: 0; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">
                 © 2026 Chintu AI Ecosystem • Subscription Support Active
               </p>
