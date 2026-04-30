@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useUser } from "@clerk/nextjs";
 
 export default function LandingPage() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn } = useUser();
 
   const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 

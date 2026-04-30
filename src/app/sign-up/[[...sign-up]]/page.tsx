@@ -59,7 +59,7 @@ export default function Page() {
             <div className="mt-4 inline-flex items-center gap-2 bg-indigo-50 py-1.5 px-3 rounded-full border border-indigo-100">
               <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
               <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest">
-                {redirecting ? "Redirecting..." : "Waiting for authentication..."}
+                {redirecting ? "Redirecting..." : "Secure Login Portal"}
               </p>
             </div>
           </div>
