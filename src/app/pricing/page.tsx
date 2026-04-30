@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Check, Sparkles, Minus, Shield } from "lucide-react";
+import { Check, Sparkles, Minus, Shield, Plus } from "lucide-react";
 
 const PLANS = [
   {
@@ -48,7 +48,7 @@ const PLANS = [
     stripePriceId: "price_1TRu3pLYcsTnVrvkVfZIjTLC",
     annualStripePriceId: "price_1TRu4ILYcsTnVrvkcfBbwSBr",
     features: [
-      "200 Credits / month",
+      "200 Credits / month per unit",
       "All Premium Engines Unlocked",
       "All Response Types",
       "Stealth Session Recording",
@@ -70,7 +70,7 @@ const PLANS = [
     stripePriceId: "price_1TRu4jLYcsTnVrvkJ7gkHA91",
     annualStripePriceId: "price_1TRu5ALYcsTnVrvk3dMorbBe",
     features: [
-      "1000 Credits / month",
+      "1000 Credits / month per unit",
       "All Pro Features",
       "Stealth Session Recording",
       "Dedicated Support",
@@ -87,6 +87,11 @@ export default function PricingPage() {
   const router = useRouter();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
   const [loading, setLoading] = useState<string | null>(null);
+  
+  // Quantity Selector
+  const [quantity, setQuantity] = useState<number>(1);
+  const minQty = 1;
+  const maxQty = 10;
 
   const handleSubscribe = async (plan: any) => {
     if (!user) return;
@@ -101,7 +106,7 @@ export default function PricingPage() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ priceId, quantity }),
       });
 
       if (res.ok) {
@@ -114,9 +119,6 @@ export default function PricingPage() {
     } catch {
       alert("Something went wrong.");
     } finally {
-      // We don't set loading back to null immediately because the user is being redirected
-      // If we are in Electron, the redirect might open in a new window, so we keep the spinner
-      // until the page is navigated or closed.
       setTimeout(() => setLoading(null), 5000); 
     }
   };
@@ -131,7 +133,6 @@ export default function PricingPage() {
 
   return (
     <div className="h-screen bg-[#f8f9fa] text-gray-900 overflow-hidden flex flex-col">
-      {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 z-[100] bg-white/90 backdrop-blur-xl flex flex-col items-center justify-center animate-in fade-in duration-500">
           <div className="relative mb-8">
@@ -141,19 +142,15 @@ export default function PricingPage() {
             </div>
           </div>
           <h2 className="text-xl font-black tracking-tighter mb-2">Securing Connection...</h2>
-          <p className="text-gray-500 text-xs font-bold uppercase tracking-widest text-center px-12">
-            Redirecting to Stripe for encrypted checkout.<br/>
-            Your features will unlock instantly after payment.
-          </p>
         </div>
       )}
 
       {/* Draggable Header */}
       <div className="flex items-center justify-between px-4 sm:px-8 py-4 sm:py-6 sticky top-0 bg-[#f8f9fa]/90 backdrop-blur-md z-50 border-b border-gray-100 shrink-0 select-none" style={{ WebkitAppRegion: 'drag' } as any}>
         <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
-           <Link href="/" className="group flex items-center gap-2 text-gray-400 hover:text-gray-900 transition-all text-[10px] font-black uppercase tracking-widest">
+           <Link href="/setup" className="group flex items-center gap-2 text-gray-400 hover:text-gray-900 transition-all text-[10px] font-black uppercase tracking-widest">
             <svg className="w-3 h-3 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-            Back to Dashboard
+            Dashboard
           </Link>
         </div>
         
@@ -163,11 +160,7 @@ export default function PricingPage() {
         </div>
 
         <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
-          <button 
-            onClick={handleMinimize}
-            className="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-900 transition-all active:scale-90"
-            title="Minimize"
-          >
+          <button onClick={handleMinimize} className="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-900 transition-all active:scale-90">
             <Minus className="w-4 h-4" />
           </button>
         </div>
@@ -175,22 +168,29 @@ export default function PricingPage() {
 
       <div className="flex-1 pb-20 overflow-y-auto overflow-x-hidden selection:bg-indigo-100" style={{ WebkitAppRegion: 'no-drag' } as any}>
         {/* Title & Billing Toggle */}
-        <div className="text-center px-4 pt-10 pb-10">
+        <div className="text-center px-4 pt-10 pb-6">
           <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-6 border border-indigo-100">
             <Sparkles className="w-3 h-3 animate-pulse" /> Launch Offer
           </div>
           <h1 className="text-3xl sm:text-5xl font-black tracking-tighter mb-4 text-gray-900 leading-none">Elevate Your Career.</h1>
-          <p className="text-gray-400 text-sm sm:text-lg font-medium max-w-sm mx-auto mb-10 leading-snug">
-            Choose a plan that fits your ambition. Unlock advanced AI.
-          </p>
+          
+          {/* Quantity Selector */}
+          <div className="max-w-xs mx-auto mb-8 bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">
+               Select Multiplier (Quantity)
+             </label>
+             <div className="flex items-center justify-between">
+                <button onClick={() => setQuantity(q => Math.max(minQty, q - 1))} disabled={quantity <= minQty} className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-50 text-gray-500 hover:bg-gray-100 disabled:opacity-50 transition-colors"><Minus className="w-3 h-3" /></button>
+                <span className="text-xl font-black">{quantity}x</span>
+                <button onClick={() => setQuantity(q => Math.min(maxQty, q + 1))} disabled={quantity >= maxQty} className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-50 text-gray-500 hover:bg-gray-100 disabled:opacity-50 transition-colors"><Plus className="w-3 h-3" /></button>
+             </div>
+             <p className="text-[9px] font-bold text-gray-400 uppercase mt-2">Credits & Price will be multiplied by {quantity}</p>
+          </div>
 
           {/* Toggle Switch */}
           <div className="flex items-center justify-center gap-4">
             <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${billingCycle === "monthly" ? "text-gray-900" : "text-gray-400"}`}>Monthly</span>
-            <button 
-              onClick={() => setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")}
-              className="w-12 h-6 bg-gray-200 rounded-full relative p-1 transition-colors"
-            >
+            <button onClick={() => setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")} className="w-12 h-6 bg-gray-200 rounded-full relative p-1 transition-colors">
               <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300 transform ${billingCycle === "annual" ? "translate-x-6 bg-indigo-600" : "translate-x-0"}`} />
             </button>
             <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${billingCycle === "annual" ? "text-gray-900" : "text-gray-400"}`}>
@@ -201,20 +201,16 @@ export default function PricingPage() {
 
         {/* Plans Grid */}
         <div className="px-4 sm:px-8 max-w-6xl mx-auto flex flex-col gap-8">
-          {PLANS.map((plan) => (
-            <div
-              key={plan.id}
-              className={`group relative flex flex-col bg-white rounded-[2.5rem] border-2 transition-all duration-300 ${
-                plan.popular 
-                  ? "border-indigo-600 shadow-2xl shadow-indigo-500/10" 
-                  : "border-gray-100 shadow-lg shadow-gray-200/50"
-              } p-6 sm:p-10`}
-            >
+          {PLANS.map((plan) => {
+             const planPrice = billingCycle === "monthly" ? plan.monthlyPrice : Math.floor(plan.annualPrice / 12);
+             const totalPrice = planPrice * quantity;
+             const totalCredits = plan.credits * quantity;
+
+             return (
+            <div key={plan.id} className={`group relative flex flex-col bg-white rounded-[2.5rem] border-2 transition-all duration-300 ${plan.popular ? "border-indigo-600 shadow-2xl shadow-indigo-500/10" : "border-gray-100 shadow-lg shadow-gray-200/50"} p-6 sm:p-10`}>
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-full">
-                    Most Preferred
-                  </span>
+                  <span className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-full">Most Preferred</span>
                 </div>
               )}
 
@@ -222,17 +218,15 @@ export default function PricingPage() {
                 <div>
                   <span className="text-4xl mb-2 block">{plan.badge}</span>
                   <h3 className="text-xl font-black text-gray-900">{plan.name}</h3>
-                  <p className="text-gray-400 text-[10px] font-bold">{plan.description}</p>
+                  <p className="text-indigo-600 text-[11px] font-black uppercase tracking-widest mt-1">{totalCredits} Credits/mo</p>
                 </div>
                 <div className="text-right">
                   <div className="flex items-baseline justify-end gap-0.5">
-                    <span className="text-4xl font-black text-gray-900 tracking-tighter">
-                      ${billingCycle === "monthly" ? plan.monthlyPrice : Math.floor(plan.annualPrice / 12)}
-                    </span>
+                    <span className="text-4xl font-black text-gray-900 tracking-tighter">${totalPrice}</span>
                     <span className="text-gray-400 text-[10px] font-black uppercase">{plan.period}</span>
                   </div>
                   {billingCycle === "annual" && plan.annualPrice > 0 && (
-                    <p className="text-emerald-500 text-[8px] font-black uppercase">Billed annually (${plan.annualPrice})</p>
+                    <p className="text-emerald-500 text-[8px] font-black uppercase">Billed annually (${plan.annualPrice * quantity})</p>
                   )}
                 </div>
               </div>
@@ -244,43 +238,17 @@ export default function PricingPage() {
                     {feature}
                   </li>
                 ))}
-                {plan.locked && plan.locked.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-xs font-bold text-gray-300">
-                    <Shield className="w-3.5 h-3.5 mt-0.5" />
-                    {feature}
-                  </li>
-                ))}
               </ul>
 
               <button
                 onClick={() => handleSubscribe(plan)}
                 disabled={plan.disabled || loading === plan.id}
-                className={`w-full py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${
-                  plan.disabled
-                    ? "bg-gray-100 text-gray-400 border border-gray-200"
-                    : plan.popular
-                      ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30"
-                      : "bg-gray-900 text-white"
-                }`}
+                className={`w-full py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${plan.disabled ? "bg-gray-100 text-gray-400 border border-gray-200" : plan.popular ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30" : "bg-gray-900 text-white"}`}
               >
                 {loading === plan.id ? "..." : plan.cta}
               </button>
             </div>
-          ))}
-        </div>
-
-        {/* Support Footer */}
-        <div className="mt-16 px-4 text-center">
-          <div className="bg-white border border-gray-100 rounded-[2.5rem] p-8 max-w-lg mx-auto shadow-sm">
-            <h3 className="text-xl font-black mb-1">Need help?</h3>
-            <p className="text-gray-400 text-xs font-medium mb-6 leading-relaxed">Our team is here to guide you.</p>
-            <button 
-              onClick={() => router.push("/support")}
-              className="w-full py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-[10px] font-black uppercase tracking-widest hover:bg-gray-100"
-            >
-              Contact Support
-            </button>
-          </div>
+          )})}
         </div>
       </div>
     </div>

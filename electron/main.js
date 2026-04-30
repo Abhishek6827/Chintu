@@ -269,9 +269,9 @@ function createWindow() {
     if (!isAppUrl) {
       event.preventDefault();
       
-      // If it's a Stripe checkout URL, open it in the system browser
-      if (url.includes("checkout.stripe.com")) {
-        console.log(`[Main] Stripe checkout detected. Opening in system browser: ${url}`);
+      // If it's a Stripe checkout or billing URL, open it in the system browser
+      if (url.includes("checkout.stripe.com") || url.includes("billing.stripe.com")) {
+        console.log(`[Main] Stripe URL detected. Opening in system browser: ${url}`);
         require('electron').shell.openExternal(url);
         return;
       }

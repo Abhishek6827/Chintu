@@ -224,6 +224,30 @@ export default function SetupPage() {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
               )}
             </button>
+
+            <button 
+              onClick={async () => {
+                try {
+                  setStatusText("Opening Billing Portal...");
+                  setIsInitiating(true);
+                  const res = await fetch("/api/create-portal-session", { method: "POST" });
+                  const data = await res.json();
+                  if (data.url) {
+                    window.location.href = data.url;
+                  } else {
+                    alert(data.error || "Failed to load portal.");
+                    setIsInitiating(false);
+                  }
+                } catch (err) {
+                  alert("Error loading billing portal.");
+                  setIsInitiating(false);
+                }
+              }}
+              disabled={isRefining || isInitiating}
+              className="w-full py-3 mt-2 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 text-gray-400 hover:text-gray-900 hover:bg-gray-200"
+            >
+              Manage Subscription
+            </button>
           </div>
         </div>
       </div>

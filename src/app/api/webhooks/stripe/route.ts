@@ -78,15 +78,17 @@ export async function POST(req: Request) {
       // Fallback or handle error
     } else {
       const { plan, credits } = PRICE_ID_MAP[priceId];
+      const quantity = lineItems.data[0]?.quantity || 1;
+      const newTotal = credits * quantity;
 
-      console.log(`[Stripe Webhook] Updating user ${userId} to plan ${plan} with ${credits} credits`);
+      console.log(`[Stripe Webhook] Updating user ${userId} to plan ${plan} with ${newTotal} credits (Qty: ${quantity})`);
 
       // Update Supabase Profile
       const { error } = await supabaseAdmin
         .from("profiles")
         .update({
           plan: plan,
-          credits: credits,
+          credits: newTotal,
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: session.subscription as string,
           updated_at: new Date().toISOString(),
@@ -139,7 +141,8 @@ export async function POST(req: Request) {
         const planInfo = PRICE_ID_MAP[priceId || ""];
         
         if (planInfo) {
-          const monthlyCredits = planInfo.plan === "pro" ? 200 : 1000;
+          const quantity = invoice.lines?.data?.[0]?.quantity || 1;
+          const monthlyCredits = planInfo.credits * quantity;
           await supabaseAdmin
             .from("profiles")
             .update({ credits: monthlyCredits, updated_at: new Date().toISOString() })
@@ -160,6 +163,63 @@ export async function POST(req: Request) {
               to: profile.email,
               subject: 'Mission Extended: Your Credits have been Reset 🔄',
               html: getPaymentEmailHtml(planInfo.plan, monthlyCredits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+            });
+          }
+        }
+      }
+    }
+  }
+
+  // ─── Handle Subscription Updated (Plan/Quantity Change) ───
+  if (event.type === "customer.subscription.updated") {
+    const subscription = event.data.object as Stripe.Subscription;
+    const previousAttributes = event.data.previous_attributes as any;
+    
+    // Only process if items (plan/quantity) changed, or status changed
+    if (previousAttributes && (previousAttributes.items || previousAttributes.status)) {
+      const priceId = subscription.items.data[0]?.price.id;
+      const quantity = subscription.items.data[0]?.quantity || 1;
+      
+      const planInfo = PRICE_ID_MAP[priceId || ""];
+      if (planInfo && subscription.status === "active") {
+        const newCredits = planInfo.credits * quantity;
+        
+        // Find user by subscription ID
+        const { data: profile } = await supabaseAdmin
+          .from("profiles")
+          .select("id, plan, email")
+          .eq("stripe_subscription_id", subscription.id)
+          .maybeSingle();
+
+        if (profile) {
+          console.log(`[Stripe Webhook] Subscription Updated for user ${profile.id}: Plan ${planInfo.plan}, Qty ${quantity}`);
+          
+          // Update Supabase
+          await supabaseAdmin
+            .from("profiles")
+            .update({ 
+              plan: planInfo.plan,
+              credits: newCredits, 
+              updated_at: new Date().toISOString() 
+            })
+            .eq("id", profile.id);
+
+          // Telegram Alert
+          await sendTelegramAlert(
+            `📈 <b>Plan Changed/Updated via Portal</b>\n\n` +
+            `👤 User: <code>${profile.id}</code>\n` +
+            `💎 New Plan: <b>${planInfo.plan.toUpperCase()}</b>\n` +
+            `🔢 Quantity: <b>${quantity}</b>\n` +
+            `⚡ New Credits: <b>${newCredits}</b>`
+          );
+          
+          // Send Email
+          if (profile.email) {
+            await resend.emails.send({
+              from: 'Chintu Intelligence <billing@getchintu.com>',
+              to: profile.email,
+              subject: 'Subscription Successfully Updated 📈',
+              html: getPaymentEmailHtml(planInfo.plan, newCredits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
             });
           }
         }
