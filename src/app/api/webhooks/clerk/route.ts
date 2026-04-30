@@ -155,5 +155,65 @@ export async function POST(req: Request) {
     return new Response('User synced successfully', { status: 200 });
   }
 
+  // ─── Handle User Deleted ───────────────────────────────
+  if (eventType === 'user.deleted') {
+    const { id } = evt.data;
+
+    if (!id) {
+      console.warn('[/api/webhooks/clerk] user.deleted event with no ID. Skipping.');
+      return new Response('No user ID', { status: 200 });
+    }
+
+    console.log(`[/api/webhooks/clerk] Deleting user ${id} from Supabase...`);
+
+    // Fetch profile before deleting (for telegram alert info)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('email, display_id, plan')
+      .eq('id', id)
+      .maybeSingle();
+
+    // Delete from Supabase
+    const { error } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('[/api/webhooks/clerk] Error deleting user from Supabase:', error.message);
+      return new Response('Error deleting user', { status: 500 });
+    }
+
+    // Send Telegram Alert
+    try {
+      const tgToken = process.env.TELEGRAM_BOT_TOKEN;
+      const tgChatId = process.env.TELEGRAM_CHAT_ID;
+
+      if (tgToken && tgChatId) {
+        const message =
+          `🗑️ <b>USER DELETED</b>\n\n` +
+          `👤 <b>Clerk ID:</b> <code>${id}</code>\n` +
+          (profile ? `📧 <b>Email:</b> <code>${profile.email}</code>\n` : '') +
+          (profile ? `🏷️ <b>Display ID:</b> <code>${profile.display_id}</code>\n` : '') +
+          (profile ? `💎 <b>Plan was:</b> <code>${profile.plan?.toUpperCase()}</code>\n` : '') +
+          `\n⚠️ <i>Profile removed from Supabase</i>`;
+
+        await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: tgChatId,
+            text: message,
+            parse_mode: 'HTML'
+          }),
+        });
+      }
+    } catch (tgErr) {
+      console.error('[/api/webhooks/clerk] Telegram notification failed:', tgErr);
+    }
+
+    return new Response('User deleted successfully', { status: 200 });
+  }
+
   return new Response('', { status: 200 })
 }
