@@ -105,7 +105,8 @@ export async function POST(req: Request) {
         `💰 <b>New Subscription!</b>\n\n` +
         `👤 User: <code>${userId}</code>\n` +
         `💎 Plan: <b>${plan.toUpperCase()}</b>\n` +
-        `⚡ Credits added: <b>${credits}</b>\n` +
+        `🔢 Quantity: <b>${quantity}</b>\n` +
+        `⚡ Credits: <b>${newTotal}</b>\n` +
         `💳 Session: <code>${session.id.slice(-10)}</code>`
       );
 

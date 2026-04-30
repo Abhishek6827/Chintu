@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
@@ -90,6 +90,15 @@ export default function PricingPage() {
   const [quantity, setQuantity] = useState<number>(1);
   const minQty = 1;
   const maxQty = 10;
+
+  // If opened inside Electron, redirect to web version
+  useEffect(() => {
+    const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
+    if (isElectron) {
+      (window as any).electronAPI.openExternal("https://getchintu.com/pricing");
+      window.location.href = "/";
+    }
+  }, []);
 
   const handleSubscribe = async (plan: any) => {
     if (!user) return;

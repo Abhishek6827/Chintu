@@ -1,15 +1,88 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useUser } from "@clerk/nextjs";
 
 export default function LandingPage() {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
+  const [waitingForAuth, setWaitingForAuth] = useState(false);
+
+  const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
+  const BASE_URL = "https://getchintu.com";
+
+  const openInBrowser = (path: string) => {
+    if (isElectron) {
+      (window as any).electronAPI.openExternal(`${BASE_URL}${path}`);
+      setWaitingForAuth(true);
+    }
+  };
+
+  // Poll for auth state changes (user completes login in browser, Clerk syncs)
+  useEffect(() => {
+    if (!waitingForAuth) return;
+    if (isLoaded && isSignedIn) {
+      // User is authenticated — redirect to setup
+      window.location.href = "/setup";
+    }
+  }, [waitingForAuth, isLoaded, isSignedIn]);
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-gray-900 selection:bg-indigo-100 flex flex-col overflow-y-auto" style={{ WebkitAppRegion: 'drag' } as any}>
+      
+      {/* ─── Waiting For Auth Overlay ─── */}
+      {waitingForAuth && (
+        <div className="fixed inset-0 z-[200] bg-[#f8f9fa] flex flex-col items-center justify-center" style={{ WebkitAppRegion: 'drag' } as any}>
+          {/* Animated Rings */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center opacity-20">
+            <div className="w-[500px] h-[500px] border border-indigo-200 rounded-full animate-[ping_4s_cubic-bezier(0,0,0.2,1)_infinite]" />
+            <div className="absolute w-[350px] h-[350px] border border-indigo-300 rounded-full animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite_0.5s]" />
+            <div className="absolute w-[200px] h-[200px] border border-indigo-400 rounded-full animate-[ping_2.5s_cubic-bezier(0,0,0.2,1)_infinite_1s]" />
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center" style={{ WebkitAppRegion: 'no-drag' } as any}>
+            {/* Animated Logo */}
+            <div className="relative w-24 h-24 mb-8">
+              <div className="absolute inset-0 bg-indigo-500 blur-2xl opacity-20 animate-pulse rounded-full" />
+              <Image src="/icon.png" alt="Chintu" className="w-full h-full object-contain relative z-10" width={96} height={96} unoptimized />
+            </div>
+
+            {/* Spinner */}
+            <div className="relative w-16 h-16 mb-8">
+              <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse" />
+              </div>
+            </div>
+
+            {/* Status Badge */}
+            <div className="inline-flex items-center gap-2 bg-white py-2 px-4 rounded-full border border-gray-200 shadow-lg mb-4">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-[10px] font-black text-gray-900 uppercase tracking-widest">
+                Waiting for Authentication
+              </p>
+            </div>
+
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-8 text-center max-w-xs leading-relaxed">
+              Complete sign-in in your browser.<br />
+              This screen will update automatically.
+            </p>
+
+            {/* Back Button */}
+            <button
+              onClick={() => setWaitingForAuth(false)}
+              className="flex items-center gap-2 px-6 py-3 rounded-2xl border border-gray-200 bg-white text-gray-400 hover:text-gray-900 hover:border-gray-400 transition-all text-[10px] font-black uppercase tracking-widest shadow-sm"
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+              Go Back
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full relative z-[60]">
         <div className="flex items-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
@@ -21,12 +94,25 @@ export default function LandingPage() {
         <div className="flex items-center gap-6" style={{ WebkitAppRegion: 'no-drag' } as any}>
           {!isSignedIn ? (
             <>
-              <Link href="/sign-in" className="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
-                Login
-              </Link>
-              <Link href="/sign-up" className="bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95">
-                Get Started
-              </Link>
+              {isElectron ? (
+                <>
+                  <button onClick={() => openInBrowser("/sign-in")} className="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
+                    Login
+                  </button>
+                  <button onClick={() => openInBrowser("/sign-up")} className="bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95">
+                    Get Started
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/sign-in" className="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
+                    Login
+                  </Link>
+                  <Link href="/sign-up" className="bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95">
+                    Get Started
+                  </Link>
+                </>
+              )}
             </>
           ) : (
             <Link href="/setup" className="bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95">
@@ -53,12 +139,25 @@ export default function LandingPage() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-300">
-          <Link href="/sign-up" className="px-10 py-5 bg-indigo-600 text-white font-black uppercase tracking-[0.25em] text-xs rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all">
-            Join the Revolution →
-          </Link>
-          <Link href="/pricing" className="px-10 py-5 bg-white border border-gray-200 text-gray-400 font-black uppercase tracking-[0.25em] text-xs rounded-2xl hover:border-gray-900 hover:text-gray-900 transition-all">
-            View Plans
-          </Link>
+          {isElectron ? (
+            <>
+              <button onClick={() => openInBrowser("/sign-up")} className="px-10 py-5 bg-indigo-600 text-white font-black uppercase tracking-[0.25em] text-xs rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all">
+                Join the Revolution →
+              </button>
+              <button onClick={() => openInBrowser("/pricing")} className="px-10 py-5 bg-white border border-gray-200 text-gray-400 font-black uppercase tracking-[0.25em] text-xs rounded-2xl hover:border-gray-900 hover:text-gray-900 transition-all">
+                View Plans
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/sign-up" className="px-10 py-5 bg-indigo-600 text-white font-black uppercase tracking-[0.25em] text-xs rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all">
+                Join the Revolution →
+              </Link>
+              <Link href="/pricing" className="px-10 py-5 bg-white border border-gray-200 text-gray-400 font-black uppercase tracking-[0.25em] text-xs rounded-2xl hover:border-gray-900 hover:text-gray-900 transition-all">
+                View Plans
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Feature Cards Preview */}

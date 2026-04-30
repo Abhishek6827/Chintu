@@ -259,8 +259,8 @@ function createWindow() {
     }
   });
 
-  // ─── External Auth Popup Handler ────────────────────────
-  // Intercept any navigation that leaves the app's origin
+  // ─── External Navigation Handler ────────────────────────
+  // ALL external URLs open in the system browser — no popups
   mainWindow.webContents.on('will-navigate', (event, url) => {
     const isAppUrl = url.startsWith("http://localhost") || url.startsWith("http://127.0.0.1") || url.startsWith(VERCEL_URL);
     
@@ -268,69 +268,18 @@ function createWindow() {
 
     if (!isAppUrl) {
       event.preventDefault();
-      
-      // If it's a Stripe checkout or billing URL, open it in the system browser
-      if (url.includes("checkout.stripe.com") || url.includes("billing.stripe.com")) {
-        console.log(`[Main] Stripe URL detected. Opening in system browser: ${url}`);
-        require('electron').shell.openExternal(url);
-        return;
-      }
-
-      console.log(`[Main] External navigation detected. Opening popup for: ${url}`);
-      
-      const authWindow = new BrowserWindow({
-        width: 500,
-        height: 750,
-        parent: mainWindow,
-        modal: true,
-        show: true,
-        webPreferences: {
-          nodeIntegration: false,
-          contextIsolation: true
-        }
-      });
-      
-      authWindow.setMenu(null); // Remove File/Edit/View menu
-      authWindow.loadURL(url);
-      
-      const handleRedirect = (ev, newUrl) => {
-        // Normalize URL for comparison
-        const normalizedUrl = newUrl.split('?')[0].split('#')[0];
-        const isBackInApp = normalizedUrl.startsWith("http://localhost") || 
-                           normalizedUrl.startsWith("http://127.0.0.1") || 
-                           normalizedUrl.startsWith(VERCEL_URL);
-        
-        console.log(`[Popup] Navigation to: ${normalizedUrl} (isBackInApp: ${isBackInApp})`);
-        
-        if (isBackInApp) {
-          console.log(`[Popup] Auth success/callback detected. Syncing main window and closing popup...`);
-          // Tell main window to go to the successful auth URL
-          mainWindow.loadURL(newUrl);
-          
-          // Small delay to ensure main window starts loading before closing popup
-          setTimeout(() => {
-            if (!authWindow.isDestroyed()) {
-              authWindow.destroy();
-            }
-          }, 500);
-        }
-      };
-
-      authWindow.webContents.on('did-navigate', handleRedirect);
-      authWindow.webContents.on('will-navigate', handleRedirect);
-      authWindow.webContents.on('did-navigate-in-page', handleRedirect);
+      console.log(`[Main] Opening in system browser: ${url}`);
+      require('electron').shell.openExternal(url);
     }
   });
 
-  // Also handle window.open calls
+  // Also handle window.open calls — everything external goes to system browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     console.log(`[Main] window.open requested for: ${url}`);
     const isAppUrl = url.startsWith("http://localhost") || url.startsWith("http://127.0.0.1") || url.startsWith(VERCEL_URL);
     
     if (isAppUrl) return { action: 'allow' };
     
-    // Open external links in system browser, but keep auth in popup if needed?
-    // For now, let's just open in system browser for safety
     require('electron').shell.openExternal(url);
     return { action: 'deny' };
   });
@@ -458,6 +407,11 @@ ipcMain.on("check-for-updates", () => {
 ipcMain.on("renderer-log", (event, { msg, level }) => {
   if (log[level]) log[level](`[Renderer] ${msg}`);
   else log.info(`[Renderer] ${msg}`);
+});
+
+ipcMain.on("open-external", (event, url) => {
+  console.log(`[Main] IPC open-external: ${url}`);
+  require('electron').shell.openExternal(url);
 });
 
 // ─── App lifecycle ────────────────────────────────────────
