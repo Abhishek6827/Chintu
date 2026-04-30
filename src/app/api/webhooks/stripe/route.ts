@@ -6,15 +6,15 @@ import { createAdminClient } from "@/utils/supabase/server";
 import { Resend } from "resend";
 import { getPaymentEmailHtml } from "@/utils/email-templates";
 
-const PRICE_ID_MAP: Record<string, { plan: string; credits: number }> = {
+const PRICE_ID_MAP: Record<string, { plan: string; credits: number; price: string }> = {
   // Pro Monthly
-  "price_1TRu3pLYcsTnVrvkVfZIjTLC": { plan: "pro", credits: 200 },
+  "price_1TRu3pLYcsTnVrvkVfZIjTLC": { plan: "pro", credits: 200, price: "$9/mo" },
   // Pro Annual
-  "price_1TRu4ILYcsTnVrvkcfBbwSBr": { plan: "pro", credits: 2400 }, // 200 * 12
+  "price_1TRu4ILYcsTnVrvkcfBbwSBr": { plan: "pro", credits: 2400, price: "$89/yr" }, // 200 * 12
   // Elite Monthly
-  "price_1TRu4jLYcsTnVrvkJ7gkHA91": { plan: "elite", credits: 1000 },
+  "price_1TRu4jLYcsTnVrvkJ7gkHA91": { plan: "elite", credits: 1000, price: "$29/mo" },
   // Elite Annual
-  "price_1TRu5ALYcsTnVrvk3dMorbBe": { plan: "elite", credits: 12000 }, // 1000 * 12
+  "price_1TRu5ALYcsTnVrvk3dMorbBe": { plan: "elite", credits: 12000, price: "$279/yr" }, // 1000 * 12
 };
 
 async function sendTelegramAlert(message: string) {
@@ -36,6 +36,15 @@ async function sendTelegramAlert(message: string) {
   } catch (err) {
     console.error("[Stripe Webhook] Telegram alert failed:", err);
   }
+}
+
+function formatEventTime(): string {
+  const now = new Date();
+  return now.toLocaleString('en-IN', { 
+    timeZone: 'Asia/Kolkata', 
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
+  });
 }
 
 export async function POST(req: Request) {
@@ -77,11 +86,22 @@ export async function POST(req: Request) {
       console.error(`[Stripe Webhook] Unknown or missing Price ID: ${priceId}`);
       // Fallback or handle error
     } else {
-      const { plan, credits } = PRICE_ID_MAP[priceId];
+      const { plan, credits, price } = PRICE_ID_MAP[priceId];
       const quantity = lineItems.data[0]?.quantity || 1;
       const newTotal = credits * quantity;
 
       console.log(`[Stripe Webhook] Updating user ${userId} to plan ${plan} with ${newTotal} credits (Qty: ${quantity})`);
+
+      // Fetch user's current plan before updating (for old plan info)
+      const { data: currentProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("plan, email")
+        .eq("id", userId)
+        .maybeSingle();
+      const oldPlan = currentProfile?.plan || "free";
+
+      // Get customer name from Stripe
+      const customerName = session.customer_details?.name || session.customer_details?.email || "Unknown";
 
       // Update Supabase Profile
       const { error } = await supabaseAdmin
@@ -101,11 +121,14 @@ export async function POST(req: Request) {
       }
 
       // ─── Send Telegram Alert ─────────────────────────────
+      const eventTime = formatEventTime();
       await sendTelegramAlert(
         `💰 <b>New Subscription!</b>\n\n` +
-        `👤 User: <code>${userId}</code>\n` +
-        `💎 Plan: <b>${plan.toUpperCase()}</b>\n` +
-        `🔢 Quantity: <b>${quantity}</b>\n` +
+        `👤 Name: <b>${customerName}</b>\n` +
+        `📧 Email: <code>${session.customer_details?.email || currentProfile?.email || "N/A"}</code>\n` +
+        `📅 Date: <code>${eventTime}</code>\n` +
+        `💎 Plan: <b>${oldPlan.toUpperCase()}</b> → <b>${plan.toUpperCase()}</b>\n` +
+        `💲 Price: <b>${price}</b> × ${quantity}\n` +
         `⚡ Credits: <b>${newTotal}</b>\n` +
         `💳 Session: <code>${session.id.slice(-10)}</code>`
       );
@@ -149,12 +172,19 @@ export async function POST(req: Request) {
             .update({ credits: monthlyCredits, updated_at: new Date().toISOString() })
             .eq("id", profile.id);
 
+          // Get customer name from invoice
+          const invoiceCustomerName = invoice.customer_name || invoice.customer_email || profile.email || "Unknown";
+          const eventTime = formatEventTime();
+
           // ─── Send Telegram Alert ─────────────────────────────
           await sendTelegramAlert(
             `🔄 <b>Subscription Renewed</b>\n\n` +
-            `👤 User: <code>${profile.id}</code>\n` +
+            `👤 Name: <b>${invoiceCustomerName}</b>\n` +
+            `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
+            `📅 Date: <code>${eventTime}</code>\n` +
             `💎 Plan: <b>${planInfo.plan.toUpperCase()}</b>\n` +
-            `⚡ Credits reset: <b>${monthlyCredits}</b>`
+            `💲 Price: <b>${planInfo.price}</b> × ${quantity}\n` +
+            `⚡ Credits Reset: <b>${monthlyCredits}</b>`
           );
 
           // ─── Send Premium Email ─────────────────────────────
@@ -193,7 +223,8 @@ export async function POST(req: Request) {
           .maybeSingle();
 
         if (profile) {
-          console.log(`[Stripe Webhook] Subscription Updated for user ${profile.id}: Plan ${planInfo.plan}, Qty ${quantity}`);
+          const oldPlan = profile.plan || "free";
+          console.log(`[Stripe Webhook] Subscription Updated for user ${profile.id}: ${oldPlan} → ${planInfo.plan}, Qty ${quantity}`);
           
           // Update Supabase
           await supabaseAdmin
@@ -205,12 +236,26 @@ export async function POST(req: Request) {
             })
             .eq("id", profile.id);
 
+          // Get customer name from Stripe
+          let customerName = profile.email || "Unknown";
+          try {
+            const stripeCustomer = await stripe.customers.retrieve(subscription.customer as string);
+            if (stripeCustomer && !stripeCustomer.deleted && (stripeCustomer as Stripe.Customer).name) {
+              customerName = (stripeCustomer as Stripe.Customer).name!;
+            }
+          } catch {} 
+
+          const eventTime = formatEventTime();
+
           // Telegram Alert
           await sendTelegramAlert(
-            `📈 <b>Plan Changed/Updated via Portal</b>\n\n` +
-            `👤 User: <code>${profile.id}</code>\n` +
+            `📈 <b>Plan Changed</b>\n\n` +
+            `👤 Name: <b>${customerName}</b>\n` +
+            `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
+            `📅 Date: <code>${eventTime}</code>\n` +
+            `💎 Old Plan: <b>${oldPlan.toUpperCase()}</b>\n` +
             `💎 New Plan: <b>${planInfo.plan.toUpperCase()}</b>\n` +
-            `🔢 Quantity: <b>${quantity}</b>\n` +
+            `💲 Price: <b>${planInfo.price}</b> × ${quantity}\n` +
             `⚡ New Credits: <b>${newCredits}</b>`
           );
           
@@ -234,11 +279,12 @@ export async function POST(req: Request) {
     
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("id, email")
+      .select("id, email, plan")
       .eq("stripe_subscription_id", subscription.id)
       .maybeSingle();
 
     if (profile) {
+      const oldPlan = profile.plan || "unknown";
       console.log(`[Stripe Webhook] Subscription Cancelled for user ${profile.id}`);
       
       await supabaseAdmin
@@ -251,10 +297,25 @@ export async function POST(req: Request) {
         })
         .eq("id", profile.id);
 
+      // Get customer name from Stripe
+      let customerName = profile.email || "Unknown";
+      try {
+        const stripeCustomer = await stripe.customers.retrieve(subscription.customer as string);
+        if (stripeCustomer && !stripeCustomer.deleted && (stripeCustomer as Stripe.Customer).name) {
+          customerName = (stripeCustomer as Stripe.Customer).name!;
+        }
+      } catch {}
+
+      const eventTime = formatEventTime();
+
       await sendTelegramAlert(
         `❌ <b>Subscription Cancelled</b>\n\n` +
-        `👤 User: <code>${profile.id}</code>\n` +
-        `📉 Plan downgraded to FREE`
+        `👤 Name: <b>${customerName}</b>\n` +
+        `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
+        `📅 Date: <code>${eventTime}</code>\n` +
+        `💎 Old Plan: <b>${oldPlan.toUpperCase()}</b> → <b>FREE</b>\n` +
+        `💰 Credits reset to: <b>10</b>\n\n` +
+        `⚠️ <i>User downgraded to Free plan. Consider sending a re-engagement offer.</i>`
       );
     }
   }
@@ -265,11 +326,13 @@ export async function POST(req: Request) {
     
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("id")
+      .select("id, email, plan")
       .eq("stripe_customer_id", customer.id)
       .maybeSingle();
 
     if (profile) {
+      const oldPlan = profile.plan || "unknown";
+      const customerName = customer.name || customer.email || profile.email || "Unknown";
       console.log(`[Stripe Webhook] Customer Deleted for user ${profile.id}`);
       
       await supabaseAdmin
@@ -283,9 +346,14 @@ export async function POST(req: Request) {
         })
         .eq("id", profile.id);
 
+      const eventTime = formatEventTime();
+
       await sendTelegramAlert(
         `🗑️ <b>Customer Deleted</b>\n\n` +
-        `👤 User: <code>${profile.id}</code>\n` +
+        `👤 Name: <b>${customerName}</b>\n` +
+        `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
+        `📅 Date: <code>${eventTime}</code>\n` +
+        `💎 Plan was: <b>${oldPlan.toUpperCase()}</b> → <b>FREE</b>\n` +
         `⚠️ Stripe records wiped and downgraded to FREE.`
       );
     }

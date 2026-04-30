@@ -86,34 +86,21 @@ export default function SetupPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rawText: aboutMe.trim() }),
-          keepalive: true, // Ensures the browser attempts to finish sending the request even if page unloads
-        }).then(res => {
-          if (!res.ok) {
-            console.error("Profile refine API returned:", res.status);
-            // Fallback save raw profile if AI fails
-            fetch("/api/profile", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ raw_profile: aboutMe.trim() })
-            });
-          }
-        }).catch(err => {
-          console.error("Profile refinement failed:", err);
-          fetch("/api/profile", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ raw_profile: aboutMe.trim() })
-          });
+          keepalive: true,
         }).finally(() => {
           localStorage.removeItem("chintu_profile_refining");
           window.dispatchEvent(new Event("chintu_profile_refining"));
         });
         
-        // Let the state reflect that we are running the refinement, so they see the skip button
+        // Navigate IMMEDIATELY to room
+        setStatusText("🎯 Finalizing workspace...");
+        window.location.href = "/room?jd=" + encodeURIComponent(jd.trim());
       } catch (err) {
         console.error("Failed to start refinement:", err);
         localStorage.removeItem("chintu_profile_refining");
         window.dispatchEvent(new Event("chintu_profile_refining"));
+        // Even if refine start fails, try to go to room
+        window.location.href = "/room?jd=" + encodeURIComponent(jd.trim());
       }
     } else {
       // Direct navigation if no profile to refine
@@ -296,6 +283,19 @@ export default function SetupPage() {
           <p className="text-[10px] text-gray-400 font-black tracking-[0.3em] uppercase text-center max-w-xs leading-relaxed opacity-60">
             {isInitiating ? "Initializing Ghost Interface" : "Calibrating Neural Synthesis"}
           </p>
+          {/* Skip Button — navigate immediately, refining continues in background */}
+          {isRefining && jd.trim() && (
+            <button
+              onClick={() => {
+                // Profile refine fetch is already fire-and-forget, just navigate
+                window.location.href = "/room?jd=" + encodeURIComponent(jd.trim());
+              }}
+              className="mt-8 px-8 py-3.5 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all active:scale-95 shadow-sm flex flex-col items-center gap-1"
+            >
+              <span>Skip & Start Interview</span>
+              <span className="text-[8px] font-medium text-indigo-400 tracking-normal normal-case">Profile will refine in background</span>
+            </button>
+          )}
         </div>
       )}
     </div>
