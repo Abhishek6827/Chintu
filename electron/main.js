@@ -35,8 +35,19 @@ let isHidden = false;
 let serverPort = null;
 let userOpacity = 1;
 
-// ─── Production Vercel URL ───────────────────────────────
+// ─── Production Vercel URLs (with and without www) ───────
 const VERCEL_URL = "https://getchintu.com";
+const VERCEL_URL_WWW = "https://www.getchintu.com";
+
+// ─── Helper: Check if a URL belongs to this app ───────────
+function isAppUrl(url) {
+  return (
+    url.startsWith("http://localhost") ||
+    url.startsWith("http://127.0.0.1") ||
+    url.startsWith(VERCEL_URL) ||
+    url.startsWith(VERCEL_URL_WWW)
+  );
+}
 
 // ─── Determine runtime mode ───────────────────────────────
 const isPreview = process.argv.includes("--preview");
@@ -160,10 +171,10 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
       contextIsolation: true,
+      nativeWindowOpen: false,  // Force all window.open() through setWindowOpenHandler
     },
     title: "Chintu",
     icon: path.join(__dirname, "icon.png"),
-
   });
 
   mainWindow.once("ready-to-show", () => {
@@ -260,28 +271,47 @@ function createWindow() {
   });
 
   // ─── External Navigation Handler ────────────────────────
-  // ALL external URLs open in the system browser — no popups
-  mainWindow.webContents.on('will-navigate', (event, url) => {
-    const isAppUrl = url.startsWith("http://localhost") || url.startsWith("http://127.0.0.1") || url.startsWith(VERCEL_URL);
-    
-    console.log(`[Main] Will navigate to: ${url} (isAppUrl: ${isAppUrl})`);
+  // ALL external URLs open in the system browser — no popups EVER
 
-    if (!isAppUrl) {
+  // Layer 1: Intercept same-window navigation
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    const appUrl = isAppUrl(url);
+    console.log(`[Nav] will-navigate → ${url} | isApp: ${appUrl}`);
+    if (!appUrl) {
       event.preventDefault();
-      console.log(`[Main] Opening in system browser: ${url}`);
       require('electron').shell.openExternal(url);
     }
   });
 
-  // Also handle window.open calls — everything external goes to system browser
+  // Layer 2: setWindowOpenHandler — fires before any new window is created
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    console.log(`[Main] window.open requested for: ${url}`);
-    const isAppUrl = url.startsWith("http://localhost") || url.startsWith("http://127.0.0.1") || url.startsWith(VERCEL_URL);
-    
-    if (isAppUrl) return { action: 'allow' };
-    
+    console.log(`[Nav] setWindowOpenHandler → ${url}`);
+    if (isAppUrl(url)) return { action: 'allow' };
+    // Send to system browser and DENY the popup
     require('electron').shell.openExternal(url);
     return { action: 'deny' };
+  });
+
+  // Layer 3: did-create-window — nuclear fallback for windows that slip through
+  mainWindow.webContents.on('did-create-window', (childWindow, details) => {
+    const url = details.url || '';
+    console.log(`[Nav] did-create-window spawned: ${url} — destroying and redirecting to browser`);
+    try {
+      childWindow.webContents.stop();
+      childWindow.destroy();
+    } catch (e) {
+      console.error('[Nav] Error destroying child window:', e);
+    }
+    if (url && url !== 'about:blank' && !isAppUrl(url)) {
+      require('electron').shell.openExternal(url);
+    } else if (!url || url === 'about:blank') {
+      // Blank popup — watch what it navigates to
+      childWindow.webContents.on('will-navigate', (ev, navUrl) => {
+        ev.preventDefault();
+        if (!isAppUrl(navUrl)) require('electron').shell.openExternal(navUrl);
+        try { childWindow.destroy(); } catch {}
+      });
+    }
   });
 }
 
@@ -393,6 +423,7 @@ ipcMain.handle("get-app-version", () => app.getVersion());
 
 // ─── Restart for update ───────────────────────────────────
 ipcMain.on("restart-for-update", () => {
+  app.isQuitting = true;
   autoUpdater.quitAndInstall(false, true);
 });
 
@@ -571,24 +602,6 @@ function setupAutoUpdater() {
     if (mainWindow) {
       mainWindow.webContents.send("update-status", { status: "ready", version: info.version });
     }
-    
-    // Instead of an immediate blocking dialog, we show it after a tiny delay
-    // to let the UI finish any current animations.
-    setTimeout(() => {
-      dialog.showMessageBox(mainWindow, {
-        type: "question",
-        title: "Update Available",
-        message: `Version ${info.version} is ready. Would you like to restart and install now?`,
-        buttons: ["Restart Now", "Later"],
-        defaultId: 0,
-        cancelId: 1
-      }).then((result) => {
-        if (result.response === 0) {
-          app.isQuitting = true; // Prevent the 'close' event from hiding the window
-          autoUpdater.quitAndInstall(false, true);
-        }
-      });
-    }, 1000);
   });
 
   autoUpdater.on("update-not-available", (info) => {
