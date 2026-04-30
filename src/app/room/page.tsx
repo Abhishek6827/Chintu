@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Mic, Sun, Moon } from "lucide-react";
+import { Mic, Sun, Moon, Shield, Crown, Minus, Zap } from "lucide-react";
 import { UserButton, useUser } from "@clerk/nextjs";
 
 
@@ -88,6 +88,7 @@ export default function RoomPage() {
   const [selectedModel, setSelectedModel] = useState<ModelKey>("gpt-oss-120b");
   const selectedModelRef = useRef<ModelKey>("gpt-oss-120b");
   const [userCredits, setUserCredits] = useState<number | null>(null);
+  const [userPlan, setUserPlan] = useState<string>("free");
 
   // ─── Vision conversation history ──────────────────────────
   // Keeps track of previous screenshot exchanges so the model
@@ -154,6 +155,17 @@ export default function RoomPage() {
               const cloudTheme = profile.theme === 'light';
               setIsLightMode(cloudTheme);
               localStorage.setItem("chintu_theme", cloudTheme ? "light" : "dark");
+            }
+
+            // Set Plan
+            if (profile.plan) {
+              setUserPlan(profile.plan);
+            }
+
+            // Set Profile Context
+            if (profile.profile_data && typeof profile.profile_data === 'object' && Object.keys(profile.profile_data).length > 0) {
+              setProfileContext(formatProfileContext(profile.profile_data));
+              setHasProfile(true);
             }
           }
         }
@@ -380,57 +392,8 @@ export default function RoomPage() {
     sessionStorage.setItem("jobDescription", jd);
     setJobDescription(jd);
 
-    const initProfile = async () => {
-      // 1. Try cloud
-      if (user?.id) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
-        
-        // Sync theme from cloud if it exists
-        if (data?.theme) {
-          setIsLightMode(data.theme === 'light');
-          localStorage.setItem("chintu_theme", data.theme);
-        }
-        
-        if (data?.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
-          setProfileContext(formatProfileContext(data.profile_data));
-          setHasProfile(true);
-          return;
-        }
-
-        if (data?.raw_profile) {
-          setProfileContext(data.raw_profile);
-          setHasProfile(true);
-          
-          try {
-            const res = await fetch("/api/refine-profile", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ rawText: data.raw_profile }),
-            });
-            if (res.ok) {
-              const resData = await res.json();
-              if (resData.profile && typeof resData.profile === "object") {
-                setProfileContext(formatProfileContext(resData.profile));
-                await fetch('/api/profile', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ profile_data: resData.profile })
-                });
-              }
-            }
-          } catch {}
-          return;
-        }
-      }
-      
-      setHasProfile(false);
-    };
-    initProfile();
-  }, [router, isLoaded, user?.id, supabase]);
+    // Profile and theme initialization is now handled by the consolidated initRoom call above.
+  }, [router, isLoaded, user?.id]);
 
   const refreshProfile = async () => {
     if (!user?.id) return;
@@ -1206,50 +1169,58 @@ export default function RoomPage() {
             <Image src="/icon.png" alt="" width={20} height={20} className="w-5 h-5 object-contain" />
             <span className="text-[var(--text-main)] text-sm font-bold tracking-tight">Chintu</span>
           </div>
-          {appVersion && (
-            <span className="bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] px-1.5 py-0.5 rounded text-[0.625rem] font-mono shadow-sm">
-              v{appVersion}
-            </span>
-          )}
           {userCredits !== null && (
             <div className="flex items-center gap-2">
-              <span className={`px-2 py-0.5 rounded-full text-[0.6rem] font-black uppercase tracking-wider border shadow-sm ${
+              <div className={`flex items-center gap-2 px-2.5 py-1 rounded-full border shadow-sm ${
                 userCredits > 5 
-                  ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
-                  : userCredits > 0 
-                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' 
-                    : 'bg-red-500/10 text-red-500 border-red-500/20'
+                  ? 'bg-emerald-500/5 text-emerald-500 border-emerald-500/10' 
+                  : 'bg-amber-500/5 text-amber-500 border-amber-500/10'
               }`}>
-                ⚡ {userCredits} Credits
-              </span>
+                <Zap className="w-3 h-3 fill-current" />
+                <span className="text-[10px] font-black tracking-tight">{userCredits}</span>
+                <div className="w-[1px] h-3 bg-current opacity-20 mx-0.5" />
+                <span className="text-[8px] font-black uppercase tracking-[0.1em] opacity-60">{userPlan}</span>
+              </div>
               <button 
                 onClick={() => router.push("/pricing")}
-                className="px-2 py-0.5 rounded-full bg-indigo-600/10 text-indigo-500 border border-indigo-600/20 hover:bg-indigo-600/20 transition-all text-[0.6rem] font-black uppercase tracking-wider shadow-sm cursor-pointer"
+                className="px-3 py-1 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition-all text-[8px] font-black uppercase tracking-[0.15em] shadow-lg shadow-indigo-600/20 active:scale-95"
               >
-                💎 Upgrade
+                Upgrade
               </button>
             </div>
           )}
         </div>
-        <div className="flex items-center gap-1 no-drag">
+        <div className="flex items-center gap-1.5 no-drag">
           {isScreenRecording && (
-            <div className="system-audio-badge mr-2">
-              <span className="system-audio-dot" style={{ background: "#f87171" }} />
-              <span className="text-[0.625rem] text-red-300 font-medium">REC</span>
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/10 border border-red-500/20 mr-1">
+              <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+              <span className="text-[8px] text-red-500 font-black uppercase tracking-widest">REC</span>
             </div>
           )}
           <button
-            onClick={toggleTheme}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-dim)] hover:text-[var(--text-main)] transition-all"
+            onClick={() => {
+              if (userPlan === 'free') {
+                router.push("/pricing");
+                return;
+              }
+              toggleTheme();
+            }}
+            className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+              userPlan === 'free' 
+                ? 'opacity-30 grayscale cursor-pointer hover:opacity-50' 
+                : 'text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)]'
+            }`}
+            title={userPlan === 'free' ? "Pro Feature: Theme Customization" : "Toggle Theme"}
           >
-            {isLightMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            {isLightMode ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
           </button>
           {isElectron && (
             <button 
               onClick={() => (window as any).electronAPI.minimize()} 
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-dim)] text-xs"
+              className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
+              title="Minimize"
             >
-              ─
+              <Minus className="w-3.5 h-3.5" />
             </button>
           )}
           {/* Profile / Account button */}
@@ -1497,23 +1468,28 @@ export default function RoomPage() {
           {/* Inline selectors row */}
           <div className="flex items-center gap-2 px-2 pt-2 flex-wrap">
             <CustomDropdown
-              options={MODELS}
+              options={MODELS.map(m => ({
+                ...m,
+                locked: userPlan === 'free' && m.key !== 'llama-3.3-70b'
+              }))}
               value={selectedModel}
               onChange={(val) => {
                 setSelectedModel(val as ModelKey);
                 selectedModelRef.current = val as ModelKey;
               }}
+              onLockedClick={() => router.push("/pricing")}
             />
 
             <CustomDropdown
               options={[
                 { key: "small", name: "Small" },
                 { key: "balanced", name: "Balanced" },
-                { key: "detailed", name: "Detailed" },
-                { key: "coding", name: "Coding" },
+                { key: "detailed", name: "Detailed", locked: userPlan === 'free' },
+                { key: "coding", name: "Coding", locked: userPlan === 'free' },
               ]}
               value={responseLength}
               onChange={(val) => setResponseLength(val as ResponseLength)}
+              onLockedClick={() => router.push("/pricing")}
             />
           </div>
           {/* Textarea */}
@@ -1906,8 +1882,14 @@ export default function RoomPage() {
 
     {/* Floating side controls */}
     {isElectron && (
-      <div className="floating-side-controls no-drag">
-        <div className="side-control-group">
+      <div className={`floating-side-controls no-drag relative group/side ${userPlan === 'free' ? 'cursor-pointer' : ''}`} onClick={() => { if(userPlan === 'free') router.push("/pricing"); }}>
+        {userPlan === 'free' && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-2xl opacity-0 group-hover/side:opacity-100 transition-opacity p-2 text-center">
+            <Crown className="w-4 h-4 text-amber-400 mb-1" />
+            <span className="text-[8px] font-black uppercase text-white tracking-widest leading-tight">Pro<br/>Features</span>
+          </div>
+        )}
+        <div className={`side-control-group ${userPlan === 'free' ? 'opacity-40 grayscale blur-[1px]' : ''}`}>
           <span className="side-control-label">🔍</span>
           <input
             type="range"
@@ -1916,10 +1898,11 @@ export default function RoomPage() {
             value={Math.round(windowOpacity * 100)}
             onChange={(e) => handleOpacityChange(parseInt(e.target.value) / 100)}
             className="side-slider"
+            disabled={userPlan === 'free'}
           />
           <span className="side-control-value">{Math.round(windowOpacity * 100)}</span>
         </div>
-        <div className="side-control-group">
+        <div className={`side-control-group ${userPlan === 'free' ? 'opacity-40 grayscale blur-[1px]' : ''}`}>
           <span className="side-control-label">Aa</span>
           <input
             type="range"
@@ -1928,6 +1911,7 @@ export default function RoomPage() {
             value={fontSize}
             onChange={(e) => setFontSize(parseInt(e.target.value))}
             className="side-slider"
+            disabled={userPlan === 'free'}
           />
           <span className="side-control-value">{fontSize}</span>
         </div>

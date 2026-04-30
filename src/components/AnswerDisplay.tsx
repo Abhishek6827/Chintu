@@ -249,21 +249,21 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                             },
                             table({ children }) {
                               return (
-                                <div className={`overflow-x-auto my-8 rounded-3xl border border-[var(--glass-border)] shadow-2xl ${isLightMode ? 'bg-[var(--glass-bg)]' : 'bg-black/20'}`}>
-                                  <table className="min-w-full text-left border-collapse text-[13px]">
+                                <div className={`overflow-x-auto my-8 rounded-[2rem] border border-[var(--glass-border)] shadow-xl ${isLightMode ? 'bg-white' : 'bg-black/20'}`}>
+                                  <table className="w-full text-left border-collapse min-w-[500px]">
                                     {children}
                                   </table>
                                 </div>
                               );
                             },
                             thead({ children }) {
-                              return <thead className="bg-[var(--glass-bg)] text-indigo-400 font-black uppercase tracking-widest border-b border-[var(--glass-border)]">{children}</thead>;
+                              return <thead className={`${isLightMode ? 'bg-indigo-50/50 text-indigo-700' : 'bg-[var(--glass-bg)] text-indigo-400'} font-black uppercase tracking-widest border-b border-[var(--glass-border)] text-[10px]`}>{children}</thead>;
                             },
                             th({ children }) {
-                              return <th className="px-6 py-4">{children}</th>;
+                              return <th className="px-6 py-4 font-black">{children}</th>;
                             },
                             td({ children }) {
-                              return <td className="px-6 py-4 text-[var(--text-dim)] border-b border-[var(--glass-border)] opacity-80">{children}</td>;
+                              return <td className={`px-6 py-4 text-sm border-b border-[var(--glass-border)] transition-colors ${isLightMode ? 'text-gray-700 font-medium' : 'text-[var(--text-dim)] opacity-90'}`}>{children}</td>;
                             },
                           }}
                         >

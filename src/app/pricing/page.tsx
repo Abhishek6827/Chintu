@@ -1,235 +1,262 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Check, Sparkles, Zap, Shield, Crown, ArrowRight, Info, Minus } from "lucide-react";
 
 const PLANS = [
   {
     id: "free",
-    name: "Free",
-    price: "$0",
+    name: "Starter",
+    description: "Explore Chintu's capabilities",
+    monthlyPrice: 0,
+    annualPrice: 0,
     period: "forever",
     credits: 10,
     badge: "🌱",
     color: "emerald",
     features: [
       "10 Credits (one-time)",
-      "Voice & Text Responses",
-      "Screenshot Analysis (2 credits each)",
-      "5 Session History",
-      "Basic AI Models",
+      "Llama 3.3 Model only",
+      "Basic Response Types",
+      "Standard History",
       "Community Support",
+    ],
+    locked: [
+      "Advanced AI Models",
+      "Coding & Detailed Modes",
+      "Custom Themes & UI",
     ],
     cta: "Current Plan",
     disabled: true,
   },
   {
     id: "pro",
-    name: "Pro",
-    price: "$9",
+    name: "Professional",
+    description: "Best for active interviewees",
+    monthlyPrice: 9,
+    annualPrice: 89,
     period: "/month",
     credits: 200,
     badge: "⚡",
     color: "indigo",
     popular: true,
+    stripePriceId: "STRIPE_PRO_PRICE_ID",
+    annualStripePriceId: "STRIPE_PRO_ANNUAL_PRICE_ID",
     features: [
       "200 Credits / month",
       "All AI Models Unlocked",
-      "Unlimited Screenshot Analysis",
-      "50 Session History",
-      "Priority Response Speed",
-      "Profile Customization",
+      "All Response Types",
+      "UI Customization",
+      "Priority Speed",
       "Email Support",
     ],
     cta: "Upgrade to Pro",
-    stripePriceId: "STRIPE_PRO_PRICE_ID",
   },
   {
     id: "elite",
     name: "Elite",
-    price: "$29",
+    description: "Unrestricted career growth",
+    monthlyPrice: 29,
+    annualPrice: 279,
     period: "/month",
     credits: 1000,
     badge: "👑",
     color: "amber",
+    stripePriceId: "STRIPE_ELITE_PRICE_ID",
+    annualStripePriceId: "STRIPE_ELITE_ANNUAL_PRICE_ID",
     features: [
       "1000 Credits / month",
       "All Pro Features",
-      "Unlimited Session History",
-      "Custom AI Fine-Tuning",
-      "Advanced Analytics",
-      "Priority Queue",
-      "Dedicated Support Channel",
-      "Early Access to New Features",
+      "Dedicated Support",
+      "AI Fine-Tuning",
+      "Early Access",
+      "Unlimited History",
     ],
     cta: "Go Elite",
-    stripePriceId: "STRIPE_ELITE_PRICE_ID",
   },
 ];
 
 export default function PricingPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
   const [loading, setLoading] = useState<string | null>(null);
 
-  const handleSubscribe = async (planId: string, stripePriceId?: string) => {
-    if (!user || !stripePriceId) return;
-    setLoading(planId);
+  const handleSubscribe = async (plan: any) => {
+    if (!user) return;
+    const priceId = billingCycle === "monthly" ? plan.stripePriceId : plan.annualStripePriceId;
+    if (!priceId || priceId.includes("STRIPE")) {
+      alert("Please configure real Stripe Price IDs.");
+      return;
+    }
 
+    setLoading(plan.id);
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId: stripePriceId }),
+        body: JSON.stringify({ priceId }),
       });
 
       if (res.ok) {
         const { url } = await res.json();
         if (url) window.location.href = url;
       } else {
-        alert("Failed to create checkout session. Please try again.");
+        const error = await res.json();
+        alert(error.error || "Failed to create checkout session.");
       }
     } catch {
-      alert("Something went wrong. Please try again.");
+      alert("Something went wrong.");
     } finally {
       setLoading(null);
     }
   };
 
-  if (!isLoaded) return <div className="min-h-screen bg-[#f8f9fa]" />;
+  const handleMinimize = () => {
+    if (typeof window !== "undefined" && (window as any).electronAPI?.minimize) {
+      (window as any).electronAPI.minimize();
+    }
+  };
+
+  if (!isLoaded) return <div className="h-screen bg-[#f8f9fa] flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] text-gray-900 overflow-y-auto" style={{ WebkitAppRegion: 'drag' } as any}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
-        <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-900 transition-all text-sm font-bold">
-          ← Back
-        </button>
-        <div className="flex items-center gap-2">
-          <Image src="/icon.png" alt="" width={20} height={20} className="w-5 h-5" />
-          <span className="text-sm font-black tracking-tight">Chintu</span>
+    <div className="h-screen bg-[#f8f9fa] text-gray-900 overflow-hidden flex flex-col">
+      {/* Draggable Header */}
+      <div className="flex items-center justify-between px-4 sm:px-8 py-4 sm:py-6 sticky top-0 bg-[#f8f9fa]/90 backdrop-blur-md z-50 border-b border-gray-100 shrink-0 select-none" style={{ WebkitAppRegion: 'drag' } as any}>
+        <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
+           <button onClick={() => router.back()} className="group flex items-center gap-2 text-gray-400 hover:text-gray-900 transition-all text-[10px] font-black uppercase tracking-widest">
+            <ArrowRight className="w-3.5 h-3.5 rotate-180" /> Back
+          </button>
         </div>
-        <div className="w-12" />
+        
+        <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
+          <Image src="/icon.png" alt="" width={20} height={20} className="w-5 h-5" />
+          <span className="text-base font-black tracking-tighter">Chintu <span className="text-indigo-600">SaaS</span></span>
+        </div>
+
+        <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          <button 
+            onClick={handleMinimize}
+            className="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-900 transition-all active:scale-90"
+            title="Minimize"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* Title */}
-      <div className="text-center px-6 pt-4 pb-8">
-        <h1 className="text-3xl font-black tracking-tight mb-2">Choose Your Plan</h1>
-        <p className="text-gray-400 text-sm font-medium max-w-md mx-auto">
-          Unlock the full power of AI-assisted interviews. Upgrade anytime.
-        </p>
-      </div>
+      <div className="flex-1 pb-20 overflow-y-auto overflow-x-hidden selection:bg-indigo-100" style={{ WebkitAppRegion: 'no-drag' } as any}>
+        {/* Title & Billing Toggle */}
+        <div className="text-center px-4 pt-10 pb-10">
+          <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-6 border border-indigo-100">
+            <Sparkles className="w-3 h-3 animate-pulse" /> Launch Offer
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tighter mb-4 text-gray-900 leading-none">Elevate Your Career.</h1>
+          <p className="text-gray-400 text-sm sm:text-lg font-medium max-w-sm mx-auto mb-10 leading-snug">
+            Choose a plan that fits your ambition. Unlock advanced AI.
+          </p>
 
-      {/* Plan Cards */}
-      <div className="px-6 pb-16 max-w-5xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Toggle Switch */}
+          <div className="flex items-center justify-center gap-4">
+            <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${billingCycle === "monthly" ? "text-gray-900" : "text-gray-400"}`}>Monthly</span>
+            <button 
+              onClick={() => setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")}
+              className="w-12 h-6 bg-gray-200 rounded-full relative p-1 transition-colors"
+            >
+              <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300 transform ${billingCycle === "annual" ? "translate-x-6 bg-indigo-600" : "translate-x-0"}`} />
+            </button>
+            <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${billingCycle === "annual" ? "text-gray-900" : "text-gray-400"}`}>
+              Annual <span className="text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded ml-1 border border-emerald-100">SAVE 20%</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Plans Grid */}
+        <div className="px-4 sm:px-8 max-w-6xl mx-auto flex flex-col gap-8">
           {PLANS.map((plan) => (
             <div
               key={plan.id}
-              className={`relative bg-white rounded-3xl border ${
+              className={`group relative flex flex-col bg-white rounded-[2.5rem] border-2 transition-all duration-300 ${
                 plan.popular 
-                  ? "border-indigo-200 shadow-2xl shadow-indigo-500/10 scale-[1.02]" 
-                  : "border-gray-200 shadow-lg"
-              } p-6 flex flex-col transition-all hover:shadow-xl`}
-              style={{ WebkitAppRegion: 'no-drag' } as any}
+                  ? "border-indigo-600 shadow-2xl shadow-indigo-500/10" 
+                  : "border-gray-100 shadow-lg shadow-gray-200/50"
+              } p-6 sm:p-10`}
             >
-              {/* Popular Badge */}
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-full shadow-lg shadow-indigo-500/30">
-                    Most Popular
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-full">
+                    Most Preferred
                   </span>
                 </div>
               )}
 
-              {/* Plan Header */}
-              <div className="text-center mb-6">
-                <span className="text-3xl mb-2 block">{plan.badge}</span>
-                <h2 className="text-xl font-black uppercase tracking-tight mb-1">{plan.name}</h2>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-black">{plan.price}</span>
-                  <span className="text-gray-400 text-sm font-bold">{plan.period}</span>
+              <div className="mb-6 flex items-start justify-between">
+                <div>
+                  <span className="text-4xl mb-2 block">{plan.badge}</span>
+                  <h3 className="text-xl font-black text-gray-900">{plan.name}</h3>
+                  <p className="text-gray-400 text-[10px] font-bold">{plan.description}</p>
                 </div>
-                <p className={`text-xs font-bold mt-2 px-3 py-1 rounded-full inline-block ${
-                  plan.color === "emerald" ? "bg-emerald-50 text-emerald-600" :
-                  plan.color === "indigo" ? "bg-indigo-50 text-indigo-600" :
-                  "bg-amber-50 text-amber-600"
-                }`}>
-                  {plan.credits} Credits{plan.id !== "free" ? " / month" : ""}
-                </p>
+                <div className="text-right">
+                  <div className="flex items-baseline justify-end gap-0.5">
+                    <span className="text-4xl font-black text-gray-900 tracking-tighter">
+                      ${billingCycle === "monthly" ? plan.monthlyPrice : Math.floor(plan.annualPrice / 12)}
+                    </span>
+                    <span className="text-gray-400 text-[10px] font-black uppercase">{plan.period}</span>
+                  </div>
+                  {billingCycle === "annual" && plan.annualPrice > 0 && (
+                    <p className="text-emerald-500 text-[8px] font-black uppercase">Billed annually (${plan.annualPrice})</p>
+                  )}
+                </div>
               </div>
 
-              {/* Features */}
-              <ul className="space-y-3 flex-1 mb-6">
+              <ul className="space-y-3 mb-8 flex-1">
                 {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm">
-                    <span className={`mt-0.5 text-xs ${
-                      plan.color === "emerald" ? "text-emerald-500" :
-                      plan.color === "indigo" ? "text-indigo-500" :
-                      "text-amber-500"
-                    }`}>✓</span>
-                    <span className="text-gray-600 font-medium">{feature}</span>
+                  <li key={i} className="flex items-start gap-2.5 text-xs font-bold text-gray-700">
+                    <Check className={`w-3.5 h-3.5 mt-0.5 ${plan.color === 'emerald' ? 'text-emerald-500' : plan.color === 'indigo' ? 'text-indigo-500' : 'text-amber-500'}`} />
+                    {feature}
+                  </li>
+                ))}
+                {plan.locked && plan.locked.map((feature, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-xs font-bold text-gray-300">
+                    <Shield className="w-3.5 h-3.5 mt-0.5" />
+                    {feature}
                   </li>
                 ))}
               </ul>
 
-              {/* CTA Button */}
               <button
-                onClick={() => handleSubscribe(plan.id, plan.stripePriceId)}
+                onClick={() => handleSubscribe(plan)}
                 disabled={plan.disabled || loading === plan.id}
-                className={`w-full py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
+                className={`w-full py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${
                   plan.disabled
-                    ? "bg-gray-100 text-gray-400 cursor-default border border-gray-200"
+                    ? "bg-gray-100 text-gray-400 border border-gray-200"
                     : plan.popular
-                      ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95"
-                      : "bg-gray-900 text-white hover:bg-gray-800 active:scale-95"
+                      ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30"
+                      : "bg-gray-900 text-white"
                 }`}
               >
-                {loading === plan.id ? "Processing..." : plan.cta}
+                {loading === plan.id ? "..." : plan.cta}
               </button>
             </div>
           ))}
         </div>
 
-        {/* Credit Info */}
-        <div className="mt-12 bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-          <h3 className="text-sm font-black uppercase tracking-widest text-gray-400 mb-4">💡 How Credits Work</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
-              <span className="text-2xl">🎤</span>
-              <div>
-                <p className="text-xs font-black text-gray-900">Voice Response</p>
-                <p className="text-[10px] text-gray-400 font-bold">1 Credit per response</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
-              <span className="text-2xl">⌨️</span>
-              <div>
-                <p className="text-xs font-black text-gray-900">Text Response</p>
-                <p className="text-[10px] text-gray-400 font-bold">1 Credit per response</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
-              <span className="text-2xl">📸</span>
-              <div>
-                <p className="text-xs font-black text-gray-900">Screenshot Analysis</p>
-                <p className="text-[10px] text-gray-400 font-bold">2 Credits per analysis</p>
-              </div>
-            </div>
+        {/* Support Footer */}
+        <div className="mt-16 px-4 text-center">
+          <div className="bg-white border border-gray-100 rounded-[2.5rem] p-8 max-w-lg mx-auto shadow-sm">
+            <h3 className="text-xl font-black mb-1">Need help?</h3>
+            <p className="text-gray-400 text-xs font-medium mb-6 leading-relaxed">Our team is here to guide you.</p>
+            <button 
+              onClick={() => router.push("/support")}
+              className="w-full py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-[10px] font-black uppercase tracking-widest hover:bg-gray-100"
+            >
+              Contact Support
+            </button>
           </div>
-        </div>
-
-        {/* Contact Support */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-gray-400 font-medium">Need a custom plan or have questions?</p>
-          <button 
-            onClick={() => router.push("/support")}
-            className="text-indigo-600 text-xs font-bold hover:underline mt-1"
-          >
-            Contact Support →
-          </button>
         </div>
       </div>
     </div>

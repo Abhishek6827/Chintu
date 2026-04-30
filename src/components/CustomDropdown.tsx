@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Shield } from "lucide-react";
 
 interface Option {
   key: string;
   name: string;
+  locked?: boolean;
 }
 
 interface CustomDropdownProps {
   options: readonly Option[] | Option[];
   value: string;
   onChange: (value: string) => void;
+  onLockedClick?: () => void;
   icon?: React.ReactNode;
   className?: string;
 }
@@ -20,6 +22,7 @@ export default function CustomDropdown({
   options,
   value,
   onChange,
+  onLockedClick,
   icon,
   className = "",
 }: CustomDropdownProps) {
@@ -48,6 +51,7 @@ export default function CustomDropdown({
         <span className="flex items-center gap-2 truncate">
           {icon}
           {selectedOption?.name}
+          {selectedOption?.locked && <Shield className="w-3 h-3 text-amber-500/50" />}
         </span>
         <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
       </button>
@@ -59,13 +63,22 @@ export default function CustomDropdown({
               <button
                 key={option.key}
                 onClick={() => {
-                  onChange(option.key);
-                  setIsOpen(false);
+                  if (option.locked) {
+                    onLockedClick?.();
+                  } else {
+                    onChange(option.key);
+                    setIsOpen(false);
+                  }
                 }}
-                className={`custom-dropdown-item ${option.key === value ? "selected" : ""}`}
+                className={`custom-dropdown-item ${option.key === value ? "selected" : ""} ${option.locked ? "opacity-60 cursor-pointer" : ""}`}
               >
-                {option.name}
-                {option.key === value && <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]" />}
+                <div className="flex items-center justify-between w-full">
+                   <span className="flex items-center gap-2">
+                    {option.name}
+                    {option.locked && <Shield className="w-3 h-3 text-amber-500" />}
+                   </span>
+                   {option.key === value && !option.locked && <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]" />}
+                </div>
               </button>
             ))}
           </div>

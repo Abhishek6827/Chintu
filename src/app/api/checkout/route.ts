@@ -34,7 +34,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
-    console.error("[/api/checkout] Error:", error);
+    console.error("[/api/checkout] Error creating session:", error.message);
+    if (error.code === 'resource_missing') {
+      return NextResponse.json({ error: "Invalid Price ID. Please check your Stripe Dashboard." }, { status: 400 });
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
