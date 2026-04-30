@@ -92,7 +92,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-8">
             <Link href="/privacy" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-indigo-600 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-indigo-600 transition-colors">Terms of Service</Link>
-            <a href="mailto:hello@getchintu.com" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-indigo-600 transition-colors">Contact</a>
+            <a href="mailto:welcome@getchintu.com" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-indigo-600 transition-colors">Contact</a>
           </div>
 
           <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">

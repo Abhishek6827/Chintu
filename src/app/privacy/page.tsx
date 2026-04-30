@@ -45,7 +45,7 @@ export default function PrivacyPolicy() {
         <section className="mb-10">
           <h2 className="text-xl font-bold mb-4 text-gray-900 uppercase tracking-wide">5. Contact Us</h2>
           <p className="leading-relaxed mb-4">
-            If you have questions about this policy, please contact us at: <span className="font-bold">hello@getchintu.com</span>
+            If you have questions about this policy, please contact us at: <span className="font-bold">contact@getchintu.com</span>
           </p>
         </section>
         
