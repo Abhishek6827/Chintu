@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 export default function TermsOfService() {
   return (
@@ -43,9 +44,9 @@ export default function TermsOfService() {
         </section>
 
         <div className="mt-16 pt-8 border-t border-gray-100 text-center">
-          <button onClick={() => window.location.href = '/'} className="text-indigo-600 font-bold hover:underline uppercase text-xs tracking-widest">
+          <Link href="/" className="text-indigo-600 font-bold hover:underline uppercase text-xs tracking-widest">
             Back to Home
-          </button>
+          </Link>
         </div>
       </div>
     </div>
