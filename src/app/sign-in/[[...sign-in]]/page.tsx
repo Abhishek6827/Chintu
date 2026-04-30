@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export default function Page() {
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex flex-col relative overflow-x-hidden" style={{ WebkitAppRegion: 'drag' } as any}>
+    <div className="min-h-screen bg-[#f8f9fa] flex flex-col relative overflow-x-hidden overflow-y-auto" style={{ WebkitAppRegion: 'drag' } as any}>
       <div className="absolute top-4 right-4 z-50 flex items-center gap-2 no-drag">
         <button 
           onClick={() => (window as any).electronAPI?.minimize()}
@@ -27,7 +27,7 @@ export default function Page() {
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-start py-12 px-6 no-drag">
+      <div className="flex-1 flex flex-col items-center justify-start py-8 sm:py-12 pb-20 px-4 sm:px-6 no-drag">
         <div className="w-full max-w-[440px] flex flex-col items-center">
           {/* Logo Section */}
           <div className="text-center mb-8">
@@ -41,7 +41,7 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="w-full bg-white rounded-[32px] border border-gray-200 shadow-2xl overflow-hidden mb-8">
+          <div className="w-full bg-white rounded-[32px] border border-gray-200 shadow-2xl mb-8">
             <SignIn 
               appearance={{
                 elements: {

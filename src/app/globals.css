@@ -55,7 +55,8 @@ html {
 }
 
 html, body, #__next, [data-reactroot] {
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: transparent !important;
   margin: 0;
   padding: 0;
@@ -102,7 +103,8 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   transition: background-color 0.3s ease;
   min-width: 0;
 }

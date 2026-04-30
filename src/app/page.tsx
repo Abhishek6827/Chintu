@@ -9,7 +9,7 @@ export default function LandingPage() {
   const { isSignedIn } = useUser();
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] text-gray-900 selection:bg-indigo-100 flex flex-col">
+    <div className="min-h-screen bg-[#f8f9fa] text-gray-900 selection:bg-indigo-100 flex flex-col overflow-y-auto">
       {/* Navigation */}
       <nav className="flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-3">

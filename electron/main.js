@@ -36,7 +36,7 @@ let serverPort = null;
 let userOpacity = 1;
 
 // ─── Production Vercel URL ───────────────────────────────
-const VERCEL_URL = "https://getchintu.com";
+const VERCEL_URL = "https://www.getchintu.com";
 
 // ─── Determine runtime mode ───────────────────────────────
 const isPreview = process.argv.includes("--preview");
@@ -285,18 +285,31 @@ function createWindow() {
       authWindow.loadURL(url);
       
       const handleRedirect = (ev, newUrl) => {
-        const isBackInApp = newUrl.startsWith("http://localhost") || newUrl.startsWith("http://127.0.0.1") || newUrl.startsWith(VERCEL_URL);
-        console.log(`[Popup] Navigated to: ${newUrl} (isBackInApp: ${isBackInApp})`);
+        // Normalize URL for comparison
+        const normalizedUrl = newUrl.split('?')[0].split('#')[0];
+        const isBackInApp = normalizedUrl.startsWith("http://localhost") || 
+                           normalizedUrl.startsWith("http://127.0.0.1") || 
+                           normalizedUrl.startsWith(VERCEL_URL);
+        
+        console.log(`[Popup] Navigation to: ${normalizedUrl} (isBackInApp: ${isBackInApp})`);
         
         if (isBackInApp) {
-          console.log(`[Popup] Auth success/callback detected. Closing popup and updating main window...`);
+          console.log(`[Popup] Auth success/callback detected. Syncing main window and closing popup...`);
+          // Tell main window to go to the successful auth URL
           mainWindow.loadURL(newUrl);
-          authWindow.destroy();
+          
+          // Small delay to ensure main window starts loading before closing popup
+          setTimeout(() => {
+            if (!authWindow.isDestroyed()) {
+              authWindow.destroy();
+            }
+          }, 500);
         }
       };
 
       authWindow.webContents.on('did-navigate', handleRedirect);
       authWindow.webContents.on('will-navigate', handleRedirect);
+      authWindow.webContents.on('did-navigate-in-page', handleRedirect);
     }
   });
 
