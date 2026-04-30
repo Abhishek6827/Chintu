@@ -16,6 +16,8 @@ export default function SetupPage() {
   const [statusText, setStatusText] = useState("");
   const [mounted, setMounted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isInitiating, setIsInitiating] = useState(false);
   
   const router = useRouter();
 
@@ -42,8 +44,18 @@ export default function SetupPage() {
     };
 
 
-    if (isLoaded && isSignedIn) checkProfile();
+    if (isLoaded && isSignedIn) {
+      checkProfile().finally(() => setIsLoadingProfile(false));
+    } else if (isLoaded && !isSignedIn) {
+      setIsLoadingProfile(false);
+    }
   }, [isLoaded, isSignedIn, user?.id, supabase]);
+
+  const handleMinimize = () => {
+    if (typeof window !== "undefined" && (window as any).electronAPI?.minimize) {
+      (window as any).electronAPI.minimize();
+    }
+  };
 
   // If not mounted or Clerk not loaded yet, show empty shell
   if (!mounted || !isLoaded) {
@@ -58,6 +70,8 @@ export default function SetupPage() {
 
   const handleStart = async () => {
     if (!jd.trim()) return;
+    setIsInitiating(true);
+    setStatusText("🚀 Preparing your interview workspace...");
 
     if (aboutMe.trim() && !hasProfile) {
       setIsRefining(true);
@@ -103,6 +117,8 @@ export default function SetupPage() {
 
       setIsRefining(false);
     }
+    
+    setStatusText("🎯 Synchronizing with neural network...");
     // ALWAYS navigate to room — pass JD via URL param (sessionStorage is unreliable in Electron)
     window.location.href = "/room?jd=" + encodeURIComponent(jd.trim());
   };
@@ -110,12 +126,20 @@ export default function SetupPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fa] text-gray-900 overflow-x-hidden overflow-y-auto">
       {/* Header / Drag Region */}
-      <div className="drag-region h-10 w-full shrink-0 flex items-center justify-between px-6">
+      <div className="drag-region h-12 w-full shrink-0 flex items-center justify-between px-6">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">System Online</span>
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+          <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">System Online</span>
         </div>
-        <div className="no-drag">
+        <div className="no-drag flex items-center gap-3">
+          <button 
+            onClick={handleMinimize}
+            className="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-900 transition-all active:scale-90"
+            title="Minimize"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+          <div className="w-[1px] h-4 bg-gray-200 mx-1" />
           <UserButton afterSignOutUrl="/sign-in" />
         </div>
       </div>
@@ -140,9 +164,18 @@ export default function SetupPage() {
               </div>
             )}
 
-            {/* Profile Section */}
-            {!hasProfile ? (
-              <div className="space-y-2">
+            {isLoadingProfile ? (
+              <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex items-center gap-3 animate-pulse">
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                  <div className="w-full h-full bg-gradient-to-r from-transparent via-white/50 to-transparent animate-[shimmer_1.5s_infinite]" />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-2 w-16 bg-gray-200 rounded" />
+                  <div className="h-3 w-32 bg-gray-200 rounded" />
+                </div>
+              </div>
+            ) : !hasProfile ? (
+              <div className="space-y-2 animate-in fade-in duration-500">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Candidate Profile</label>
                 <textarea
                   value={aboutMe}
@@ -152,7 +185,7 @@ export default function SetupPage() {
                 />
               </div>
             ) : (
-              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
+              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 shadow-sm animate-in zoom-in-95 duration-500">
                 <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
                   <span className="text-emerald-600 text-lg">✓</span>
                 </div>
@@ -200,28 +233,27 @@ export default function SetupPage() {
         <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-gray-500">Secure Mode • Ghost Overlay Active</p>
       </div>
 
-      {/* Full Page Loading Animation — RESTORED (Light Theme Fixed) */}
-      {isRefining && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/90 backdrop-blur-md">
+      {/* Full Page Loading Animation (Refining or Initiating) */}
+      {(isRefining || isInitiating) && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/95 backdrop-blur-xl animate-in fade-in duration-300">
           <div className="relative flex items-center justify-center w-32 h-32 mb-8">
-            <div className="absolute inset-0 rounded-full border-[3px] border-indigo-600/20 animate-[spin_3s_linear_infinite]"></div>
+            <div className="absolute inset-0 rounded-full border-[3px] border-indigo-600/10 animate-[spin_3s_linear_infinite]"></div>
             <div className="absolute inset-2 rounded-full border-[3px] border-t-purple-600 border-purple-600/10 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
             <div className="absolute inset-4 rounded-full border-[3px] border-b-cyan-500 border-cyan-500/10 animate-[spin_2s_linear_infinite]"></div>
             <div className="absolute inset-0 flex items-center justify-center text-4xl animate-pulse">
-              ✨
+              {isInitiating ? "🚀" : "✨"}
             </div>
           </div>
-          <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 animate-pulse tracking-wide mb-3 text-center px-4">
-            {statusText || "AI is structuring your profile..."}
+          <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 animate-pulse tracking-tight mb-3 text-center px-6">
+            {statusText}
           </h2>
-          <div className="flex gap-1.5 items-center">
-            <div className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-bounce" style={{ animationDelay: "0ms" }}></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-bounce" style={{ animationDelay: "150ms" }}></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-cyan-600 animate-bounce" style={{ animationDelay: "300ms" }}></div>
+          <div className="flex gap-2 items-center mb-10">
+            <div className="w-2 h-2 rounded-full bg-indigo-600 animate-bounce" style={{ animationDelay: "0ms" }}></div>
+            <div className="w-2 h-2 rounded-full bg-purple-600 animate-bounce" style={{ animationDelay: "150ms" }}></div>
+            <div className="w-2 h-2 rounded-full bg-cyan-600 animate-bounce" style={{ animationDelay: "300ms" }}></div>
           </div>
-          <p className="mt-8 text-xs text-gray-500 font-black tracking-[0.2em] uppercase text-center max-w-xs leading-relaxed">
-            Please wait...<br />
-            <span className="text-gray-400 font-medium text-[0.65rem] normal-case tracking-normal">Structuring your background for personalized answers</span>
+          <p className="text-[10px] text-gray-400 font-black tracking-[0.3em] uppercase text-center max-w-xs leading-relaxed opacity-60">
+            {isInitiating ? "Initializing Ghost Interface" : "Calibrating Neural Synthesis"}
           </p>
         </div>
       )}

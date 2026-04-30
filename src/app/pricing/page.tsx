@@ -44,8 +44,8 @@ const PLANS = [
     badge: "⚡",
     color: "indigo",
     popular: true,
-    stripePriceId: "STRIPE_PRO_PRICE_ID",
-    annualStripePriceId: "STRIPE_PRO_ANNUAL_PRICE_ID",
+    stripePriceId: "price_1TRu3pLYcsTnVrvkVfZIjTLC",
+    annualStripePriceId: "price_1TRu4ILYcsTnVrvkcfBbwSBr",
     features: [
       "200 Credits / month",
       "All Premium Engines Unlocked",
@@ -66,8 +66,8 @@ const PLANS = [
     credits: 1000,
     badge: "👑",
     color: "amber",
-    stripePriceId: "STRIPE_ELITE_PRICE_ID",
-    annualStripePriceId: "STRIPE_ELITE_ANNUAL_PRICE_ID",
+    stripePriceId: "price_1TRu4jLYcsTnVrvkJ7gkHA91",
+    annualStripePriceId: "price_1TRu5ALYcsTnVrvk3dMorbBe",
     features: [
       "1000 Credits / month",
       "All Pro Features",

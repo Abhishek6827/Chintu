@@ -1246,12 +1246,14 @@ export default function RoomPage() {
                 <div className="w-[1px] h-3 bg-current opacity-20 mx-0.5" />
                 <span className="text-[8px] font-black uppercase tracking-[0.1em] opacity-60">{userPlan}</span>
               </div>
-              <button 
-                onClick={() => router.push("/pricing")}
-                className="px-3 py-1 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition-all text-[8px] font-black uppercase tracking-[0.15em] shadow-lg shadow-indigo-600/20 active:scale-95"
-              >
-                Upgrade
-              </button>
+              {userPlan !== 'elite' && (
+                <button 
+                  onClick={() => router.push("/pricing")}
+                  className="px-3 py-1 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition-all text-[8px] font-black uppercase tracking-[0.15em] shadow-lg shadow-indigo-600/20 active:scale-95"
+                >
+                  Upgrade
+                </button>
+              )}
             </div>
           )}
         </div>

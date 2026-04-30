@@ -212,6 +212,18 @@ export async function POST(req: NextRequest) {
       }, { status: 402 });
     }
 
+    // ─── Deduct 1 Credit Upfront ─────────────────────────────
+    const { error: deductError } = await supabaseAdmin
+      .from("profiles")
+      .update({ credits: currentCredits - 1 })
+      .eq("id", userId);
+
+    if (deductError) {
+      console.error("[/api/answer] Credit deduction failed:", deductError.message);
+      // We continue anyway so the user doesn't get blocked by a DB lag, 
+      // but in production you might want to handle this strictly.
+    }
+
     const apiKeys = [
       process.env.GROQ_API_KEY,
       process.env.GROQ_API_KEY_2,

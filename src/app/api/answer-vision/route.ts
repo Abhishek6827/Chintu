@@ -232,6 +232,16 @@ export async function POST(req: NextRequest) {
       }, { status: 402 });
     }
 
+    // ─── Deduct 1 Credit Upfront ─────────────────────────────
+    const { error: deductError } = await supabaseAdmin
+      .from("profiles")
+      .update({ credits: currentCredits - 1 })
+      .eq("id", userId);
+
+    if (deductError) {
+      console.error("[/api/answer-vision] Credit deduction failed:", deductError.message);
+    }
+
     const apiKeys = [
       process.env.GROQ_API_KEY,
       process.env.GROQ_API_KEY_2,
