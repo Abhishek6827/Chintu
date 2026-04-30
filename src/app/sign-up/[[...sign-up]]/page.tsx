@@ -1,5 +1,6 @@
 "use client";
 import { SignUp } from "@clerk/nextjs";
+import Image from "next/image";
 
 export default function Page() {
   return (
@@ -29,7 +30,7 @@ export default function Page() {
         {/* Logo Section */}
         <div className="text-center mb-8 mt-12">
           <div className="w-20 h-20 mx-auto mb-4 drop-shadow-2xl">
-            <img src="/icon.png" alt="Chintu" className="w-full h-full object-contain" />
+            <Image src="/icon.png" alt="Chintu" width={80} height={80} className="w-full h-full object-contain" />
           </div>
           <h1 className="text-2xl font-black tracking-tight uppercase text-gray-900">Chintu</h1>
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1 text-center">Join the AI Revolution</p>

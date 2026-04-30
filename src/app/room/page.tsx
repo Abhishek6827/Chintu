@@ -119,7 +119,7 @@ export default function RoomPage() {
 
 
   // ─── Fetch Credits Helper ──────────────────────────────────
-  const refreshCredits = async () => {
+  const refreshCredits = useCallback(async () => {
     if (!user?.id) return;
     const { data } = await supabase
       .from('profiles')
@@ -127,7 +127,7 @@ export default function RoomPage() {
       .eq('id', user.id)
       .maybeSingle();
     if (data) setUserCredits(data.credits);
-  };
+  }, [user?.id, supabase]);
 
   useEffect(() => {
     const initRoom = async () => {
@@ -149,7 +149,7 @@ export default function RoomPage() {
     };
     
     initRoom();
-  }, [isLoaded, isSignedIn, user?.id, supabase]);
+  }, [isLoaded, isSignedIn, user?.id, supabase, refreshCredits]);
 
   const saveToHistory = useCallback(async () => {
     if (answers.length === 0 || !user?.id) return;
@@ -278,7 +278,7 @@ export default function RoomPage() {
       // Best-effort update to cloud (fails silently if column doesn't exist)
       try {
         await supabase.from('profiles').update({ theme: newTheme ? 'light' : 'dark' }).eq('id', user.id);
-      } catch (e) {}
+      } catch {}
     }
   };
   const [isCapturing, setIsCapturing] = useState(false);
@@ -841,7 +841,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [jobDescription, profileContext, liveTranscript, aiSpeechBubbles, stopWhisperRecordingAndTranscribe, chatConversationHistory]);
+  }, [jobDescription, profileContext, liveTranscript, aiSpeechBubbles, stopWhisperRecordingAndTranscribe, chatConversationHistory, refreshCredits]);
 
   const handleSendText = useCallback(async () => {
     if (!inputText.trim()) return;
@@ -919,7 +919,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [inputText, status, jobDescription, profileContext, aiSpeechBubbles, chatConversationHistory]);
+  }, [inputText, status, jobDescription, profileContext, aiSpeechBubbles, chatConversationHistory, refreshCredits]);
 
   const startRecordingRef = useRef(startRecording);
   const stopRecordingRef = useRef(stopRecordingAndGenerate);
@@ -1130,7 +1130,7 @@ export default function RoomPage() {
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, answer: "⚠️ " + msg, isStreaming: false } : a));
       setStatus("idle");
     }
-  }, [capturedScreenshots, status, jobDescription, profileContext, inputText, visionConversationHistory]);
+  }, [capturedScreenshots, status, jobDescription, profileContext, inputText, visionConversationHistory, refreshCredits]);
 
   const handleOpacityChange = (value: number) => {
     setWindowOpacity(value);
@@ -1176,7 +1176,7 @@ export default function RoomPage() {
       <div className="drag-region flex items-center justify-between px-2 sm:px-4 h-10 sm:h-12 shrink-0 relative z-10">
         <div className="flex items-center gap-2 no-drag">
           <div className="flex items-center gap-2">
-            <img src="/icon.png" alt="" className="w-5 h-5 object-contain" />
+            <Image src="/icon.png" alt="" width={20} height={20} className="w-5 h-5 object-contain" />
             <span className="text-[var(--text-main)] text-sm font-bold tracking-tight">Chintu</span>
           </div>
           {appVersion && (
@@ -1185,15 +1185,23 @@ export default function RoomPage() {
             </span>
           )}
           {userCredits !== null && (
-            <span className={`px-2 py-0.5 rounded-full text-[0.6rem] font-black uppercase tracking-wider border shadow-sm ${
-              userCredits > 5 
-                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
-                : userCredits > 0 
-                  ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' 
-                  : 'bg-red-500/10 text-red-500 border-red-500/20'
-            }`}>
-              ⚡ {userCredits} Credits
-            </span>
+            <div className="flex items-center gap-2">
+              <span className={`px-2 py-0.5 rounded-full text-[0.6rem] font-black uppercase tracking-wider border shadow-sm ${
+                userCredits > 5 
+                  ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
+                  : userCredits > 0 
+                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' 
+                    : 'bg-red-500/10 text-red-500 border-red-500/20'
+              }`}>
+                ⚡ {userCredits} Credits
+              </span>
+              <button 
+                onClick={() => router.push("/pricing")}
+                className="px-2 py-0.5 rounded-full bg-indigo-600/10 text-indigo-500 border border-indigo-600/20 hover:bg-indigo-600/20 transition-all text-[0.6rem] font-black uppercase tracking-wider shadow-sm cursor-pointer"
+              >
+                💎 Upgrade
+              </button>
+            </div>
           )}
         </div>
         <div className="flex items-center gap-1 no-drag">

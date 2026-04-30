@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { createClient } from "@/utils/supabase/client";
 
@@ -79,12 +80,12 @@ export default function SetupPage() {
             // Save structured profile to Supabase
             const { error: upsertError } = await supabase
               .from('profiles')
-              .update({
+              .upsert({
+                id: user.id,
                 profile_data: data.profile,
                 raw_profile: aboutMe.trim(),
                 updated_at: new Date().toISOString()
-              })
-              .eq('id', user.id);
+              });
 
             if (upsertError) {
               console.error("Failed to sync profile to Cloud:", upsertError);
@@ -93,17 +94,19 @@ export default function SetupPage() {
           }
         } else {
           console.error("Profile refine API returned:", res.status);
-          await supabase.from('profiles').update({
+          await supabase.from('profiles').upsert({
+            id: user.id,
             raw_profile: aboutMe.trim(),
             updated_at: new Date().toISOString()
-          }).eq('id', user.id);
+          });
         }
       } catch (err) {
         console.error("Profile refinement failed:", err);
-        await supabase.from('profiles').update({
+        await supabase.from('profiles').upsert({
+          id: user.id,
           raw_profile: aboutMe.trim(),
           updated_at: new Date().toISOString()
-        }).eq('id', user.id);
+        });
       }
 
       setIsRefining(false);
@@ -130,7 +133,7 @@ export default function SetupPage() {
           {/* Logo Section */}
           <div className="text-center mb-8">
             <div className="w-20 h-20 mx-auto mb-4 drop-shadow-2xl">
-              <img src="/icon.png" alt="Chintu" className="w-full h-full object-contain" />
+              <Image src="/icon.png" alt="Chintu" width={80} height={80} className="w-full h-full object-contain" />
             </div>
             <h1 className="text-2xl font-black tracking-tight uppercase text-gray-900">Chintu</h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1 text-center">AI Interview Assistant</p>
@@ -205,28 +208,28 @@ export default function SetupPage() {
         <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-gray-500">Secure Mode • Ghost Overlay Active</p>
       </div>
 
-      {/* Full Page Loading Animation — RESTORED */}
+      {/* Full Page Loading Animation — RESTORED (Light Theme Fixed) */}
       {isRefining && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0a0a0c] backdrop-blur-2xl">
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/90 backdrop-blur-md">
           <div className="relative flex items-center justify-center w-32 h-32 mb-8">
-            <div className="absolute inset-0 rounded-full border-[3px] border-indigo-500/30 animate-[spin_3s_linear_infinite]"></div>
-            <div className="absolute inset-2 rounded-full border-[3px] border-t-purple-500 border-purple-500/20 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
-            <div className="absolute inset-4 rounded-full border-[3px] border-b-cyan-400 border-cyan-400/20 animate-[spin_2s_linear_infinite]"></div>
+            <div className="absolute inset-0 rounded-full border-[3px] border-indigo-600/20 animate-[spin_3s_linear_infinite]"></div>
+            <div className="absolute inset-2 rounded-full border-[3px] border-t-purple-600 border-purple-600/10 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
+            <div className="absolute inset-4 rounded-full border-[3px] border-b-cyan-500 border-cyan-500/10 animate-[spin_2s_linear_infinite]"></div>
             <div className="absolute inset-0 flex items-center justify-center text-4xl animate-pulse">
               ✨
             </div>
           </div>
-          <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 animate-pulse tracking-wide mb-3 text-center px-4">
+          <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 animate-pulse tracking-wide mb-3 text-center px-4">
             {statusText || "AI is structuring your profile..."}
           </h2>
           <div className="flex gap-1.5 items-center">
-            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "0ms" }}></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "300ms" }}></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-bounce" style={{ animationDelay: "0ms" }}></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-bounce" style={{ animationDelay: "150ms" }}></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-cyan-600 animate-bounce" style={{ animationDelay: "300ms" }}></div>
           </div>
-          <p className="mt-8 text-xs text-white/30 font-medium tracking-[0.2em] uppercase text-center max-w-xs leading-relaxed">
+          <p className="mt-8 text-xs text-gray-500 font-black tracking-[0.2em] uppercase text-center max-w-xs leading-relaxed">
             Please wait...<br />
-            <span className="text-white/20 opacity-70 text-[0.65rem] normal-case tracking-normal">Structuring your background for personalized answers</span>
+            <span className="text-gray-400 font-medium text-[0.65rem] normal-case tracking-normal">Structuring your background for personalized answers</span>
           </p>
         </div>
       )}

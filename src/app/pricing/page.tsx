@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const PLANS = [
   {
@@ -107,7 +108,7 @@ export default function PricingPage() {
           ← Back
         </button>
         <div className="flex items-center gap-2">
-          <img src="/icon.png" alt="" className="w-5 h-5" />
+          <Image src="/icon.png" alt="" width={20} height={20} className="w-5 h-5" />
           <span className="text-sm font-black tracking-tight">Chintu</span>
         </div>
         <div className="w-12" />
