@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 import Groq from "groq-sdk";
 import OpenAI from "openai";
 import { auth } from "@clerk/nextjs/server";
