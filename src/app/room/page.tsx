@@ -168,13 +168,16 @@ export default function RoomPage() {
     await supabase
       .from('profiles')
       .update({ history: updatedHistory })
-      .eq('id', user.id);
+    // Save to Supabase (fails silently if RLS blocked)
+    try {
+      await supabase.from('profiles').update({ history: updatedHistory }).eq('id', user?.id);
+    } catch {}
   }, [answers, history, user?.id, supabase]);
 
   const clearHistory = async () => {
     if (!user?.id) return;
     setHistory([]);
-    await supabase.from('profiles').update({ history: [] }).eq('id', user.id);
+    try { await supabase.from('profiles').update({ history: [] }).eq('id', user?.id); } catch {}
     setShowClearHistoryConfirm(false);
   };
 
@@ -182,7 +185,7 @@ export default function RoomPage() {
     if (!user?.id) return;
     const updatedHistory = history.filter(s => s.id !== id);
     setHistory(updatedHistory);
-    await supabase.from('profiles').update({ history: updatedHistory }).eq('id', user.id);
+    try { await supabase.from('profiles').update({ history: updatedHistory }).eq('id', user?.id); } catch {}
   };
 
   const exportHistory = () => {
@@ -275,7 +278,6 @@ export default function RoomPage() {
     setIsLightMode(newTheme);
     localStorage.setItem("chintu_theme", newTheme ? "light" : "dark");
     if (user?.id) {
-      // Best-effort update to cloud (fails silently if column doesn't exist)
       try {
         await supabase.from('profiles').update({ theme: newTheme ? 'light' : 'dark' }).eq('id', user.id);
       } catch {}

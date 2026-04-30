@@ -24,28 +24,18 @@ export default function SetupPage() {
     setMounted(true);
 
     const checkProfile = async () => {
-      if (!user?.id) return;
-      
-      // Try Supabase first (Cloud)
-      const { data: profileRow, error } = await supabase
-        .from('profiles')
-        .select('profile_data, raw_profile')
-        .eq('id', user.id)
-        .maybeSingle();
+      const storedData = sessionStorage.getItem("profile_data");
+      const storedRaw = sessionStorage.getItem("raw_profile");
 
-      if (error) {
-        console.error("Error fetching profile from Supabase:", error);
-      }
-
-      console.log("Supabase profile check:", profileRow);
-
-      if (profileRow?.profile_data && Object.keys(profileRow.profile_data).length > 0) {
+      if (storedData) {
         setHasProfile(true);
-        if (profileRow.raw_profile) setAboutMe(profileRow.raw_profile);
+        if (storedRaw) setAboutMe(storedRaw);
       } else {
         setHasProfile(false);
       }
     };
+
+
     if (isLoaded && isSignedIn) checkProfile();
   }, [isLoaded, isSignedIn, user?.id, supabase]);
 
@@ -77,36 +67,17 @@ export default function SetupPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.profile) {
-            // Save structured profile to Supabase
-            const { error: upsertError } = await supabase
-              .from('profiles')
-              .upsert({
-                id: user.id,
-                profile_data: data.profile,
-                raw_profile: aboutMe.trim(),
-                updated_at: new Date().toISOString()
-              });
-
-            if (upsertError) {
-              console.error("Failed to sync profile to Cloud:", upsertError);
-            }
+            sessionStorage.setItem("profile_data", JSON.stringify(data.profile));
+            sessionStorage.setItem("raw_profile", aboutMe.trim());
             setHasProfile(true);
           }
         } else {
           console.error("Profile refine API returned:", res.status);
-          await supabase.from('profiles').upsert({
-            id: user.id,
-            raw_profile: aboutMe.trim(),
-            updated_at: new Date().toISOString()
-          });
+          sessionStorage.setItem("raw_profile", aboutMe.trim());
         }
       } catch (err) {
         console.error("Profile refinement failed:", err);
-        await supabase.from('profiles').upsert({
-          id: user.id,
-          raw_profile: aboutMe.trim(),
-          updated_at: new Date().toISOString()
-        });
+        sessionStorage.setItem("raw_profile", aboutMe.trim());
       }
 
       setIsRefining(false);
