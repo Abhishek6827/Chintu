@@ -36,7 +36,7 @@ let serverPort = null;
 let userOpacity = 1;
 
 // ─── Production Vercel URL ───────────────────────────────
-const VERCEL_URL = "https://chintu-phi.vercel.app";
+const VERCEL_URL = "https://getchintu.com";
 
 // ─── Determine runtime mode ───────────────────────────────
 const isPreview = process.argv.includes("--preview");
