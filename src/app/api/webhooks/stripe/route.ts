@@ -2,6 +2,10 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/utils/supabase/server";
+import { Resend } from "resend";
+import { getPaymentEmailHtml } from "@/utils/email-templates";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20" as any,
@@ -105,6 +109,17 @@ export async function POST(req: Request) {
         `⚡ Credits added: <b>${credits}</b>\n` +
         `💳 Session: <code>${session.id.slice(-10)}</code>`
       );
+
+      // ─── Send Premium Email ─────────────────────────────
+      const userEmail = session.customer_details?.email;
+      if (userEmail) {
+        await resend.emails.send({
+          from: 'Chintu Intelligence <welcome@getchintu.com>',
+          to: userEmail,
+          subject: 'Access Granted: Your Chintu Upgrade is Active ⚡',
+          html: getPaymentEmailHtml(plan, credits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+        });
+      }
     }
   }
 
@@ -117,7 +132,7 @@ export async function POST(req: Request) {
       // Find user by subscription ID
       const { data: profile, error: findError } = await supabaseAdmin
         .from("profiles")
-        .select("id, plan")
+        .select("id, plan, email")
         .eq("stripe_subscription_id", subscriptionId)
         .maybeSingle();
 
@@ -140,6 +155,16 @@ export async function POST(req: Request) {
             `💎 Plan: <b>${planInfo.plan.toUpperCase()}</b>\n` +
             `⚡ Credits reset: <b>${monthlyCredits}</b>`
           );
+
+          // ─── Send Premium Email ─────────────────────────────
+          if (profile.email) {
+            await resend.emails.send({
+              from: 'Chintu Intelligence <billing@getchintu.com>',
+              to: profile.email,
+              subject: 'Mission Extended: Your Credits have been Reset 🔄',
+              html: getPaymentEmailHtml(planInfo.plan, monthlyCredits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+            });
+          }
         }
       }
     }

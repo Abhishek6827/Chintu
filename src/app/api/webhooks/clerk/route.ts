@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { createAdminClient } from '@/utils/supabase/server'
 import { Resend } from 'resend'
+import { getWelcomeEmailHtml } from '@/utils/email-templates'
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -119,31 +120,10 @@ export async function POST(req: Request) {
         console.log(`[/api/webhooks/clerk] Attempting to send welcome email to ${email}...`);
         
         await resend.emails.send({
-          from: 'Chintu Intelligence <onboarding@resend.dev>', // Replace with your domain once verified
+          from: 'Chintu Intelligence <welcome@getchintu.com>', // Dedicated welcome address
           to: email,
           subject: 'Welcome to Chintu Intelligence Ecosystem 🚀',
-          html: `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0c; color: #ffffff; padding: 40px; border-radius: 24px; border: 1px solid #333;">
-              <h1 style="font-size: 24px; font-weight: 900; color: #6366f1; margin-bottom: 24px;">MISSION BRIEFING: SUCCESS</h1>
-              <p style="font-size: 16px; line-height: 1.6; color: #d1d5db;">Welcome to the ecosystem. Your account (ID: <strong>${displayId}</strong>) is now active and provisioned with <strong>10 Tactical Credits</strong>.</p>
-              
-              <div style="background: #1a1a1c; padding: 20px; border-radius: 16px; margin: 30px 0; border: 1px solid #333;">
-                <h2 style="font-size: 14px; font-weight: 900; color: #ffffff; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 15px;">Quick Start Guide:</h2>
-                <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px; color: #9ca3af;">
-                  <li style="margin-bottom: 10px;">⚡ <strong>Step 1:</strong> Complete your Profile with your Resume.</li>
-                  <li style="margin-bottom: 10px;">⚡ <strong>Step 2:</strong> Hold SPACE to capture live audio during interviews.</li>
-                  <li style="margin-bottom: 10px;">⚡ <strong>Step 3:</strong> Use Screenshots for technical coding rounds.</li>
-                </ul>
-              </div>
-
-              <p style="font-size: 14px; color: #9ca3af; margin-bottom: 30px;">Chintu lives discreetly on your screen, providing real-time strategic guidance without being detected.</p>
-              
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/room" style="display: inline-block; background: #6366f1; color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; text-transform: uppercase; font-size: 12px; letter-spacing: 0.2em;">Launch Your First Mission</a>
-              
-              <hr style="border: 0; border-top: 1px solid #333; margin: 40px 0;">
-              <p style="font-size: 10px; color: #4b5563; text-align: center; text-transform: uppercase; letter-spacing: 0.1em;">© 2026 Chintu AI Ecosystem • Stealth Mode Active</p>
-            </div>
-          `
+          html: getWelcomeEmailHtml(displayId, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
         });
         console.log(`[/api/webhooks/clerk] Welcome email sent successfully to ${email}`);
       } else {
