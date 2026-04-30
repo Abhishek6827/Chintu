@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { Check, Sparkles, ArrowRight, Minus, Shield } from "lucide-react";
 
@@ -130,9 +131,10 @@ export default function PricingPage() {
       {/* Draggable Header */}
       <div className="flex items-center justify-between px-4 sm:px-8 py-4 sm:py-6 sticky top-0 bg-[#f8f9fa]/90 backdrop-blur-md z-50 border-b border-gray-100 shrink-0 select-none" style={{ WebkitAppRegion: 'drag' } as any}>
         <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
-           <button onClick={() => router.back()} className="group flex items-center gap-2 text-gray-400 hover:text-gray-900 transition-all text-[10px] font-black uppercase tracking-widest">
-            <ArrowRight className="w-3.5 h-3.5 rotate-180" /> Back
-          </button>
+           <Link href="/" className="group flex items-center gap-2 text-gray-400 hover:text-gray-900 transition-all text-[10px] font-black uppercase tracking-widest">
+            <svg className="w-3 h-3 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            Back to Dashboard
+          </Link>
         </div>
         
         <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">

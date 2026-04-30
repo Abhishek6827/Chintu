@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 
 export default function SupportPage() {
@@ -49,9 +50,9 @@ export default function SupportPage() {
     <div className="min-h-screen bg-[#f8f9fa] text-gray-900" style={{ WebkitAppRegion: 'drag' } as any}>
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
-        <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-900 transition-all text-sm font-bold">
-          ← Back
-        </button>
+        <Link href="/" className="text-gray-400 hover:text-gray-900 transition-all text-sm font-bold">
+          ← Back to Dashboard
+        </Link>
         <div className="flex items-center gap-2">
           <Image src="/icon.png" alt="" width={20} height={20} className="w-5 h-5" />
           <span className="text-sm font-black tracking-tight">Chintu</span>

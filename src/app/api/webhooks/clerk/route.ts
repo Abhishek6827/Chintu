@@ -1,4 +1,5 @@
 import { Webhook } from 'svix'
+export const dynamic = "force-dynamic";
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { createAdminClient } from '@/utils/supabase/server'
