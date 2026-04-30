@@ -200,9 +200,9 @@ export default function RoomPage() {
               setIsLightMode(cloudTheme);
             }
 
-            // Set Reading Guide
-            if (profile.reading_guide !== undefined) {
-              setShowReadingGuide(profile.reading_guide);
+            // Set Reading Guide (from profile_data.preferences)
+            if (profile.profile_data?.preferences?.reading_guide !== undefined) {
+              setShowReadingGuide(profile.profile_data.preferences.reading_guide);
             }
 
             // Onboarding Check
@@ -1881,10 +1881,30 @@ export default function RoomPage() {
                     <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">Highlight text as it arrives</p>
                   </div>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       const newVal = !showReadingGuide;
                       setShowReadingGuide(newVal);
-                      localStorage.setItem("chintu_reading_guide", newVal.toString());
+                      
+                      // Save to Supabase preferences
+                      try {
+                        const res = await fetch("/api/profile");
+                        const { profile } = await res.json();
+                        const updatedData = {
+                          ...(profile?.profile_data || {}),
+                          preferences: {
+                            ...(profile?.profile_data?.preferences || {}),
+                            reading_guide: newVal
+                          }
+                        };
+                        
+                        await fetch('/api/profile', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ profile_data: updatedData })
+                        });
+                      } catch (err) {
+                        console.error("Error saving reading guide preference:", err);
+                      }
                     }}
                     className={`w-12 h-6 rounded-full transition-all relative ${showReadingGuide ? "bg-indigo-600" : "bg-gray-600/30"}`}
                   >

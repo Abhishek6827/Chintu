@@ -58,11 +58,18 @@ export async function POST(req: Request) {
       return new Response('No email found, skipping sync', { status: 200 });
     }
 
-    // --- Generate Standard Display ID ---
+    // --- Generate Standard Display ID & IST Time ---
     const now = new Date();
-    const dateStr = now.toLocaleDateString('en-GB').replace(/\//g, '-'); // 29-04-2026
-    const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-    const displayTimeStr = now.getHours().toString().padStart(2, '0') + now.getMinutes().toString().padStart(2, '0');
+    const istOptions: Intl.DateTimeFormatOptions = { 
+      timeZone: 'Asia/Kolkata', 
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true 
+    };
+    const istString = now.toLocaleString('en-IN', istOptions); // e.g. "30/04/2026, 11:44 pm"
+    
+    // For Display ID, keep it URL/ID friendly
+    const dateStr = now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(/\//g, '-');
+    const displayTimeStr = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).replace(':', '');
     
     // Extract provider safely
     const externalAccounts = (evt.data as any).external_accounts || [];
@@ -121,8 +128,7 @@ export async function POST(req: Request) {
           `🆔 <b>Clerk ID:</b> <code>${id}</code>\n` +
           `🏷️ <b>Internal ID:</b> <code>${displayId}</code>\n` +
           `🛡️ <b>Auth Provider:</b> <code>${provider.toUpperCase()}</code>\n` +
-          `📅 <b>Date:</b> <code>${dateStr}</code>\n` +
-          `⏰ <b>Time:</b> <code>${timeStr}</code>\n\n` +
+          `🕒 <b>Time (IST):</b> <code>${istString}</code>\n\n` +
           `💰 <b>Onboarding Reward:</b> <code>10 Credits Provisioned</code>\n\n` +
           `📈 <i>Chintu AI Ecosystem Growth +1</i>`;
         
@@ -201,8 +207,12 @@ export async function POST(req: Request) {
 
       if (tgToken && tgChatId) {
         const now = new Date();
-        const dateStr = now.toLocaleDateString('en-GB').replace(/\//g, '-');
-        const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        const istOptions: Intl.DateTimeFormatOptions = { 
+          timeZone: 'Asia/Kolkata', 
+          day: '2-digit', month: '2-digit', year: 'numeric',
+          hour: '2-digit', minute: '2-digit', hour12: true 
+        };
+        const istString = now.toLocaleString('en-IN', istOptions);
 
         const message =
           `🗑️ <b>USER DELETED</b>\n\n` +
@@ -210,8 +220,7 @@ export async function POST(req: Request) {
           (profile ? `📧 <b>Email:</b> <code>${profile.email}</code>\n` : '') +
           (profile ? `🏷️ <b>Display ID:</b> <code>${profile.display_id}</code>\n` : '') +
           (profile ? `💎 <b>Plan was:</b> <code>${profile.plan?.toUpperCase()}</code>\n` : '') +
-          `📅 <b>Date:</b> <code>${dateStr}</code>\n` +
-          `⏰ <b>Time:</b> <code>${timeStr}</code>\n` +
+          `🕒 <b>Time (IST):</b> <code>${istString}</code>\n` +
           `\n⚠️ <i>Profile removed from Supabase</i>`;
 
         await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {

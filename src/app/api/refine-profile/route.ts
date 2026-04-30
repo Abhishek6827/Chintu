@@ -175,8 +175,20 @@ Rules:
         const { userId } = auth();
         if (userId) {
           const supabase = createAdminClient();
+          // Fetch existing profile_data first to preserve preferences/settings
+          const { data: existing } = await supabase.from("profiles").select("profile_data").eq("id", userId).maybeSingle();
+          
+          const mergedData = { 
+            ...(existing?.profile_data || {}), 
+            ...profileData,
+            preferences: {
+              ...(existing?.profile_data?.preferences || {}),
+              ...(profileData?.preferences || {})
+            }
+          };
+          
           await supabase.from("profiles").update({
-            profile_data: profileData,
+            profile_data: mergedData,
             raw_profile: rawText,
             updated_at: new Date().toISOString()
           }).eq("id", userId);
