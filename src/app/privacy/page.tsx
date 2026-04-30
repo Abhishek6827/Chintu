@@ -10,7 +10,7 @@ export default function PrivacyPolicy() {
         <section className="mb-10">
           <h2 className="text-xl font-bold mb-4 text-gray-900 uppercase tracking-wide">1. Introduction</h2>
           <p className="leading-relaxed mb-4">
-            Welcome to Chintu Intelligence ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, and safeguard your data when you use our application.
+            Welcome to Chintu Intelligence (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, and safeguard your data when you use our application.
           </p>
         </section>
 

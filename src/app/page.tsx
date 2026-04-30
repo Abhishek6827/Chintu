@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useUser } from "@clerk/nextjs";
 
 export default function LandingPage() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn } = useUser();
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-gray-900 selection:bg-indigo-100 flex flex-col">
