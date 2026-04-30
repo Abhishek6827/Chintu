@@ -178,10 +178,10 @@ function createWindow() {
   mainWindow.setContentProtection(true);
   mainWindow.setSkipTaskbar(true);
   
-  // ─── Set initial hidden state ───────────────────────────
-  isHidden = false;
-  mainWindow.setContentProtection(false);
-  mainWindow.webContents.send("window-hidden-change", false);
+  // ─── Set initial hidden state (Default to HIDDEN for stealth) ───
+  isHidden = true;
+  mainWindow.setContentProtection(true);
+  mainWindow.webContents.send("window-hidden-change", true);
 
   // ─── System Audio Loopback ──────────────────────────────
   session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
@@ -498,6 +498,27 @@ ipcMain.on("window-minimize", () => {
 
 ipcMain.on("window-close", () => {
   if (mainWindow) mainWindow.close();
+});
+
+ipcMain.handle("save-video", async (event, arrayBuffer) => {
+  try {
+    const buffer = Buffer.from(arrayBuffer);
+    const videosDir = path.join(app.getPath("videos"), "Chintu Recordings");
+    
+    if (!fs.existsSync(videosDir)) {
+      fs.mkdirSync(videosDir, { recursive: true });
+    }
+
+    const filename = `recording-${new Date().toISOString().replace(/[:.]/g, "-")}.webm`;
+    const filePath = path.join(videosDir, filename);
+
+    fs.writeFileSync(filePath, buffer);
+    console.log(`[Main] Stealth recording saved to: ${filePath}`);
+    return { success: true, path: filePath };
+  } catch (err) {
+    console.error("[Main] Error saving recording:", err);
+    return { success: false, error: err.message };
+  }
 });
 
 ipcMain.handle("load-profile", () => {

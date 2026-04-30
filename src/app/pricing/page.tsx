@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Check, Sparkles, Zap, Shield, Crown, ArrowRight, Info, Minus } from "lucide-react";
+import { Check, Sparkles, ArrowRight, Minus, Shield } from "lucide-react";
 
 const PLANS = [
   {
@@ -19,14 +19,15 @@ const PLANS = [
     color: "emerald",
     features: [
       "10 Credits (one-time)",
-      "Llama 3.3 Model only",
+      "Standard Engine only",
       "Basic Response Types",
       "Standard History",
       "Community Support",
     ],
     locked: [
-      "Advanced AI Models",
+      "Premium AI Engines",
       "Coding & Detailed Modes",
+      "Stealth Session Recording",
       "Custom Themes & UI",
     ],
     cta: "Current Plan",
@@ -47,11 +48,11 @@ const PLANS = [
     annualStripePriceId: "STRIPE_PRO_ANNUAL_PRICE_ID",
     features: [
       "200 Credits / month",
-      "All AI Models Unlocked",
+      "All Premium Engines Unlocked",
       "All Response Types",
+      "Stealth Session Recording",
       "UI Customization",
       "Priority Speed",
-      "Email Support",
     ],
     cta: "Upgrade to Pro",
   },
@@ -70,6 +71,7 @@ const PLANS = [
     features: [
       "1000 Credits / month",
       "All Pro Features",
+      "Stealth Session Recording",
       "Dedicated Support",
       "AI Fine-Tuning",
       "Early Access",

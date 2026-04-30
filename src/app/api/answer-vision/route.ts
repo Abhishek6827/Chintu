@@ -201,21 +201,6 @@ export async function POST(req: NextRequest) {
       }, { status: 403 });
     }
 
-    const apiKeys = [
-      process.env.GROQ_API_KEY,
-      process.env.GROQ_API_KEY_2,
-      process.env.GROQ_API_KEY_3,
-    ].filter(Boolean) as string[];
-
-    const openRouterKey = process.env.OPENROUTER_API_KEY || "";
-    const dashscopeKey = process.env.DASHSCOPE_API_KEY || "";
-
-    console.log(`[/api/answer-vision] Groq keys: ${apiKeys.length} | OpenRouter: ${openRouterKey ? "yes" : "no"} | DashScope: ${dashscopeKey ? "yes" : "no"}`);
-
-    if (apiKeys.length === 0 && !openRouterKey && !dashscopeKey) {
-      return NextResponse.json({ error: "No API keys configured" }, { status: 500 });
-    }
-
     const {
       images,
       jobDescription,
@@ -232,6 +217,34 @@ export async function POST(req: NextRequest) {
 
     if (!jobDescription) {
       return NextResponse.json({ error: "Missing jobDescription" }, { status: 400 });
+    }
+
+    // ─── Plan & Feature Gating ──────────────────────────────
+    const userPlan = profile?.plan || "free";
+    const isProModel = selectedModel !== "llama-3.3-70b";
+    const isProMode = responseLength === "coding" || responseLength === "detailed";
+
+    if (userPlan === "free" && (isProModel || isProMode)) {
+      const reason = isProModel ? "Premium Engine" : "Advanced Mode";
+      return NextResponse.json({ 
+        error: `${reason} Locked. Please upgrade to Pro to unlock this feature.`,
+        code: "UPGRADE_REQUIRED"
+      }, { status: 402 });
+    }
+
+    const apiKeys = [
+      process.env.GROQ_API_KEY,
+      process.env.GROQ_API_KEY_2,
+      process.env.GROQ_API_KEY_3,
+    ].filter(Boolean) as string[];
+
+    const openRouterKey = process.env.OPENROUTER_API_KEY || "";
+    const dashscopeKey = process.env.DASHSCOPE_API_KEY || "";
+
+    console.log(`[/api/answer-vision] Groq keys: ${apiKeys.length} | OpenRouter: ${openRouterKey ? "yes" : "no"} | DashScope: ${dashscopeKey ? "yes" : "no"}`);
+
+    if (apiKeys.length === 0 && !openRouterKey && !dashscopeKey) {
+      return NextResponse.json({ error: "No API keys configured" }, { status: 500 });
     }
 
     const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.coding;

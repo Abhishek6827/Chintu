@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   setOpacity: (opacity) => ipcRenderer.send("set-opacity", opacity),
   getOpacity: () => ipcRenderer.invoke("get-opacity"),
   captureScreenshot: () => ipcRenderer.invoke("capture-screenshot"), // returns Promise<string|null>
+  saveVideo: (arrayBuffer) => ipcRenderer.invoke("save-video", arrayBuffer), // returns Promise<{success, path, error}>
   onHiddenChange: (callback) => {
     const handler = (_event, hidden) => callback(hidden);
     ipcRenderer.on("window-hidden-change", handler);

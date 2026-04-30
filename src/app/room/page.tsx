@@ -3,13 +3,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Mic, Sun, Moon, Shield, Crown, Minus, Zap } from "lucide-react";
+import { Mic, Sun, Moon, Crown, Minus, Zap, Check, Sparkles } from "lucide-react";
 import { UserButton, useUser } from "@clerk/nextjs";
 
 
 import AnswerDisplay from "@/components/AnswerDisplay";
 import ProfileModal, { formatProfileContext } from "@/components/ProfileModal";
 import CustomDropdown from "@/components/CustomDropdown";
+import OnboardingModal from "@/components/OnboardingModal";
+import { HelpCircle } from "lucide-react";
 
 interface AnswerEntry {
   id: string;
@@ -38,11 +40,11 @@ type ResponseLength = "small" | "balanced" | "detailed" | "coding";
 
 // ─── Available models ─────────────────────────────────────────
 const MODELS = [
-  { key: "llama-3.3-70b", name: "Llama 3.3 70B" },
-  { key: "gpt-oss-120b", name: "GPT-OSS 120B" },
-  { key: "qwen3-Coder", name: "Qwen3 Coder 480B" },
-  { key: "nemotron-3-120b", name: "Nemotron 3 (120B)" },
-  { key: "qwen3.6", name: "Qwen3.6 Plus" }
+  { key: "llama-3.3-70b", name: "Standard Engine" },
+  { key: "gpt-oss-120b", name: "Pro Engine" },
+  { key: "qwen3-Coder", name: "Coding Specialist" },
+  { key: "nemotron-3-120b", name: "Nemotron Specialist" },
+  { key: "qwen3.6", name: "Turbo Engine" }
 ] as const;
 
 type ModelKey = typeof MODELS[number]["key"];
@@ -78,17 +80,19 @@ export default function RoomPage() {
   const [liveTranscript, setLiveTranscript] = useState("");
   const [responseLength, setResponseLength] = useState<ResponseLength>("balanced");
   const [showSettings, setShowSettings] = useState(false);
-  const [isWindowHidden, setIsWindowHidden] = useState(false);
+  const [isWindowHidden, setIsWindowHidden] = useState(true);
   const [showUnhidePrompt, setShowUnhidePrompt] = useState(false);
   const [inputText, setInputText] = useState("");
   const [mounted, setMounted] = useState(false);
   const [windowOpacity, setWindowOpacity] = useState(1);
   const [fontSize, setFontSize] = useState(10);
   const [spaceMode, setSpaceMode] = useState<"hold" | "toggle">("hold");
-  const [selectedModel, setSelectedModel] = useState<ModelKey>("gpt-oss-120b");
-  const selectedModelRef = useRef<ModelKey>("gpt-oss-120b");
+  const [selectedModel, setSelectedModel] = useState<ModelKey>("llama-3.3-70b");
+  const selectedModelRef = useRef<ModelKey>("llama-3.3-70b");
   const [userCredits, setUserCredits] = useState<number | null>(null);
   const [userPlan, setUserPlan] = useState<string>("free");
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // ─── Vision conversation history ──────────────────────────
   // Keeps track of previous screenshot exchanges so the model
@@ -157,9 +161,18 @@ export default function RoomPage() {
               localStorage.setItem("chintu_theme", cloudTheme ? "light" : "dark");
             }
 
-            // Set Plan
-            if (profile.plan) {
-              setUserPlan(profile.plan);
+            // Set Plan & Gating
+            const plan = profile.plan || 'free';
+            setUserPlan(plan);
+            if (plan === 'free') {
+              if (selectedModelRef.current !== 'llama-3.3-70b') {
+                setSelectedModel('llama-3.3-70b');
+                selectedModelRef.current = 'llama-3.3-70b';
+              }
+              if (responseLengthRef.current === 'detailed' || responseLengthRef.current === 'coding') {
+                setResponseLength('balanced');
+                responseLengthRef.current = 'balanced';
+              }
             }
 
             // Set Profile Context
@@ -240,6 +253,13 @@ export default function RoomPage() {
 
   useEffect(() => {
     setMounted(true);
+    // Check if user has seen onboarding
+    const hasSeenOnboarding = localStorage.getItem("chintu_onboarding_seen");
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+      localStorage.setItem("chintu_onboarding_seen", "true");
+    }
+
     if (isElectron && (window as any).electronAPI?.getOpacity) {
       (window as any).electronAPI.getOpacity().then((o: number) => setWindowOpacity(o));
     }
@@ -539,17 +559,36 @@ export default function RoomPage() {
         if (e.data.size > 0) screenChunksRef.current.push(e.data);
       };
 
-      recorder.onstop = () => {
+      recorder.onstop = async () => {
         const blob = new Blob(screenChunksRef.current, { type: "video/webm" });
         screenChunksRef.current = [];
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `interview-recording-${new Date().toISOString().replace(/[:.]/g, "-")}.webm`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 5000);
+        
+        if (isElectron && (window as any).electronAPI?.saveVideo) {
+          // Stealth Auto-save for Electron
+          const arrayBuffer = await blob.arrayBuffer();
+          const result = await (window as any).electronAPI.saveVideo(arrayBuffer);
+          if (result.success) {
+            console.log("[Recording] Stealth saved to:", result.path);
+            setToast({ 
+              message: `Recording saved to: ${result.path}`, 
+              type: 'success' 
+            });
+            // Auto-hide toast after 5 seconds
+            setTimeout(() => setToast(null), 5000);
+          } else {
+            setError("Failed to save recording stealthily: " + result.error);
+          }
+        } else {
+          // Browser fallback (normal download)
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `interview-recording-${new Date().toISOString().replace(/[:.]/g, "-")}.webm`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
+        }
       };
 
       if (videoTrack) {
@@ -801,7 +840,8 @@ export default function RoomPage() {
       if (!res.body) throw new Error("No response body");
 
       const actualModelUsed = res.headers.get("X-Model-Used") || modelName;
-      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: actualModelUsed } : a));
+      const displayModelName = MODELS.find(m => m.key === actualModelUsed)?.name || actualModelUsed;
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: displayModelName } : a));
 
       let fullResponse = "";
       const reader = res.body.getReader();
@@ -879,7 +919,8 @@ export default function RoomPage() {
       if (!res.body) throw new Error("No response body");
 
       const actualModelUsed = res.headers.get("X-Model-Used") || modelName;
-      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: actualModelUsed } : a));
+      const displayModelName = MODELS.find(m => m.key === actualModelUsed)?.name || actualModelUsed;
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: displayModelName } : a));
 
       let fullResponse = "";
       const reader = res.body.getReader();
@@ -1162,6 +1203,30 @@ export default function RoomPage() {
         <div className="mesh-orb w-[250px] h-[250px] bg-blue-600/20 top-1/2 left-1/3" style={{ animationDelay: '5s' }} />
       </div>
 
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-12 left-4 right-4 z-[9999] animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className={`
+            rounded-2xl px-4 py-3 shadow-2xl backdrop-blur-xl border flex items-center justify-between gap-3
+            ${toast.type === 'success' 
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+              : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'}
+          `}>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${toast.type === 'success' ? 'bg-emerald-500/20' : 'bg-indigo-500/20'}`}>
+                {toast.type === 'success' ? <Check className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+              </div>
+              <p className="text-[10px] font-bold leading-tight truncate">
+                {toast.message}
+              </p>
+            </div>
+            <button onClick={() => setToast(null)} className="opacity-50 hover:opacity-100 transition-opacity">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Draggable title bar */}
       <div className="drag-region flex items-center justify-between px-2 sm:px-4 h-10 sm:h-12 shrink-0 relative z-10">
         <div className="flex items-center gap-2 no-drag">
@@ -1210,7 +1275,6 @@ export default function RoomPage() {
                 ? 'opacity-30 grayscale cursor-pointer hover:opacity-50' 
                 : 'text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)]'
             }`}
-            title={userPlan === 'free' ? "Pro Feature: Theme Customization" : "Toggle Theme"}
           >
             {isLightMode ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
           </button>
@@ -1223,6 +1287,12 @@ export default function RoomPage() {
               <Minus className="w-3.5 h-3.5" />
             </button>
           )}
+          <button 
+            onClick={() => setShowOnboarding(true)} 
+            className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
+          >
+            <HelpCircle className="w-3.5 h-3.5" />
+          </button>
           {/* Profile / Account button */}
           <div className={`rounded-lg overflow-hidden flex items-center justify-center transition-all ${hasProfile ? "ring-2 ring-indigo-500/50 shadow-lg shadow-indigo-500/20" : "ring-1 ring-[var(--glass-border)]"}`}>
             <UserButton 
@@ -1269,7 +1339,7 @@ export default function RoomPage() {
               <svg className="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
               </svg>
-              <span className="text-[0.625rem] text-cyan-400 font-semibold uppercase tracking-wider">AI Interviewer</span>
+              <span className="text-[0.625rem] text-cyan-400 font-semibold uppercase tracking-wider">Chintu Expert</span>
             </div>
             <p className="text-[0.8125rem] text-[var(--text-main)] opacity-90 leading-relaxed">
               {aiSpeechBubbles[aiSpeechBubbles.length - 1]}
@@ -1584,13 +1654,21 @@ export default function RoomPage() {
 
         {/* Button 4: Screen Recording */}
         <button
-          onClick={isScreenRecording ? stopScreenRecording : startScreenRecording}
+          onClick={() => {
+            if (userPlan === 'free') {
+              router.push("/pricing");
+              return;
+            }
+            if (isScreenRecording) stopScreenRecording();
+            else startScreenRecording();
+          }}
           className={`
-            no-drag w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all active:scale-90
+            no-drag w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all active:scale-90 relative
             ${isScreenRecording
               ? "bg-red-500 text-white shadow-[0_0_30px_rgba(239,68,68,0.4)]"
               : "bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)]"
             }
+            ${userPlan === 'free' ? 'opacity-50' : ''}
           `}
         >
           {isScreenRecording ? (
@@ -1598,9 +1676,16 @@ export default function RoomPage() {
               <div className="w-4 h-4 bg-white rounded-sm animate-pulse" />
             </div>
           ) : (
-            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
-            </svg>
+            <>
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
+              </svg>
+              {userPlan === 'free' && (
+                <div className="absolute -top-1 -right-1 bg-amber-500 rounded-full p-0.5 shadow-lg border border-white/20">
+                  <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+                </div>
+              )}
+            </>
           )}
         </button>
 
@@ -1982,6 +2067,18 @@ export default function RoomPage() {
           </div>
         </div>
       </div>
+    )}
+    {showProfile && (
+      <ProfileModal 
+        onClose={() => setShowProfile(false)} 
+      />
+    )}
+
+    {showOnboarding && (
+      <OnboardingModal 
+        isOpen={showOnboarding} 
+        onClose={() => setShowOnboarding(false)} 
+      />
     )}
     </div>
   );
