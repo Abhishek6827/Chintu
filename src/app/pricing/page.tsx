@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Check, Sparkles, Minus, Shield, Plus } from "lucide-react";
@@ -84,7 +83,6 @@ const PLANS = [
 
 export default function PricingPage() {
   const { user, isLoaded } = useUser();
-  const router = useRouter();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
   const [loading, setLoading] = useState<string | null>(null);
   

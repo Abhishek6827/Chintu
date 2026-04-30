@@ -239,6 +239,7 @@ export default function SetupPage() {
                     setIsInitiating(false);
                   }
                 } catch (err) {
+                  console.error(err);
                   alert("Error loading billing portal.");
                   setIsInitiating(false);
                 }
