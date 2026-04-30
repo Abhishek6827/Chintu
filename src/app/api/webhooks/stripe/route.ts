@@ -6,13 +6,16 @@ import { createAdminClient } from "@/utils/supabase/server";
 import { Resend } from "resend";
 import { getPaymentEmailHtml } from "@/utils/email-templates";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20" as any,
-});
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const PRICE_ID_MAP: Record<string, { plan: string; credits: number }> = {
+  // Pro Monthly
+  "price_1TRu3pLYcsTnVrvkVfZIjTLC": { plan: "pro", credits: 200 },
+  // Pro Annual
+  "price_1TRu4ILYcsTnVrvkcfBbwSBr": { plan: "pro", credits: 2400 }, // 200 * 12
+  // Elite Monthly
+  "price_1TRu4jLYcsTnVrvkJ7gkHA91": { plan: "elite", credits: 1000 },
+  // Elite Annual
+  "price_1TRu5ALYcsTnVrvk3dMorbBe": { plan: "elite", credits: 12000 }, // 1000 * 12
+};
 
 async function sendTelegramAlert(message: string) {
   const botToken = process.env.TELEGRAM_PAYMENT_BOT_TOKEN;
@@ -35,20 +38,13 @@ async function sendTelegramAlert(message: string) {
   }
 }
 
-// Map Price IDs to Plan and Credits
-// IMPORTANT: Update these with your real Stripe Price IDs
-const PRICE_ID_MAP: Record<string, { plan: string; credits: number }> = {
-  // Pro Monthly
-  "price_1TRu3pLYcsTnVrvkVfZIjTLC": { plan: "pro", credits: 200 },
-  // Pro Annual
-  "price_1TRu4ILYcsTnVrvkcfBbwSBr": { plan: "pro", credits: 2400 }, // 200 * 12
-  // Elite Monthly
-  "price_1TRu4jLYcsTnVrvkJ7gkHA91": { plan: "elite", credits: 1000 },
-  // Elite Annual
-  "price_1TRu5ALYcsTnVrvk3dMorbBe": { plan: "elite", credits: 12000 }, // 1000 * 12
-};
-
 export async function POST(req: Request) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+    apiVersion: "2024-06-20" as any,
+  });
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
+
   const body = await req.text();
   const signature = headers().get("Stripe-Signature") as string;
 

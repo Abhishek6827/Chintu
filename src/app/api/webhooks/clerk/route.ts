@@ -6,9 +6,9 @@ import { createAdminClient } from '@/utils/supabase/server'
 import { Resend } from 'resend'
 import { getWelcomeEmailHtml } from '@/utils/email-templates'
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
   // Get the headers
   const headerPayload = headers();
   const svix_id = headerPayload.get("svix-id");
