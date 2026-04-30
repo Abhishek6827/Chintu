@@ -114,8 +114,8 @@ function startServer() {
 function hideWindow() {
   if (!mainWindow) return;
   isHidden = true;
-  // Ghost Mode: Visible to user, but hidden from taskbar and capture
-  mainWindow.setIgnoreMouseEvents(false);
+  mainWindow.setOpacity(0);
+  mainWindow.setIgnoreMouseEvents(true);
   mainWindow.setSkipTaskbar(true);
   mainWindow.setContentProtection(true);
   mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
@@ -126,9 +126,9 @@ function hideWindow() {
 function showWindow() {
   if (!mainWindow) return;
   isHidden = false;
-  // Normal Mode: Visible to user but ALWAYS protected from screen capture
-  mainWindow.setContentProtection(true);  // NEVER disable — always invisible to screenshare
+  mainWindow.setOpacity(1);
   mainWindow.setIgnoreMouseEvents(false);
+  mainWindow.setContentProtection(false); 
   mainWindow.show();
   mainWindow.setSkipTaskbar(false);
   mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
@@ -378,7 +378,11 @@ ipcMain.handle("capture-screenshot", async () => {
     if (wasVisible) {
       // Restore window to fully opaque (CSS handles visual opacity)
       mainWindow.setOpacity(1);
-      // Note: content protection stays OFF because window is in "shown" state
+      mainWindow.setContentProtection(false);
+    } else {
+      // Keep hidden if it was already hidden
+      mainWindow.setOpacity(0);
+      mainWindow.setContentProtection(true);
     }
 
     if (sources.length === 0) return null;
