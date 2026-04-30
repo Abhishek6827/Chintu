@@ -78,48 +78,52 @@ export default function SetupPage() {
       setStatusText("✨ AI is structuring your profile...");
 
       try {
-        const res = await fetch("/api/refine-profile", {
+        localStorage.setItem("chintu_profile_refining", "true");
+        window.dispatchEvent(new Event("chintu_profile_refining"));
+
+        // Fire the API without awaiting it, so it runs in background
+        fetch("/api/refine-profile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rawText: aboutMe.trim() }),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.profile) {
-            // Save structured profile to Supabase via secure API
-            await fetch("/api/profile", {
+          keepalive: true, // Ensures the browser attempts to finish sending the request even if page unloads
+        }).then(res => {
+          if (!res.ok) {
+            console.error("Profile refine API returned:", res.status);
+            // Fallback save raw profile if AI fails
+            fetch("/api/profile", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                profile_data: data.profile,
-                raw_profile: aboutMe.trim(),
-              })
+              body: JSON.stringify({ raw_profile: aboutMe.trim() })
             });
-            setHasProfile(true);
           }
-        } else {
-          console.error("Profile refine API returned:", res.status);
-          await fetch("/api/profile", {
+        }).catch(err => {
+          console.error("Profile refinement failed:", err);
+          fetch("/api/profile", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ raw_profile: aboutMe.trim() })
           });
-        }
-      } catch (err) {
-        console.error("Profile refinement failed:", err);
-        await fetch("/api/profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ raw_profile: aboutMe.trim() })
+        }).finally(() => {
+          localStorage.removeItem("chintu_profile_refining");
+          window.dispatchEvent(new Event("chintu_profile_refining"));
         });
+        
+        // Let the state reflect that we are running the refinement, so they see the skip button
+      } catch (err) {
+        console.error("Failed to start refinement:", err);
+        localStorage.removeItem("chintu_profile_refining");
+        window.dispatchEvent(new Event("chintu_profile_refining"));
       }
-
-      setIsRefining(false);
+    } else {
+      // Direct navigation if no profile to refine
+      setStatusText("🎯 Synchronizing with neural network...");
+      window.location.href = "/room?jd=" + encodeURIComponent(jd.trim());
     }
-    
+  };
+
+  const handleSkipAndStart = () => {
     setStatusText("🎯 Synchronizing with neural network...");
-    // ALWAYS navigate to room — pass JD via URL param (sessionStorage is unreliable in Electron)
     window.location.href = "/room?jd=" + encodeURIComponent(jd.trim());
   };
 
@@ -208,22 +212,34 @@ export default function SetupPage() {
             </div>
 
             {/* Action Button */}
-            <button
-              onClick={handleStart}
-              disabled={!jd.trim() || (!hasProfile && !aboutMe.trim()) || isRefining}
-              className={`
-                w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative overflow-hidden group
-                ${jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining
-                  ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95"
-                  : "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
-                }
-              `}
-            >
-              <span className="relative z-10">{isRefining ? statusText : "Initiate Session →"}</span>
-              {jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleStart}
+                disabled={!jd.trim() || (!hasProfile && !aboutMe.trim()) || isRefining}
+                className={`
+                  w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative overflow-hidden group
+                  ${jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining
+                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95"
+                    : "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                  }
+                `}
+              >
+                <span className="relative z-10">{isRefining ? statusText : "Initiate Session →"}</span>
+                {jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
+                )}
+              </button>
+
+              {isRefining && (
+                <button
+                  onClick={handleSkipAndStart}
+                  className="w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 text-indigo-500 bg-indigo-50 hover:bg-indigo-100 active:scale-95 border border-indigo-100 shadow-sm"
+                >
+                  Skip & Start Interview
+                  <p className="text-[8px] font-medium text-indigo-400 mt-0.5 tracking-normal normal-case">Profile will refine in background</p>
+                </button>
               )}
-            </button>
+            </div>
 
             <button 
               onClick={async () => {

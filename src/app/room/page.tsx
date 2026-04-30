@@ -119,6 +119,20 @@ export default function RoomPage() {
   const [showClearHistoryConfirm, setShowClearHistoryConfirm] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [showReadingGuide, setShowReadingGuide] = useState(false);
+  const [isBackgroundRefining, setIsBackgroundRefining] = useState(false);
+
+  useEffect(() => {
+    const checkRefining = () => {
+      setIsBackgroundRefining(localStorage.getItem("chintu_profile_refining") === "true");
+    };
+    checkRefining();
+    window.addEventListener("chintu_profile_refining", checkRefining);
+    const interval = setInterval(checkRefining, 2000); // Poll occasionally just in case
+    return () => {
+      window.removeEventListener("chintu_profile_refining", checkRefining);
+      clearInterval(interval);
+    };
+  }, []);
 
   const supabase = createClient();
 
@@ -1469,6 +1483,23 @@ export default function RoomPage() {
             {(updateStatus.status === "error" || updateStatus.status === "up-to-date" || updateStatus.status === "ready") && (
                <button onClick={() => setUpdateStatus(null)} className="ml-2 opacity-50 hover:opacity-100 transition-opacity">✕</button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Background Profile Refining Indicator */}
+      {isBackgroundRefining && (
+        <div className="px-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 rounded-xl px-4 py-3 text-xs flex items-center justify-between shadow-[0_0_15px_rgba(99,102,241,0.15)]">
+            <div className="flex items-center gap-3">
+              <div className="flex gap-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "300ms" }}></div>
+              </div>
+              <span className="font-bold tracking-tight">AI is optimizing your profile in the background...</span>
+            </div>
+            <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Almost Done</span>
           </div>
         </div>
       )}

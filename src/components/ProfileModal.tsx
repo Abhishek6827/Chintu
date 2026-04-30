@@ -71,6 +71,9 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
     if (!rawText.trim()) return;
     setIsRefining(true);
     setError("");
+    localStorage.setItem("chintu_profile_refining", "true");
+    window.dispatchEvent(new Event("chintu_profile_refining"));
+
     try {
       const res = await fetch("/api/refine-profile", {
         method: "POST",
@@ -82,6 +85,7 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
       if (data.profile) {
         setProfile(data.profile);
         if (user?.id) {
+          // Note: Server now saves this automatically, but doing it here again is fine
           await supabase.from('profiles').update({
             profile_data: data.profile,
             raw_profile: rawText.trim(),
@@ -92,8 +96,11 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
       }
     } catch (err: any) {
       setError(err.message || "Failed to refine profile");
+    } finally {
+      setIsRefining(false);
+      localStorage.removeItem("chintu_profile_refining");
+      window.dispatchEvent(new Event("chintu_profile_refining"));
     }
-    setIsRefining(false);
   };
 
   const handleDelete = async () => {
@@ -330,6 +337,15 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
             Please wait • Making you look awesome<br />
             <span className="text-[var(--text-dim)] opacity-80 text-[0.65rem] normal-case tracking-normal">This may take a few moments</span>
           </p>
+          <button 
+            onClick={() => {
+              // Dismiss UI, refinement continues in background
+              onClose();
+            }} 
+            className="mt-8 px-6 py-3 rounded-xl bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-main)] text-[10px] font-black uppercase tracking-widest hover:bg-[var(--glass-bg)] transition-all active:scale-95 shadow-lg shadow-black/20"
+          >
+            Skip & Run in Background
+          </button>
         </div>
       )}
       {/* Profile Delete Confirmation */}

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import Groq from "groq-sdk";
 import OpenAI from "openai";
+import { auth } from "@clerk/nextjs/server";
+import { createAdminClient } from "@/utils/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -167,9 +169,28 @@ Rules:
       jsonStr = jsonMatch[1].trim();
     }
 
+    // Helper to save to Supabase
+    const saveToSupabase = async (profileData: any) => {
+      try {
+        const { userId } = auth();
+        if (userId) {
+          const supabase = createAdminClient();
+          await supabase.from("profiles").update({
+            profile_data: profileData,
+            raw_profile: rawText,
+            updated_at: new Date().toISOString()
+          }).eq("id", userId);
+          console.log(`[/api/refine-profile] ✓ Saved to Supabase for user ${userId}`);
+        }
+      } catch (e) {
+        console.error("[/api/refine-profile] Failed to save to Supabase:", e);
+      }
+    };
+
     // Try to parse
     try {
       const profile = JSON.parse(jsonStr);
+      await saveToSupabase(profile);
       return NextResponse.json({ profile });
     } catch {
       // Try to find JSON object in the response
@@ -177,6 +198,7 @@ Rules:
       if (objectMatch) {
         try {
           const profile = JSON.parse(objectMatch[0]);
+          await saveToSupabase(profile);
           return NextResponse.json({ profile });
         } catch {
           return NextResponse.json({ error: "Failed to parse AI response", raw: rawContent }, { status: 500 });
