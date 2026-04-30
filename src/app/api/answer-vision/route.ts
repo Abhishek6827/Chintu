@@ -99,7 +99,6 @@ NEVER respond in multiple modes at once — pick ONE mode and stick to it.
 - NEVER use words like "might", "seems", "appears", "potentially", "could be"
   — if you found a bug, state it directly; if no bug exists, say "No bugs found"
 - NEVER add analysis or suggestions after the Fixed Code — Root Cause ke baad STOP
-- If no bugs found: say "No bugs found" with 1 line explanation
 
 ---
 
@@ -167,6 +166,11 @@ const QWEN_FALLBACK = [
   "qwen3-vl-flash"
 ];
 
+// ─── Check if model is a Qwen 3.6 variant ─────────────────
+function isQwenNativeVision(model: string): boolean {
+  return model === "qwen3.6" || model === "qwen3.6-plus";
+}
+
 export async function POST(req: NextRequest) {
   const { userId } = auth();
   const supabaseAdmin = createAdminClient();
@@ -175,24 +179,28 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // ─── Credit Check ─────────────────────────────────────────
+    // ─── Credit Check (graceful — don't block if profile missing) ──
+    let currentCredits = 999; // default: allow if no profile found
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("credits")
       .eq("id", userId)
-      .single();
+      .maybeSingle(); // ← maybeSingle instead of single — no error if 0 rows
 
-    if (profileError || !profile) {
+    if (profileError) {
       console.error("[/api/answer-vision] Profile fetch error:", profileError);
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+      // Continue anyway — don't block the user
+    } else if (profile) {
+      currentCredits = profile.credits;
     }
 
-    if (profile.credits <= 0) {
+    if (currentCredits <= 0) {
       return NextResponse.json({ 
         error: "Insufficient credits. Please upgrade your plan.",
         code: "OUT_OF_CREDITS"
       }, { status: 403 });
     }
+
     const apiKeys = [
       process.env.GROQ_API_KEY,
       process.env.GROQ_API_KEY_2,
@@ -200,10 +208,11 @@ export async function POST(req: NextRequest) {
     ].filter(Boolean) as string[];
 
     const openRouterKey = process.env.OPENROUTER_API_KEY || "";
+    const dashscopeKey = process.env.DASHSCOPE_API_KEY || "";
 
-    console.log(`[/api/answer-vision] Groq keys: ${apiKeys.length} | OpenRouter: ${openRouterKey ? "yes" : "no"}`);
+    console.log(`[/api/answer-vision] Groq keys: ${apiKeys.length} | OpenRouter: ${openRouterKey ? "yes" : "no"} | DashScope: ${dashscopeKey ? "yes" : "no"}`);
 
-    if (apiKeys.length === 0 && !openRouterKey) {
+    if (apiKeys.length === 0 && !openRouterKey && !dashscopeKey) {
       return NextResponse.json({ error: "No API keys configured" }, { status: 500 });
     }
 
@@ -213,7 +222,7 @@ export async function POST(req: NextRequest) {
       aboutYou = "",
       responseLength = "coding",
       additionalContext = "",
-      conversationHistory = [],   // ← NEW: previous messages for context
+      conversationHistory = [],
       selectedModel = "gpt-oss-120b",
     } = await req.json();
 
@@ -227,15 +236,14 @@ export async function POST(req: NextRequest) {
 
     const lengthInstruction = RESPONSE_PROMPTS[responseLength] || RESPONSE_PROMPTS.coding;
     const isCoding = responseLength === "coding";
+    const useQwenNative = isQwenNativeVision(selectedModel);
 
-    console.log(`[/api/answer-vision] Mode: ${responseLength} | Images: ${images.length} | Model: ${selectedModel}`);
+    console.log(`[/api/answer-vision] Mode: ${responseLength} | Images: ${images.length} | Model: ${selectedModel} | Native Vision: ${useQwenNative}`);
 
-    // ====================================================================
-    // STEP 1: Extract Text from Image using Vision Model (llama-4-scout)
-    // ====================================================================
-    const visionModel = "meta-llama/llama-4-scout-17b-16e-instruct";
-    const visionPrompt = "Extract all text, code, and UI elements from these screenshots accurately. Transcribe everything you see. Do not solve the problem or provide answers.";
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 10000;
 
+    // ─── Build image content parts ────────────────────────────
     const contentParts: any[] = [];
     for (const img of images) {
       contentParts.push({
@@ -245,93 +253,6 @@ export async function POST(req: NextRequest) {
         },
       });
     }
-
-    contentParts.push({
-      type: "text",
-      text: additionalContext
-        ? `User added context: "${additionalContext}". Please include this in your extraction.`
-        : "Transcribe the screenshot.",
-    });
-
-    let extractedText = "";
-    let visionSuccess = false;
-    let lastError: any;
-
-    const MAX_RETRIES = 3;
-    const RETRY_DELAY_MS = 10000;
-
-    console.log(`[/api/answer-vision] Step 1: Extracting text using ${visionModel}...`);
-
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      if (attempt > 0) await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
-
-      for (let i = 0; i < apiKeys.length; i++) {
-        try {
-          const groq = new Groq({ apiKey: apiKeys[i] });
-          const response = await groq.chat.completions.create({
-            model: visionModel,
-            stream: false,
-            max_tokens: 2048,
-            messages: [
-              { role: "system", content: visionPrompt },
-              { role: "user", content: contentParts },
-            ],
-          });
-          extractedText = response.choices[0]?.message?.content || "";
-          visionSuccess = true;
-          break;
-        } catch (err) {
-          lastError = err;
-        }
-      }
-      if (visionSuccess) break;
-    }
-
-    if (!visionSuccess && openRouterKey) {
-      console.log(`[/api/answer-vision] Groq vision failed. Trying OpenRouter...`);
-      try {
-        const openrouter = new OpenAI({
-          baseURL: "https://openrouter.ai/api/v1",
-          apiKey: openRouterKey,
-        });
-        const response = await openrouter.chat.completions.create({
-          model: "meta-llama/llama-3.3-70b-instruct:free",
-          stream: false,
-          max_tokens: 2048,
-          messages: [
-            { role: "system", content: visionPrompt },
-            { role: "user", content: contentParts },
-          ],
-        });
-        extractedText = response.choices[0]?.message?.content || "";
-        visionSuccess = true;
-      } catch (err) {
-        lastError = err;
-      }
-    }
-
-    if (!visionSuccess) {
-      throw new Error("Vision extraction failed: " + (lastError?.message || "Unknown error"));
-    }
-
-    console.log(`[/api/answer-vision] ✓ Step 1 Complete. Extracted ${extractedText.length} characters.`);
-
-    // ====================================================================
-    // STEP 2: Generate Final Answer using Selected Model
-    // ====================================================================
-    const MODEL_MAP: Record<string, { provider: string; groq?: string; openrouter?: string; dashscope?: string }> = {
-      "gpt-oss-120b": { provider: "groq", groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
-      "qwen3-Coder": { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
-      "nemotron-3-120b": { provider: "openrouter", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
-      "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
-      "qwen3.6-plus": { provider: "dashscope", dashscope: "qwen3.6-plus" },
-      "llama-3.3-70b": { provider: "groq", groq: "llama-3.3-70b-versatile", openrouter: "meta-llama/llama-3.3-70b-instruct" },
-    };
-
-    const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
-    const isDashScope = modelConfig.provider === "dashscope";
-    const groqModel = modelConfig.groq || "";
-    const openrouterModel = modelConfig.openrouter || "";
 
     const aboutYouBlock = aboutYou
       ? `\n\nHere is the candidate's background — use this to personalize your answers with their real experience, projects, and skills. Speak as if YOU are this person:\n---\n${aboutYou}\n---`
@@ -370,8 +291,6 @@ Rules:
 - Avoid robotic or overly formal phrasing
 - When relevant, naturally reference the candidate's real projects, experience, and skills from their background`;
 
-    const finalTranscript = `[Screenshot Transcription]:\n${extractedText}\n\n[User Context]: ${additionalContext || "None"}`;
-
     const sanitizedHistory = conversationHistory.map((msg: any) => {
       if (Array.isArray(msg.content)) {
         const textParts = msg.content.filter((part: any) => part.type === "text").map((part: any) => part.text).join("\n");
@@ -385,55 +304,200 @@ Rules:
     let stream: any;
     let finalError: any;
 
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      if (attempt > 0) await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+    // ====================================================================
+    // PATH A: Qwen 3.6 Plus → Native Vision (send images directly to Qwen)
+    // ====================================================================
+    if (useQwenNative) {
+      console.log(`[/api/answer-vision] PATH A: Qwen Native Vision`);
 
-      // DashScope routing for vision Step 2
-      if (isDashScope) {
-        const modelsToTry = (selectedModel === "qwen3.6" || selectedModel === "qwen3.6-plus")
-          ? [...QWEN_PRIORITY, ...QWEN_FALLBACK]
-          : [modelConfig.dashscope!];
+      // Add user context to content parts
+      contentParts.push({
+        type: "text",
+        text: additionalContext
+          ? `User question/context: "${additionalContext}". Answer based on what you see in the screenshots.`
+          : "Analyze the screenshots and provide your answer.",
+      });
 
-        for (const modelId of modelsToTry) {
-          try {
-            console.log(`[/api/answer-vision] Step 2: Using DashScope model: ${modelId}`);
-            const dashscope = new OpenAI({
-              baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-              apiKey: process.env.DASHSCOPE_API_KEY || "",
-            });
-            stream = await dashscope.chat.completions.create({
-              model: modelId,
-              stream: true,
-              max_tokens: 2048,
-              messages: [
-                { role: "system", content: systemPrompt },
-                ...trimmedHistory,
-                { role: "user", content: finalTranscript },
-              ],
-            });
-            actualModelUsed = modelId;
-            console.log(`[/api/answer-vision] ✓ DashScope stream created with ${modelId}`);
-            break;
-          } catch (err: any) {
-            finalError = err;
-            console.error(`[/api/answer-vision] ✗ DashScope model ${modelId} failed:`, err?.message?.slice(0, 100));
-            continue;
-          }
+      const modelsToTry = [...QWEN_PRIORITY, ...QWEN_FALLBACK];
+
+      for (const modelId of modelsToTry) {
+        try {
+          console.log(`[/api/answer-vision] Trying Qwen model: ${modelId}`);
+          const dashscope = new OpenAI({
+            baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+            apiKey: dashscopeKey,
+          });
+          stream = await dashscope.chat.completions.create({
+            model: modelId,
+            stream: true,
+            max_tokens: 2048,
+            messages: [
+              { role: "system", content: systemPrompt },
+              ...trimmedHistory,
+              { role: "user", content: contentParts },
+            ],
+          });
+          actualModelUsed = modelId;
+          console.log(`[/api/answer-vision] ✓ Qwen native vision stream created with ${modelId}`);
+          break;
+        } catch (err: any) {
+          finalError = err;
+          console.error(`[/api/answer-vision] ✗ Qwen model ${modelId} failed:`, err?.message?.slice(0, 100));
+          continue;
         }
-        if (stream) break;
-        break;
       }
 
-      if (modelConfig.provider === "openrouter") {
-        console.log(`[/api/answer-vision] Explicitly using OpenRouter for ${selectedModel}`);
-        break;
-      } else {
+      // If all Qwen models fail, fall back to Scout extraction + any available model
+      if (!stream) {
+        console.log(`[/api/answer-vision] All Qwen native models failed. Falling back to Scout extraction...`);
+        // Fall through to Path B logic below
+      }
+    }
+
+    // ====================================================================
+    // PATH B: Non-Qwen model → Scout extracts text → Selected model answers
+    // Also serves as fallback if Path A (Qwen native) failed
+    // ====================================================================
+    if (!stream) {
+      console.log(`[/api/answer-vision] PATH B: Scout extraction → Selected model answer`);
+
+      // ─── STEP 1: Extract text from images using Scout ───────
+      const visionModel = "meta-llama/llama-4-scout-17b-16e-instruct";
+      const visionPrompt = "Extract all text, code, and UI elements from these screenshots accurately. Transcribe everything you see. Do not solve the problem or provide answers.";
+
+      const extractionParts = [...contentParts]; // clone
+      extractionParts.push({
+        type: "text",
+        text: additionalContext
+          ? `User added context: "${additionalContext}". Please include this in your extraction.`
+          : "Transcribe the screenshot.",
+      });
+
+      let extractedText = "";
+      let visionSuccess = false;
+
+      console.log(`[/api/answer-vision] Step 1: Extracting text using ${visionModel}...`);
+
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        if (attempt > 0) await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+
         for (let i = 0; i < apiKeys.length; i++) {
           try {
-            console.log(`[/api/answer-vision] Step 2: Trying key ${i + 1} with ${groqModel}...`);
             const groq = new Groq({ apiKey: apiKeys[i] });
-            stream = await groq.chat.completions.create({
-              model: groqModel,
+            const response = await groq.chat.completions.create({
+              model: visionModel,
+              stream: false,
+              max_tokens: 2048,
+              messages: [
+                { role: "system", content: visionPrompt },
+                { role: "user", content: extractionParts },
+              ],
+            });
+            extractedText = response.choices[0]?.message?.content || "";
+            visionSuccess = true;
+            break;
+          } catch (err) {
+            finalError = err;
+          }
+        }
+        if (visionSuccess) break;
+      }
+
+      // Scout extraction via OpenRouter fallback
+      if (!visionSuccess && openRouterKey) {
+        console.log(`[/api/answer-vision] Groq Scout failed. Trying OpenRouter...`);
+        try {
+          const openrouter = new OpenAI({
+            baseURL: "https://openrouter.ai/api/v1",
+            apiKey: openRouterKey,
+          });
+          const response = await openrouter.chat.completions.create({
+            model: "meta-llama/llama-4-scout-17b-16e-instruct",
+            stream: false,
+            max_tokens: 2048,
+            messages: [
+              { role: "system", content: visionPrompt },
+              { role: "user", content: extractionParts },
+            ],
+          });
+          extractedText = response.choices[0]?.message?.content || "";
+          visionSuccess = true;
+        } catch (err) {
+          finalError = err;
+        }
+      }
+
+      if (!visionSuccess) {
+        throw new Error("Vision extraction failed: " + (finalError?.message || "Unknown error"));
+      }
+
+      console.log(`[/api/answer-vision] ✓ Step 1 Complete. Extracted ${extractedText.length} characters.`);
+
+      // ─── STEP 2: Send extracted text to the selected model ──
+      const finalTranscript = `[Screenshot Transcription]:\n${extractedText}\n\n[User Context]: ${additionalContext || "None"}`;
+
+      const MODEL_MAP: Record<string, { provider: string; groq?: string; openrouter?: string; dashscope?: string }> = {
+        "gpt-oss-120b": { provider: "groq", groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
+        "qwen3-Coder": { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
+        "nemotron-3-120b": { provider: "openrouter", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
+        "llama-3.3-70b": { provider: "groq", groq: "llama-3.3-70b-versatile", openrouter: "meta-llama/llama-3.3-70b-instruct" },
+        // Qwen falls here only if native vision failed (Path A fallback)
+        "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
+        "qwen3.6-plus": { provider: "dashscope", dashscope: "qwen3.6-plus" },
+      };
+
+      const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
+      const isDashScope = modelConfig.provider === "dashscope";
+      const groqModel = modelConfig.groq || "";
+      const openrouterModel = modelConfig.openrouter || "";
+
+      // Try selected model
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        if (attempt > 0) await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+
+        if (isDashScope && dashscopeKey) {
+          const modelsToTry = isQwenNativeVision(selectedModel)
+            ? [...QWEN_PRIORITY, ...QWEN_FALLBACK]
+            : [modelConfig.dashscope!];
+
+          for (const modelId of modelsToTry) {
+            try {
+              console.log(`[/api/answer-vision] Step 2: Using DashScope model: ${modelId}`);
+              const dashscope = new OpenAI({
+                baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+                apiKey: dashscopeKey,
+              });
+              stream = await dashscope.chat.completions.create({
+                model: modelId,
+                stream: true,
+                max_tokens: 2048,
+                messages: [
+                  { role: "system", content: systemPrompt },
+                  ...trimmedHistory,
+                  { role: "user", content: finalTranscript },
+                ],
+              });
+              actualModelUsed = modelId;
+              console.log(`[/api/answer-vision] ✓ DashScope stream created with ${modelId}`);
+              break;
+            } catch (err: any) {
+              finalError = err;
+              console.error(`[/api/answer-vision] ✗ DashScope model ${modelId} failed:`, err?.message?.slice(0, 100));
+              continue;
+            }
+          }
+          if (stream) break;
+        }
+
+        if (modelConfig.provider === "openrouter" && openRouterKey) {
+          try {
+            console.log(`[/api/answer-vision] Step 2: Using OpenRouter with ${openrouterModel}`);
+            const openrouter = new OpenAI({
+              baseURL: "https://openrouter.ai/api/v1",
+              apiKey: openRouterKey,
+            });
+            stream = await openrouter.chat.completions.create({
+              model: openrouterModel,
               stream: true,
               max_tokens: 2048,
               messages: [
@@ -443,43 +507,46 @@ Rules:
               ],
             });
             actualModelUsed = selectedModel;
+            console.log(`[/api/answer-vision] ✓ OpenRouter stream created`);
             break;
           } catch (err) {
             finalError = err;
           }
         }
-      }
-      if (stream) break;
-    }
 
-    if (!stream && openRouterKey) {
-      console.log(`[/api/answer-vision] Step 2: Groq failed. Trying OpenRouter with ${openrouterModel}...`);
-      try {
-        const openrouter = new OpenAI({
-          baseURL: "https://openrouter.ai/api/v1",
-          apiKey: openRouterKey,
-        });
-        stream = await openrouter.chat.completions.create({
-          model: openrouterModel,
-          stream: true,
-          max_tokens: 2048,
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...trimmedHistory,
-            { role: "user", content: finalTranscript },
-          ],
-        });
-        actualModelUsed = selectedModel;
-        console.log(`[/api/answer-vision] ✓ OpenRouter stream created`);
-      } catch (err) {
-        finalError = err;
-        console.log(`[/api/answer-vision] OpenRouter with ${openrouterModel} failed. Falling back...`);
-        let fallbackStream;
+        if (groqModel) {
+          for (let i = 0; i < apiKeys.length; i++) {
+            try {
+              console.log(`[/api/answer-vision] Step 2: Trying Groq key ${i + 1} with ${groqModel}...`);
+              const groq = new Groq({ apiKey: apiKeys[i] });
+              stream = await groq.chat.completions.create({
+                model: groqModel,
+                stream: true,
+                max_tokens: 2048,
+                messages: [
+                  { role: "system", content: systemPrompt },
+                  ...trimmedHistory,
+                  { role: "user", content: finalTranscript },
+                ],
+              });
+              actualModelUsed = selectedModel;
+              break;
+            } catch (err) {
+              finalError = err;
+            }
+          }
+        }
+        if (stream) break;
+      }
+
+      // ─── FALLBACK: If selected model failed, Scout answers directly ──
+      if (!stream) {
+        console.log(`[/api/answer-vision] Selected model failed. Fallback: Scout answering directly...`);
         for (let i = 0; i < apiKeys.length; i++) {
           try {
-            console.log(`[/api/answer-vision] Fallback: Trying Groq key ${i + 1} with meta-llama/llama-4-scout-17b-16e-instruct...`);
+            console.log(`[/api/answer-vision] Fallback: Trying Groq key ${i + 1} with Scout...`);
             const groq = new Groq({ apiKey: apiKeys[i] });
-            fallbackStream = await groq.chat.completions.create({
+            stream = await groq.chat.completions.create({
               model: "meta-llama/llama-4-scout-17b-16e-instruct",
               stream: true,
               max_tokens: 2048,
@@ -489,12 +556,11 @@ Rules:
                 { role: "user", content: finalTranscript },
               ],
             });
-            stream = fallbackStream;
-            actualModelUsed = "Llama-4-Scout (Groq Fallback)";
-            console.log(`[/api/answer-vision] ✓ Groq fallback stream created`);
+            actualModelUsed = "Llama-4-Scout (Fallback)";
+            console.log(`[/api/answer-vision] ✓ Scout fallback stream created`);
             break;
-          } catch (fallbackGroqErr) {
-            finalError = fallbackGroqErr;
+          } catch (err) {
+            finalError = err;
           }
         }
       }
@@ -503,10 +569,12 @@ Rules:
     if (!stream) throw finalError || new Error("All API keys failed for selected model.");
 
     // ─── Deduct Credit ────────────────────────────────────────
-    await supabaseAdmin
-      .from("profiles")
-      .update({ credits: profile.credits - 1 })
-      .eq("id", userId);
+    if (profile) {
+      await supabaseAdmin
+        .from("profiles")
+        .update({ credits: currentCredits - 1 })
+        .eq("id", userId);
+    }
 
     // ─── Stream with <think> tag filter ───────────────────────
     const encoder = new TextEncoder();

@@ -306,15 +306,23 @@ export default function RoomPage() {
   useEffect(() => {
     if (!isLoaded) return;
     
-    const jd = sessionStorage.getItem("jobDescription");
+    // Read JD from URL param (primary) or sessionStorage (fallback)
+    const params = new URLSearchParams(window.location.search);
+    const jdFromUrl = params.get("jd");
+    const jdFromSession = sessionStorage.getItem("jobDescription");
+    const jd = jdFromUrl || jdFromSession || "";
+    
     if (!jd) { 
       router.push("/"); 
       return; 
     }
+    
+    // Persist to sessionStorage so it survives within the session
+    sessionStorage.setItem("jobDescription", jd);
     setJobDescription(jd);
 
     const initProfile = async () => {
-      // 1. Try cloud only
+      // 1. Try cloud
       if (user?.id) {
         const { data } = await supabase
           .from('profiles')
@@ -323,16 +331,23 @@ export default function RoomPage() {
           .single();
         
         if (data?.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
-          // Instead of saving to disk, we can just use the context from here or keep it in state
-          // For now, let's keep getProfileContext as is but we'll need to update it to use cloud if needed
-          // Actually, we'll keep using the stored profile but we'll manually set it in localStorage as a temporary cache ONLY if needed,
-          // but the user said "dont use localdisk at all".
-          setProfileContext(JSON.stringify(data.profile_data)); // Use raw JSON or formatted string
+          setProfileContext(JSON.stringify(data.profile_data));
           setHasProfile(true);
-        } else {
-          router.push("/");
+          return;
         }
       }
+      
+      // 2. Check for pending raw profile (fallback from failed refinement)
+      const pendingRaw = sessionStorage.getItem("chintu_pending_raw_profile");
+      if (pendingRaw) {
+        // Use raw text as basic context until refinement succeeds
+        setProfileContext(pendingRaw);
+        setHasProfile(true);
+        return;
+      }
+      
+      // 3. No profile anywhere — don't block, just proceed without profile
+      setHasProfile(false);
     };
     initProfile();
 

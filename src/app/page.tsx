@@ -21,10 +21,6 @@ export default function SetupPage() {
   // Handle hydration / Initial load
   useEffect(() => {
     setMounted(true);
-    
-    // Clear any previous session context on landing page mount
-    sessionStorage.removeItem("jobDescription");
-    sessionStorage.removeItem("chintu_pending_raw_profile");
 
     const checkProfile = async () => {
       if (!user?.id) return;
@@ -59,12 +55,10 @@ export default function SetupPage() {
 
   const handleStart = async () => {
     if (!jd.trim()) return;
-    sessionStorage.setItem("jobDescription", jd.trim());
 
     if (aboutMe.trim() && !hasProfile) {
       setIsRefining(true);
       setStatusText("✨ AI is structuring your profile...");
-      let profileSaved = false;
 
       try {
         const res = await fetch("/api/refine-profile", {
@@ -76,35 +70,36 @@ export default function SetupPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.profile) {
-            // Save to Supabase Cloud ONLY
+            // Save structured profile to Supabase
             const { error: upsertError } = await supabase
               .from('profiles')
-              .upsert({
-                id: user.id,
+              .update({
                 profile_data: data.profile,
                 raw_profile: aboutMe.trim(),
                 updated_at: new Date().toISOString()
-              });
+              })
+              .eq('id', user.id);
 
             if (upsertError) {
               console.error("Failed to sync profile to Cloud:", upsertError);
             }
-            profileSaved = true;
+            setHasProfile(true);
           }
+        } else {
+          console.error("Profile refine API returned:", res.status);
+          // Fallback: save raw text so room page can still use it
+          sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
         }
       } catch (err) {
-        console.error("Profile refinement failed", err);
+        console.error("Profile refinement failed:", err);
+        // Fallback: save raw text for later refinement in room
+        sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
       }
 
-      if (!profileSaved) {
-        setIsRefining(false);
-        setError("Could not structure your profile. Please try again with more detail.");
-        return;
-      }
       setIsRefining(false);
-      setHasProfile(true);
     }
-    router.push("/room");
+    // ALWAYS navigate to room — pass JD via URL param (sessionStorage is unreliable in Electron)
+    window.location.href = "/room?jd=" + encodeURIComponent(jd.trim());
   };
 
   return (
