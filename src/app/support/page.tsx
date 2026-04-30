@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function SupportPage() {
   const { user, isLoaded } = useUser();
-  const router = useRouter();
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);

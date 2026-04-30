@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Check, Sparkles, ArrowRight, Minus, Shield } from "lucide-react";
+import { Check, Sparkles, Minus, Shield } from "lucide-react";
 
 const PLANS = [
   {
