@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
     // Send to Telegram
     const tgToken = process.env.TELEGRAM_SUPPORT_BOT_TOKEN;
-    const tgChatId = process.env.TELEGRAM_SUPPORT_CHAT_ID;
+    const tgChatId = process.env.TELEGRAM_CHAT_ID;
 
     if (!tgToken || !tgChatId) {
       console.error("[/api/support] Missing Telegram env vars");

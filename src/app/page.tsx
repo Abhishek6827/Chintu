@@ -24,14 +24,20 @@ export default function SetupPage() {
     setMounted(true);
 
     const checkProfile = async () => {
-      const storedData = sessionStorage.getItem("profile_data");
-      const storedRaw = sessionStorage.getItem("raw_profile");
-
-      if (storedData) {
-        setHasProfile(true);
-        if (storedRaw) setAboutMe(storedRaw);
-      } else {
-        setHasProfile(false);
+      // Fetch profile via secure backend API
+      try {
+        const res = await fetch("/api/profile");
+        if (res.ok) {
+          const { profile: profileRow } = await res.json();
+          if (profileRow?.profile_data && Object.keys(profileRow.profile_data).length > 0) {
+            setHasProfile(true);
+            if (profileRow.raw_profile) setAboutMe(profileRow.raw_profile);
+          } else {
+            setHasProfile(false);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching profile via API:", err);
       }
     };
 
@@ -67,17 +73,32 @@ export default function SetupPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.profile) {
-            sessionStorage.setItem("profile_data", JSON.stringify(data.profile));
-            sessionStorage.setItem("raw_profile", aboutMe.trim());
+            // Save structured profile to Supabase via secure API
+            await fetch("/api/profile", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                profile_data: data.profile,
+                raw_profile: aboutMe.trim(),
+              })
+            });
             setHasProfile(true);
           }
         } else {
           console.error("Profile refine API returned:", res.status);
-          sessionStorage.setItem("raw_profile", aboutMe.trim());
+          await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ raw_profile: aboutMe.trim() })
+          });
         }
       } catch (err) {
         console.error("Profile refinement failed:", err);
-        sessionStorage.setItem("raw_profile", aboutMe.trim());
+        await fetch("/api/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ raw_profile: aboutMe.trim() })
+        });
       }
 
       setIsRefining(false);

@@ -121,35 +121,49 @@ export default function RoomPage() {
   // ─── Fetch Credits Helper ──────────────────────────────────
   const refreshCredits = useCallback(async () => {
     if (!user?.id) return;
-    const { data } = await supabase
-      .from('profiles')
-      .select('credits')
-      .eq('id', user.id)
-      .maybeSingle();
-    if (data) setUserCredits(data.credits);
-  }, [user?.id, supabase]);
+    try {
+      const res = await fetch("/api/profile");
+      if (res.ok) {
+        const { profile } = await res.json();
+        if (profile) setUserCredits(profile.credits);
+      }
+    } catch (err) {
+      console.error("Error refreshing credits:", err);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     const initRoom = async () => {
       if (!isLoaded || !isSignedIn || !user?.id) return;
       
-      // 1. Fetch Credits
-      refreshCredits();
-      
-      // 2. Fetch History from Supabase
-      const { data } = await supabase
-        .from('profiles')
-        .select('history')
-        .eq('id', user.id)
-        .maybeSingle();
-      
-      if (data?.history && Array.isArray(data.history)) {
-        setHistory(data.history);
+      try {
+        const res = await fetch("/api/profile");
+        if (res.ok) {
+          const { profile } = await res.json();
+          if (profile) {
+            // Set Credits
+            if (profile.credits !== undefined) setUserCredits(profile.credits);
+            
+            // Set History
+            if (profile.history && Array.isArray(profile.history)) {
+              setHistory(profile.history);
+            }
+
+            // Set Theme
+            if (profile.theme) {
+              const cloudTheme = profile.theme === 'light';
+              setIsLightMode(cloudTheme);
+              localStorage.setItem("chintu_theme", cloudTheme ? "light" : "dark");
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error initializing room from API:", err);
       }
     };
     
     initRoom();
-  }, [isLoaded, isSignedIn, user?.id, supabase, refreshCredits]);
+  }, [isLoaded, isSignedIn, user?.id]);
 
   const saveToHistory = useCallback(async () => {
     if (answers.length === 0 || !user?.id) return;
@@ -164,20 +178,22 @@ export default function RoomPage() {
     const updatedHistory = [newSession, ...history].slice(0, 5); // Keep only last 5 sessions
     setHistory(updatedHistory);
     
-    // Save to Supabase
-    await supabase
-      .from('profiles')
-      .update({ history: updatedHistory })
-    // Save to Supabase (fails silently if RLS blocked)
-    try {
-      await supabase.from('profiles').update({ history: updatedHistory }).eq('id', user?.id);
-    } catch {}
-  }, [answers, history, user?.id, supabase]);
+    // Save to API via secure backend
+    await fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ history: updatedHistory })
+    });
+  }, [answers, history, user?.id]);
 
   const clearHistory = async () => {
     if (!user?.id) return;
     setHistory([]);
-    try { await supabase.from('profiles').update({ history: [] }).eq('id', user?.id); } catch {}
+    await fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ history: [] })
+    });
     setShowClearHistoryConfirm(false);
   };
 
@@ -185,7 +201,11 @@ export default function RoomPage() {
     if (!user?.id) return;
     const updatedHistory = history.filter(s => s.id !== id);
     setHistory(updatedHistory);
-    try { await supabase.from('profiles').update({ history: updatedHistory }).eq('id', user?.id); } catch {}
+    await fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ history: updatedHistory })
+    });
   };
 
   const exportHistory = () => {
@@ -279,7 +299,11 @@ export default function RoomPage() {
     localStorage.setItem("chintu_theme", newTheme ? "light" : "dark");
     if (user?.id) {
       try {
-        await supabase.from('profiles').update({ theme: newTheme ? 'light' : 'dark' }).eq('id', user.id);
+        await fetch('/api/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ theme: newTheme ? 'light' : 'dark' })
+        });
       } catch {}
     }
   };
@@ -391,10 +415,11 @@ export default function RoomPage() {
               const resData = await res.json();
               if (resData.profile && typeof resData.profile === "object") {
                 setProfileContext(formatProfileContext(resData.profile));
-                await supabase.from('profiles').update({
-                  profile_data: resData.profile,
-                  updated_at: new Date().toISOString()
-                }).eq('id', user.id);
+                await fetch('/api/profile', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ profile_data: resData.profile })
+                });
               }
             }
           } catch {}
