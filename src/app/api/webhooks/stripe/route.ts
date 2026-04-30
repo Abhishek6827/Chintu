@@ -227,5 +227,68 @@ export async function POST(req: Request) {
     }
   }
 
+  // ─── Handle Subscription Cancelled / Deleted ───
+  if (event.type === "customer.subscription.deleted") {
+    const subscription = event.data.object as Stripe.Subscription;
+    
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("id, email")
+      .eq("stripe_subscription_id", subscription.id)
+      .maybeSingle();
+
+    if (profile) {
+      console.log(`[Stripe Webhook] Subscription Cancelled for user ${profile.id}`);
+      
+      await supabaseAdmin
+        .from("profiles")
+        .update({ 
+          plan: "free",
+          credits: 10, 
+          stripe_subscription_id: null,
+          updated_at: new Date().toISOString() 
+        })
+        .eq("id", profile.id);
+
+      await sendTelegramAlert(
+        `❌ <b>Subscription Cancelled</b>\n\n` +
+        `👤 User: <code>${profile.id}</code>\n` +
+        `📉 Plan downgraded to FREE`
+      );
+    }
+  }
+
+  // ─── Handle Customer Deleted ───
+  if (event.type === "customer.deleted") {
+    const customer = event.data.object as Stripe.Customer;
+    
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("stripe_customer_id", customer.id)
+      .maybeSingle();
+
+    if (profile) {
+      console.log(`[Stripe Webhook] Customer Deleted for user ${profile.id}`);
+      
+      await supabaseAdmin
+        .from("profiles")
+        .update({ 
+          plan: "free",
+          credits: 10, 
+          stripe_customer_id: null,
+          stripe_subscription_id: null,
+          updated_at: new Date().toISOString() 
+        })
+        .eq("id", profile.id);
+
+      await sendTelegramAlert(
+        `🗑️ <b>Customer Deleted</b>\n\n` +
+        `👤 User: <code>${profile.id}</code>\n` +
+        `⚠️ Stripe records wiped and downgraded to FREE.`
+      );
+    }
+  }
+
   return NextResponse.json({ received: true });
 }
