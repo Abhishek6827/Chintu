@@ -9,16 +9,16 @@ export default function LandingPage() {
   const { isSignedIn } = useUser();
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] text-gray-900 selection:bg-indigo-100 flex flex-col overflow-y-auto">
+    <div className="min-h-screen bg-[#f8f9fa] text-gray-900 selection:bg-indigo-100 flex flex-col overflow-y-auto" style={{ WebkitAppRegion: 'drag' } as any}>
       {/* Navigation */}
-      <nav className="flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full">
-        <div className="flex items-center gap-3">
+      <nav className="flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full relative z-[60]">
+        <div className="flex items-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
           <div className="w-10 h-10 drop-shadow-xl transition-transform hover:scale-110">
-            <Image src="/icon.png" alt="Chintu" width={40} height={40} className="w-full h-full object-contain" />
+            <Image src="/icon.png" alt="Chintu" className="w-full h-full object-contain" width={40} height={40} unoptimized />
           </div>
           <span className="text-xl font-black tracking-tight uppercase text-gray-900">Chintu</span>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6" style={{ WebkitAppRegion: 'no-drag' } as any}>
           {!isSignedIn ? (
             <>
               <Link href="/sign-in" className="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
@@ -37,7 +37,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 max-w-4xl mx-auto w-full">
+      <main className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 max-w-4xl mx-auto w-full" style={{ WebkitAppRegion: 'no-drag' } as any}>
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
           <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Next-Gen Interview Assistant</span>
@@ -82,14 +82,15 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="px-6 py-12 border-t border-gray-100 bg-white">
+      <footer className="px-6 py-12 border-t border-gray-100 bg-white" style={{ WebkitAppRegion: 'no-drag' } as any}>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-3 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all">
-            <Image src="/icon.png" alt="Chintu" width={24} height={24} className="object-contain" />
+            <Image src="/icon.png" alt="Chintu" className="w-6 h-6 object-contain" width={40} height={40} unoptimized />
             <span className="text-sm font-black tracking-tight uppercase">Chintu Intelligence</span>
           </div>
           
           <div className="flex items-center gap-8">
+            <Link href="/about" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-indigo-600 transition-colors">About Us</Link>
             <Link href="/privacy" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-indigo-600 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-indigo-600 transition-colors">Terms of Service</Link>
             <a href="mailto:welcome@getchintu.com" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-indigo-600 transition-colors">Contact</a>

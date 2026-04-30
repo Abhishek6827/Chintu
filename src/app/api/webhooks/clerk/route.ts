@@ -51,6 +51,12 @@ export async function POST(req: Request) {
     const { id, email_addresses } = evt.data;
     const email = email_addresses[0]?.email_address;
 
+    // Safety Check: If no email is found, it might be a partial signup or a failed attempt
+    if (!email) {
+      console.warn(`[/api/webhooks/clerk] User ${id} created without an email address. Skipping sync to prevent ghost entries.`);
+      return new Response('No email found, skipping sync', { status: 200 });
+    }
+
     // --- Generate Standard Display ID ---
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-GB').replace(/\//g, '-'); // 29-04-2026
@@ -62,6 +68,13 @@ export async function POST(req: Request) {
     const displayId = `CHINTU-${provider.toUpperCase()}-${dateStr}-${timeStr}`;
 
     console.log(`[/api/webhooks/clerk] Syncing user ${id} with Display ID ${displayId}`);
+
+    // Check if user already exists to prevent duplicate notifications
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', id)
+      .maybeSingle();
 
     const { error } = await supabase
       .from('profiles')
@@ -76,6 +89,12 @@ export async function POST(req: Request) {
 
     if (error) {
       console.error('Error syncing user to Supabase:', error);
+    }
+
+    // If user already existed, skip notifications
+    if (existingProfile) {
+      console.log(`[/api/webhooks/clerk] User ${id} already exists. Skipping duplicate notifications.`);
+      return new Response('User already exists, notifications skipped', { status: 200 });
     }
 
     // --- Send Telegram Notification ---

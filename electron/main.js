@@ -36,7 +36,7 @@ let serverPort = null;
 let userOpacity = 1;
 
 // ─── Production Vercel URL ───────────────────────────────
-const VERCEL_URL = "https://www.getchintu.com";
+const VERCEL_URL = "https://getchintu.com";
 
 // ─── Determine runtime mode ───────────────────────────────
 const isPreview = process.argv.includes("--preview");
@@ -268,6 +268,14 @@ function createWindow() {
 
     if (!isAppUrl) {
       event.preventDefault();
+      
+      // If it's a Stripe checkout URL, open it in the system browser
+      if (url.includes("checkout.stripe.com")) {
+        console.log(`[Main] Stripe checkout detected. Opening in system browser: ${url}`);
+        require('electron').shell.openExternal(url);
+        return;
+      }
+
       console.log(`[Main] External navigation detected. Opening popup for: ${url}`);
       
       const authWindow = new BrowserWindow({
@@ -282,6 +290,7 @@ function createWindow() {
         }
       });
       
+      authWindow.setMenu(null); // Remove File/Edit/View menu
       authWindow.loadURL(url);
       
       const handleRedirect = (ev, newUrl) => {

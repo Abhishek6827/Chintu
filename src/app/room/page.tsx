@@ -1231,7 +1231,7 @@ export default function RoomPage() {
       <div className="drag-region flex items-center justify-between px-2 sm:px-4 h-10 sm:h-12 shrink-0 relative z-10">
         <div className="flex items-center gap-2 no-drag">
           <div className="flex items-center gap-2">
-            <Image src="/icon.png" alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+            <Image src="/icon.png" alt="" className="w-5 h-5 object-contain" width={40} height={40} unoptimized />
             <span className="text-[var(--text-main)] text-sm font-bold tracking-tight">Chintu</span>
           </div>
           {userCredits !== null && (

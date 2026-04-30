@@ -114,7 +114,10 @@ export default function PricingPage() {
     } catch {
       alert("Something went wrong.");
     } finally {
-      setLoading(null);
+      // We don't set loading back to null immediately because the user is being redirected
+      // If we are in Electron, the redirect might open in a new window, so we keep the spinner
+      // until the page is navigated or closed.
+      setTimeout(() => setLoading(null), 5000); 
     }
   };
 
@@ -128,6 +131,23 @@ export default function PricingPage() {
 
   return (
     <div className="h-screen bg-[#f8f9fa] text-gray-900 overflow-hidden flex flex-col">
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 z-[100] bg-white/90 backdrop-blur-xl flex flex-col items-center justify-center animate-in fade-in duration-500">
+          <div className="relative mb-8">
+            <div className="w-20 h-20 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Shield className="w-6 h-6 text-indigo-600 animate-pulse" />
+            </div>
+          </div>
+          <h2 className="text-xl font-black tracking-tighter mb-2">Securing Connection...</h2>
+          <p className="text-gray-500 text-xs font-bold uppercase tracking-widest text-center px-12">
+            Redirecting to Stripe for encrypted checkout.<br/>
+            Your features will unlock instantly after payment.
+          </p>
+        </div>
+      )}
+
       {/* Draggable Header */}
       <div className="flex items-center justify-between px-4 sm:px-8 py-4 sm:py-6 sticky top-0 bg-[#f8f9fa]/90 backdrop-blur-md z-50 border-b border-gray-100 shrink-0 select-none" style={{ WebkitAppRegion: 'drag' } as any}>
         <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
@@ -138,7 +158,7 @@ export default function PricingPage() {
         </div>
         
         <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-          <Image src="/icon.png" alt="" width={20} height={20} className="w-5 h-5" />
+          <Image src="/icon.png" alt="" className="w-5 h-5" width={40} height={40} unoptimized />
           <span className="text-base font-black tracking-tighter">Chintu <span className="text-indigo-600">SaaS</span></span>
         </div>
 
