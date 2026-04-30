@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
+import { createClient } from "@/utils/supabase/client";
 
 interface ProfileData {
   name: string;
@@ -13,38 +15,7 @@ interface ProfileData {
   achievements: string[];
 }
 
-const STORAGE_KEY = "chintu_user_profile";
-
-export function getStoredProfile(): ProfileData | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-
-const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
-
-export async function saveProfileToDisk(profile: ProfileData) {
-  if (isElectron && (window as any).electronAPI?.saveProfile) {
-    await (window as any).electronAPI.saveProfile(profile);
-  }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
-}
-
-export async function loadProfileFromDisk(): Promise<ProfileData | null> {
-  if (isElectron && (window as any).electronAPI?.loadProfile) {
-    const diskProfile = await (window as any).electronAPI.loadProfile();
-    if (diskProfile) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(diskProfile));
-      return diskProfile;
-    }
-  }
-  return getStoredProfile();
-}
-
-export function getProfileContext(): string {
-  const p = getStoredProfile();
+export function formatProfileContext(p: any): string {
   if (!p) return "";
   const lines: string[] = [];
   if (p.name) lines.push(`Name: ${p.name}`);
@@ -52,14 +23,14 @@ export function getProfileContext(): string {
   if (p.summary) lines.push(`Summary: ${p.summary}`);
   if (p.experience?.length) {
     lines.push("Experience:");
-    p.experience.forEach(e => {
+    p.experience.forEach((e: any) => {
       lines.push(`- ${e.role} at ${e.company} (${e.duration})`);
-      e.highlights?.forEach(h => lines.push(`  • ${h}`));
+      e.highlights?.forEach((h: any) => lines.push(`  • ${h}`));
     });
   }
   if (p.projects?.length) {
     lines.push("Projects:");
-    p.projects.forEach(pr => {
+    p.projects.forEach((pr: any) => {
       lines.push(`- ${pr.name}: ${pr.description} [${pr.tech?.join(", ")}]`);
     });
   }
@@ -69,7 +40,7 @@ export function getProfileContext(): string {
   }
   if (p.education?.length) {
     lines.push("Education:");
-    p.education.forEach(e => lines.push(`- ${e.degree} from ${e.institution} (${e.year})`));
+    p.education.forEach((e: any) => lines.push(`- ${e.degree} from ${e.institution} (${e.year})`));
   }
   if (p.certifications?.length) lines.push(`Certifications: ${p.certifications.join(", ")}`);
   if (p.achievements?.length) lines.push(`Achievements: ${p.achievements.join(", ")}`);
@@ -77,6 +48,8 @@ export function getProfileContext(): string {
 }
 
 export default function ProfileModal({ onClose }: { onClose: () => void }) {
+  const { user } = useUser();
+  const supabase = createClient();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [rawText, setRawText] = useState("");
   const [isRefining, setIsRefining] = useState(false);
@@ -86,10 +59,13 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
-    loadProfileFromDisk().then(p => {
-      if (p) setProfile(p);
+    if (!user?.id) return;
+    supabase.from('profiles').select('profile_data').eq('id', user.id).maybeSingle().then(({ data }) => {
+      if (data?.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
+        setProfile(data.profile_data);
+      }
     });
-  }, []);
+  }, [user?.id, supabase]);
 
   const handleRefine = async () => {
     if (!rawText.trim()) return;
@@ -105,7 +81,13 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
       const data = await res.json();
       if (data.profile) {
         setProfile(data.profile);
-        await saveProfileToDisk(data.profile);
+        if (user?.id) {
+          await supabase.from('profiles').update({
+            profile_data: data.profile,
+            raw_profile: rawText.trim(),
+            updated_at: new Date().toISOString()
+          }).eq('id', user.id);
+        }
         setRawText("");
       }
     } catch (err: any) {
@@ -115,9 +97,12 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
   };
 
   const handleDelete = async () => {
-    localStorage.removeItem(STORAGE_KEY);
-    if (isElectron && (window as any).electronAPI?.saveProfile) {
-      await (window as any).electronAPI.saveProfile(null);
+    if (user?.id) {
+      await supabase.from('profiles').update({
+        profile_data: null,
+        raw_profile: null,
+        updated_at: new Date().toISOString()
+      }).eq('id', user.id);
     }
     setProfile(null);
     setEditMode(false);
@@ -129,11 +114,16 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
     setEditMode(true);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     try {
       const parsed = JSON.parse(editJson);
       setProfile(parsed);
-      saveProfileToDisk(parsed);
+      if (user?.id) {
+        await supabase.from('profiles').update({
+          profile_data: parsed,
+          updated_at: new Date().toISOString()
+        }).eq('id', user.id);
+      }
       setEditMode(false);
       setError("");
     } catch {
@@ -195,15 +185,36 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
         {/* Edit mode */}
         {editMode && (
           <div className="space-y-4 animate-in fade-in">
-            <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">Manual JSON Override</p>
+            <div className="flex bg-[var(--input-bg)] p-1 rounded-xl">
+              <button 
+                onClick={() => setEditJson("")}
+                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${!editJson.startsWith('{') ? 'bg-[var(--glass-bg)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-dim)] hover:text-[var(--text-main)]'}`}
+              >
+                Free Text
+              </button>
+              <button 
+                onClick={() => setEditJson(JSON.stringify(profile, null, 2))}
+                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${editJson.startsWith('{') ? 'bg-[var(--glass-bg)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-dim)] hover:text-[var(--text-main)]'}`}
+              >
+                JSON
+              </button>
+            </div>
+            
             <textarea
-              value={editJson}
-              onChange={e => setEditJson(e.target.value)}
-              className="w-full h-80 bg-black/40 border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-xs text-indigo-300 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all resize-none"
+              value={editJson.startsWith('{') ? editJson : rawText}
+              onChange={e => editJson.startsWith('{') ? setEditJson(e.target.value) : setRawText(e.target.value)}
+              placeholder={editJson.startsWith('{') ? "Edit JSON directly..." : "Paste new experience, skills, etc. AI will merge it."}
+              className={`w-full h-80 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all resize-none ${editJson.startsWith('{') ? 'font-mono text-[var(--text-main)]' : 'text-[var(--text-main)] font-medium'}`}
             />
             <div className="flex gap-3">
-              <button onClick={handleSaveEdit} className="flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-[var(--text-main)] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20 active:scale-95">Save Changes</button>
-              <button onClick={() => setEditMode(false)} className="flex-1 py-3.5 bg-[var(--glass-bg)] hover:bg-white/10 text-[var(--text-dim)] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95">Cancel</button>
+              <button 
+                onClick={editJson.startsWith('{') ? handleSaveEdit : handleRefine} 
+                disabled={(!editJson.startsWith('{') && !rawText.trim()) || isRefining}
+                className="flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20 active:scale-95 disabled:opacity-50"
+              >
+                {isRefining ? "Optimizing..." : "Save Changes"}
+              </button>
+              <button onClick={() => setEditMode(false)} className="flex-1 py-3.5 bg-[var(--glass-bg)] hover:bg-black/10 text-[var(--text-dim)] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-[var(--glass-border)]">Cancel</button>
             </div>
           </div>
         )}
@@ -302,12 +313,12 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
           <div className="relative flex items-center justify-center w-32 h-32 mb-8">
             <div className="absolute inset-0 rounded-full border-[3px] border-indigo-500/30 animate-[spin_3s_linear_infinite]"></div>
             <div className="absolute inset-2 rounded-full border-[3px] border-t-purple-500 border-purple-500/20 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
-            <div className="absolute inset-4 rounded-full border-[3px] border-b-cyan-400 border-cyan-400/20 animate-[spin_2s_linear_infinite]"></div>
+            <div className="absolute inset-4 rounded-full border-[3px] border-b-cyan-500 border-cyan-500/20 animate-[spin_2s_linear_infinite]"></div>
             <div className="absolute inset-0 flex items-center justify-center text-4xl animate-pulse">
               ✨
             </div>
           </div>
-          <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 animate-pulse tracking-wide mb-3 text-center px-4">
+          <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 animate-pulse tracking-wide mb-3 text-center px-4">
             AI is structuring your profile...
           </h2>
           <div className="flex gap-1.5 items-center">
@@ -323,8 +334,8 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
       )}
       {/* Profile Delete Confirmation */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-md bg-black/40 animate-in fade-in duration-300" onClick={(e) => e.stopPropagation()}>
-          <div className="w-full max-w-xs bg-gradient-to-br from-red-500 via-rose-600 to-pink-700 p-[1.5px] rounded-[32px] shadow-[0_20px_50px_rgba(225,29,72,0.3)] animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-md bg-black/20 animate-in fade-in duration-300" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-xs bg-gradient-to-br from-red-500 via-rose-600 to-pink-700 p-[1.5px] rounded-[32px] shadow-2xl animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
             <div className="bg-[var(--panel-bg)] backdrop-blur-2xl rounded-[30px] p-6 text-center">
               <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
                 <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -148,7 +148,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-indigo-500/50 via-purple-500/20 to-transparent" />
                 
-                <div className={`markdown-answer ${showReadingGuide && entry.isStreaming ? 'reading-guide-active' : ''}`} style={{ fontSize: `clamp(9px, calc(${fontSize / 14} * 1rem), 20px)` }}>
+                <div className={`markdown-answer ${showReadingGuide && idx === answers.length - 1 ? 'reading-guide-active' : ''}`} style={{ fontSize: `clamp(9px, calc(${fontSize / 14} * 1rem), 20px)` }}>
                   {(() => {
                     if (entry.isStreaming && !entry.answer) {
                       return (
@@ -249,7 +249,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                             },
                             table({ children }) {
                               return (
-                                <div className="overflow-x-auto my-8 rounded-3xl border border-[var(--glass-border)] shadow-2xl bg-black/20">
+                                <div className={`overflow-x-auto my-8 rounded-3xl border border-[var(--glass-border)] shadow-2xl ${isLightMode ? 'bg-[var(--glass-bg)]' : 'bg-black/20'}`}>
                                   <table className="min-w-full text-left border-collapse text-[13px]">
                                     {children}
                                   </table>

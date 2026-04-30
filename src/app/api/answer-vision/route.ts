@@ -568,11 +568,11 @@ Rules:
 
     if (!stream) throw finalError || new Error("All API keys failed for selected model.");
 
-    // ─── Deduct Credit ────────────────────────────────────────
+    // ─── Deduct Credit (2 credits for screenshot) ──────────────
     if (profile) {
       await supabaseAdmin
         .from("profiles")
-        .update({ credits: currentCredits - 1 })
+        .update({ credits: currentCredits - 2 })
         .eq("id", userId);
     }
 

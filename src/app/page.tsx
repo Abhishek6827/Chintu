@@ -26,13 +26,19 @@ export default function SetupPage() {
       if (!user?.id) return;
       
       // Try Supabase first (Cloud)
-      const { data: profileRow } = await supabase
+      const { data: profileRow, error } = await supabase
         .from('profiles')
         .select('profile_data, raw_profile')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (profileRow?.profile_data && typeof profileRow.profile_data === 'object' && Object.keys(profileRow.profile_data).length > 0) {
+      if (error) {
+        console.error("Error fetching profile from Supabase:", error);
+      }
+
+      console.log("Supabase profile check:", profileRow);
+
+      if (profileRow?.profile_data && Object.keys(profileRow.profile_data).length > 0) {
         setHasProfile(true);
         if (profileRow.raw_profile) setAboutMe(profileRow.raw_profile);
       } else {
@@ -87,13 +93,17 @@ export default function SetupPage() {
           }
         } else {
           console.error("Profile refine API returned:", res.status);
-          // Fallback: save raw text so room page can still use it
-          sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
+          await supabase.from('profiles').update({
+            raw_profile: aboutMe.trim(),
+            updated_at: new Date().toISOString()
+          }).eq('id', user.id);
         }
       } catch (err) {
         console.error("Profile refinement failed:", err);
-        // Fallback: save raw text for later refinement in room
-        sessionStorage.setItem("chintu_pending_raw_profile", aboutMe.trim());
+        await supabase.from('profiles').update({
+          raw_profile: aboutMe.trim(),
+          updated_at: new Date().toISOString()
+        }).eq('id', user.id);
       }
 
       setIsRefining(false);

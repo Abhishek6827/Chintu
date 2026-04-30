@@ -167,19 +167,21 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // ─── Credit Check ─────────────────────────────────────────
+    // ─── Credit Check (graceful) ──────────────────────────────
+    let currentCredits = 999;
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("credits")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
-    if (profileError || !profile) {
+    if (profileError) {
       console.error("[/api/answer] Profile fetch error:", profileError);
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    } else if (profile) {
+      currentCredits = profile.credits;
     }
 
-    if (profile.credits <= 0) {
+    if (currentCredits <= 0) {
       return NextResponse.json({ 
         error: "Insufficient credits. Please upgrade your plan.",
         code: "OUT_OF_CREDITS"
@@ -420,11 +422,13 @@ Rules:
       throw lastError;
     }
 
-    // ─── Deduct Credit ────────────────────────────────────────
-    await supabaseAdmin
-      .from("profiles")
-      .update({ credits: profile.credits - 1 })
-      .eq("id", userId);
+    // ─── Deduct Credit (1 credit for voice/text) ──────────────
+    if (profile) {
+      await supabaseAdmin
+        .from("profiles")
+        .update({ credits: currentCredits - 1 })
+        .eq("id", userId);
+    }
 
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({

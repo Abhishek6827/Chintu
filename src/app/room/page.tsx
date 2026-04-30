@@ -8,7 +8,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 
 
 import AnswerDisplay from "@/components/AnswerDisplay";
-import ProfileModal, { getProfileContext, getStoredProfile } from "@/components/ProfileModal";
+import ProfileModal, { formatProfileContext } from "@/components/ProfileModal";
 import CustomDropdown from "@/components/CustomDropdown";
 
 interface AnswerEntry {
@@ -87,6 +87,7 @@ export default function RoomPage() {
   const [spaceMode, setSpaceMode] = useState<"hold" | "toggle">("hold");
   const [selectedModel, setSelectedModel] = useState<ModelKey>("gpt-oss-120b");
   const selectedModelRef = useRef<ModelKey>("gpt-oss-120b");
+  const [userCredits, setUserCredits] = useState<number | null>(null);
 
   // ─── Vision conversation history ──────────────────────────
   // Keeps track of previous screenshot exchanges so the model
@@ -117,16 +118,30 @@ export default function RoomPage() {
   const supabase = createClient();
 
 
+  // ─── Fetch Credits Helper ──────────────────────────────────
+  const refreshCredits = async () => {
+    if (!user?.id) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('credits')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (data) setUserCredits(data.credits);
+  };
+
   useEffect(() => {
     const initRoom = async () => {
       if (!isLoaded || !isSignedIn || !user?.id) return;
       
-      // 1. Fetch History from Supabase
+      // 1. Fetch Credits
+      refreshCredits();
+      
+      // 2. Fetch History from Supabase
       const { data } = await supabase
         .from('profiles')
         .select('history')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
       if (data?.history && Array.isArray(data.history)) {
         setHistory(data.history);
@@ -242,12 +257,30 @@ export default function RoomPage() {
   const [isLightMode, setIsLightMode] = useState(true);
 
   useEffect(() => {
+    // Initial local fallback while cloud loads
+    const localTheme = localStorage.getItem("chintu_theme");
+    if (localTheme) setIsLightMode(localTheme === 'light');
+  }, []);
+
+  useEffect(() => {
     if (isLightMode) {
       document.body.classList.add("light-mode");
     } else {
       document.body.classList.remove("light-mode");
     }
   }, [isLightMode]);
+
+  const toggleTheme = async () => {
+    const newTheme = !isLightMode;
+    setIsLightMode(newTheme);
+    localStorage.setItem("chintu_theme", newTheme ? "light" : "dark");
+    if (user?.id) {
+      // Best-effort update to cloud (fails silently if column doesn't exist)
+      try {
+        await supabase.from('profiles').update({ theme: newTheme ? 'light' : 'dark' }).eq('id', user.id);
+      } catch (e) {}
+    }
+  };
   const [isCapturing, setIsCapturing] = useState(false);
 
   // ─── AI Speech tracking ─────────────────────────────────
@@ -326,66 +359,71 @@ export default function RoomPage() {
       if (user?.id) {
         const { data } = await supabase
           .from('profiles')
-          .select('profile_data')
+          .select('*')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
+        
+        // Sync theme from cloud if it exists
+        if (data?.theme) {
+          setIsLightMode(data.theme === 'light');
+          localStorage.setItem("chintu_theme", data.theme);
+        }
         
         if (data?.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
-          setProfileContext(JSON.stringify(data.profile_data));
+          setProfileContext(formatProfileContext(data.profile_data));
           setHasProfile(true);
+          return;
+        }
+
+        if (data?.raw_profile) {
+          setProfileContext(data.raw_profile);
+          setHasProfile(true);
+          
+          try {
+            const res = await fetch("/api/refine-profile", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ rawText: data.raw_profile }),
+            });
+            if (res.ok) {
+              const resData = await res.json();
+              if (resData.profile && typeof resData.profile === "object") {
+                setProfileContext(formatProfileContext(resData.profile));
+                await supabase.from('profiles').update({
+                  profile_data: resData.profile,
+                  updated_at: new Date().toISOString()
+                }).eq('id', user.id);
+              }
+            }
+          } catch {}
           return;
         }
       }
       
-      // 2. Check for pending raw profile (fallback from failed refinement)
-      const pendingRaw = sessionStorage.getItem("chintu_pending_raw_profile");
-      if (pendingRaw) {
-        // Use raw text as basic context until refinement succeeds
-        setProfileContext(pendingRaw);
-        setHasProfile(true);
-        return;
-      }
-      
-      // 3. No profile anywhere — don't block, just proceed without profile
       setHasProfile(false);
     };
     initProfile();
-
-    // Check if there's a pending raw profile that needs re-refining
-    const pendingRaw = sessionStorage.getItem("chintu_pending_raw_profile");
-    if (pendingRaw) {
-      (async () => {
-        try {
-          const res = await fetch("/api/refine-profile", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ rawText: pendingRaw }),
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.profile && typeof data.profile === "object") {
-              setProfileContext(JSON.stringify(data.profile));
-              setHasProfile(true);
-              sessionStorage.removeItem("chintu_pending_raw_profile");
-              
-              // Sync to Supabase
-              if (user?.id) {
-                await supabase.from('profiles').upsert({
-                  id: user.id,
-                  profile_data: data.profile,
-                  updated_at: new Date().toISOString()
-                });
-              }
-            }
-          }
-        } catch {}
-      })();
-    }
   }, [router, isLoaded, user?.id, supabase]);
 
-  const refreshProfile = () => {
-    setProfileContext(getProfileContext());
-    setHasProfile(!!getStoredProfile());
+  const refreshProfile = async () => {
+    if (!user?.id) return;
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('profile_data')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (data?.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
+        setProfileContext(formatProfileContext(data.profile_data));
+        setHasProfile(true);
+      } else {
+        setProfileContext("");
+        setHasProfile(false);
+      }
+    } catch (e) {
+      console.error("Failed to refresh profile", e);
+    }
   };
 
   // ─── Fullscreen change listener ─────────────────────────
@@ -796,6 +834,7 @@ export default function RoomPage() {
       });
 
       setStatus("idle");
+      refreshCredits(); // Update credits badge after response
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error";
       setError(msg);
@@ -873,6 +912,7 @@ export default function RoomPage() {
       });
 
       setStatus("idle");
+      refreshCredits(); // Update credits badge after response
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error";
       setError(msg);
@@ -1083,6 +1123,7 @@ export default function RoomPage() {
       setCapturedScreenshots([]);
       setInputText("");
       setStatus("idle");
+      refreshCredits(); // Update credits badge after screenshot response
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error";
       setError(msg);
@@ -1143,6 +1184,17 @@ export default function RoomPage() {
               v{appVersion}
             </span>
           )}
+          {userCredits !== null && (
+            <span className={`px-2 py-0.5 rounded-full text-[0.6rem] font-black uppercase tracking-wider border shadow-sm ${
+              userCredits > 5 
+                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
+                : userCredits > 0 
+                  ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' 
+                  : 'bg-red-500/10 text-red-500 border-red-500/20'
+            }`}>
+              ⚡ {userCredits} Credits
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1 no-drag">
           {isScreenRecording && (
@@ -1152,7 +1204,7 @@ export default function RoomPage() {
             </div>
           )}
           <button
-            onClick={() => setIsLightMode(!isLightMode)}
+            onClick={toggleTheme}
             className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-dim)] hover:text-[var(--text-main)] transition-all"
           >
             {isLightMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
@@ -1166,20 +1218,20 @@ export default function RoomPage() {
             </button>
           )}
           {/* Profile / Account button */}
-          <button
-            onClick={() => setShowProfile(true)}
-            className={`w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center transition-all ${
-              hasProfile ? "ring-1 ring-indigo-500/50 shadow-lg shadow-indigo-500/10" : "bg-[var(--input-bg)] hover:bg-[var(--glass-bg)]"
-            }`}
-          >
-            {user?.imageUrl && typeof user.imageUrl === 'string' && user.imageUrl.startsWith('http') ? (
-               <Image src={user.imageUrl} alt="Profile" width={28} height={28} className="w-full h-full object-cover" />
-            ) : (
-              <svg className="w-4 h-4 text-[var(--text-dim)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-              </svg>
-            )}
-          </button>
+          <div className={`rounded-lg overflow-hidden flex items-center justify-center transition-all ${hasProfile ? "ring-2 ring-indigo-500/50 shadow-lg shadow-indigo-500/20" : "ring-1 ring-[var(--glass-border)]"}`}>
+            <UserButton 
+              appearance={{ elements: { userButtonAvatarBox: "w-7 h-7 rounded-lg" } }}
+              afterSignOutUrl="/"
+            >
+              <UserButton.MenuItems>
+                <UserButton.Action 
+                  label="Manage AI Profile" 
+                  labelIcon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>} 
+                  onClick={() => setShowProfile(true)} 
+                />
+              </UserButton.MenuItems>
+            </UserButton>
+          </div>
         </div>
       </div>
 
@@ -1669,23 +1721,7 @@ export default function RoomPage() {
                 </div>
               </div>
 
-              {/* Profile Section */}
-              <div 
-                className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)] flex items-center justify-between"
-                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
-              >
-                <div>
-                  <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">User Profile</h4>
-                  <p style={{ fontSize: 'clamp(8px, 2vw, 12px)' }} className="font-bold text-[var(--text-main)] uppercase tracking-tight">{hasProfile ? "Identity Loaded" : "No Profile"}</p>
-                </div>
-                <button
-                  onClick={() => { setShowSettings(false); setShowProfile(true); }}
-                  className="bg-indigo-600 text-white rounded-xl font-black uppercase tracking-widest hover:bg-indigo-500 transition-all active:scale-95 shadow-lg shadow-indigo-500/20"
-                  style={{ fontSize: 'clamp(6px, 1.5vw, 10px)', padding: 'clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 20px)' }}
-                >
-                  {hasProfile ? "Open Vault" : "Setup"}
-                </button>
-              </div>
+
 
               {/* History Section */}
               <div 
@@ -1758,27 +1794,6 @@ export default function RoomPage() {
                     ))}
                   </div>
                 )}
-              </div>
-
-              {/* Account Section */}
-              <div 
-                className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)] flex items-center justify-between"
-                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
-              >
-                <div className="flex-1 min-w-0 pr-4">
-                  <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Account</h4>
-                  <p style={{ fontSize: 'clamp(8px, 2vw, 12px)' }} className="font-bold text-[var(--text-main)] uppercase tracking-tight truncate">
-                    {user?.fullName || "User"}
-                  </p>
-                  <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] truncate flex items-center gap-2">
-                    {user?.primaryEmailAddress?.emailAddress}
-                  </p>
-
-
-                </div>
-
-                <UserButton afterSignOutUrl="/sign-in" />
-
               </div>
 
 
