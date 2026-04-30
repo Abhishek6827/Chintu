@@ -49,6 +49,36 @@ function isAppUrl(url) {
   );
 }
 
+// ─── Helper: Check if a URL is part of the Clerk/OAuth auth flow ──
+// These MUST stay inside the Electron window for auth to complete.
+function isAuthFlowUrl(url) {
+  try {
+    const u = new URL(url);
+    const host = u.hostname;
+    return (
+      // Clerk FAPI / auth domains
+      host.endsWith(".getchintu.com") ||            // accounts.getchintu.com, etc.
+      host.endsWith(".clerk.accounts.dev") ||        // Clerk dev domains
+      host === "accounts.getchintu.com" ||           // Clerk FAPI (primary)
+      // OAuth provider domains (Google, GitHub, etc.)
+      host === "accounts.google.com" ||
+      host.endsWith(".google.com") ||
+      host === "github.com" ||
+      host === "appleid.apple.com"
+    );
+  } catch {
+    return false;
+  }
+}
+
+// ─── Helper: Should this URL open in system browser? ──────
+// Only truly external URLs (Stripe checkout, random links) go to browser
+function shouldOpenExternal(url) {
+  if (isAppUrl(url)) return false;       // Our app — stay inside
+  if (isAuthFlowUrl(url)) return false;  // Auth flow — MUST stay inside
+  return true;                            // Everything else → system browser
+}
+
 // ─── Determine runtime mode ───────────────────────────────
 const isPreview = process.argv.includes("--preview");
 const isDev = !app.isPackaged && !isPreview;
@@ -271,46 +301,58 @@ function createWindow() {
   });
 
   // ─── External Navigation Handler ────────────────────────
-  // ALL external URLs open in the system browser — no popups EVER
+  // Strategy:
+  //   - App URLs (getchintu.com, localhost) → stay in main window ✅
+  //   - Auth flow URLs (accounts.getchintu.com, accounts.google.com) → stay in main window ✅
+  //   - Everything else (Stripe, random links) → system browser ✅
+  //   - NEVER open popups — redirect main window for auth flows
 
   // Layer 1: Intercept same-window navigation
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    const appUrl = isAppUrl(url);
-    console.log(`[Nav] will-navigate → ${url} | isApp: ${appUrl}`);
-    if (!appUrl) {
+    const external = shouldOpenExternal(url);
+    console.log(`[Nav] will-navigate → ${url} | external: ${external}`);
+    if (external) {
       event.preventDefault();
       require('electron').shell.openExternal(url);
     }
+    // App URLs + Auth flow URLs proceed normally in main window
   });
 
-  // Layer 2: setWindowOpenHandler — fires before any new window is created
+  // Layer 2: setWindowOpenHandler — DENY ALL popups
+  // Auth popups → redirect main window (so OAuth stays in-app)
+  // External popups → system browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     console.log(`[Nav] setWindowOpenHandler → ${url}`);
-    if (isAppUrl(url)) return { action: 'allow' };
-    // Send to system browser and DENY the popup
+    
+    if (isAppUrl(url) || isAuthFlowUrl(url)) {
+      // Auth/app popup requested — DON'T create popup!
+      // Instead, navigate the main window directly.
+      // This makes the entire OAuth flow happen in-place.
+      console.log(`[Nav] Redirecting main window to: ${url} (no popup)`);
+      mainWindow.loadURL(url);
+      return { action: 'deny' };
+    }
+    
+    // Truly external → system browser
     require('electron').shell.openExternal(url);
     return { action: 'deny' };
   });
 
-  // Layer 3: did-create-window — nuclear fallback for windows that slip through
+  // Layer 3: Nuclear fallback — destroy any rogue popup that somehow slips through
   mainWindow.webContents.on('did-create-window', (childWindow, details) => {
     const url = details.url || '';
-    console.log(`[Nav] did-create-window spawned: ${url} — destroying and redirecting to browser`);
+    console.log(`[Nav] did-create-window (rogue popup): ${url} — destroying`);
     try {
+      if (isAppUrl(url)) {
+        // If it somehow opened an app URL as popup, redirect main window
+        mainWindow.loadURL(url);
+      } else if (!isAuthFlowUrl(url) && url && url !== 'about:blank') {
+        require('electron').shell.openExternal(url);
+      }
       childWindow.webContents.stop();
       childWindow.destroy();
     } catch (e) {
       console.error('[Nav] Error destroying child window:', e);
-    }
-    if (url && url !== 'about:blank' && !isAppUrl(url)) {
-      require('electron').shell.openExternal(url);
-    } else if (!url || url === 'about:blank') {
-      // Blank popup — watch what it navigates to
-      childWindow.webContents.on('will-navigate', (ev, navUrl) => {
-        ev.preventDefault();
-        if (!isAppUrl(navUrl)) require('electron').shell.openExternal(navUrl);
-        try { childWindow.destroy(); } catch {}
-      });
     }
   });
 }
