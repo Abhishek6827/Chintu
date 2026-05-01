@@ -44,12 +44,14 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
   const getSafeModelName = (modelId: string) => {
     if (!modelId) return "";
     
-    // Check if it's a vision-augmented response (Scout)
-    const isScout = modelId.toLowerCase().includes("scout");
-    let baseModel = modelId.toLowerCase();
+    const id = modelId.toLowerCase();
     
-    if (isScout) {
-      baseModel = modelId.split("+").pop()?.trim().toLowerCase() || "";
+    // Check if it's a vision-augmented response (Scout)
+    const isScout = id.includes("scout") || id.includes("vision-preview");
+    let baseModel = id;
+    
+    if (id.includes("+")) {
+      baseModel = id.split("+").pop()?.trim() || "";
     }
 
     const mapping: Record<string, string> = {
@@ -57,11 +59,13 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
       "gpt-oss-120b": "Pro Engine",
       "qwen3-coder": "Coding Specialist",
       "nemotron-3-120b": "Titan Engine",
-      "qwen3.6": "Turbo Engine"
+      "qwen3.6": "Turbo Engine",
+      "scout": "Vision Engine",
+      "llama-4": "Vision Engine"
     };
 
     // Find the closest match in our safe names
-    const safeName = Object.entries(mapping).find(([key]) => baseModel.includes(key.toLowerCase()))?.[1];
+    const safeName = Object.entries(mapping).find(([key]) => baseModel.includes(key))?.[1];
     
     if (isScout) {
       return safeName ? `SCOUT + ${safeName}` : "SCOUT ENGINE";
