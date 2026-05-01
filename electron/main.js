@@ -407,30 +407,10 @@ ipcMain.handle("window-get-hidden", () => isHidden);
 ipcMain.handle("capture-screenshot", async () => {
   if (!mainWindow) return null;
   try {
-    const wasVisible = !isHidden;
-
-    if (wasVisible) {
-      // Temporarily make invisible + remove content protection for capture
-      mainWindow.setOpacity(0);
-      mainWindow.setContentProtection(false);
-    }
-
-    await new Promise((r) => setTimeout(r, 150));
-
     const sources = await desktopCapturer.getSources({
       types: ["screen"],
       thumbnailSize: { width: 1920, height: 1080 },
     });
-
-    if (wasVisible) {
-      // Restore window to fully opaque (CSS handles visual opacity)
-      mainWindow.setOpacity(1);
-      mainWindow.setContentProtection(false);
-    } else {
-      // Keep hidden if it was already hidden
-      mainWindow.setOpacity(0);
-      mainWindow.setContentProtection(true);
-    }
 
     if (sources.length === 0) return null;
 
@@ -438,7 +418,6 @@ ipcMain.handle("capture-screenshot", async () => {
     return `data:image/png;base64,${screenshot.toString("base64")}`;
   } catch (err) {
     console.error("[Screenshot] Error:", err);
-    if (mainWindow) mainWindow.setOpacity(1);
     return null;
   }
 });
