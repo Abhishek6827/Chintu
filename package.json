@@ -72,8 +72,7 @@
     "win": {
       "target": "nsis",
       "icon": "public/icon.png",
-      "artifactName": "${productName}-Setup-${version}.${ext}",
-      "publisherName": "Chintu AI"
+      "artifactName": "${productName}-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": true,
