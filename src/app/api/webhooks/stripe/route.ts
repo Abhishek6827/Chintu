@@ -129,6 +129,10 @@ export async function POST(req: Request) {
           subscription_expires_at: newExpiry.toISOString(),
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: session.subscription as string,
+          profile_data: {
+            ...(currentProfile?.profile_data as object || {}),
+            full_name: customerName
+          },
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId);
@@ -141,14 +145,16 @@ export async function POST(req: Request) {
       // ─── Send Telegram Alert ─────────────────────────────
       const eventTime = formatEventTime();
       await sendTelegramAlert(
-        `💰 <b>New Subscription!</b>\n\n` +
-        `👤 Name: <b>${customerName}</b>\n` +
+        `🤖 <b>CHINTU - MISSION CONTROL</b>\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `🚀 <b>New Upgrade Detected!</b>\n\n` +
+        `👤 User: <b>${customerName}</b>\n` +
         `📧 Email: <code>${session.customer_details?.email || currentProfile?.email || "N/A"}</code>\n` +
-        `📅 Date: <code>${eventTime}</code>\n` +
-        `💎 Plan: <b>${oldPlan.toUpperCase()}</b> → <b>${plan.toUpperCase()}</b>\n` +
+        `📅 Sync: <code>${eventTime}</code>\n` +
+        `💎 Tier: <b>${oldPlan.toUpperCase()}</b> → <b>${plan.toUpperCase()}</b>\n` +
         `💲 Price: <b>${price}</b> × ${quantity}\n` +
-        `⚡ Credits: <b>${totalCredits}</b>\n` +
-        `⏳ Expires: <code>${newExpiry.toLocaleDateString()}</code>\n` +
+        `⚡ Total Credits: <b>${totalCredits}</b>\n` +
+        `⏳ Expiry: <code>${newExpiry.toLocaleDateString()}</code>\n` +
         `💳 Session: <code>${session.id.slice(-10)}</code>`
       );
 
@@ -159,7 +165,7 @@ export async function POST(req: Request) {
           from: 'Chintu Intelligence <welcome@getchintu.com>',
           replyTo: 'contact@getchintu.com',
           to: userEmail,
-          subject: 'Access Granted: Your Chintu Upgrade is Active ⚡',
+          subject: 'CHINTU: PROTOCOL UPGRADE VERIFIED ⚡',
           html: getPaymentEmailHtml(
             customerName,
             plan,
@@ -209,29 +215,35 @@ export async function POST(req: Request) {
           if (currentExpiry < now) currentExpiry = now;
           const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
 
+          // Get customer name from invoice
+          const invoiceCustomerName = invoice.customer_name || invoice.customer_email || profile.email || "Unknown";
+          const eventTime = formatEventTime();
+
           await supabaseAdmin
             .from("profiles")
             .update({ 
               credits: totalCredits, 
               subscription_expires_at: newExpiry.toISOString(),
+              profile_data: {
+                ...(profile?.profile_data as object || {}),
+                full_name: invoiceCustomerName
+              },
               updated_at: new Date().toISOString() 
             })
             .eq("id", profile.id);
 
-          // Get customer name from invoice
-          const invoiceCustomerName = invoice.customer_name || invoice.customer_email || profile.email || "Unknown";
-          const eventTime = formatEventTime();
-
           // ─── Send Telegram Alert ─────────────────────────────
           // Telegram Alert
           await sendTelegramAlert(
+            `🤖 <b>CHINTU - MISSION CONTROL</b>\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
             `🔄 <b>Subscription Renewed</b>\n\n` +
-            `👤 Name: <b>${invoiceCustomerName}</b>\n` +
+            `👤 User: <b>${invoiceCustomerName}</b>\n` +
             `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
-            `📅 Date: <code>${eventTime}</code>\n` +
-            `💎 Plan: <b>${planInfo.plan.toUpperCase()}</b>\n` +
+            `📅 Sync: <code>${eventTime}</code>\n` +
+            `💎 Tier: <b>${planInfo.plan.toUpperCase()}</b>\n` +
             `💲 Price: <b>${planInfo.price}</b> × ${quantity}\n` +
-            `⚡ Credits (Stacked): <b>${totalCredits}</b>\n` +
+            `⚡ Stacked Credits: <b>${totalCredits}</b>\n` +
             `⏳ New Expiry: <code>${newExpiry.toLocaleDateString()}</code>`
           );
 
@@ -241,7 +253,7 @@ export async function POST(req: Request) {
               from: 'Chintu Intelligence <billing@getchintu.com>',
               replyTo: 'contact@getchintu.com',
               to: profile.email,
-              subject: 'Mission Extended: Your Credits have been Stacked 🔄',
+              subject: 'CHINTU: MISSION EXTENSION VERIFIED 🔄',
               html: getPaymentEmailHtml(
                 invoiceCustomerName,
                 planInfo.plan,
@@ -296,17 +308,6 @@ export async function POST(req: Request) {
 
           console.log(`[Stripe Webhook] Subscription Updated for user ${profile.id}: ${oldPlan} → ${planInfo.plan}, Qty ${quantity}`);
           
-          // Update Supabase
-          await supabaseAdmin
-            .from("profiles")
-            .update({ 
-              plan: planInfo.plan,
-              credits: totalCredits, 
-              subscription_expires_at: newExpiry.toISOString(),
-              updated_at: new Date().toISOString() 
-            })
-            .eq("id", profile.id);
-
           // Get customer name from Stripe
           let customerName = profile.email || "Unknown";
           try {
@@ -318,17 +319,33 @@ export async function POST(req: Request) {
 
           const eventTime = formatEventTime();
 
+          // Update Supabase
+          await supabaseAdmin
+            .from("profiles")
+            .update({ 
+              plan: planInfo.plan,
+              credits: totalCredits, 
+              subscription_expires_at: newExpiry.toISOString(),
+              profile_data: {
+                ...(profile?.profile_data as object || {}),
+                full_name: customerName
+              },
+              updated_at: new Date().toISOString() 
+            })
+            .eq("id", profile.id);
+
           // Telegram Alert
           await sendTelegramAlert(
-            `📈 <b>Plan Changed</b>\n\n` +
-            `👤 Name: <b>${customerName}</b>\n` +
+            `🤖 <b>CHINTU - MISSION CONTROL</b>\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `📈 <b>Operation Tier Optimized</b>\n\n` +
+            `👤 User: <b>${customerName}</b>\n` +
             `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
-            `📅 Date: <code>${eventTime}</code>\n` +
-            `💎 Old Plan: <b>${oldPlan.toUpperCase()}</b>\n` +
-            `💎 New Plan: <b>${planInfo.plan.toUpperCase()}</b>\n` +
-            `💲 Price: <b>${planInfo.price}</b> × ${quantity}\n` +
-            `⚡ Total Credits (Stacked): <b>${totalCredits}</b>\n` +
-            `⏳ New Expiry: <code>${newExpiry.toLocaleDateString()}</code>`
+            `📅 Sync: <code>${eventTime}</code>\n` +
+            `💎 Evolution: <b>${oldPlan.toUpperCase()}</b> → <b>${planInfo.plan.toUpperCase()}</b>\n` +
+            `💲 Unit Price: <b>${planInfo.price}</b> × ${quantity}\n` +
+            `⚡ Total Allocation: <b>${totalCredits}</b>\n` +
+            `⏳ Next Sync: <code>${newExpiry.toLocaleDateString()}</code>`
           );
           
           // Send Email
@@ -337,7 +354,7 @@ export async function POST(req: Request) {
               from: 'Chintu Intelligence <billing@getchintu.com>',
               replyTo: 'contact@getchintu.com',
               to: profile.email,
-              subject: 'Subscription Successfully Updated 📈',
+              subject: 'CHINTU: PROTOCOL RECALIBRATED 📈',
               html: getPaymentEmailHtml(
                 customerName,
                 planInfo.plan,

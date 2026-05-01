@@ -4,11 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
-import { createClient } from "@/utils/supabase/client";
 
 export default function SetupPage() {
   const { isLoaded, isSignedIn, user } = useUser();
-  const supabase = createClient();
   const [jd, setJd] = useState("");
   const [aboutMe, setAboutMe] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
@@ -45,12 +43,31 @@ export default function SetupPage() {
     };
 
 
-    if (isLoaded && isSignedIn) {
-      checkProfile().finally(() => setIsLoadingProfile(false));
+    if (isLoaded && isSignedIn && user) {
+      checkProfile().then(async () => {
+        // Sync name if missing in profile_data
+        try {
+          const res = await fetch("/api/profile");
+          const { profile: p } = await res.json();
+          if (!p?.profile_data?.full_name && user.fullName) {
+             await fetch("/api/profile", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ 
+                profile_data: { 
+                  ...(p?.profile_data || {}), 
+                  full_name: user.fullName 
+                } 
+              }),
+            });
+          }
+        } catch {}
+        setIsLoadingProfile(false);
+      });
     } else if (isLoaded && !isSignedIn) {
       setIsLoadingProfile(false);
     }
-  }, [isLoaded, isSignedIn, user?.id, supabase]);
+  }, [isLoaded, isSignedIn, user]);
 
 
 

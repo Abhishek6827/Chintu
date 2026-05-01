@@ -120,8 +120,8 @@ export const getPaymentEmailHtml = (
           <tr>
             <td style="padding: 40px 40px 30px 40px; text-align: center;">
               <img src="https://www.getchintu.com/icon.png" alt="Chintu Intelligence" width="60" height="60" style="margin-bottom: 20px;">
-              <h1 style="margin: 0; font-size: 28px; font-weight: 900; color: #1a1a1c; letter-spacing: -0.02em; text-transform: uppercase;">Access Elevated.</h1>
-              <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.2em;">Subscription Activated</p>
+              <h1 style="margin: 0; font-size: 28px; font-weight: 900; color: #1a1a1c; letter-spacing: -0.02em; text-transform: uppercase;">CHINTU: MISSION CONTROL</h1>
+              <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.2em;">TACTICAL UPGRADE VERIFIED</p>
             </td>
           </tr>
           
