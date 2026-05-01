@@ -71,7 +71,7 @@ export default function SetupPage() {
     } else if (isLoaded && !isSignedIn) {
       setIsLoadingProfile(false);
     }
-  }, [isLoaded, isSignedIn, user]);
+  }, [isLoaded, isSignedIn, user, isElectron, router]);
 
 
 

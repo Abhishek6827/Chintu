@@ -340,13 +340,16 @@ export default function RoomPage() {
   useEffect(() => {
     const handleOpenProfile = () => setShowProfile(true);
     const handleUnhideRequest = () => setShowUnhidePrompt(true);
+    const handleToggleGhost = () => handleHide();
 
     window.addEventListener('chintu-open-profile', handleOpenProfile);
     window.addEventListener('chintu-unhide-request', handleUnhideRequest);
+    window.addEventListener('chintu-toggle-ghost', handleToggleGhost);
 
     return () => {
       window.removeEventListener('chintu-open-profile', handleOpenProfile);
       window.removeEventListener('chintu-unhide-request', handleUnhideRequest);
+      window.removeEventListener('chintu-toggle-ghost', handleToggleGhost);
     };
   }, []);
 
