@@ -4,9 +4,11 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from 'next/navigation';
 
 export default function LandingPage() {
   const { isSignedIn } = useUser();
+  const router = useRouter();
 
   const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
@@ -32,9 +34,15 @@ export default function LandingPage() {
               </Link>
             </>
           ) : (
-            <Link href="/setup" className="bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95">
+            <button 
+              onClick={() => {
+                const jd = sessionStorage.getItem("jobDescription");
+                router.push(jd ? "/room" : "/setup");
+              }}
+              className="bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95"
+            >
               Go to Dashboard
-            </Link>
+            </button>
           )}
         </div>
       </nav>
@@ -60,7 +68,7 @@ export default function LandingPage() {
             Join the Revolution →
           </Link>
           {isElectron ? (
-            <button onClick={() => (window as any).electronAPI.openExternal("https://getchintu.com/pricing")} className="px-10 py-5 bg-white border border-gray-200 text-gray-400 font-black uppercase tracking-[0.25em] text-xs rounded-2xl hover:border-gray-900 hover:text-gray-900 transition-all">
+            <button onClick={() => (window as any).electronAPI.openExternal("https://chintu.devilz.me/pricing")} className="px-10 py-5 bg-white border border-gray-200 text-gray-400 font-black uppercase tracking-[0.25em] text-xs rounded-2xl hover:border-gray-900 hover:text-gray-900 transition-all">
               View Plans
             </button>
           ) : (

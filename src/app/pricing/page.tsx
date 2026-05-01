@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Check, Sparkles, Minus, Shield, Plus } from "lucide-react";
@@ -83,6 +84,7 @@ const PLANS = [
 
 export default function PricingPage() {
   const { user, isLoaded } = useUser();
+  const router = useRouter();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
   const [loading, setLoading] = useState<string | null>(null);
   
@@ -91,14 +93,11 @@ export default function PricingPage() {
   const minQty = 1;
   const maxQty = 10;
 
-  // If opened inside Electron, redirect to web version
-  useEffect(() => {
-    const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
-    if (isElectron) {
-      (window as any).electronAPI.openExternal("https://getchintu.com/pricing");
-      window.location.href = "/";
-    }
-  }, []);
+  // Handle back button
+  const handleBack = () => {
+    const jd = sessionStorage.getItem("jobDescription");
+    router.push(jd ? "/room" : "/setup");
+  };
 
   const handleSubscribe = async (plan: any) => {
     if (!user) return;
@@ -155,10 +154,13 @@ export default function PricingPage() {
       {/* Draggable Header */}
       <div className="flex items-center justify-between px-4 sm:px-8 py-4 sm:py-6 sticky top-0 bg-[#f8f9fa]/90 backdrop-blur-md z-50 border-b border-gray-100 shrink-0 select-none" style={{ WebkitAppRegion: 'drag' } as any}>
         <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
-           <Link href="/setup" className="group flex items-center gap-2 text-gray-400 hover:text-gray-900 transition-all text-[10px] font-black uppercase tracking-widest">
+           <button 
+            onClick={handleBack}
+            className="group flex items-center gap-2 text-gray-400 hover:text-gray-900 transition-all text-[10px] font-black uppercase tracking-widest no-drag"
+           >
             <svg className="w-3 h-3 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-            Dashboard
-          </Link>
+            Back to App
+          </button>
         </div>
         
         <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">

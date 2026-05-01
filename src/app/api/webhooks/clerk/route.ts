@@ -182,12 +182,17 @@ export async function POST(req: Request) {
 
     console.log(`[/api/webhooks/clerk] Deleting user ${id} from Supabase...`);
 
-    // Fetch profile before deleting (for telegram alert info)
+    // Fetch profile before deleting (to check if it exists and get info for alert)
     const { data: profile } = await supabase
       .from('profiles')
       .select('email, display_id, plan')
       .eq('id', id)
       .maybeSingle();
+
+    if (!profile) {
+      console.log(`[/api/webhooks/clerk] User ${id} not found in Supabase. Likely already deleted or never synced. skipping alert.`);
+      return new Response('User not found, skipping', { status: 200 });
+    }
 
     // Delete from Supabase
     const { error } = await supabase
@@ -200,7 +205,7 @@ export async function POST(req: Request) {
       return new Response('Error deleting user', { status: 500 });
     }
 
-    // Send Telegram Alert
+    // Send Telegram Alert (Only if profile existed)
     try {
       const tgToken = process.env.TELEGRAM_BOT_TOKEN;
       const tgChatId = process.env.TELEGRAM_CHAT_ID;
@@ -217,9 +222,9 @@ export async function POST(req: Request) {
         const message =
           `🗑️ <b>USER DELETED</b>\n\n` +
           `👤 <b>Clerk ID:</b> <code>${id}</code>\n` +
-          (profile ? `📧 <b>Email:</b> <code>${profile.email}</code>\n` : '') +
-          (profile ? `🏷️ <b>Display ID:</b> <code>${profile.display_id}</code>\n` : '') +
-          (profile ? `💎 <b>Plan was:</b> <code>${profile.plan?.toUpperCase()}</code>\n` : '') +
+          `📧 <b>Email:</b> <code>${profile.email}</code>\n` +
+          `🏷️ <b>Display ID:</b> <code>${profile.display_id}</code>\n` +
+          `💎 <b>Plan was:</b> <code>${profile.plan?.toUpperCase()}</code>\n` +
           `🕒 <b>Time (IST):</b> <code>${istString}</code>\n` +
           `\n⚠️ <i>Profile removed from Supabase</i>`;
 

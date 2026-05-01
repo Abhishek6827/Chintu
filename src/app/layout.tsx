@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 
 import { ClerkProvider } from "@clerk/nextjs";
 import UpdateNotification from "@/components/UpdateNotification";
+import GlobalHeader from "@/components/GlobalHeader";
 
 export default function RootLayout({
   children,
@@ -21,6 +22,7 @@ export default function RootLayout({
           <link rel="icon" href="/icon.png" />
         </head>
         <body className="bg-transparent">
+          <GlobalHeader />
           {children}
           <UpdateNotification />
         </body>

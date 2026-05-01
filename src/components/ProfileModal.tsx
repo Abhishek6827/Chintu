@@ -2,6 +2,9 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { createClient } from "@/utils/supabase/client";
+import { Sparkles } from "lucide-react";
+
+const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
 interface ProfileData {
   name: string;
@@ -47,7 +50,15 @@ export function formatProfileContext(p: any): string {
   return lines.join("\n");
 }
 
-export default function ProfileModal({ onClose, onSuccess }: { onClose: () => void, onSuccess?: () => void }) {
+export default function ProfileModal({ 
+  onClose, 
+  onSuccess, 
+  isBackgroundRefining = false 
+}: { 
+  onClose: () => void, 
+  onSuccess?: () => void,
+  isBackgroundRefining?: boolean
+}) {
   const { user } = useUser();
   const supabase = createClient();
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -60,12 +71,25 @@ export default function ProfileModal({ onClose, onSuccess }: { onClose: () => vo
 
   useEffect(() => {
     if (!user?.id) return;
-    supabase.from('profiles').select('profile_data').eq('id', user.id).maybeSingle().then(({ data }) => {
-      if (data?.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
-        setProfile(data.profile_data);
+    
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("/api/profile");
+        if (res.ok) {
+          const { profile: data } = await res.json();
+          if (data?.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
+            setProfile(data.profile_data);
+          } else {
+            setProfile(null);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching profile:", err);
       }
-    });
-  }, [user?.id, supabase]);
+    };
+
+    fetchProfile();
+  }, [user?.id, isBackgroundRefining]);
 
   const handleRefine = async () => {
     if (!rawText.trim()) return;
@@ -83,12 +107,16 @@ export default function ProfileModal({ onClose, onSuccess }: { onClose: () => vo
       if (data.profile) {
         setProfile(data.profile);
         if (user?.id) {
-          // Note: Server now saves this automatically, but doing it here again is fine
-          await supabase.from('profiles').update({
-            profile_data: data.profile,
-            raw_profile: rawText.trim(),
-            updated_at: new Date().toISOString()
-          }).eq('id', user.id);
+          // Note: The /api/refine-profile endpoint already saves the result.
+          // If we need to save manually, we should use the POST /api/profile endpoint
+          await fetch('/api/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              profile_data: data.profile,
+              raw_profile: rawText.trim()
+            })
+          });
         }
         setRawText("");
       }
@@ -104,11 +132,14 @@ export default function ProfileModal({ onClose, onSuccess }: { onClose: () => vo
 
   const handleDelete = async () => {
     if (user?.id) {
-      await supabase.from('profiles').update({
-        profile_data: null,
-        raw_profile: null,
-        updated_at: new Date().toISOString()
-      }).eq('id', user.id);
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profile_data: null,
+          raw_profile: null
+        })
+      });
     }
     setProfile(null);
     setEditMode(false);
@@ -125,10 +156,11 @@ export default function ProfileModal({ onClose, onSuccess }: { onClose: () => vo
       const parsed = JSON.parse(editJson);
       setProfile(parsed);
       if (user?.id) {
-        await supabase.from('profiles').update({
-          profile_data: parsed,
-          updated_at: new Date().toISOString()
-        }).eq('id', user.id);
+        await fetch('/api/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ profile_data: parsed })
+        });
       }
       setEditMode(false);
       setError("");
@@ -299,6 +331,35 @@ export default function ProfileModal({ onClose, onSuccess }: { onClose: () => vo
               </div>
             )}
 
+            {/* Support & Guide Section */}
+            <div className="pt-4 border-t border-[var(--glass-border)] space-y-3">
+              <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">Support & Guide</p>
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={() => {
+                    const supportUrl = "https://chintu.devilz.me/support";
+                    if (isElectron) (window as any).electronAPI.openExternal(supportUrl);
+                    else window.open(supportUrl, "_blank");
+                  }}
+                  className="flex items-center justify-center gap-2 py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-[var(--glass-border)]"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                  Support
+                </button>
+                <button 
+                  onClick={() => {
+                    // Trigger onboarding event that GlobalHeader listens to
+                    window.dispatchEvent(new CustomEvent('chintu-open-guide'));
+                    onClose();
+                  }}
+                  className="flex items-center justify-center gap-2 py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-[var(--glass-border)]"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  Operation Guide
+                </button>
+              </div>
+            </div>
+
             {/* Action buttons */}
             <div className="flex gap-3 pt-2">
               <button onClick={handleEdit} className="flex-1 py-3.5 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-[var(--glass-border)]">✏️ Edit</button>
@@ -314,7 +375,7 @@ export default function ProfileModal({ onClose, onSuccess }: { onClose: () => vo
       </div>
 
       {/* Full Page Loading Animation */}
-      {isRefining && (
+      {(isRefining || isBackgroundRefining) && (
         <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--bg-app)] backdrop-blur-2xl" onClick={e => e.stopPropagation()}>
           <div className="relative flex items-center justify-center w-32 h-32 mb-8">
             <div className="absolute inset-0 rounded-full border-[3px] border-indigo-500/30 animate-[spin_3s_linear_infinite]"></div>

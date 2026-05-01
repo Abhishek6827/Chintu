@@ -114,24 +114,7 @@ export default function SetupPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fa] text-gray-900 overflow-x-hidden overflow-y-auto">
-      {/* Header / Drag Region */}
-      <div className="drag-region h-12 w-full shrink-0 flex items-center justify-between px-6">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-          <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">System Online</span>
-        </div>
-        <div className="no-drag flex items-center gap-3">
-          <button 
-            onClick={handleMinimize}
-            className="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-900 transition-all active:scale-90"
-            title="Minimize"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          </button>
-          <div className="w-[1px] h-4 bg-gray-200 mx-1" />
-          <UserButton afterSignOutUrl="/sign-in" />
-        </div>
-      </div>
+
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12 overflow-y-auto">
         <div className="w-full max-w-sm">
