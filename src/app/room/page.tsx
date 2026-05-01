@@ -89,9 +89,10 @@ export default function RoomPage() {
   const [selectedModel, setSelectedModel] = useState<ModelKey>("llama-3.3-70b");
   const selectedModelRef = useRef<ModelKey>("llama-3.3-70b");
   const [userPlan, setUserPlan] = useState<string>("free");
-  const [credits, setCredits] = useState<number | null>(null);
+
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [isWindowHidden, setIsWindowHidden] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
 
   // ─── Vision conversation history ──────────────────────────
   // Keeps track of previous screenshot exchanges so the model
@@ -222,7 +223,7 @@ export default function RoomPage() {
 
             const plan = (profile.plan || 'free').toLowerCase();
             setUserPlan(plan);
-            setCredits(profile.credits ?? null); // Update credits directly from profile
+            setCredits(profile.credits ?? null);
 
             // Plan Gating Logic
             if (plan === 'free') {
@@ -444,8 +445,6 @@ export default function RoomPage() {
   // ─── Fullscreen UI persistence ref ──────────────────────
   const controlsRef = useRef<HTMLDivElement>(null);
   const originalParentRef = useRef<HTMLElement | null>(null);
-  const captureScreenshotRef = useRef<() => Promise<void>>(() => Promise.resolve());
-  const isCapturingRef = useRef(false);
 
   useEffect(() => { responseLengthRef.current = responseLength; }, [responseLength]);
 
@@ -1060,11 +1059,8 @@ export default function RoomPage() {
         }
       } else if (e.code === "Enter" || e.key === "Enter") {
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
-        
         e.preventDefault();
-        if (!isCapturingRef.current) {
-          captureScreenshotRef.current();
-        }
+        captureScreenshot();
       }
     };
 
@@ -1111,7 +1107,6 @@ export default function RoomPage() {
       return;
     }
     setIsCapturing(true);
-    isCapturingRef.current = true;
     try {
       const dataUrl = await (window as any).electronAPI.captureScreenshot();
       if (dataUrl) {
@@ -1129,12 +1124,7 @@ export default function RoomPage() {
       setError("Screenshot capture failed");
     }
     setIsCapturing(false);
-    isCapturingRef.current = false;
   }, []);
-
-  useEffect(() => {
-    captureScreenshotRef.current = captureScreenshot;
-  }, [captureScreenshot]);
 
   const removeScreenshot = (index: number) => {
     setCapturedScreenshots((prev) => prev.filter((_, i) => i !== index));
@@ -1671,12 +1661,29 @@ export default function RoomPage() {
       <div ref={controlsRef} className="toolbar px-1 sm:px-6 py-2 sm:py-3 flex flex-nowrap items-center justify-center gap-1 sm:gap-4 shrink-0 relative z-10">
         
         {/* Button 1: Settings */}
-        <button
-          onClick={() => setShowSettings(true)}
-          className="no-drag w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
-        >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-        </button>
+        <div className="flex items-center gap-2">
+          {credits !== null && (
+            <div 
+              className={`
+                no-drag h-10 sm:h-11 px-3 rounded-xl sm:rounded-2xl flex items-center gap-2 border transition-all
+                ${credits > 5 
+                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+                  : "bg-amber-500/10 border-amber-500/20 text-amber-400"}
+              `}
+              title="Tactical Credits"
+            >
+              <div className={`w-1.5 h-1.5 rounded-full ${credits > 5 ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
+              <span className="text-[10px] font-black tracking-tight uppercase">{credits}</span>
+            </div>
+          )}
+          
+          <button
+            onClick={() => setShowSettings(true)}
+            className="no-drag w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
+          >
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          </button>
+        </div>
         
         {/* Button 2: New Conversation / Clear */}
         <button
