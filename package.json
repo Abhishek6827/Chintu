@@ -1,6 +1,6 @@
 {
   "name": "chintu",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "description": "Premium AI Interview Assistant",
   "author": "Abhishek6827 <devilizbusy@gmail.com>",
   "private": true,
@@ -77,7 +77,6 @@
     "nsis": {
       "oneClick": true,
       "perMachine": false,
-
       "allowElevation": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
