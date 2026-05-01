@@ -120,7 +120,7 @@ export default function SetupPage() {
           {/* Logo Section */}
           <div className="text-center mb-8">
             <div className="w-20 h-20 mx-auto mb-4 drop-shadow-2xl">
-              <Image src="/icon.png" alt="Chintu" className="w-full h-full object-contain" width={40} height={40} unoptimized />
+              <Image src="https://www.getchintu.com/icon.png" alt="Chintu" className="w-full h-full object-contain" width={40} height={40} unoptimized />
             </div>
             <h1 className="text-2xl font-black tracking-tight uppercase text-gray-900">Chintu</h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1 text-center">AI Interview Assistant</p>

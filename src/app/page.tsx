@@ -14,6 +14,11 @@ export default function LandingPage() {
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = React.useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isElectron = typeof window !== "undefined" && (!!(window as any).electronAPI || navigator.userAgent.toLowerCase().includes('electron'));
 
@@ -50,7 +55,7 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, []);
 
-  if (isElectron) return <div className="h-screen bg-[#f8f9fa] flex items-center justify-center"><div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
+  if (mounted && isElectron) return <div className="h-screen bg-[#f8f9fa] flex items-center justify-center"><div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-gray-900 selection:bg-indigo-100 flex flex-col relative overflow-x-hidden" style={{ WebkitAppRegion: 'drag' } as any}>

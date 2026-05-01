@@ -16,7 +16,7 @@ export default function AboutPage() {
             Dashboard
           </Link>
           <div className="flex items-center gap-2">
-            <Image src="/icon.png" alt="Chintu" width={20} height={20} className="w-5 h-5" unoptimized />
+            <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={20} height={20} className="w-5 h-5" unoptimized />
             <span className="text-sm font-black tracking-tight uppercase">About Chintu</span>
           </div>
           <div className="w-20" /> {/* Spacer */}
@@ -161,7 +161,7 @@ export default function AboutPage() {
       <footer className="bg-white border-t border-gray-100 py-12 px-6">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-2 grayscale opacity-50">
-             <Image src="/icon.png" alt="" width={20} height={20} unoptimized />
+             <Image src="https://www.getchintu.com/icon.png" alt="" width={20} height={20} unoptimized />
              <span className="text-xs font-black uppercase tracking-tight">Chintu AI</span>
           </div>
           <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-gray-400">

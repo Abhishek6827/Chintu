@@ -52,7 +52,7 @@ export default function SupportPage() {
           ← Back to Dashboard
         </Link>
         <div className="flex items-center gap-2">
-          <Image src="/icon.png" alt="" width={20} height={20} className="w-5 h-5" />
+          <Image src="https://www.getchintu.com/icon.png" alt="" width={20} height={20} className="w-5 h-5" unoptimized />
           <span className="text-sm font-black tracking-tight">Chintu</span>
         </div>
         <div className="w-12" />

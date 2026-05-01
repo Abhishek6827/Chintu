@@ -18,7 +18,12 @@ export default function GlobalHeader() {
   const [hasProfile, setHasProfile] = useState(false);
   const [isScreenRecording, setIsScreenRecording] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Sync state with Electron and Supabase
   useEffect(() => {
@@ -67,18 +72,19 @@ export default function GlobalHeader() {
   }, [isLoaded, isSignedIn, user?.id]);
 
   useEffect(() => {
-    if (isElectron) {
-      (window as any).electronAPI?.onProtectionChange((protected_state: boolean) => {
-        setIsWindowHidden(protected_state);
+    if (isElectron && (window as any).electronAPI?.onHiddenChange) {
+      const cleanup = (window as any).electronAPI.onHiddenChange((hidden: boolean) => {
+        setIsWindowHidden(hidden);
       });
+      return () => {
+        if (typeof cleanup === 'function') cleanup();
+      };
     }
   }, [isElectron]);
 
   const handleHide = () => {
-    if (isElectron) {
-      const newState = !isWindowHidden;
-      setIsWindowHidden(newState);
-      (window as any).electronAPI.setProtection(newState);
+    if (isElectron && (window as any).electronAPI?.toggle) {
+      (window as any).electronAPI.toggle();
     }
   };
 
@@ -157,7 +163,7 @@ export default function GlobalHeader() {
               <span className="text-[8px] text-red-500 font-black uppercase tracking-[0.2em]">REC</span>
             </div>
           )}
-          {isElectron && (
+          {mounted && isElectron && (
             <>
               <button
                 onClick={handleHide}
