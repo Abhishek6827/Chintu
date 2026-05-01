@@ -69,22 +69,23 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "electron/icon.png",
-      "signAndEditExecutable": true
+      "icon": "public/icon.png",
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "publisherName": "Chintu AI"
     },
     "nsis": {
       "oneClick": true,
       "perMachine": false,
-      "allowToChangeInstallationDirectory": false,
+      "allowToChangeInstallationDirectory": true,
       "allowElevation": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Chintu",
-      "installerIcon": "electron/icon.png",
-      "uninstallerIcon": "electron/icon.png",
-      "installerHeaderIcon": "electron/icon.png",
+      "installerIcon": "public/icon.png",
+      "uninstallerIcon": "public/icon.png",
+      "installerHeaderIcon": "public/icon.png",
       "artifactName": "${productName}-Setup-${version}.${ext}",
-      "uninstallDisplayName": "${productName}"
+      "uninstallDisplayName": "Chintu"
     },
     "publish": {
       "provider": "github",

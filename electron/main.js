@@ -207,6 +207,10 @@ function createWindow() {
     icon: path.join(__dirname, "icon.png"),
   });
 
+  // Fallback for icon if local file is missing or being stubborn
+  const liveIconUrl = "https://www.getchintu.com/icon.png";
+  mainWindow.setIcon(path.join(__dirname, "icon.png"));
+
   mainWindow.once("ready-to-show", () => {
     mainWindow.setSkipTaskbar(true);
     mainWindow.show();
