@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
     let currentCredits = 999;
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("credits")
+      .select("credits, plan")
       .eq("id", userId)
       .maybeSingle();
 
@@ -203,12 +203,23 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Plan & Model Gating ──────────────────────────────
-    const userPlan = profile?.plan || "free";
+    const userPlan = (profile?.plan || "free").toLowerCase();
+    const isElite = userPlan === "elite";
+    const isPaid = userPlan === "pro" || userPlan === "elite";
+    
+    const isTurboModel = selectedModel === "qwen3.6";
     const isProModel = selectedModel !== "llama-3.3-70b";
 
-    if (userPlan === "free" && isProModel) {
+    if (isTurboModel && !isElite) {
       return NextResponse.json({ 
-        error: "Premium Engine Locked. Please upgrade to Pro to use this engine.",
+        error: "Turbo Engine Locked. Please upgrade to Elite to unlock this hyper-intelligence.",
+        code: "UPGRADE_REQUIRED"
+      }, { status: 402 });
+    }
+
+    if (!isPaid && isProModel) {
+      return NextResponse.json({ 
+        error: "Premium Engine Locked. Please upgrade to Pro or Elite to use this engine.",
         code: "UPGRADE_REQUIRED"
       }, { status: 402 });
     }

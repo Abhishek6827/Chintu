@@ -41,7 +41,7 @@ const MODELS = [
   { key: "llama-3.3-70b", name: "Standard Engine" },
   { key: "gpt-oss-120b", name: "Pro Engine" },
   { key: "qwen3-Coder", name: "Coding Specialist" },
-  { key: "nemotron-3-120b", name: "Nemotron Specialist" },
+  { key: "nemotron-3-120b", name: "Titan Engine" },
   { key: "qwen3.6", name: "Turbo Engine" }
 ] as const;
 
@@ -212,8 +212,10 @@ export default function RoomPage() {
               setShowReadingGuide(profile.profile_data.preferences.reading_guide);
             }
 
-            const plan = profile.plan || 'free';
+            const plan = (profile.plan || 'free').toLowerCase();
             setUserPlan(plan);
+
+            // Plan Gating Logic
             if (plan === 'free') {
               if (selectedModelRef.current !== 'llama-3.3-70b') {
                 setSelectedModel('llama-3.3-70b');
@@ -222,6 +224,12 @@ export default function RoomPage() {
               if (responseLengthRef.current === 'detailed' || responseLengthRef.current === 'coding') {
                 setResponseLength('balanced');
                 responseLengthRef.current = 'balanced';
+              }
+            } else if (plan === 'pro') {
+              // Pro can access everything EXCEPT Turbo Engine (qwen3.6)
+              if (selectedModelRef.current === 'qwen3.6') {
+                setSelectedModel('gpt-oss-120b');
+                selectedModelRef.current = 'gpt-oss-120b';
               }
             }
 

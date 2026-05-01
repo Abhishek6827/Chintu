@@ -183,7 +183,7 @@ export async function POST(req: NextRequest) {
     let currentCredits = 999; // default: allow if no profile found
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("credits")
+      .select("credits, plan")
       .eq("id", userId)
       .maybeSingle(); // ← maybeSingle instead of single — no error if 0 rows
 
@@ -220,14 +220,25 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Plan & Feature Gating ──────────────────────────────
-    const userPlan = profile?.plan || "free";
+    const userPlan = (profile?.plan || "free").toLowerCase();
+    const isElite = userPlan === "elite";
+    const isPaid = userPlan === "pro" || userPlan === "elite";
+    
+    const isTurboModel = selectedModel === "qwen3.6";
     const isProModel = selectedModel !== "llama-3.3-70b";
     const isProMode = responseLength === "coding" || responseLength === "detailed";
 
-    if (userPlan === "free" && (isProModel || isProMode)) {
+    if (isTurboModel && !isElite) {
+      return NextResponse.json({ 
+        error: "Turbo Engine Locked. Please upgrade to Elite to unlock hyper-vision intelligence.",
+        code: "UPGRADE_REQUIRED"
+      }, { status: 402 });
+    }
+
+    if (!isPaid && (isProModel || isProMode)) {
       const reason = isProModel ? "Premium Engine" : "Advanced Mode";
       return NextResponse.json({ 
-        error: `${reason} Locked. Please upgrade to Pro to unlock this feature.`,
+        error: `${reason} Locked. Please upgrade to Pro or Elite to unlock this feature.`,
         code: "UPGRADE_REQUIRED"
       }, { status: 402 });
     }
