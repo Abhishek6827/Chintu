@@ -89,7 +89,7 @@ export default function RoomPage() {
   const selectedModelRef = useRef<ModelKey>("llama-3.3-70b");
   const [userPlan, setUserPlan] = useState<string>("free");
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
-
+  const [isWindowHidden, setIsWindowHidden] = useState(false);
 
   // ─── Vision conversation history ──────────────────────────
   // Keeps track of previous screenshot exchanges so the model
@@ -308,6 +308,19 @@ export default function RoomPage() {
     }
     if (isElectron && (window as any).electronAPI?.getVersion) {
       (window as any).electronAPI.getVersion().then((v: string) => setAppVersion(v));
+    }
+    if (isElectron && (window as any).electronAPI?.getHidden) {
+      (window as any).electronAPI.getHidden().then((hidden: boolean) => {
+        setIsWindowHidden(hidden);
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isElectron && (window as any).electronAPI?.onHiddenChange) {
+      return (window as any).electronAPI.onHiddenChange((hidden: boolean) => {
+        setIsWindowHidden(hidden);
+      });
     }
   }, []);
 
@@ -1184,10 +1197,22 @@ export default function RoomPage() {
 
 
 
+  const handleHide = async () => {
+    if (isElectron) {
+      if (isWindowHidden) {
+        setShowUnhidePrompt(true);
+      } else {
+        const hidden = await (window as any).electronAPI.hideToggle();
+        setIsWindowHidden(hidden);
+      }
+    }
+  };
+
   const confirmUnhide = async () => {
     setShowUnhidePrompt(false);
     if (isElectron) {
-      await (window as any).electronAPI.hideToggle();
+      const hidden = await (window as any).electronAPI.hideToggle();
+      setIsWindowHidden(hidden);
     }
   };
 
@@ -1769,7 +1794,29 @@ export default function RoomPage() {
                 </p>
               </div>
 
+              {/* Stealth Mode (Electron Only) */}
+              {isElectron && (
+                <div 
+                  className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
+                  style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Stealth Mode</h4>
+                      <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">Hide window from screen capture</p>
+                    </div>
+                    <button
+                      onClick={handleHide}
+                      className={`w-12 h-6 rounded-full transition-all relative ${isWindowHidden ? "bg-orange-500" : "bg-gray-600/30"}`}
+                    >
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isWindowHidden ? "left-7" : "left-1"}`} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Reading Guide Toggle */}
+
               <div 
                 className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
                 style={{ padding: 'clamp(8px, 3vw, 20px)' }}

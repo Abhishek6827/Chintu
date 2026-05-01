@@ -160,7 +160,15 @@ export async function POST(req: Request) {
           replyTo: 'contact@getchintu.com',
           to: userEmail,
           subject: 'Access Granted: Your Chintu Upgrade is Active ⚡',
-          html: getPaymentEmailHtml(plan, totalCredits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+          html: getPaymentEmailHtml(
+            customerName,
+            plan,
+            oldPlan,
+            totalCredits,
+            price,
+            eventTime,
+            process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+          ),
           text: `Your upgrade to the ${plan.toUpperCase()} tier is verified. Advanced strategic engines and high-priority features are now fully operational.\n\nTactical Credit Allocation: ${totalCredits} Credits Provisioned\n\nQuestions? Contact our support team at contact@getchintu.com\n\nYou are receiving this receipt because of a recent transaction on your Chintu Intelligence account.\nChintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105\n\n© 2026 Chintu Intelligence Ecosystem • Professional Tier Verified`
         });
       }
@@ -234,7 +242,15 @@ export async function POST(req: Request) {
               replyTo: 'contact@getchintu.com',
               to: profile.email,
               subject: 'Mission Extended: Your Credits have been Stacked 🔄',
-              html: getPaymentEmailHtml(planInfo.plan, totalCredits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+              html: getPaymentEmailHtml(
+                invoiceCustomerName,
+                planInfo.plan,
+                profile.plan || "pro",
+                totalCredits,
+                planInfo.price,
+                eventTime,
+                process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+              ),
               text: `Your subscription to the ${planInfo.plan.toUpperCase()} tier has been successfully renewed.\n\nTactical Credit Allocation: ${totalCredits} Credits Provisioned (Stacked)\n\nQuestions? Contact our support team at contact@getchintu.com\n\nYou are receiving this receipt because of a recent transaction on your Chintu Intelligence account.\nChintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105\n\n© 2026 Chintu Intelligence Ecosystem • Professional Tier Verified`
             });
           }
@@ -322,7 +338,15 @@ export async function POST(req: Request) {
               replyTo: 'contact@getchintu.com',
               to: profile.email,
               subject: 'Subscription Successfully Updated 📈',
-              html: getPaymentEmailHtml(planInfo.plan, totalCredits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+              html: getPaymentEmailHtml(
+                customerName,
+                planInfo.plan,
+                oldPlan,
+                totalCredits,
+                planInfo.price,
+                eventTime,
+                process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+              ),
               text: `Your subscription to the ${planInfo.plan.toUpperCase()} tier has been successfully updated.\n\nTactical Credit Allocation: ${totalCredits} Credits Provisioned\n\nQuestions? Contact our support team at contact@getchintu.com\n\nYou are receiving this receipt because of a recent transaction on your Chintu Intelligence account.\nChintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105\n\n© 2026 Chintu Intelligence Ecosystem • Professional Tier Verified`
             });
           }

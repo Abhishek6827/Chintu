@@ -95,7 +95,15 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
 </html>
 `;
 
-export const getPaymentEmailHtml = (plan: string, credits: number, appUrl: string) => `
+export const getPaymentEmailHtml = (
+  name: string,
+  plan: string,
+  oldPlan: string,
+  credits: number,
+  price: string,
+  timestamp: string,
+  appUrl: string
+) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -128,14 +136,28 @@ export const getPaymentEmailHtml = (plan: string, credits: number, appUrl: strin
                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tr>
                     <td style="padding-bottom: 15px;">
-                      <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Activated Tier:</span>
-                      <div style="font-size: 14px; font-weight: 700; color: #1a1a1c;">${plan.toUpperCase()} Experience</div>
+                      <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Candidate:</span>
+                      <div style="font-size: 14px; font-weight: 700; color: #1a1a1c;">${name}</div>
+                    </td>
+                    <td style="padding-bottom: 15px; text-align: right;">
+                      <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Timestamp:</span>
+                      <div style="font-size: 12px; font-weight: 500; color: #6b7280;">${timestamp}</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom: 15px;">
+                      <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Operation Tier:</span>
+                      <div style="font-size: 14px; font-weight: 700; color: #1a1a1c;">${oldPlan.toUpperCase()} → ${plan.toUpperCase()}</div>
+                    </td>
+                    <td style="padding-bottom: 15px; text-align: right;">
+                      <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Transaction:</span>
+                      <div style="font-size: 14px; font-weight: 700; color: #1a1a1c;">${price}</div>
                     </td>
                   </tr>
                   <tr>
                     <td>
                       <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Tactical Credit Allocation:</span>
-                      <div style="font-size: 14px; font-weight: 700; color: #10b981;">${credits} Credits Provisioned</div>
+                      <div style="font-size: 14px; font-weight: 700; color: #10b981;">${credits} Credits Stacked</div>
                     </td>
                   </tr>
                 </table>
