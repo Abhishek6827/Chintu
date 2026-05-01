@@ -157,9 +157,10 @@ function hideWindow() {
   isHidden = true;
   mainWindow.setOpacity(0);
   mainWindow.setIgnoreMouseEvents(true);
-  mainWindow.setSkipTaskbar(true);
   mainWindow.setContentProtection(true);
   mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
+  mainWindow.setSkipTaskbar(true);
+  mainWindow.showInactive(); // Ensures window remains "shown" in OS but invisible, preventing minimize
   mainWindow.webContents.send("window-hidden-change", true);
 }
 
@@ -167,11 +168,11 @@ function hideWindow() {
 function showWindow() {
   if (!mainWindow) return;
   isHidden = false;
-  mainWindow.setOpacity(1);
+  mainWindow.setContentProtection(false); // Disable protection before showing
+  mainWindow.setSkipTaskbar(false);        // Show in taskbar before focus
+  mainWindow.show();                       // Bring to front and focus
+  mainWindow.setOpacity(1);                // Make visible
   mainWindow.setIgnoreMouseEvents(false);
-  mainWindow.setContentProtection(false); 
-  mainWindow.show();
-  mainWindow.setSkipTaskbar(false);
   mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
   mainWindow.webContents.send("window-hidden-change", false);
 }
@@ -210,8 +211,8 @@ function createWindow() {
   mainWindow.setIcon(path.join(__dirname, "icon.png"));
 
   mainWindow.once("ready-to-show", () => {
-    mainWindow.setSkipTaskbar(true);
-    mainWindow.show();
+    if (isHidden) hideWindow();
+    else showWindow();
   });
 
   mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
