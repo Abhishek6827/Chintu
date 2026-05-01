@@ -84,7 +84,13 @@ export default function GlobalHeader() {
 
   const handleHide = () => {
     if (isElectron && (window as any).electronAPI?.toggle) {
-      (window as any).electronAPI.toggle();
+      if (isWindowHidden) {
+        // Dispatch event to RoomPage to show the security prompt
+        window.dispatchEvent(new CustomEvent('chintu-unhide-request'));
+      } else {
+        // Hide immediately
+        (window as any).electronAPI.toggle();
+      }
     }
   };
 
@@ -199,6 +205,13 @@ export default function GlobalHeader() {
                 afterSignOutUrl="/"
               >
                 <UserButton.MenuItems>
+                  <UserButton.Action 
+                    label="My AI Profile" 
+                    labelIcon={<Sparkles className="w-4 h-4" />} 
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('chintu-open-profile'));
+                    }} 
+                  />
                   <UserButton.Action 
                     label="Manage Subscription" 
                     labelIcon={<CreditCard className="w-4 h-4" />} 

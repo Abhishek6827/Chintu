@@ -80,6 +80,7 @@ export default function RoomPage() {
   const [showSettings, setShowSettings] = useState(false);
 
   const [showUnhidePrompt, setShowUnhidePrompt] = useState(false);
+
   const [inputText, setInputText] = useState("");
   const [mounted, setMounted] = useState(false);
   const [windowOpacity, setWindowOpacity] = useState(1);
@@ -183,13 +184,18 @@ export default function RoomPage() {
       if (!isLoaded || !isSignedIn || !user?.id) return;
       
       try {
+        // First, check sessionStorage for jobDescription to avoid asking again
+        const jdFromSession = sessionStorage.getItem("jobDescription");
+        const jdFromLocal = localStorage.getItem("jobDescription");
+        const jd = jdFromSession || jdFromLocal;
+        if (jd && !jobDescription) {
+          setJobDescription(jd);
+        }
+
         const res = await fetch("/api/profile");
         if (res.ok) {
           const { profile } = await res.json();
           if (profile) {
-            // Credits updated via backend
-
-            
             // Set History
             if (profile.history && Array.isArray(profile.history)) {
               setHistory(profile.history);
@@ -201,10 +207,11 @@ export default function RoomPage() {
               setIsLightMode(cloudTheme);
             }
 
-            // Set Job Description if not already set from URL/Session
-            if (profile.current_jd && !jobDescription) {
+            // Set Job Description if not already set from URL/Session/Local
+            if (profile.current_jd && !jobDescription && !jd) {
               setJobDescription(profile.current_jd);
               sessionStorage.setItem("jobDescription", profile.current_jd);
+              localStorage.setItem("jobDescription", profile.current_jd);
             }
 
             // Set Reading Guide (from profile_data.preferences)
@@ -328,8 +335,24 @@ export default function RoomPage() {
     if (isElectron && (window as any).electronAPI?.onHiddenChange) {
       return (window as any).electronAPI.onHiddenChange((hidden: boolean) => {
         setIsWindowHidden(hidden);
+        if (!hidden) {
+          setShowUnhidePrompt(false); // Close prompt if unhidden via other means
+        }
       });
     }
+  }, []);
+
+  useEffect(() => {
+    const handleOpenProfile = () => setShowProfile(true);
+    const handleUnhideRequest = () => setShowUnhidePrompt(true);
+
+    window.addEventListener('chintu-open-profile', handleOpenProfile);
+    window.addEventListener('chintu-unhide-request', handleUnhideRequest);
+
+    return () => {
+      window.removeEventListener('chintu-open-profile', handleOpenProfile);
+      window.removeEventListener('chintu-unhide-request', handleUnhideRequest);
+    };
   }, []);
 
   // ─── Listen for auto-update events ────────────────────────
@@ -452,8 +475,9 @@ export default function RoomPage() {
       return; 
     }
     
-    // Persist to sessionStorage so it survives within the session
+    // Persist to sessionStorage and localStorage so it survives within the session
     sessionStorage.setItem("jobDescription", jd);
+    localStorage.setItem("jobDescription", jd);
     setJobDescription(jd);
 
     // Profile and theme initialization is now handled by the consolidated initRoom call above.
