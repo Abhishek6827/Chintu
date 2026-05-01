@@ -97,9 +97,15 @@ export default function GlobalHeader() {
     }
   };
 
-  // Determine if we should show the full header or just controls
-  // On login/signup pages, maybe we want a simpler view? 
-  // But the user said "every page".
+  // Hide GlobalHeader on public marketing pages where custom premium headers are used
+  const publicPages = ["/", "/privacy", "/terms", "/pricing", "/sign-in", "/sign-up"];
+  
+  // Use startsWith for auth pages in case of catch-all routes like /sign-in/factor-one
+  const isPublicPage = publicPages.some(page => pathname === page || pathname.startsWith(page + "/"));
+  
+  if (isPublicPage) {
+    return null;
+  }
 
   return (
     <>

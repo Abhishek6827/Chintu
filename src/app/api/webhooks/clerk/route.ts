@@ -156,9 +156,11 @@ export async function POST(req: Request) {
         
         await resend.emails.send({
           from: 'Chintu Intelligence <welcome@getchintu.com>', // Dedicated welcome address
+          replyTo: 'contact@getchintu.com',
           to: email,
           subject: 'Welcome to Chintu Intelligence Ecosystem 🚀',
-          html: getWelcomeEmailHtml(displayId, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+          html: getWelcomeEmailHtml(displayId, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+          text: `Welcome to Chintu Intelligence!\n\nYour strategic interview assistant is now active. We've provisioned your account with 10 Tactical Credits to jumpstart your career growth with high-precision intelligence.\n\nInternal ID: ${displayId}\n\nNext Steps for Success:\n1. Feed the Engine: Complete your profile with your resume and JD to enable high-context response synthesis.\n2. Activate Stealth: Launch the ghost interface during your live sessions for real-time tactical guidance.\n\nLaunch Ghost Interface: ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/room\n\nQuestions or issues? Contact our strategy team at contact@getchintu.com\n\nYou are receiving this email because you recently created an account at Chintu Intelligence.\nChintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105\n\n© 2026 Chintu Intelligence Ecosystem • All Rights Reserved`
         });
         console.log(`[/api/webhooks/clerk] Welcome email sent successfully to ${email}`);
       } else {

@@ -6,15 +6,15 @@ import { createAdminClient } from "@/utils/supabase/server";
 import { Resend } from "resend";
 import { getPaymentEmailHtml } from "@/utils/email-templates";
 
-const PRICE_ID_MAP: Record<string, { plan: string; credits: number; price: string }> = {
+const PRICE_ID_MAP: Record<string, { plan: string; credits: number; price: string; days: number }> = {
   // Pro Monthly
-  "price_1TRu3pLYcsTnVrvkVfZIjTLC": { plan: "pro", credits: 200, price: "$9/mo" },
+  "price_1TRu3pLYcsTnVrvkVfZIjTLC": { plan: "pro", credits: 200, price: "$9/mo", days: 30 },
   // Pro Annual
-  "price_1TRu4ILYcsTnVrvkcfBbwSBr": { plan: "pro", credits: 2400, price: "$89/yr" }, // 200 * 12
+  "price_1TRu4ILYcsTnVrvkcfBbwSBr": { plan: "pro", credits: 2400, price: "$89/yr", days: 365 },
   // Elite Monthly
-  "price_1TRu4jLYcsTnVrvkJ7gkHA91": { plan: "elite", credits: 1000, price: "$29/mo" },
+  "price_1TRu4jLYcsTnVrvkJ7gkHA91": { plan: "elite", credits: 1000, price: "$29/mo", days: 30 },
   // Elite Annual
-  "price_1TRu5ALYcsTnVrvk3dMorbBe": { plan: "elite", credits: 12000, price: "$279/yr" }, // 1000 * 12
+  "price_1TRu5ALYcsTnVrvk3dMorbBe": { plan: "elite", credits: 12000, price: "$279/yr", days: 365 },
 };
 
 async function sendTelegramAlert(message: string) {
@@ -86,19 +86,36 @@ export async function POST(req: Request) {
       console.error(`[Stripe Webhook] Unknown or missing Price ID: ${priceId}`);
       // Fallback or handle error
     } else {
-      const { plan, credits, price } = PRICE_ID_MAP[priceId];
+      const { plan, credits, price, days } = PRICE_ID_MAP[priceId];
       const quantity = lineItems.data[0]?.quantity || 1;
-      const newTotal = credits * quantity;
+      const purchasedCredits = credits * quantity;
+      const purchasedDays = days * quantity;
 
-      console.log(`[Stripe Webhook] Updating user ${userId} to plan ${plan} with ${newTotal} credits (Qty: ${quantity})`);
-
-      // Fetch user's current plan before updating (for old plan info)
+      // Fetch user's current status for stacking
       const { data: currentProfile } = await supabaseAdmin
         .from("profiles")
-        .select("plan, email")
+        .select("plan, email, credits, subscription_expires_at")
         .eq("id", userId)
         .maybeSingle();
+
       const oldPlan = currentProfile?.plan || "free";
+      const existingCredits = currentProfile?.credits || 0;
+      
+      // 1. Stack Credits
+      const totalCredits = existingCredits + purchasedCredits;
+
+      // 2. Pro-rata Date Extension
+      const now = new Date();
+      let currentExpiry = currentProfile?.subscription_expires_at 
+        ? new Date(currentProfile.subscription_expires_at) 
+        : now;
+      
+      // If current expiry is in the past, start from now
+      if (currentExpiry < now) currentExpiry = now;
+      const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
+
+      console.log(`[Stripe Webhook] Stacking for user ${userId}: Credits ${existingCredits} + ${purchasedCredits} = ${totalCredits}`);
+      console.log(`[Stripe Webhook] Extending expiry for user ${userId}: to ${newExpiry.toISOString()}`);
 
       // Get customer name from Stripe
       const customerName = session.customer_details?.name || session.customer_details?.email || "Unknown";
@@ -108,7 +125,8 @@ export async function POST(req: Request) {
         .from("profiles")
         .update({
           plan: plan,
-          credits: newTotal,
+          credits: totalCredits,
+          subscription_expires_at: newExpiry.toISOString(),
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: session.subscription as string,
           updated_at: new Date().toISOString(),
@@ -129,7 +147,8 @@ export async function POST(req: Request) {
         `📅 Date: <code>${eventTime}</code>\n` +
         `💎 Plan: <b>${oldPlan.toUpperCase()}</b> → <b>${plan.toUpperCase()}</b>\n` +
         `💲 Price: <b>${price}</b> × ${quantity}\n` +
-        `⚡ Credits: <b>${newTotal}</b>\n` +
+        `⚡ Credits: <b>${totalCredits}</b>\n` +
+        `⏳ Expires: <code>${newExpiry.toLocaleDateString()}</code>\n` +
         `💳 Session: <code>${session.id.slice(-10)}</code>`
       );
 
@@ -138,9 +157,11 @@ export async function POST(req: Request) {
       if (userEmail) {
         await resend.emails.send({
           from: 'Chintu Intelligence <welcome@getchintu.com>',
+          replyTo: 'contact@getchintu.com',
           to: userEmail,
           subject: 'Access Granted: Your Chintu Upgrade is Active ⚡',
-          html: getPaymentEmailHtml(plan, credits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+          html: getPaymentEmailHtml(plan, totalCredits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+          text: `Your upgrade to the ${plan.toUpperCase()} tier is verified. Advanced strategic engines and high-priority features are now fully operational.\n\nTactical Credit Allocation: ${totalCredits} Credits Provisioned\n\nQuestions? Contact our support team at contact@getchintu.com\n\nYou are receiving this receipt because of a recent transaction on your Chintu Intelligence account.\nChintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105\n\n© 2026 Chintu Intelligence Ecosystem • Professional Tier Verified`
         });
       }
     }
@@ -155,21 +176,38 @@ export async function POST(req: Request) {
       // Find user by subscription ID
       const { data: profile, error: findError } = await supabaseAdmin
         .from("profiles")
-        .select("id, plan, email")
+        .select("id, plan, email, credits, subscription_expires_at")
         .eq("stripe_subscription_id", subscriptionId)
         .maybeSingle();
 
       if (profile && !findError) {
-        // Reset credits based on plan
+        // Stack credits and extend days based on plan
         const priceId = invoice.lines?.data?.[0]?.price?.id;
         const planInfo = PRICE_ID_MAP[priceId || ""];
         
         if (planInfo) {
           const quantity = invoice.lines?.data?.[0]?.quantity || 1;
-          const monthlyCredits = planInfo.credits * quantity;
+          const purchasedCredits = planInfo.credits * quantity;
+          const purchasedDays = planInfo.days * quantity;
+
+          const existingCredits = profile.credits || 0;
+          const totalCredits = existingCredits + purchasedCredits;
+
+          const now = new Date();
+          let currentExpiry = profile.subscription_expires_at 
+            ? new Date(profile.subscription_expires_at) 
+            : now;
+          
+          if (currentExpiry < now) currentExpiry = now;
+          const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
+
           await supabaseAdmin
             .from("profiles")
-            .update({ credits: monthlyCredits, updated_at: new Date().toISOString() })
+            .update({ 
+              credits: totalCredits, 
+              subscription_expires_at: newExpiry.toISOString(),
+              updated_at: new Date().toISOString() 
+            })
             .eq("id", profile.id);
 
           // Get customer name from invoice
@@ -177,6 +215,7 @@ export async function POST(req: Request) {
           const eventTime = formatEventTime();
 
           // ─── Send Telegram Alert ─────────────────────────────
+          // Telegram Alert
           await sendTelegramAlert(
             `🔄 <b>Subscription Renewed</b>\n\n` +
             `👤 Name: <b>${invoiceCustomerName}</b>\n` +
@@ -184,16 +223,19 @@ export async function POST(req: Request) {
             `📅 Date: <code>${eventTime}</code>\n` +
             `💎 Plan: <b>${planInfo.plan.toUpperCase()}</b>\n` +
             `💲 Price: <b>${planInfo.price}</b> × ${quantity}\n` +
-            `⚡ Credits Reset: <b>${monthlyCredits}</b>`
+            `⚡ Credits (Stacked): <b>${totalCredits}</b>\n` +
+            `⏳ New Expiry: <code>${newExpiry.toLocaleDateString()}</code>`
           );
 
-          // ─── Send Premium Email ─────────────────────────────
+          // Email
           if (profile.email) {
             await resend.emails.send({
               from: 'Chintu Intelligence <billing@getchintu.com>',
+              replyTo: 'contact@getchintu.com',
               to: profile.email,
-              subject: 'Mission Extended: Your Credits have been Reset 🔄',
-              html: getPaymentEmailHtml(planInfo.plan, monthlyCredits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+              subject: 'Mission Extended: Your Credits have been Stacked 🔄',
+              html: getPaymentEmailHtml(planInfo.plan, totalCredits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+              text: `Your subscription to the ${planInfo.plan.toUpperCase()} tier has been successfully renewed.\n\nTactical Credit Allocation: ${totalCredits} Credits Provisioned (Stacked)\n\nQuestions? Contact our support team at contact@getchintu.com\n\nYou are receiving this receipt because of a recent transaction on your Chintu Intelligence account.\nChintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105\n\n© 2026 Chintu Intelligence Ecosystem • Professional Tier Verified`
             });
           }
         }
@@ -218,12 +260,26 @@ export async function POST(req: Request) {
         // Find user by subscription ID
         const { data: profile } = await supabaseAdmin
           .from("profiles")
-          .select("id, plan, email")
+          .select("id, plan, email, credits, subscription_expires_at")
           .eq("stripe_subscription_id", subscription.id)
           .maybeSingle();
 
         if (profile) {
           const oldPlan = profile.plan || "free";
+          const purchasedCredits = planInfo.credits * quantity;
+          const purchasedDays = planInfo.days * quantity;
+
+          const existingCredits = profile.credits || 0;
+          const totalCredits = existingCredits + purchasedCredits;
+
+          const now = new Date();
+          let currentExpiry = profile.subscription_expires_at 
+            ? new Date(profile.subscription_expires_at) 
+            : now;
+          
+          if (currentExpiry < now) currentExpiry = now;
+          const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
+
           console.log(`[Stripe Webhook] Subscription Updated for user ${profile.id}: ${oldPlan} → ${planInfo.plan}, Qty ${quantity}`);
           
           // Update Supabase
@@ -231,7 +287,8 @@ export async function POST(req: Request) {
             .from("profiles")
             .update({ 
               plan: planInfo.plan,
-              credits: newCredits, 
+              credits: totalCredits, 
+              subscription_expires_at: newExpiry.toISOString(),
               updated_at: new Date().toISOString() 
             })
             .eq("id", profile.id);
@@ -256,16 +313,19 @@ export async function POST(req: Request) {
             `💎 Old Plan: <b>${oldPlan.toUpperCase()}</b>\n` +
             `💎 New Plan: <b>${planInfo.plan.toUpperCase()}</b>\n` +
             `💲 Price: <b>${planInfo.price}</b> × ${quantity}\n` +
-            `⚡ New Credits: <b>${newCredits}</b>`
+            `⚡ Total Credits (Stacked): <b>${totalCredits}</b>\n` +
+            `⏳ New Expiry: <code>${newExpiry.toLocaleDateString()}</code>`
           );
           
           // Send Email
           if (profile.email) {
             await resend.emails.send({
               from: 'Chintu Intelligence <billing@getchintu.com>',
+              replyTo: 'contact@getchintu.com',
               to: profile.email,
               subject: 'Subscription Successfully Updated 📈',
-              html: getPaymentEmailHtml(planInfo.plan, newCredits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+              html: getPaymentEmailHtml(planInfo.plan, totalCredits, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+              text: `Your subscription to the ${planInfo.plan.toUpperCase()} tier has been successfully updated.\n\nTactical Credit Allocation: ${totalCredits} Credits Provisioned\n\nQuestions? Contact our support team at contact@getchintu.com\n\nYou are receiving this receipt because of a recent transaction on your Chintu Intelligence account.\nChintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105\n\n© 2026 Chintu Intelligence Ecosystem • Professional Tier Verified`
             });
           }
         }

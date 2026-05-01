@@ -78,8 +78,12 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
               <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: 500; color: #6b7280;">
                 Questions or issues? Contact our strategy team at <a href="mailto:contact@getchintu.com" style="color: #6366f1; text-decoration: none;">contact@getchintu.com</a>
               </p>
+              <p style="margin: 0 0 15px 0; font-size: 11px; color: #9ca3af; line-height: 1.5;">
+                You are receiving this email because you recently created an account at Chintu Intelligence.<br>
+                Chintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105
+              </p>
               <p style="margin: 0; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">
-                © 2026 Chintu Intelligence Ecosystem • All Rights Reserved
+                © 2026 Chintu Intelligence Ecosystem • <a href="${appUrl}/setup" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>
               </p>
             </td>
           </tr>
@@ -171,8 +175,12 @@ export const getPaymentEmailHtml = (plan: string, credits: number, appUrl: strin
               <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: 500; color: #6b7280;">
                 Billing questions? Contact our support team at <a href="mailto:contact@getchintu.com" style="color: #6366f1; text-decoration: none;">contact@getchintu.com</a>
               </p>
+              <p style="margin: 0 0 15px 0; font-size: 11px; color: #9ca3af; line-height: 1.5;">
+                You are receiving this receipt because of a recent transaction on your Chintu Intelligence account.<br>
+                Chintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105
+              </p>
               <p style="margin: 0; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">
-                © 2026 Chintu Intelligence Ecosystem • Professional Tier Verified
+                © 2026 Chintu Intelligence Ecosystem • <a href="${appUrl}/setup" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>
               </p>
             </td>
           </tr>
