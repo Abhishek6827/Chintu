@@ -233,10 +233,10 @@ function createWindow() {
 
   // ─── Load the app ───────────────────────────────────────
   if (isDev) {
-    mainWindow.loadURL("http://localhost:3000");
+    mainWindow.loadURL("http://localhost:3000/setup");
   } else {
     // In production, we load the remote Vercel URL for SaaS functionality
-    mainWindow.loadURL(`${VERCEL_URL}`);
+    mainWindow.loadURL(`${VERCEL_URL}/setup`);
   }
 
   // Set window position (bottom-right corner)

@@ -80,6 +80,12 @@ export default function SetupPage() {
     setIsInitiating(true);
     setStatusText("🚀 Preparing your interview workspace...");
 
+    if (!isElectron) {
+      alert("⚠️ SYSTEM REQUIREMENT: Interview rooms are desktop-exclusive. Please use the Chintu Desktop App.");
+      setIsInitiating(false);
+      return;
+    }
+
     if (aboutMe.trim() && !hasProfile) {
       setIsRefining(true);
       setStatusText("✨ AI is structuring your profile...");
