@@ -326,6 +326,17 @@ export default function RoomPage() {
     }
   }, []);
 
+  const handleHide = useCallback(async () => {
+    if (isElectron) {
+      if (isWindowHidden) {
+        setShowUnhidePrompt(true);
+      } else {
+        const hidden = await (window as any).electronAPI.hideToggle();
+        setIsWindowHidden(hidden);
+      }
+    }
+  }, [isWindowHidden]);
+
   useEffect(() => {
     if (isElectron && (window as any).electronAPI?.onHiddenChange) {
       return (window as any).electronAPI.onHiddenChange((hidden: boolean) => {
@@ -351,7 +362,7 @@ export default function RoomPage() {
       window.removeEventListener('chintu-unhide-request', handleUnhideRequest);
       window.removeEventListener('chintu-toggle-ghost', handleToggleGhost);
     };
-  }, []);
+  }, [handleHide]);
 
   // ─── Listen for auto-update events ────────────────────────
   const updateCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -1226,16 +1237,7 @@ export default function RoomPage() {
 
 
 
-  const handleHide = async () => {
-    if (isElectron) {
-      if (isWindowHidden) {
-        setShowUnhidePrompt(true);
-      } else {
-        const hidden = await (window as any).electronAPI.hideToggle();
-        setIsWindowHidden(hidden);
-      }
-    }
-  };
+
 
   const confirmUnhide = async () => {
     setShowUnhidePrompt(false);
