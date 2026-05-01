@@ -151,11 +151,19 @@ export default function SetupPage() {
         <div className="w-full max-w-sm">
           {/* Logo Section */}
           <div className="text-center mb-8">
-            <div className="w-20 h-20 mx-auto mb-4 drop-shadow-2xl">
-              <Image src="https://www.getchintu.com/icon.png" alt="Chintu" className="w-full h-full object-contain" width={40} height={40} unoptimized />
+            <div className="w-20 h-20 mx-auto mb-6 bg-white rounded-[2rem] border border-gray-100 shadow-xl flex items-center justify-center p-3 relative overflow-hidden group hover:scale-105 transition-transform">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Image 
+                src="https://www.getchintu.com/icon.png" 
+                alt="Chintu" 
+                className="w-full h-full object-contain relative z-10" 
+                width={80} 
+                height={80} 
+                unoptimized 
+              />
             </div>
-            <h1 className="text-2xl font-black tracking-tight uppercase text-gray-900">Chintu</h1>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1 text-center">AI Interview Assistant</p>
+            <h1 className="text-3xl font-black tracking-tight uppercase text-gray-900 leading-none">Chintu</h1>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mt-2 text-center">AI Interview Assistant</p>
           </div>
 
           <div className="space-y-5">

@@ -21,9 +21,11 @@ export default function RootLayout({
         <head>
           <link rel="icon" href="https://www.getchintu.com/icon.png" />
         </head>
-        <body className="bg-transparent">
+        <body className="bg-transparent h-screen flex flex-col">
           <GlobalHeader />
-          {children}
+          <main className="flex-1 min-h-0 relative overflow-y-auto overflow-x-hidden">
+            {children}
+          </main>
           <UpdateNotification />
         </body>
       </html>

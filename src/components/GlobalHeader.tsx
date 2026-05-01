@@ -127,7 +127,16 @@ export default function GlobalHeader() {
               }
             }}
           >
-            <Image src="https://www.getchintu.com/icon.png" alt="Chintu" className="w-5 h-5 object-contain" width={40} height={40} unoptimized />
+            <div className="flex items-center justify-center w-7 h-7 bg-indigo-500/10 rounded-lg border border-indigo-500/20 shadow-sm overflow-hidden p-1">
+              <Image 
+                src="https://www.getchintu.com/icon.png" 
+                alt="Chintu" 
+                className="w-full h-full object-contain" 
+                width={28} 
+                height={28} 
+                unoptimized 
+              />
+            </div>
             <span className="text-[var(--text-main)] text-sm font-black tracking-tight uppercase">Chintu</span>
           </div>
           

@@ -164,7 +164,16 @@ export default function PricingPage() {
         </div>
         
         <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-          <Image src="https://www.getchintu.com/icon.png" alt="Chintu" className="w-5 h-5" width={40} height={40} unoptimized />
+          <div className="flex items-center justify-center w-7 h-7 bg-indigo-500/10 rounded-lg border border-indigo-500/20 shadow-sm overflow-hidden p-1">
+            <Image 
+              src="https://www.getchintu.com/icon.png" 
+              alt="Chintu" 
+              className="w-full h-full object-contain" 
+              width={28} 
+              height={28} 
+              unoptimized 
+            />
+          </div>
           <span className="text-sm font-black tracking-tighter uppercase">Chintu <span className="text-indigo-600">SaaS</span></span>
         </div>
 

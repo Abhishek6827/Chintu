@@ -74,8 +74,15 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-[100] bg-white/70 backdrop-blur-2xl border-b border-gray-100 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 no-drag" style={{ WebkitAppRegion: 'no-drag' } as any}>
-            <div className="w-8 h-8 drop-shadow-xl transition-transform hover:scale-110">
-              <Image src="https://www.getchintu.com/icon.png" alt="Chintu" className="w-full h-full object-contain" width={40} height={40} unoptimized />
+            <div className="flex items-center justify-center w-8 h-8 bg-indigo-500/10 rounded-xl border border-indigo-500/20 shadow-md overflow-hidden p-1.5 hover:scale-110 transition-transform">
+              <Image 
+                src="https://www.getchintu.com/icon.png" 
+                alt="Chintu" 
+                className="w-full h-full object-contain" 
+                width={32} 
+                height={32} 
+                unoptimized 
+              />
             </div>
             <span className="text-xl font-black tracking-tighter uppercase text-gray-900">Chintu <span className="text-indigo-600">AI</span></span>
           </div>
