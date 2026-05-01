@@ -19,7 +19,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <head>
-          <link rel="icon" href="/icon.png" />
+          <link rel="icon" href="https://www.getchintu.com/icon.png" />
         </head>
         <body className="bg-transparent">
           <GlobalHeader />

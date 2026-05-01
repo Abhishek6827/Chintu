@@ -15,13 +15,13 @@ export default function LandingPage() {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
+  const isElectron = typeof window !== "undefined" && (!!(window as any).electronAPI || navigator.userAgent.toLowerCase().includes('electron'));
 
   useEffect(() => {
     if (isLoaded && isElectron) {
       if (isSignedIn) {
-        const jd = sessionStorage.getItem("jobDescription");
-        router.push(jd ? "/room" : "/setup");
+        // App always starts at setup/dashboard
+        router.push("/setup");
       } else {
         router.push("/sign-in");
       }
@@ -50,7 +50,7 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, []);
 
-  if (isElectron && isLoaded) return <div className="h-screen bg-[#f8f9fa] flex items-center justify-center"><div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
+  if (isElectron) return <div className="h-screen bg-[#f8f9fa] flex items-center justify-center"><div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-gray-900 selection:bg-indigo-100 flex flex-col relative overflow-x-hidden" style={{ WebkitAppRegion: 'drag' } as any}>
@@ -83,10 +83,7 @@ export default function LandingPage() {
               </>
             ) : (
               <button 
-                onClick={() => {
-                  const jd = sessionStorage.getItem("jobDescription");
-                  router.push(jd ? "/room" : "/setup");
-                }}
+                onClick={() => router.push("/setup")}
                 className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-6 py-3.5 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
               >
                 Go to Dashboard <Zap className="w-3 h-3 fill-current" />
@@ -114,9 +111,15 @@ export default function LandingPage() {
           </p>
 
           <div className="reveal flex flex-col sm:flex-row gap-5 transition-all duration-1000 delay-500">
-            <Link href="/sign-up" className="px-12 py-6 bg-indigo-600 text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
-              Join the Revolution <ArrowRight className="w-4 h-4" />
-            </Link>
+            {isSignedIn ? (
+              <Link href="/setup" className="px-12 py-6 bg-indigo-600 text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
+                Go to Dashboard <Zap className="w-4 h-4 fill-current" />
+              </Link>
+            ) : (
+              <Link href="/sign-up" className="px-12 py-6 bg-indigo-600 text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
+                Join the Revolution <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
             <Link href="/pricing" className="px-12 py-6 bg-white border border-gray-100 text-gray-400 font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl hover:border-indigo-500/30 hover:text-indigo-600 transition-all flex items-center justify-center">
               View Strategy Plans
             </Link>

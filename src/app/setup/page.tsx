@@ -20,6 +20,7 @@ export default function SetupPage() {
   const [isInitiating, setIsInitiating] = useState(false);
   
   const router = useRouter();
+  const isElectron = typeof window !== "undefined" && (!!(window as any).electronAPI || navigator.userAgent.toLowerCase().includes('electron'));
 
   // Handle hydration / Initial load
   useEffect(() => {
@@ -70,6 +71,12 @@ export default function SetupPage() {
 
   const handleStart = async () => {
     if (!jd.trim()) return;
+    
+    if (!isElectron) {
+      alert("⚠️ SYSTEM REQUIREMENT: Interview rooms and real-time guidance are only accessible via the Chintu Desktop Application for security and performance reasons. Please launch the app on your PC.");
+      return;
+    }
+
     setIsInitiating(true);
     setStatusText("🚀 Preparing your interview workspace...");
 
@@ -97,19 +104,11 @@ export default function SetupPage() {
   };
 
   const handleSkipAndStart = () => {
-    setStatusText("🎯 Synchronizing with neural network...");
-    
-    // Start refinement in background
-    if (aboutMe.trim() && !hasProfile) {
-      fetch("/api/refine-profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rawText: aboutMe.trim() }),
-      });
-      router.push("/room?jd=" + encodeURIComponent(jd.trim()) + "&refining=true");
-    } else {
-      router.push("/room?jd=" + encodeURIComponent(jd.trim()));
+    if (!isElectron) {
+      alert("⚠️ SYSTEM REQUIREMENT: Interview rooms are desktop-exclusive. Please use the Chintu Desktop App.");
+      return;
     }
+    router.push("/room?jd=" + encodeURIComponent(jd.trim()));
   };
 
   return (
