@@ -4,8 +4,10 @@ import React from 'react';
 import { Download, Laptop, Shield, Zap, ArrowRight, CheckCircle2 } from 'lucide-react';
 import GlobalFooter from '@/components/GlobalFooter';
 
+import pkg from '../../../package.json';
+
 export default function DownloadPage() {
-  const version = "1.1.3";
+  const version = pkg.version;
   const downloadUrl = "https://github.com/Abhishek6827/Chintu/releases/latest/download/Chintu-Setup-" + version + ".exe";
 
   return (
