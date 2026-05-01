@@ -255,8 +255,6 @@ export async function POST(req: Request) {
       
       const planInfo = PRICE_ID_MAP[priceId || ""];
       if (planInfo && subscription.status === "active") {
-        const newCredits = planInfo.credits * quantity;
-        
         // Find user by subscription ID
         const { data: profile } = await supabaseAdmin
           .from("profiles")

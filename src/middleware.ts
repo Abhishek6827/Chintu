@@ -1,5 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-
+import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
   '/', 
@@ -12,6 +12,20 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  const { userId } = auth();
+  const url = new URL(req.url);
+  
+  // App-specific redirection: App users should never see the landing page
+  const isElectron = req.headers.get("user-agent")?.toLowerCase().includes("electron");
+  
+  if (isElectron && url.pathname === "/") {
+    if (userId) {
+      return NextResponse.redirect(new URL("/setup", req.url));
+    } else {
+      return NextResponse.redirect(new URL("/sign-in", req.url));
+    }
+  }
+
   if (!isPublicRoute(req)) {
     auth().protect();
   }

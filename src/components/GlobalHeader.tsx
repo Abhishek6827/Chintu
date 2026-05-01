@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
-import { Minus, Zap, Crown, Check, Sparkles } from "lucide-react";
+import { Minus, Zap, Sparkles } from "lucide-react";
 
 import OnboardingModal from "@/components/OnboardingModal";
 

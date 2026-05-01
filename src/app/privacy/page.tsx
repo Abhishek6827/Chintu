@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Shield, ArrowLeft, Lock, EyeOff, Server, FileCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, Lock, EyeOff, Server, FileCheck, Sparkles } from 'lucide-react';
 
 import GlobalFooter from '@/components/GlobalFooter';
 

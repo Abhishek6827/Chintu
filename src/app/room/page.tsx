@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Mic, Sun, Moon, Crown, Minus, Zap, Check, Sparkles } from "lucide-react";
-import { UserButton, useUser } from "@clerk/nextjs";
+import { Mic, Sun, Moon, Check, Sparkles, Crown } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 
 
 import AnswerDisplay from "@/components/AnswerDisplay";
@@ -61,38 +61,16 @@ interface HistoryMessage {
 // Check if running in Electron
 const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
-import { createClient } from "@/utils/supabase/client";
+
 
 export default function RoomPage() {
   const { user, isLoaded, isSignedIn } = useUser();
   const router = useRouter();
 
-  if (!isLoaded) return <div className="h-screen bg-[#f8f9fa] flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
-
-  if (!isElectron) {
-    return (
-      <div className="h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
-        <div className="max-w-md">
-          <div className="w-20 h-20 bg-indigo-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8">
-            <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={40} height={40} unoptimized />
-          </div>
-          <h1 className="text-3xl font-black tracking-tighter text-gray-900 mb-4 uppercase">Desktop Exclusive.</h1>
-          <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed mb-10">
-            The Chintu Room is a strategic environment designed exclusively for our Desktop Application. Please launch Chintu on your computer to access live synthesis and stealth mode.
-          </p>
-          <div className="flex flex-col gap-4">
-             <a href="https://www.getchintu.com/download" className="bg-indigo-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 transition-all">Download Chintu</a>
-             <button onClick={() => router.push('/')} className="text-[10px] text-gray-400 font-black uppercase tracking-widest hover:text-gray-900 transition-colors">Return to Home</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const [jobDescription, setJobDescription] = useState("");
   const [profileContext, setProfileContext] = useState("");
   const [showProfile, setShowProfile] = useState(false);
-  const [hasProfile, setHasProfile] = useState(false);
   const [status, setStatus] = useState<"idle" | "recording" | "generating">("idle");
   const [answers, setAnswers] = useState<AnswerEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -100,7 +78,7 @@ export default function RoomPage() {
   const [liveTranscript, setLiveTranscript] = useState("");
   const [responseLength, setResponseLength] = useState<ResponseLength>("balanced");
   const [showSettings, setShowSettings] = useState(false);
-  const [isWindowHidden, setIsWindowHidden] = useState(true);
+
   const [showUnhidePrompt, setShowUnhidePrompt] = useState(false);
   const [inputText, setInputText] = useState("");
   const [mounted, setMounted] = useState(false);
@@ -109,9 +87,9 @@ export default function RoomPage() {
   const [spaceMode, setSpaceMode] = useState<"hold" | "toggle">("hold");
   const [selectedModel, setSelectedModel] = useState<ModelKey>("llama-3.3-70b");
   const selectedModelRef = useRef<ModelKey>("llama-3.3-70b");
-  const [userCredits, setUserCredits] = useState<number | null>(null);
   const [userPlan, setUserPlan] = useState<string>("free");
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
 
   // ─── Vision conversation history ──────────────────────────
   // Keeps track of previous screenshot exchanges so the model
@@ -170,7 +148,6 @@ export default function RoomPage() {
               setIsBackgroundRefining(false);
               setToast({ message: "Profile successfully optimized!", type: "success" });
               setProfileContext(formatProfileContext(profile.profile_data));
-              setHasProfile(true);
             }
           }
         } catch {}
@@ -180,7 +157,9 @@ export default function RoomPage() {
     }
   }, []);
 
-  const supabase = createClient();
+
+
+
 
 
   // ─── Fetch Credits Helper ──────────────────────────────────
@@ -190,7 +169,9 @@ export default function RoomPage() {
       const res = await fetch("/api/profile");
       if (res.ok) {
         const { profile } = await res.json();
-        if (profile) setUserCredits(profile.credits);
+        if (profile) {
+          // Credits updated via backend
+        }
       }
     } catch (err) {
       console.error("Error refreshing credits:", err);
@@ -206,8 +187,8 @@ export default function RoomPage() {
         if (res.ok) {
           const { profile } = await res.json();
           if (profile) {
-            // Set Credits
-            if (profile.credits !== undefined) setUserCredits(profile.credits);
+            // Credits updated via backend
+
             
             // Set History
             if (profile.history && Array.isArray(profile.history)) {
@@ -220,11 +201,16 @@ export default function RoomPage() {
               setIsLightMode(cloudTheme);
             }
 
+            // Set Job Description if not already set from URL/Session
+            if (profile.current_jd && !jobDescription) {
+              setJobDescription(profile.current_jd);
+              sessionStorage.setItem("jobDescription", profile.current_jd);
+            }
+
             // Set Reading Guide (from profile_data.preferences)
             if (profile.profile_data?.preferences?.reading_guide !== undefined) {
               setShowReadingGuide(profile.profile_data.preferences.reading_guide);
             }
-
 
             const plan = profile.plan || 'free';
             setUserPlan(plan);
@@ -242,7 +228,6 @@ export default function RoomPage() {
             // Set Profile Context
             if (profile.profile_data && typeof profile.profile_data === 'object' && Object.keys(profile.profile_data).length > 0) {
               setProfileContext(formatProfileContext(profile.profile_data));
-              setHasProfile(true);
             }
           }
         }
@@ -252,7 +237,7 @@ export default function RoomPage() {
     };
     
     initRoom();
-  }, [isLoaded, isSignedIn, user?.id]);
+  }, [isLoaded, isSignedIn, user?.id, jobDescription]);
 
   const saveToHistory = useCallback(async () => {
     if (answers.length === 0 || !user?.id) return;
@@ -323,19 +308,6 @@ export default function RoomPage() {
     }
     if (isElectron && (window as any).electronAPI?.getVersion) {
       (window as any).electronAPI.getVersion().then((v: string) => setAppVersion(v));
-    }
-    if (isElectron && (window as any).electronAPI?.getHidden) {
-      (window as any).electronAPI.getHidden().then((hidden: boolean) => {
-        setIsWindowHidden(hidden);
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isElectron && (window as any).electronAPI?.onHiddenChange) {
-      return (window as any).electronAPI.onHiddenChange((hidden: boolean) => {
-        setIsWindowHidden(hidden);
-      });
     }
   }, []);
 
@@ -466,26 +438,7 @@ export default function RoomPage() {
     // Profile and theme initialization is now handled by the consolidated initRoom call above.
   }, [router, isLoaded, user?.id]);
 
-  const refreshProfile = async () => {
-    if (!user?.id) return;
-    try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('profile_data')
-        .eq('id', user.id)
-        .maybeSingle();
 
-      if (data?.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
-        setProfileContext(formatProfileContext(data.profile_data));
-        setHasProfile(true);
-      } else {
-        setProfileContext("");
-        setHasProfile(false);
-      }
-    } catch (e) {
-      console.error("Failed to refresh profile", e);
-    }
-  };
 
   // ─── Fullscreen change listener ─────────────────────────
   useEffect(() => {
@@ -918,6 +871,7 @@ export default function RoomPage() {
 
       setStatus("idle");
       refreshCredits(); // Update credits badge after response
+
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error";
       setError(msg);
@@ -997,6 +951,7 @@ export default function RoomPage() {
 
       setStatus("idle");
       refreshCredits(); // Update credits badge after response
+
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error";
       setError(msg);
@@ -1208,6 +1163,7 @@ export default function RoomPage() {
       setInputText("");
       setStatus("idle");
       refreshCredits(); // Update credits badge after screenshot response
+
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error";
       setError(msg);
@@ -1224,24 +1180,38 @@ export default function RoomPage() {
     // --app-opacity on the container, which only affects the background gradient.
   };
 
-  const handleHide = async () => {
-    if (isElectron) {
-      if (isWindowHidden) {
-        setShowUnhidePrompt(true);
-      } else {
-        const hidden = await (window as any).electronAPI.hideToggle();
-        setIsWindowHidden(hidden);
-      }
-    }
-  };
+
+
+
 
   const confirmUnhide = async () => {
     setShowUnhidePrompt(false);
     if (isElectron) {
-      const hidden = await (window as any).electronAPI.hideToggle();
-      setIsWindowHidden(hidden);
+      await (window as any).electronAPI.hideToggle();
     }
   };
+
+  if (!isElectron) {
+    return (
+      <div className="h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
+        <div className="max-w-md">
+          <div className="w-20 h-20 bg-indigo-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8">
+            <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={40} height={40} unoptimized />
+          </div>
+          <h1 className="text-3xl font-black tracking-tighter text-gray-900 mb-4 uppercase">Desktop Exclusive.</h1>
+          <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed mb-10">
+            The Chintu Room is a strategic environment designed exclusively for our Desktop Application. Please launch Chintu on your computer to access live synthesis and stealth mode.
+          </p>
+          <div className="flex flex-col gap-4">
+             <a href="https://www.getchintu.com/download" className="bg-indigo-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 transition-all">Download Chintu</a>
+             <button onClick={() => router.push('/')} className="text-[10px] text-gray-400 font-black uppercase tracking-widest hover:text-gray-900 transition-colors">Return to Home</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoaded) return <div className="h-screen bg-[#f8f9fa] flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
 
   if (!mounted) {
     return <div className="app-container" />;

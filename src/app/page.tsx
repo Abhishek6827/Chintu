@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useUser } from "@clerk/nextjs";
@@ -13,7 +13,6 @@ import ContactForm from '@/components/ContactForm';
 export default function LandingPage() {
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
-  const containerRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = React.useState(false);
 
   useEffect(() => {
@@ -112,7 +111,7 @@ export default function LandingPage() {
           </h1>
           
           <p className="reveal text-sm sm:text-lg text-gray-400 mb-14 max-w-2xl leading-relaxed font-bold uppercase tracking-wide transition-all duration-1000 delay-400">
-            The ultimate strategic environment for technical interviews. Real-time guidance, neural-network-backed responses, and seamless stealth intelligence. 
+            The ultimate strategic environment for technical interviews. Configure on web, dominate on desktop. Real-time guidance and stealth intelligence exclusively via our Windows App.
           </p>
 
           <div className="reveal flex flex-col sm:flex-row gap-5 transition-all duration-1000 delay-500">
@@ -122,7 +121,7 @@ export default function LandingPage() {
               </Link>
             ) : (
               <Link href="/sign-up" className="px-12 py-6 bg-indigo-600 text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
-                Join the Revolution <ArrowRight className="w-4 h-4" />
+                Start Revolution <ArrowRight className="w-4 h-4" />
               </Link>
             )}
             <Link href="/pricing" className="px-12 py-6 bg-white border border-gray-100 text-gray-400 font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl hover:border-indigo-500/30 hover:text-indigo-600 transition-all flex items-center justify-center">

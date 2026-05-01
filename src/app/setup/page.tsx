@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { UserButton, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { createClient } from "@/utils/supabase/client";
 
 export default function SetupPage() {
@@ -52,11 +52,7 @@ export default function SetupPage() {
     }
   }, [isLoaded, isSignedIn, user?.id, supabase]);
 
-  const handleMinimize = () => {
-    if (typeof window !== "undefined" && (window as any).electronAPI?.minimize) {
-      (window as any).electronAPI.minimize();
-    }
-  };
+
 
   // If not mounted or Clerk not loaded yet, show empty shell
   if (!mounted || !isLoaded) {
@@ -73,18 +69,28 @@ export default function SetupPage() {
     if (!jd.trim()) return;
     
     if (!isElectron) {
-      alert("⚠️ SYSTEM REQUIREMENT: Interview rooms and real-time guidance are only accessible via the Chintu Desktop Application for security and performance reasons. Please launch the app on your PC.");
+      // On web, we don't allow entering the room, but we can save the JD for the app
+      setIsInitiating(true);
+      setStatusText("☁️ Syncing configurations to cloud...");
+      
+      try {
+        await fetch("/api/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ current_jd: jd.trim() }),
+        });
+        
+        setStatusText("✅ Config Synced. Please open the Desktop App.");
+        setTimeout(() => setIsInitiating(false), 2000);
+      } catch (err) {
+        console.error("Failed to sync JD:", err);
+        setIsInitiating(false);
+      }
       return;
     }
 
     setIsInitiating(true);
     setStatusText("🚀 Preparing your interview workspace...");
-
-    if (!isElectron) {
-      alert("⚠️ SYSTEM REQUIREMENT: Interview rooms are desktop-exclusive. Please use the Chintu Desktop App.");
-      setIsInitiating(false);
-      return;
-    }
 
     if (aboutMe.trim() && !hasProfile) {
       setIsRefining(true);
@@ -111,7 +117,6 @@ export default function SetupPage() {
 
   const handleSkipAndStart = () => {
     if (!isElectron) {
-      alert("⚠️ SYSTEM REQUIREMENT: Interview rooms are desktop-exclusive. Please use the Chintu Desktop App.");
       return;
     }
     router.push("/room?jd=" + encodeURIComponent(jd.trim()));
@@ -197,11 +202,24 @@ export default function SetupPage() {
                   }
                 `}
               >
-                <span className="relative z-10">{isRefining ? statusText : "Initiate Session →"}</span>
+                <span className="relative z-10">
+                  {isRefining ? statusText : (isElectron ? "Initiate Session →" : "Sync & Start in App →")}
+                </span>
                 {jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining && (
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
                 )}
               </button>
+
+              {!isElectron && (
+                <a
+                  href="https://www.getchintu.com/download"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 text-indigo-500 bg-indigo-50 hover:bg-indigo-100 active:scale-95 border border-indigo-100 shadow-sm text-center"
+                >
+                  Download Desktop App
+                </a>
+              )}
 
               {isRefining && (
                 <button

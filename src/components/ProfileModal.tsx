@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import { createClient } from "@/utils/supabase/client";
+
 import { Sparkles } from "lucide-react";
 
 const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
@@ -60,7 +60,6 @@ export default function ProfileModal({
   isBackgroundRefining?: boolean
 }) {
   const { user } = useUser();
-  const supabase = createClient();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [rawText, setRawText] = useState("");
   const [isRefining, setIsRefining] = useState(false);
