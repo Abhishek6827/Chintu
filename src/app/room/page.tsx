@@ -184,12 +184,22 @@ export default function RoomPage() {
     const initRoom = async () => {
       if (!isLoaded || !isSignedIn || !user?.id) return;
       
-      try {
-        const jd = sessionStorage.getItem("jobDescription");
-        if (jd && !jobDescription) {
-          setJobDescription(jd);
-        }
+      // Read JD from URL param (primary) or sessionStorage (fallback)
+      const params = new URLSearchParams(window.location.search);
+      const jdFromUrl = params.get("jd");
+      const jdFromSession = sessionStorage.getItem("jobDescription");
+      const localJd = jdFromUrl || jdFromSession || "";
 
+      if (!localJd) {
+        router.push("/");
+        return;
+      }
+
+      // Persist to sessionStorage and state
+      sessionStorage.setItem("jobDescription", localJd);
+      setJobDescription(localJd);
+
+      try {
         const res = await fetch("/api/profile");
         if (res.ok) {
           const { profile } = await res.json();
@@ -205,11 +215,6 @@ export default function RoomPage() {
               setIsLightMode(cloudTheme);
             }
 
-            if (profile.current_jd && !jobDescription && !jd) {
-              setJobDescription(profile.current_jd);
-              sessionStorage.setItem("jobDescription", profile.current_jd);
-            }
-
             // Set Reading Guide (from profile_data.preferences)
             if (profile.profile_data?.preferences?.reading_guide !== undefined) {
               setShowReadingGuide(profile.profile_data.preferences.reading_guide);
@@ -217,6 +222,7 @@ export default function RoomPage() {
 
             const plan = (profile.plan || 'free').toLowerCase();
             setUserPlan(plan);
+            setCredits(profile.credits ?? null); // Update credits directly from profile
 
             // Plan Gating Logic
             if (plan === 'free') {
@@ -248,7 +254,7 @@ export default function RoomPage() {
     };
     
     initRoom();
-  }, [isLoaded, isSignedIn, user?.id, jobDescription]);
+  }, [isLoaded, isSignedIn, user?.id, router]);
 
   const saveToHistory = useCallback(async () => {
     if (answers.length === 0 || !user?.id) return;
@@ -291,6 +297,7 @@ export default function RoomPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ history: updatedHistory })
     });
+    setSessionToDelete(null);
   };
 
   const exportHistory = () => {
@@ -474,26 +481,7 @@ export default function RoomPage() {
     }
   }, [answers, status]);
 
-  useEffect(() => {
-    if (!isLoaded) return;
-    
-    // Read JD from URL param (primary) or sessionStorage (fallback)
-    const params = new URLSearchParams(window.location.search);
-    const jdFromUrl = params.get("jd");
-    const jdFromSession = sessionStorage.getItem("jobDescription");
-    const jd = jdFromUrl || jdFromSession || "";
-    
-    if (!jd) { 
-      router.push("/"); 
-      return; 
-    }
-    
-    // Persist to sessionStorage so it survives within the session
-    sessionStorage.setItem("jobDescription", jd);
-    setJobDescription(jd);
 
-    // Profile and theme initialization is now handled by the consolidated initRoom call above.
-  }, [router, isLoaded, user?.id]);
 
 
 
