@@ -44,6 +44,13 @@ export default function SetupPage() {
 
 
     if (isLoaded && isSignedIn && user) {
+      // If we already have a JD in this session, jump straight to the room
+      const sessionJd = sessionStorage.getItem("jobDescription");
+      if (sessionJd && isElectron) {
+        router.push("/room");
+        return;
+      }
+
       checkProfile().then(async () => {
         // Sync name if missing in profile_data
         try {

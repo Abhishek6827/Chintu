@@ -184,10 +184,7 @@ export default function RoomPage() {
       if (!isLoaded || !isSignedIn || !user?.id) return;
       
       try {
-        // First, check sessionStorage for jobDescription to avoid asking again
-        const jdFromSession = sessionStorage.getItem("jobDescription");
-        const jdFromLocal = localStorage.getItem("jobDescription");
-        const jd = jdFromSession || jdFromLocal;
+        const jd = sessionStorage.getItem("jobDescription");
         if (jd && !jobDescription) {
           setJobDescription(jd);
         }
@@ -207,11 +204,9 @@ export default function RoomPage() {
               setIsLightMode(cloudTheme);
             }
 
-            // Set Job Description if not already set from URL/Session/Local
             if (profile.current_jd && !jobDescription && !jd) {
               setJobDescription(profile.current_jd);
               sessionStorage.setItem("jobDescription", profile.current_jd);
-              localStorage.setItem("jobDescription", profile.current_jd);
             }
 
             // Set Reading Guide (from profile_data.preferences)
@@ -475,9 +470,8 @@ export default function RoomPage() {
       return; 
     }
     
-    // Persist to sessionStorage and localStorage so it survives within the session
+    // Persist to sessionStorage so it survives within the session
     sessionStorage.setItem("jobDescription", jd);
-    localStorage.setItem("jobDescription", jd);
     setJobDescription(jd);
 
     // Profile and theme initialization is now handled by the consolidated initRoom call above.

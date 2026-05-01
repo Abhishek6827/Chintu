@@ -127,8 +127,9 @@ export default function GlobalHeader() {
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => {
               if (isSignedIn) {
-                // Both Web and App should go to Setup/Dashboard for configuration
-                router.push("/setup");
+                const jd = sessionStorage.getItem("jobDescription");
+                if (jd) router.push("/room");
+                else router.push("/setup");
               } else {
                 router.push("/");
               }

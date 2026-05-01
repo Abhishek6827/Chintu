@@ -24,8 +24,13 @@ export default function LandingPage() {
   useEffect(() => {
     if (isLoaded && isElectron) {
       if (isSignedIn) {
-        // App always starts at setup/dashboard
-        router.push("/setup");
+        // If we already have a JD in this session, jump straight to the room
+        const jd = sessionStorage.getItem("jobDescription");
+        if (jd) {
+          router.push("/room");
+        } else {
+          router.push("/setup");
+        }
       } else {
         router.push("/sign-in");
       }
