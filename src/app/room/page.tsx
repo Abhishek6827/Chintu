@@ -444,6 +444,8 @@ export default function RoomPage() {
   // ─── Fullscreen UI persistence ref ──────────────────────
   const controlsRef = useRef<HTMLDivElement>(null);
   const originalParentRef = useRef<HTMLElement | null>(null);
+  const captureScreenshotRef = useRef<() => Promise<void>>(() => Promise.resolve());
+  const isCapturingRef = useRef(false);
 
   useEffect(() => { responseLengthRef.current = responseLength; }, [responseLength]);
 
@@ -1056,6 +1058,13 @@ export default function RoomPage() {
             }
           }
         }
+      } else if (e.code === "Enter" || e.key === "Enter") {
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
+        
+        e.preventDefault();
+        if (!isCapturingRef.current) {
+          captureScreenshotRef.current();
+        }
       }
     };
 
@@ -1102,6 +1111,7 @@ export default function RoomPage() {
       return;
     }
     setIsCapturing(true);
+    isCapturingRef.current = true;
     try {
       const dataUrl = await (window as any).electronAPI.captureScreenshot();
       if (dataUrl) {
@@ -1119,7 +1129,12 @@ export default function RoomPage() {
       setError("Screenshot capture failed");
     }
     setIsCapturing(false);
+    isCapturingRef.current = false;
   }, []);
+
+  useEffect(() => {
+    captureScreenshotRef.current = captureScreenshot;
+  }, [captureScreenshot]);
 
   const removeScreenshot = (index: number) => {
     setCapturedScreenshots((prev) => prev.filter((_, i) => i !== index));
@@ -1322,32 +1337,7 @@ export default function RoomPage() {
         <div className="mesh-orb w-[250px] h-[250px] bg-blue-600/20 top-1/2 left-1/3" style={{ animationDelay: '5s' }} />
       </div>
 
-      {/* Premium Credits Display */}
-      <div className="px-4 py-2 sticky top-0 z-[100] pointer-events-none">
-        <div className="flex justify-end pointer-events-auto">
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-full pl-3 pr-4 py-1.5 flex items-center gap-2.5 shadow-2xl transition-all hover:border-white/20 group">
-            <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
-              <Sparkles className="w-3 h-3 text-white fill-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[0.5rem] uppercase font-black tracking-widest text-white/40 leading-none mb-0.5">Credits</span>
-              <span className="text-[0.75rem] font-black text-white tracking-tight leading-none">
-                {credits !== null ? credits : '—'}
-              </span>
-            </div>
-            {userPlan === 'pro' && (
-              <div className="ml-1 px-1.5 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-500/30">
-                <span className="text-[0.5rem] font-black text-indigo-400 uppercase tracking-tighter">Pro</span>
-              </div>
-            )}
-            {userPlan === 'elite' && (
-              <div className="ml-1 px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/30">
-                <span className="text-[0.5rem] font-black text-amber-400 uppercase tracking-tighter">Elite</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+
 
       {/* Toast Notification */}
       {toast && (
