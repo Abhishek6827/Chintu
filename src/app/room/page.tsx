@@ -962,20 +962,44 @@ export default function RoomPage() {
 
     const historyToSend = [...chatConversationHistory];
 
+    const tryModels = selectedModelRef.current === "qwen3.6" 
+      ? [selectedModelRef.current] 
+      : [selectedModelRef.current, "llama-3.3-70b", "gpt-oss-120b"];
+    const uniqueModels = Array.from(new Set(tryModels));
+    
+    let response: Response | null = null;
+    let lastError: any = null;
+
+    for (const modelToTry of uniqueModels) {
+      try {
+        const res = await fetch("/api/answer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            transcript: fullTranscript,
+            jobDescription,
+            aboutYou: profileContext,
+            responseLength: responseLengthRef.current,
+            conversationHistory: historyToSend,
+            selectedModel: modelToTry,
+          }),
+        });
+        
+        if (res.ok) {
+          response = res;
+          break;
+        } else {
+          const e = await res.json().catch(() => ({}));
+          lastError = new Error(e.error || `Model ${modelToTry} failed`);
+        }
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
     try {
-      const res = await fetch("/api/answer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          transcript: fullTranscript,
-          jobDescription,
-          aboutYou: profileContext,
-          responseLength: responseLengthRef.current,
-          conversationHistory: historyToSend,
-          selectedModel: selectedModelRef.current,
-        }),
-      });
-      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Failed"); }
+      if (!response) throw lastError || new Error("All models failed");
+      const res = response;
       if (!res.body) throw new Error("No response body");
 
       const actualModelUsed = res.headers.get("X-Model-Used") || modelName;
@@ -1149,21 +1173,45 @@ export default function RoomPage() {
     const screenshotsToSend = [...capturedScreenshots];
     const historyToSend = [...visionConversationHistory];
 
+    const tryModels = selectedModelRef.current === "qwen3.6" 
+      ? [selectedModelRef.current] 
+      : [selectedModelRef.current, "llama-3.3-70b", "gpt-oss-120b"];
+    const uniqueModels = Array.from(new Set(tryModels));
+    
+    let response: Response | null = null;
+    let lastError: any = null;
+
+    for (const modelToTry of uniqueModels) {
+      try {
+        const res = await fetch("/api/answer-vision", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            images: screenshotsToSend,
+            jobDescription,
+            aboutYou: profileContext,
+            responseLength: responseLengthRef.current,
+            additionalContext: contextText,
+            conversationHistory: historyToSend,
+            selectedModel: modelToTry,
+          }),
+        });
+        
+        if (res.ok) {
+          response = res;
+          break;
+        } else {
+          const e = await res.json().catch(() => ({}));
+          lastError = new Error(e.error || `Model ${modelToTry} failed`);
+        }
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
     try {
-      const res = await fetch("/api/answer-vision", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          images: screenshotsToSend,
-          jobDescription,
-          aboutYou: profileContext,
-          responseLength: responseLengthRef.current,
-          additionalContext: contextText,
-          conversationHistory: historyToSend,
-          selectedModel: selectedModelRef.current,
-        }),
-      });
-      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Vision failed"); }
+      if (!response) throw lastError || new Error("All vision models failed");
+      const res = response;
       if (!res.body) throw new Error("No response body");
 
       const actualModelUsed = res.headers.get("X-Model-Used") || selectedModelRef.current;
@@ -1825,26 +1873,7 @@ export default function RoomPage() {
                 </p>
               </div>
 
-              {/* Stealth Mode (Electron Only) */}
-              {isElectron && (
-                <div 
-                  className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
-                  style={{ padding: 'clamp(8px, 3vw, 20px)' }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Stealth Mode</h4>
-                      <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">Hide window from screen capture</p>
-                    </div>
-                    <button
-                      onClick={handleHide}
-                      className={`w-12 h-6 rounded-full transition-all relative ${isWindowHidden ? "bg-orange-500" : "bg-gray-600/30"}`}
-                    >
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isWindowHidden ? "left-7" : "left-1"}`} />
-                    </button>
-                  </div>
-                </div>
-              )}
+
 
               {/* Reading Guide Toggle */}
 

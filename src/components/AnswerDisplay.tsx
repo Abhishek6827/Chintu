@@ -41,6 +41,35 @@ const parseAnswer = (text: string) => {
 export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = false, onUndo, showReadingGuide = false }: AnswerDisplayProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  const getSafeModelName = (modelId: string) => {
+    if (!modelId) return "";
+    
+    // Check if it's a vision-augmented response (Scout)
+    const isScout = modelId.toLowerCase().includes("scout");
+    let baseModel = modelId.toLowerCase();
+    
+    if (isScout) {
+      baseModel = modelId.split("+").pop()?.trim().toLowerCase() || "";
+    }
+
+    const mapping: Record<string, string> = {
+      "llama-3.3-70b": "Standard Engine",
+      "gpt-oss-120b": "Pro Engine",
+      "qwen3-coder": "Coding Specialist",
+      "nemotron-3-120b": "Titan Engine",
+      "qwen3.6": "Turbo Engine"
+    };
+
+    // Find the closest match in our safe names
+    const safeName = Object.entries(mapping).find(([key]) => baseModel.includes(key.toLowerCase()))?.[1];
+    
+    if (isScout) {
+      return safeName ? `SCOUT + ${safeName}` : "SCOUT ENGINE";
+    }
+    
+    return safeName || "NEURAL SYNC";
+  };
+
   const handleCopy = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
@@ -289,7 +318,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                     {entry.model && (
                       <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--input-bg)] border border-[var(--glass-border)]">
                         <Cpu style={{ width: 'clamp(10px, 1.4vh, 12px)', height: 'clamp(10px, 1.4vh, 12px)' }} className="text-indigo-400" />
-                        <span style={{ fontSize: 'clamp(7px, 1vh, 9px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-[0.2em]">{entry.model}</span>
+                        <span style={{ fontSize: 'clamp(7px, 1vh, 9px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-[0.2em]">{getSafeModelName(entry.model)}</span>
                       </div>
                     )}
                     {entry.timeTaken !== undefined && (

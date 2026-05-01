@@ -191,23 +191,6 @@ function createServer(apiKeys, openRouterKey, dashscopeKey, staticDir) {
         "qwen3-vl-flash"
       ];
 
-      // ─── Model mapping: key → { groq model ID, openrouter model ID } ─
-      const MODEL_MAP = {
-        "gpt-oss-120b": { provider: "groq", groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
-        "qwen3-Coder": { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
-        "nemotron-3-120b": { provider: "openrouter", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
-        "qwen3.6": { provider: "dashscope", dashscope: "qwen3.6-plus" },
-        "qwen3.6-plus": { provider: "dashscope", dashscope: "qwen3.6-plus" },
-        "llama-3.3-70b": { provider: "groq", groq: "llama-3.3-70b-versatile", openrouter: "meta-llama/llama-3.3-70b-instruct" },
-      };
-
-      const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
-      const isDashScope = modelConfig.provider === "dashscope";
-      const groqModel = modelConfig.groq;
-      const openrouterModel = modelConfig.openrouter;
-
-      console.log(`[/api/answer] Mode: ${responseLength} | Model: ${selectedModel} | Provider: ${modelConfig.provider} | History: ${conversationHistory.length} messages`);
-
       const aboutYouBlock = aboutYou
         ? `\n\nHere is the candidate's background — use this to personalize your answers with their real experience, projects, and skills. Speak as if YOU are this person:\n---\n${aboutYou}\n---`
         : "";
@@ -245,8 +228,63 @@ Rules:
 - Avoid robotic or overly formal phrasing
 - When relevant, naturally reference the candidate's real projects, experience, and skills from their background`;
 
-      // ─── Keep last 10 history messages to avoid token overflow ─
-      const trimmedHistory = conversationHistory.slice(-10);
+      // ─── Handle Qwen Rotation ──────────────────────────────────
+      if (selectedModel === "qwen3.6") {
+        const fullQwenList = [...QWEN_PRIORITY, ...QWEN_FALLBACK];
+        let qwenSuccess = false;
+
+        for (const qwenModel of fullQwenList) {
+          try {
+            console.log(`[Qwen Rotation] Trying: ${qwenModel}`);
+            const response = await axios.post(
+              "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+              {
+                model: qwenModel,
+                messages: [
+                  { role: "system", content: systemPrompt },
+                  ...trimmedHistory,
+                  { role: "user", content: transcript },
+                ],
+                stream: true,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${dashscopeKey}`,
+                  "Content-Type": "application/json",
+                },
+                responseType: "stream",
+                timeout: 12000, 
+              }
+            );
+
+            res.setHeader("X-Model-Used", qwenModel);
+            response.data.pipe(res);
+            qwenSuccess = true;
+            break;
+          } catch (err) {
+            console.error(`[Qwen Rotation] Failed ${qwenModel}: ${err.message}`);
+            continue;
+          }
+        }
+
+        if (qwenSuccess) return;
+        else return res.status(500).json({ error: "All Qwen models failed" });
+      }
+
+      // ─── Model mapping (Non-Qwen) ──────────────────────────────
+      const MODEL_MAP = {
+        "gpt-oss-120b": { provider: "groq", groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
+        "qwen3-Coder": { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
+        "nemotron-3-120b": { provider: "openrouter", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
+        "llama-3.3-70b": { provider: "groq", groq: "llama-3.3-70b-versatile", openrouter: "meta-llama/llama-3.3-70b-instruct" },
+      };
+
+      const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
+      const isDashScope = modelConfig.provider === "dashscope";
+      const groqModel = modelConfig.groq;
+      const openrouterModel = modelConfig.openrouter;
+
+      console.log(`[/api/answer] Mode: ${responseLength} | Model: ${selectedModel} | Provider: ${modelConfig.provider} | History: ${conversationHistory.length} messages`);
 
       let actualModelUsed = selectedModel;
       let stream;
