@@ -129,10 +129,7 @@ export async function POST(req: Request) {
           subscription_expires_at: newExpiry.toISOString(),
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: session.subscription as string,
-          profile_data: {
-            ...(currentProfile?.profile_data as object || {}),
-            full_name: customerName
-          },
+          full_name: customerName,
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId);
@@ -224,10 +221,7 @@ export async function POST(req: Request) {
             .update({ 
               credits: totalCredits, 
               subscription_expires_at: newExpiry.toISOString(),
-              profile_data: {
-                ...(profile?.profile_data as object || {}),
-                full_name: invoiceCustomerName
-              },
+              full_name: invoiceCustomerName,
               updated_at: new Date().toISOString() 
             })
             .eq("id", profile.id);
@@ -326,10 +320,7 @@ export async function POST(req: Request) {
               plan: planInfo.plan,
               credits: totalCredits, 
               subscription_expires_at: newExpiry.toISOString(),
-              profile_data: {
-                ...(profile?.profile_data as object || {}),
-                full_name: customerName
-              },
+              full_name: customerName,
               updated_at: new Date().toISOString() 
             })
             .eq("id", profile.id);

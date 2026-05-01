@@ -49,15 +49,12 @@ export default function SetupPage() {
         try {
           const res = await fetch("/api/profile");
           const { profile: p } = await res.json();
-          if (!p?.profile_data?.full_name && user.fullName) {
+          if (!p?.full_name && user.fullName) {
              await fetch("/api/profile", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ 
-                profile_data: { 
-                  ...(p?.profile_data || {}), 
-                  full_name: user.fullName 
-                } 
+                full_name: user.fullName 
               }),
             });
           }
