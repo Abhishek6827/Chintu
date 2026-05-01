@@ -115,7 +115,7 @@ export default function GlobalHeader() {
 
   return (
     <>
-      <div className="drag-region flex items-center justify-between px-4 h-12 shrink-0 relative z-[100] w-full">
+      <div className="drag-region flex items-center justify-between px-4 h-12 shrink-0 relative z-[100] w-full bg-[var(--bg-app)] border-b border-[var(--glass-border)] shadow-sm">
         <div className="flex items-center gap-3 no-drag">
           <div 
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"

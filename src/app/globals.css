@@ -16,6 +16,8 @@
   --accent-glow: rgba(129, 140, 248, calc(0.5 * var(--app-opacity, 1)));
   --panel-bg: rgba(15, 15, 25, calc(0.8 * var(--app-opacity, 1)));
   --input-bg: rgba(255, 255, 255, calc(0.05 * var(--app-opacity, 1)));
+  --bg-app: rgba(10, 10, 18, var(--app-opacity, 1));
+  --toolbar-bg: rgba(10, 10, 18, var(--app-opacity, 1));
 }
 
 .light-mode {
@@ -28,6 +30,8 @@
   --accent-glow: rgba(79, 70, 229, calc(0.2 * var(--app-opacity, 1)));
   --panel-bg: rgba(255, 255, 255, calc(0.95 * var(--app-opacity, 1)));
   --input-bg: rgba(0, 0, 0, calc(0.04 * var(--app-opacity, 1)));
+  --bg-app: rgba(245, 247, 250, var(--app-opacity, 1));
+  --toolbar-bg: rgba(245, 247, 250, var(--app-opacity, 1));
 }
 
 /* Global fluid scaling */
@@ -93,8 +97,6 @@ body {
 
 /* Main app container with Neural Mesh */
 .app-container {
-  --bg-app: rgba(10, 10, 18, var(--app-opacity, 1));
-  --toolbar-bg: rgba(10, 10, 18, calc(0.8 * var(--app-opacity, 1)));
   background-color: var(--bg-app) !important;
   height: 100vh;
   height: 100dvh;
@@ -114,8 +116,6 @@ body {
 }
 
 .light-mode .app-container {
-  --bg-app: rgba(245, 247, 250, var(--app-opacity, 1));
-  --toolbar-bg: rgba(255, 255, 255, calc(0.85 * var(--app-opacity, 1)));
 }
 
 .neural-mesh {
