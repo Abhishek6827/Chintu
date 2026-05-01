@@ -216,7 +216,7 @@ const QWEN_FALLBACK = [
 ];
 
 export async function POST(req: NextRequest) {
-  const { userId } = auth();
+  const { userId } = await auth();
   const supabaseAdmin = createAdminClient();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -264,6 +264,7 @@ export async function POST(req: NextRequest) {
 
     const isTurboModel = selectedModel === "qwen3.6";
     const isProModel = selectedModel !== "llama-3.3-70b";
+    const isProMode = responseLength === "coding" || responseLength === "detailed";
 
     if (isTurboModel && !isElite) {
       return NextResponse.json({
@@ -272,9 +273,10 @@ export async function POST(req: NextRequest) {
       }, { status: 402 });
     }
 
-    if (!isPaid && isProModel) {
+    if (!isPaid && (isProModel || isProMode)) {
+      const reason = isProModel ? "Premium Engine" : "Advanced Mode";
       return NextResponse.json({
-        error: "Premium Engine Locked. Please upgrade to Pro or Elite to use this engine.",
+        error: `${reason} Locked. Please upgrade to Pro or Elite to unlock this feature.`,
         code: "UPGRADE_REQUIRED"
       }, { status: 402 });
     }

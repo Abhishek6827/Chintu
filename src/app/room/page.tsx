@@ -89,6 +89,7 @@ export default function RoomPage() {
   const [selectedModel, setSelectedModel] = useState<ModelKey>("llama-3.3-70b");
   const selectedModelRef = useRef<ModelKey>("llama-3.3-70b");
   const [userPlan, setUserPlan] = useState<string>("free");
+  const [credits, setCredits] = useState<number | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [isWindowHidden, setIsWindowHidden] = useState(false);
 
@@ -171,7 +172,7 @@ export default function RoomPage() {
       if (res.ok) {
         const { profile } = await res.json();
         if (profile) {
-          // Credits updated via backend
+          setCredits(profile.credits ?? null);
         }
       }
     } catch (err) {
@@ -442,13 +443,16 @@ export default function RoomPage() {
   // Auto-switch model when coding mode is selected
   useEffect(() => {
     if (responseLength === "coding") {
+      // Coding mode always uses qwen3-Coder (gating is done server-side)
       setSelectedModel("qwen3-Coder");
       selectedModelRef.current = "qwen3-Coder";
     } else {
-      setSelectedModel("gpt-oss-120b");
-      selectedModelRef.current = "gpt-oss-120b";
+      // Non-coding: respect plan — free users only get llama-3.3-70b
+      const defaultModel = userPlan === "free" ? "llama-3.3-70b" : "gpt-oss-120b";
+      setSelectedModel(defaultModel);
+      selectedModelRef.current = defaultModel;
     }
-  }, [responseLength]);
+  }, [responseLength, userPlan]);
 
   useEffect(() => { selectedModelRef.current = selectedModel; }, [selectedModel]);
 
@@ -1328,6 +1332,33 @@ export default function RoomPage() {
         <div className="mesh-orb w-[400px] h-[400px] bg-indigo-600/30 -top-20 -left-20 animate-pulse" />
         <div className="mesh-orb w-[300px] h-[300px] bg-purple-600/20 bottom-10 right-10 animate-pulse" style={{ animationDelay: '2s' }} />
         <div className="mesh-orb w-[250px] h-[250px] bg-blue-600/20 top-1/2 left-1/3" style={{ animationDelay: '5s' }} />
+      </div>
+
+      {/* Premium Credits Display */}
+      <div className="px-4 py-2 sticky top-0 z-[100] pointer-events-none">
+        <div className="flex justify-end pointer-events-auto">
+          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-full pl-3 pr-4 py-1.5 flex items-center gap-2.5 shadow-2xl transition-all hover:border-white/20 group">
+            <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+              <Sparkles className="w-3 h-3 text-white fill-white" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[0.5rem] uppercase font-black tracking-widest text-white/40 leading-none mb-0.5">Credits</span>
+              <span className="text-[0.75rem] font-black text-white tracking-tight leading-none">
+                {credits !== null ? credits : '—'}
+              </span>
+            </div>
+            {userPlan === 'pro' && (
+              <div className="ml-1 px-1.5 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-500/30">
+                <span className="text-[0.5rem] font-black text-indigo-400 uppercase tracking-tighter">Pro</span>
+              </div>
+            )}
+            {userPlan === 'elite' && (
+              <div className="ml-1 px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/30">
+                <span className="text-[0.5rem] font-black text-amber-400 uppercase tracking-tighter">Elite</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Toast Notification */}

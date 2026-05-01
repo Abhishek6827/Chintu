@@ -12,7 +12,7 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = auth();
+  const { userId } = await auth();
   const url = new URL(req.url);
   
   // App-specific redirection: App users should never see the landing page
@@ -27,7 +27,7 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   if (!isPublicRoute(req)) {
-    auth().protect();
+    (await auth()).protect();
   }
 });
 

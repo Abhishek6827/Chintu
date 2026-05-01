@@ -207,8 +207,6 @@ function createWindow() {
     icon: path.join(__dirname, "icon.png"),
   });
 
-  // Fallback for icon if local file is missing or being stubborn
-  const liveIconUrl = "https://www.getchintu.com/icon.png";
   mainWindow.setIcon(path.join(__dirname, "icon.png"));
 
   mainWindow.once("ready-to-show", () => {
@@ -473,6 +471,7 @@ ipcMain.on("open-external", (event, url) => {
 // ─── App lifecycle ────────────────────────────────────────
 app.whenReady().then(async () => {
   app.setAppUserModelId("com.chintu.app");
+  if (!PROFILE_FILE) PROFILE_FILE = path.join(app.getPath("userData"), "profile.json");
   loadEnv();
 
 
@@ -491,7 +490,6 @@ app.whenReady().then(async () => {
   }
 
   // ─── App Setup ──────────────────────────────────────────
-  app.setAppUserModelId("com.chintu.app");
   app.name = "Chintu";
 
   createWindow();
@@ -516,7 +514,8 @@ app.whenReady().then(async () => {
 });
 
 // ─── Profile Storage (File-based for persistence) ────────
-const PROFILE_FILE = path.join(app.getPath("userData"), "profile.json");
+let PROFILE_FILE = null;
+try { PROFILE_FILE = path.join(app.getPath("userData"), "profile.json"); } catch (e) { /* deferred */ }
 
 ipcMain.handle("save-profile", (event, profile) => {
   try {
@@ -528,13 +527,8 @@ ipcMain.handle("save-profile", (event, profile) => {
   }
 });
 
-ipcMain.on("window-minimize", () => {
-  if (mainWindow) mainWindow.minimize();
-});
 
-ipcMain.on("window-close", () => {
-  if (mainWindow) mainWindow.close();
-});
+
 
 ipcMain.handle("save-video", async (event, arrayBuffer) => {
   try {

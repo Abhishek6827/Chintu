@@ -228,7 +228,7 @@ function isQwenNativeVision(model: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  const { userId } = auth();
+  const { userId } = await auth();
   const supabaseAdmin = createAdminClient();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

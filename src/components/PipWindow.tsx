@@ -11,9 +11,9 @@ interface AnswerEntry {
 
 interface PipWindowProps {
   answers: AnswerEntry[];
-  status: "idle" | "recording" | "transcribing" | "generating";
+  status: "idle" | "recording" | "generating";
   liveTranscript: string;
-  responseLength: "small" | "balanced" | "detailed";
+  responseLength: "small" | "balanced" | "detailed" | "coding";
 }
 
 export default function PipWindow({
@@ -61,7 +61,6 @@ export default function PipWindow({
     const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
       idle: { label: "● Ready", color: "#71717a", bg: "#27272a" },
       recording: { label: "● REC", color: "#f87171", bg: "#7f1d1d" },
-      transcribing: { label: "⏳ Processing", color: "#fbbf24", bg: "#78350f" },
       generating: { label: "✨ Generating", color: "#34d399", bg: "#064e3b" },
     };
     const sc = statusConfig[st] || statusConfig.idle;
@@ -74,7 +73,7 @@ export default function PipWindow({
     ctx.fillText(sc.label, pillX + 16, 44);
 
     // Response length indicator
-    const rlLabels: Record<string, string> = { small: "⚡ Small", balanced: "⚖️ Balanced", detailed: "📝 Detailed" };
+    const rlLabels: Record<string, string> = { small: "⚡ Small", balanced: "⚖️ Balanced", detailed: "📝 Detailed", coding: "💻 Coding" };
     ctx.fillStyle = "#3f3f46";
     ctx.font = "16px Inter, system-ui, sans-serif";
     ctx.fillText(rlLabels[rl] || "Balanced", 24, topH - 10);

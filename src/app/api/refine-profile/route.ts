@@ -172,7 +172,7 @@ Rules:
     // Helper to save to Supabase
     const saveToSupabase = async (profileData: any) => {
       try {
-        const { userId } = auth();
+        const { userId } = await auth();
         if (userId) {
           const supabase = createAdminClient();
           // Fetch existing profile_data first to preserve preferences/settings

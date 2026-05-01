@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import { createAdminClient } from "@/utils/supabase/server";
 
 export async function GET() {
-  const { userId } = auth();
+  const { userId } = await auth();
   if (!userId) {
     return new NextResponse("Unauthorized", { status: 0 });
   }

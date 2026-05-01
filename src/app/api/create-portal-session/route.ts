@@ -10,7 +10,7 @@ export async function POST() {
     apiVersion: "2024-06-20" as any,
   });
 
-  const { userId } = auth();
+  const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

@@ -39,6 +39,7 @@ const PLANS = [
     name: "Professional",
     description: "Best for active interviewees",
     monthlyPrice: 9,
+    oldPrice: 29, // Added oldPrice
     annualPrice: 89,
     period: "/month",
     credits: 200,
@@ -62,6 +63,7 @@ const PLANS = [
     name: "Elite",
     description: "Unrestricted career growth",
     monthlyPrice: 29,
+    oldPrice: 79, // Added oldPrice
     annualPrice: 279,
     period: "/month",
     credits: 1000,
@@ -237,9 +239,22 @@ export default function PricingPage() {
                 <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">{plan.name}</h3>
                 <p className="text-indigo-600 text-[10px] font-black uppercase tracking-widest mt-1">{totalCredits} Credits/mo</p>
                 
-                <div className="mt-4 flex items-baseline gap-0.5">
-                  <span className="text-3xl font-black text-gray-900 tracking-tighter">${totalPrice}</span>
-                  <span className="text-gray-400 text-[9px] font-black uppercase">{plan.period}</span>
+                <div className="mt-4 flex flex-col gap-1">
+                  <div className="flex items-baseline gap-2">
+                    {plan.oldPrice && (
+                      <span className="text-gray-400 text-sm line-through decoration-red-500/50 decoration-2 tracking-tighter">
+                        ${plan.oldPrice * quantity}
+                      </span>
+                    )}
+                    <span className="text-4xl font-black text-gray-900 tracking-tighter">${totalPrice}</span>
+                    <span className="text-gray-400 text-[9px] font-black uppercase">{plan.period}</span>
+                  </div>
+                  {plan.oldPrice && (
+                    <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md w-fit border border-emerald-100">
+                      <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-[8px] font-black uppercase tracking-widest">Early Bird - Save {Math.round((1 - plan.monthlyPrice/plan.oldPrice) * 100)}%</span>
+                    </div>
+                  )}
                 </div>
                 {billingCycle === "annual" && plan.annualPrice > 0 && (
                   <p className="text-emerald-500 text-[8px] font-black uppercase mt-1">Billed annually (${plan.annualPrice * quantity})</p>
