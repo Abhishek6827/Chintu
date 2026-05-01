@@ -85,19 +85,22 @@ jobs:
         run: npx electron-builder --win --publish always
 
       - name: Send Telegram Notification
-        uses: appleboy/telegram-action@master
         if: always()
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BUILD_BOT_TOKEN }}
-          format: markdown
-          message: |
-            🚀 *Chintu Build Report*
-            
-            *Project:* ${{ github.repository }}
-            *Status:* ${{ job.status == 'success' && '✅ SUCCESS' || '❌ FAILED' }}
-            *Version:* ${{ steps.version.outputs.VERSION }}
-            *Commit:* `${{ github.sha }}`
-            *Branch:* `${{ github.ref_name }}`
-            
-            [View Build Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+        run: |
+          $status = if ("${{ job.status }}" -eq "success") { "✅ SUCCESS" } else { "❌ FAILED" }
+          $message = "🚀 *Chintu Build Report*`n`n" +
+                     "*Project:* ${{ github.repository }}`n" +
+                     "*Status:* $status`n" +
+                     "*Version:* ${{ steps.version.outputs.VERSION }}`n" +
+                     "*Commit:* `${{ github.sha }}`n" +
+                     "*Branch:* `${{ github.ref_name }}`n`n" +
+                     "[View Build Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          
+          $payload = @{
+              chat_id = "${{ secrets.TELEGRAM_CHAT_ID }}"
+              text = $message
+              parse_mode = "Markdown"
+          }
+          
+          Invoke-RestMethod -Uri "https://api.telegram.org/bot${{ secrets.TELEGRAM_BUILD_BOT_TOKEN }}/sendMessage" -Method Post -Body ($payload | ConvertTo-Json) -ContentType "application/json"
+        shell: pwsh
