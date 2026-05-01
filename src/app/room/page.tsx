@@ -67,6 +67,28 @@ export default function RoomPage() {
   const { user, isLoaded, isSignedIn } = useUser();
   const router = useRouter();
 
+  if (!isLoaded) return <div className="h-screen bg-[#f8f9fa] flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
+
+  if (!isElectron) {
+    return (
+      <div className="h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
+        <div className="max-w-md">
+          <div className="w-20 h-20 bg-indigo-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8">
+            <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={40} height={40} unoptimized />
+          </div>
+          <h1 className="text-3xl font-black tracking-tighter text-gray-900 mb-4 uppercase">Desktop Exclusive.</h1>
+          <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed mb-10">
+            The Chintu Room is a strategic environment designed exclusively for our Desktop Application. Please launch Chintu on your computer to access live synthesis and stealth mode.
+          </p>
+          <div className="flex flex-col gap-4">
+             <a href="https://www.getchintu.com/download" className="bg-indigo-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 transition-all">Download Chintu</a>
+             <button onClick={() => router.push('/')} className="text-[10px] text-gray-400 font-black uppercase tracking-widest hover:text-gray-900 transition-colors">Return to Home</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const [jobDescription, setJobDescription] = useState("");
   const [profileContext, setProfileContext] = useState("");
   const [showProfile, setShowProfile] = useState(false);

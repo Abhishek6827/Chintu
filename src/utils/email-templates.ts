@@ -14,7 +14,7 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
           <!-- Header -->
           <tr>
             <td style="padding: 40px 40px 30px 40px; text-align: center;">
-              <img src="https://www.getchintu.com/icon.png" alt="Chintu AI" width="60" height="60" style="margin-bottom: 20px;">
+              <img src="https://www.getchintu.com/icon.png" alt="Chintu Intelligence" width="60" height="60" style="margin-bottom: 20px;">
               <h1 style="margin: 0; font-size: 28px; font-weight: 900; color: #1a1a1c; letter-spacing: -0.02em; text-transform: uppercase;">Identity Verified.</h1>
               <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.2em;">Welcome to the Ecosystem</p>
             </td>
@@ -24,7 +24,7 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
           <tr>
             <td style="padding: 0 40px 40px 40px;">
               <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #4b5563; text-align: center;">
-                Your strategic interview assistant is now active. We've provisioned your account with tactical credits to jumpstart your career growth.
+                Your strategic interview assistant is now active. We've provisioned your account with tactical credits to jumpstart your career growth with high-precision intelligence.
               </p>
               
               <div style="background-color: #f8f9fa; border-radius: 24px; padding: 30px; border: 1px solid #f1f3f5; margin-bottom: 32px;">
@@ -45,14 +45,14 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
               </div>
 
               <div style="margin-bottom: 32px;">
-                <h3 style="font-size: 12px; font-weight: 900; color: #1a1a1c; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px;">Mission Objectives:</h3>
+                <h3 style="font-size: 12px; font-weight: 900; color: #1a1a1c; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px;">Next Steps for Success:</h3>
                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tr>
                     <td width="24" style="vertical-align: top; padding-bottom: 12px;">
                       <div style="width: 16px; height: 16px; background-color: #6366f1; border-radius: 4px;"></div>
                     </td>
                     <td style="padding-bottom: 12px; font-size: 14px; color: #4b5563; line-height: 1.4;">
-                      <b>Setup Identity:</b> Complete your profile to enable personalized AI synthesis.
+                      <b>Feed the Engine:</b> Complete your profile with your resume and JD to enable high-context response synthesis.
                     </td>
                   </tr>
                   <tr>
@@ -60,7 +60,7 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
                       <div style="width: 16px; height: 16px; background-color: #6366f1; border-radius: 4px;"></div>
                     </td>
                     <td style="padding-bottom: 12px; font-size: 14px; color: #4b5563; line-height: 1.4;">
-                      <b>Stealth Operation:</b> Use the ghost overlay during live sessions.
+                      <b>Activate Stealth:</b> Launch the ghost interface during your live sessions for real-time tactical guidance.
                     </td>
                   </tr>
                 </table>
@@ -76,10 +76,10 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
           <tr>
             <td style="padding: 30px; background-color: #fcfcfd; border-top: 1px solid #f1f3f5; text-align: center;">
               <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: 500; color: #6b7280;">
-                Need assistance? Contact us at <a href="mailto:support@getchintu.com" style="color: #6366f1; text-decoration: none;">support@getchintu.com</a>
+                Questions or issues? Contact our strategy team at <a href="mailto:contact@getchintu.com" style="color: #6366f1; text-decoration: none;">contact@getchintu.com</a>
               </p>
               <p style="margin: 0; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">
-                © 2026 Chintu AI Ecosystem • Stealth Mode Active
+                © 2026 Chintu Intelligence Ecosystem • All Rights Reserved
               </p>
             </td>
           </tr>
@@ -107,8 +107,8 @@ export const getPaymentEmailHtml = (plan: string, credits: number, appUrl: strin
           <!-- Header -->
           <tr>
             <td style="padding: 40px 40px 30px 40px; text-align: center;">
-              <img src="https://www.getchintu.com/icon.png" alt="Chintu AI" width="60" height="60" style="margin-bottom: 20px;">
-              <h1 style="margin: 0; font-size: 28px; font-weight: 900; color: #1a1a1c; letter-spacing: -0.02em; text-transform: uppercase;">Access Granted.</h1>
+              <img src="https://www.getchintu.com/icon.png" alt="Chintu Intelligence" width="60" height="60" style="margin-bottom: 20px;">
+              <h1 style="margin: 0; font-size: 28px; font-weight: 900; color: #1a1a1c; letter-spacing: -0.02em; text-transform: uppercase;">Access Elevated.</h1>
               <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.2em;">Subscription Activated</p>
             </td>
           </tr>
@@ -117,35 +117,35 @@ export const getPaymentEmailHtml = (plan: string, credits: number, appUrl: strin
           <tr>
             <td style="padding: 0 40px 40px 40px;">
               <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #4b5563; text-align: center;">
-                Your upgrade to the <b>${plan.toUpperCase()}</b> tier is complete. Premium AI engines and advanced features have been unlocked for your account.
+                Your upgrade to the <b>${plan.toUpperCase()}</b> tier is verified. Advanced strategic engines and high-priority features are now fully operational.
               </p>
               
               <div style="background-color: #f8f9fa; border-radius: 24px; padding: 30px; border: 1px solid #f1f3f5; margin-bottom: 32px;">
                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tr>
                     <td style="padding-bottom: 15px;">
-                      <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Activated Plan:</span>
-                      <div style="font-size: 14px; font-weight: 700; color: #1a1a1c;">${plan.toUpperCase()} Tier</div>
+                      <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Activated Tier:</span>
+                      <div style="font-size: 14px; font-weight: 700; color: #1a1a1c;">${plan.toUpperCase()} Experience</div>
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Monthly Credit Allowance:</span>
-                      <div style="font-size: 14px; font-weight: 700; color: #10b981;">${credits} Tactical Credits</div>
+                      <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Tactical Credit Allocation:</span>
+                      <div style="font-size: 14px; font-weight: 700; color: #10b981;">${credits} Credits Provisioned</div>
                     </td>
                   </tr>
                 </table>
               </div>
 
               <div style="margin-bottom: 32px;">
-                <h3 style="font-size: 12px; font-weight: 900; color: #1a1a1c; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px;">Unlocked Capabilities:</h3>
+                <h3 style="font-size: 12px; font-weight: 900; color: #1a1a1c; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px;">Enhanced Capabilities:</h3>
                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tr>
                     <td width="24" style="vertical-align: top; padding-bottom: 12px;">
                       <div style="width: 16px; height: 16px; background-color: #6366f1; border-radius: 4px;"></div>
                     </td>
                     <td style="padding-bottom: 12px; font-size: 14px; color: #4b5563; line-height: 1.4;">
-                      <b>Premium Engines:</b> Access GPT-OSS 120B and specialized Coding models.
+                      <b>Elite Strategic Engines:</b> Access to our highest-fidelity reasoning and specialized coding logic.
                     </td>
                   </tr>
                   <tr>
@@ -153,7 +153,7 @@ export const getPaymentEmailHtml = (plan: string, credits: number, appUrl: strin
                       <div style="width: 16px; height: 16px; background-color: #6366f1; border-radius: 4px;"></div>
                     </td>
                     <td style="padding-bottom: 12px; font-size: 14px; color: #4b5563; line-height: 1.4;">
-                      <b>Stealth Recording:</b> Secure, prompt-less session recording enabled.
+                      <b>Stealth Operation:</b> High-speed visual analysis and stealth session tracking are now active.
                     </td>
                   </tr>
                 </table>
@@ -169,10 +169,10 @@ export const getPaymentEmailHtml = (plan: string, credits: number, appUrl: strin
           <tr>
             <td style="padding: 30px; background-color: #fcfcfd; border-top: 1px solid #f1f3f5; text-align: center;">
               <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: 500; color: #6b7280;">
-                Need assistance? Contact us at <a href="mailto:support@getchintu.com" style="color: #6366f1; text-decoration: none;">support@getchintu.com</a>
+                Billing questions? Contact our support team at <a href="mailto:contact@getchintu.com" style="color: #6366f1; text-decoration: none;">contact@getchintu.com</a>
               </p>
               <p style="margin: 0; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">
-                © 2026 Chintu AI Ecosystem • Subscription Support Active
+                © 2026 Chintu Intelligence Ecosystem • Professional Tier Verified
               </p>
             </td>
           </tr>

@@ -337,7 +337,7 @@ export default function ProfileModal({
               <div className="grid grid-cols-2 gap-3">
                 <button 
                   onClick={() => {
-                    const supportUrl = "https://chintu.devilz.me/support";
+                    const supportUrl = "https://www.getchintu.com/support";
                     if (isElectron) (window as any).electronAPI.openExternal(supportUrl);
                     else window.open(supportUrl, "_blank");
                   }}

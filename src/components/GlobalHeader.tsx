@@ -89,7 +89,7 @@ export default function GlobalHeader() {
   };
 
   const handleUpgrade = () => {
-    const pricingUrl = "https://chintu.devilz.me/pricing";
+    const pricingUrl = "https://www.getchintu.com/pricing";
     if (isElectron) {
       (window as any).electronAPI.openExternal(pricingUrl);
     } else {
@@ -109,7 +109,7 @@ export default function GlobalHeader() {
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => router.push(isSignedIn ? "/room" : "/")}
           >
-            <Image src="/icon.png" alt="" className="w-5 h-5 object-contain" width={40} height={40} unoptimized />
+            <Image src="https://www.getchintu.com/icon.png" alt="Chintu" className="w-5 h-5 object-contain" width={40} height={40} unoptimized />
             <span className="text-[var(--text-main)] text-sm font-black tracking-tight uppercase">Chintu</span>
           </div>
           
@@ -184,7 +184,7 @@ export default function GlobalHeader() {
                     label="Support" 
                     labelIcon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>} 
                     onClick={() => {
-                      const supportUrl = "https://chintu.devilz.me/support";
+                      const supportUrl = "https://www.getchintu.com/support";
                       if (isElectron) (window as any).electronAPI.openExternal(supportUrl);
                       else window.open(supportUrl, "_blank");
                     }} 
