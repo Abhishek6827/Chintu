@@ -13,8 +13,24 @@ export async function POST(req: NextRequest) {
 
   const { amount, currency = "INR", planId, quantity = 1, billingCycle = "monthly", email, fullName } = await req.json();
 
-  // Note: Strict email check removed to allow users with multiple accounts (e.g. social vs email) 
-  // to proceed with payment. Verification route handles profile updates gracefully.
+  // Use admin client to fetch user profile for backend validation
+  const supabaseAdmin = createAdminClient();
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("plan")
+    .eq("id", userId)
+    .maybeSingle();
+
+  // Prevent downgrades (Elite -> Pro) at the API level
+  if (profile?.plan === "elite" && planId === "pro") {
+    return NextResponse.json({ 
+      error: "You are already on the Elite plan. Downgrades are not allowed via this portal." 
+    }, { status: 400 });
+  }
+
+  // Note: Strict email conflict check was removed to allow multi-account users to proceed.
+  // Verification route handles profile updates gracefully.
+
 
 
   const razorpay = new Razorpay({
