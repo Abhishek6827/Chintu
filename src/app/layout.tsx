@@ -13,14 +13,24 @@ import { ClerkProvider } from "@clerk/nextjs";
 import UpdateNotification from "@/components/UpdateNotification";
 import GlobalHeader from "@/components/GlobalHeader";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { headers } from "next/headers";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Logic to switch Clerk Publishable Key based on request headers for SSR
+  const headersList = await headers();
+  const host = headersList.get("host") || "";
+  const isProd = host.includes("getchintu.com");
+  
+  const clerkPubKey = isProd 
+    ? process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY 
+    : process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY_SANDBOX;
+
   return (
-    <ClerkProvider>
+    <ClerkProvider publishableKey={clerkPubKey}>
       <html lang="en">
         <head>
           <link rel="icon" href="https://www.getchintu.com/icon.png" />
