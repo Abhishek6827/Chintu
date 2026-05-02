@@ -10,6 +10,12 @@ import { useUser } from "@clerk/nextjs";
 import AnswerDisplay from "@/components/AnswerDisplay";
 import ProfileModal, { formatProfileContext } from "@/components/ProfileModal";
 import CustomDropdown from "@/components/CustomDropdown";
+import { Meteors } from "@/components/magicui/meteors";
+import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
+import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
+
+
+
 
 interface AnswerEntry {
   id: string;
@@ -1328,6 +1334,7 @@ export default function RoomPage() {
     <div className="app-container" style={{ '--app-opacity': windowOpacity } as React.CSSProperties}>
       {/* Neural Mesh Background */}
       <div className="neural-mesh">
+        {userPlan !== "free" && <Meteors number={30} />}
         <div className="mesh-orb w-[400px] h-[400px] bg-indigo-600/30 -top-20 -left-20 animate-pulse" />
         <div className="mesh-orb w-[300px] h-[300px] bg-purple-600/20 bottom-10 right-10 animate-pulse" style={{ animationDelay: '2s' }} />
         <div className="mesh-orb w-[250px] h-[250px] bg-blue-600/20 top-1/2 left-1/3" style={{ animationDelay: '5s' }} />
@@ -1710,32 +1717,19 @@ export default function RoomPage() {
           <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </button>
 
-        {/* Button 3: Mic (The Core) */}
-        <button
+        <InteractiveHoverButton
           onClick={handleMicButton}
           disabled={!micReady || status === "generating"}
           className={`
-            no-drag flex-initial w-auto min-w-[40px] sm:min-w-[120px] h-10 sm:h-14 px-3 sm:px-6 rounded-xl sm:rounded-3xl flex items-center justify-center gap-2 sm:gap-3 relative transition-all duration-500 active:scale-95 overflow-hidden group
+            no-drag flex-initial w-auto min-w-[120px] h-12 sm:h-14 rounded-xl sm:rounded-3xl flex items-center justify-center transition-all duration-500 active:scale-95 overflow-hidden group
             ${status === "recording"
               ? "bg-red-500 text-white shadow-[0_0_50px_rgba(239,68,68,0.4)]"
-              : "bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 animate-gradient text-white shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:shadow-[0_25px_50px_rgba(99,102,241,0.5)]"
+              : "bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 animate-gradient text-white shadow-[0_20px_40px_rgba(99,102,241,0.3)]"
             }
           `}
         >
-          <div className="relative z-10 flex items-center gap-2">
-            {status === "recording" ? (
-              <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-white rounded-sm animate-pulse" />
-            ) : (
-              <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            )}
-            <span className="hidden sm:inline text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-white">
-              {status === "recording" ? "REC" : "Analysis"}
-            </span>
-          </div>
-          {status === "recording" && (
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.2)_0%,transparent_70%)] animate-pulse" />
-          )}
-        </button>
+          {status === "recording" ? "Recording" : "Analysis"}
+        </InteractiveHoverButton>
 
         {/* Button 4: Screen Recording */}
         <button
@@ -1845,20 +1839,17 @@ export default function RoomPage() {
                     </div>
                     <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">Toggle dark/light mode</p>
                   </div>
-                  <button
-                    onClick={() => {
+                  <AnimatedThemeToggler 
+                    theme={isLightMode ? "light" : "dark"} 
+                    onToggle={() => {
                       if (userPlan === 'free') {
                         router.push("/pricing");
                         return;
                       }
                       toggleTheme();
                     }}
-                    className={`w-12 h-6 rounded-full transition-all relative ${!isLightMode ? "bg-indigo-600" : "bg-gray-600/30"} ${userPlan === 'free' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all flex items-center justify-center ${!isLightMode ? "left-7" : "left-1"}`}>
-                       {!isLightMode ? <Moon className="w-2.5 h-2.5 text-indigo-600" /> : <Sun className="w-2.5 h-2.5 text-gray-600" />}
-                    </div>
-                  </button>
+                    className={userPlan === 'free' ? 'opacity-50 cursor-not-allowed' : ''}
+                  />
                 </div>
               </div>
 

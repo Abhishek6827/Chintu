@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
-import { Minus, Zap, Sparkles, CreditCard, Moon, Sun } from "lucide-react";
+import { Minus, Zap, Sparkles, CreditCard } from "lucide-react";
+import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
+import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
+
+
 
 import OnboardingModal from "@/components/OnboardingModal";
 
@@ -184,26 +188,23 @@ export default function GlobalHeader() {
                 <span className="text-[8px] font-black uppercase tracking-[0.1em] opacity-60">{userPlan}</span>
               </div>
               {userPlan === 'free' && (
-                <button 
+                <InteractiveHoverButton 
                   onClick={handleUpgrade}
-                  className="px-3 py-1 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition-all text-[8px] font-black uppercase tracking-[0.15em] shadow-lg shadow-indigo-600/20 active:scale-95"
+                  className="px-4 py-1.5 bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
                 >
                   Upgrade
-                </button>
+                </InteractiveHoverButton>
               )}
             </div>
           )}
         </div>
 
         <div className="flex items-center gap-3 no-drag">
-          {userPlan !== 'free' && !isElectron && (
-            <button
-              onClick={toggleTheme}
-              className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
-              title={`Switch to ${currentTheme === 'light' ? 'Dark' : 'Light'} Mode`}
-            >
-              {currentTheme === 'light' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
-            </button>
+          {userPlan !== 'free' && (
+            <AnimatedThemeToggler 
+              theme={currentTheme} 
+              onToggle={toggleTheme} 
+            />
           )}
           {isScreenRecording && (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20 mr-1 animate-pulse">

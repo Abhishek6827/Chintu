@@ -5,7 +5,13 @@ import { useUser, UserButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Check, Sparkles, Minus, Shield, Plus, HelpCircle } from "lucide-react";
+import { Check, Sparkles, Minus, Shield, Plus, HelpCircle, Trophy, Crown, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
+import { VideoText } from "@/components/magicui/video-text";
+
+
+
 
 const PLANS = [
   {
@@ -89,6 +95,10 @@ export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
   const [loading, setLoading] = useState<string | null>(null);
   const [currentPlan, setCurrentPlan] = useState<string>("free");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successPlan, setSuccessPlan] = useState<any>(null);
+  const [countdown, setCountdown] = useState(5);
+
 
   // Fetch current plan
   useEffect(() => {
@@ -195,7 +205,22 @@ export default function PricingPage() {
 
           const result = await verifyRes.json();
           if (result.success) {
-            router.push("/room?payment=success");
+            // Auto-switch to Dark Mode
+            document.body.classList.remove("light-mode");
+            setSuccessPlan(plan);
+            setShowSuccess(true);
+            
+            // Start countdown to redirect
+            let timer = 5;
+            const interval = setInterval(() => {
+              timer -= 1;
+              setCountdown(timer);
+              if (timer <= 0) {
+                clearInterval(interval);
+                const jd = sessionStorage.getItem("jobDescription");
+                router.push(jd ? "/room" : "/setup");
+              }
+            }, 1000);
           } else {
             alert(result.error || "Payment verification failed.");
           }
@@ -234,6 +259,108 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-gray-900 flex flex-col">
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-[#0a0a0c] flex flex-col items-center justify-center p-6 text-center overflow-hidden"
+          >
+            {/* Background Orbs */}
+            <motion.div 
+              animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.5, 0.3],
+              }}
+              transition={{ duration: 4, repeat: Infinity }}
+              className="absolute top-1/4 -left-20 w-96 h-96 bg-indigo-600/20 blur-[120px] rounded-full"
+            />
+            <motion.div 
+              animate={{ 
+                scale: [1, 1.3, 1],
+                opacity: [0.2, 0.4, 0.2],
+              }}
+              transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+              className="absolute bottom-1/4 -right-20 w-96 h-96 bg-purple-600/20 blur-[120px] rounded-full"
+            />
+
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", damping: 15, stiffness: 100 }}
+              className="relative z-10"
+            >
+              <div className="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-[0_20px_50px_rgba(79,70,229,0.3)]">
+                {successPlan?.id === 'elite' ? <Crown className="w-12 h-12 text-white" /> : <Trophy className="w-12 h-12 text-white" />}
+              </div>
+
+              <motion.h1 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-4xl sm:text-6xl font-black tracking-tighter text-white mb-4 uppercase"
+              >
+                Protocol <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Upgraded.</span>
+              </motion.h1>
+
+              <motion.p 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-gray-400 text-sm sm:text-lg font-bold uppercase tracking-[0.2em] mb-12 max-w-md mx-auto leading-relaxed"
+              >
+                Welcome to the {successPlan?.name} tier. Your account has been initialized with {successPlan?.credits * quantity} credits and Dark Mode has been activated.
+              </motion.p>
+
+              <motion.div 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="flex flex-col gap-4 items-center"
+              >
+                <InteractiveHoverButton
+                  onClick={() => {
+                    const jd = sessionStorage.getItem("jobDescription");
+                    router.push(jd ? "/room" : "/setup");
+                  }}
+                  className="px-12 py-5 bg-white text-black font-black uppercase tracking-[0.2em] text-xs rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                >
+                  Enter the App
+                </InteractiveHoverButton>
+                <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-4">
+                  Redirecting in {countdown}s...
+                </p>
+              </motion.div>
+            </motion.div>
+
+            {/* Confetti-like Sparkles */}
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ 
+                  x: Math.random() * 1000 - 500, 
+                  y: Math.random() * 1000 - 500,
+                  opacity: 0,
+                  scale: 0
+                }}
+                animate={{ 
+                  y: [null, Math.random() * -500],
+                  opacity: [0, 1, 0],
+                  scale: [0, 1, 0]
+                }}
+                transition={{ 
+                  duration: Math.random() * 2 + 1,
+                  repeat: Infinity,
+                  delay: Math.random() * 2
+                }}
+                className="absolute w-1 h-1 bg-indigo-400 rounded-full"
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {loading && (
         <div className="fixed inset-0 z-[100] bg-white/90 backdrop-blur-xl flex flex-col items-center justify-center animate-in fade-in duration-500">
           <div className="relative mb-8">
@@ -285,6 +412,13 @@ export default function PricingPage() {
           <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-6 border border-indigo-100">
             <Sparkles className="w-3 h-3 animate-pulse" /> Premium Access
           </div>
+          
+          {currentPlan === 'elite' && (
+            <div className="max-w-4xl mx-auto mb-12 h-[150px] rounded-[2rem] overflow-hidden border border-amber-500/30 shadow-2xl shadow-amber-500/10">
+              <VideoText src="https://cdn.magicui.design/ocean-small.webm">ELITE PROTOCOL ACTIVE</VideoText>
+            </div>
+          )}
+
           <h1 className="text-3xl sm:text-4xl font-black tracking-tighter mb-4 text-gray-900 leading-none uppercase">Elevate Your Career.</h1>
           
           <div className="max-w-[280px] mx-auto mb-10 bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
@@ -334,7 +468,12 @@ export default function PricingPage() {
              const totalCredits = plan.credits * quantity;
 
              return (
-            <div key={plan.id} className={`group relative flex flex-col bg-white rounded-[2rem] border-2 transition-all duration-300 ${plan.popular ? "border-indigo-600 shadow-xl shadow-indigo-500/5 scale-105 z-10" : "border-gray-100 shadow-sm"} p-6 sm:p-8`}>
+            <div key={plan.id} className={`group relative flex flex-col bg-white rounded-[2rem] border-2 transition-all duration-300 ${plan.popular ? "border-indigo-600 shadow-xl shadow-indigo-500/5 scale-105 z-10" : "border-gray-100 shadow-sm"} p-6 sm:p-8 overflow-hidden`}>
+              {plan.id === 'elite' && (
+                <div className="absolute inset-0 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+                  <VideoText src="https://cdn.magicui.design/ocean-small.webm">ELITE</VideoText>
+                </div>
+              )}
               {plan.popular && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                   <span className="bg-indigo-600 text-white text-[8px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-full">Most Preferred</span>
@@ -379,13 +518,13 @@ export default function PricingPage() {
                 ))}
               </ul>
 
-              <button
+              <InteractiveHoverButton
                 onClick={() => handleSubscribe(plan)}
                 disabled={(currentPlan === 'elite' && (plan.id === 'pro' || plan.id === 'elite')) || (currentPlan === 'pro' && plan.id === 'pro') || loading === plan.id}
                 className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${(currentPlan === plan.id || (currentPlan === 'elite' && plan.id === 'pro')) ? "bg-gray-100 text-gray-400 border border-gray-200" : plan.popular ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-gray-900 text-white"}`}
               >
                 {loading === plan.id ? "Connecting..." : (currentPlan === plan.id || (currentPlan === 'elite' && plan.id === 'pro')) ? "Current Plan" : plan.cta}
-              </button>
+              </InteractiveHoverButton>
             </div>
           )})}
         </div>

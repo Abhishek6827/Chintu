@@ -11,6 +11,8 @@ import GlobalFooter from '@/components/GlobalFooter';
 import ContactForm from '@/components/ContactForm';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { MarqueeReviews } from '@/components/MarqueeReviews';
+import { TextReveal } from '@/components/magicui/text-reveal';
+
 
 export default function LandingPage() {
   const { isSignedIn, isLoaded } = useUser();
@@ -199,6 +201,11 @@ export default function LandingPage() {
               View Access Tiers
             </Link>
           </div>
+        </section>
+
+        {/* Scroll Reveal Narrative */}
+        <section className="bg-white">
+          <TextReveal text="Chintu Intelligence is not just a tool. It is a strategic evolution for your career. Master any challenge. Instantly." />
         </section>
 
         {/* Total Coverage Section */}

@@ -4,6 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
+import { Meteors } from "@/components/magicui/meteors";
+import { PremiumWelcome } from "@/components/PremiumWelcome";
+import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
+
+
+
 
 export default function SetupPage() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -228,6 +234,8 @@ export default function SetupPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fa] text-gray-900 overflow-x-hidden overflow-y-auto">
+      {userPlan !== "free" && <Meteors number={30} />}
+
 
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12 overflow-y-auto">
@@ -285,38 +293,28 @@ export default function SetupPage() {
                 />
               </div>
             ) : (
-              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex flex-col gap-3 shadow-sm animate-in zoom-in-95 duration-500">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                      <span className="text-emerald-600 text-lg">✓</span>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-emerald-600/60 uppercase tracking-widest">Profile Status</p>
-                      <p className="text-sm font-bold text-emerald-700">Identity Loaded</p>
+              userPlan === "free" ? (
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex flex-col gap-3 shadow-sm animate-in zoom-in-95 duration-500">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <span className="text-emerald-600 text-lg">✓</span>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-emerald-600/60 uppercase tracking-widest">Profile Status</p>
+                        <p className="text-sm font-bold text-emerald-700">Identity Loaded</p>
+                      </div>
                     </div>
                   </div>
-                  {userPlan !== "free" && (
-                    <button 
-                      onClick={() => {
-                        setHasProfile(false);
-                        setAboutMe("");
-                        setShowJdOnly(false);
-                      }}
-                      className="text-[9px] font-black text-emerald-600 uppercase tracking-widest hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors border border-emerald-200"
-                    >
-                      Reset
-                    </button>
-                  )}
-                </div>
-                {userPlan === "free" && (
                   <div className="pt-2 border-t border-emerald-100/50">
                     <p className="text-[8px] font-bold text-emerald-600/60 uppercase tracking-widest leading-relaxed">
                       Starter plan limited to one-time profile. <button onClick={() => router.push("/pricing")} className="text-emerald-600 underline">Upgrade</button> to edit.
                     </p>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <PremiumWelcome plan={userPlan} />
+              )
             )}
 
             {/* Job Description Section */}
@@ -371,34 +369,27 @@ export default function SetupPage() {
 
             {/* Action Button */}
             <div className="flex flex-col gap-2">
-              <button
+              <InteractiveHoverButton
                 onClick={handleStart}
                 disabled={!jd.trim() || (!hasProfile && !aboutMe.trim()) || isRefining}
                 className={`
                   w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative overflow-hidden group
                   ${jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining
-                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95"
+                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30"
                     : "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
                   }
                 `}
               >
-                <span className="relative z-10">
-                  {isRefining ? statusText : (isElectron ? "Initiate Session →" : "Sync & Start in App →")}
-                </span>
-                {jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
-                )}
-              </button>
+                {isRefining ? statusText : (isElectron ? "Initiate Session" : "Sync & Start")}
+              </InteractiveHoverButton>
 
               {!isElectron && (
-                <a
-                  href="https://www.getchintu.com/download"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 text-indigo-500 bg-indigo-50 hover:bg-indigo-100 active:scale-95 border border-indigo-100 shadow-sm text-center"
+                <InteractiveHoverButton
+                  onClick={() => window.open("https://www.getchintu.com/download", "_blank")}
+                  className="w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 text-indigo-500 bg-indigo-50 border border-indigo-100 shadow-sm"
                 >
-                  Download Desktop App
-                </a>
+                  Download App
+                </InteractiveHoverButton>
               )}
 
               {isRefining && (
@@ -412,7 +403,7 @@ export default function SetupPage() {
               )}
             </div>
 
-            <button 
+            <InteractiveHoverButton 
               onClick={async () => {
                 try {
                   setStatusText("Opening Billing Portal...");
@@ -432,10 +423,10 @@ export default function SetupPage() {
                 }
               }}
               disabled={isRefining || isInitiating}
-              className="w-full py-3 mt-2 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 text-gray-400 hover:text-gray-900 hover:bg-gray-200"
+              className="w-full py-3 mt-2 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 text-gray-400 hover:text-gray-900"
             >
               Manage Subscription
-            </button>
+            </InteractiveHoverButton>
           </div>
         </div>
       </div>
