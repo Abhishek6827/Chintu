@@ -90,16 +90,18 @@ export async function POST(req: Request) {
       return new Response('User already exists, notifications skipped', { status: 200 });
     }
 
-    // Use INSERT instead of UPSERT to prevent concurrent race conditions
+    // Use UPSERT to handle cases where the user record was partially created by other routes
     const { error } = await supabase
       .from('profiles')
-      .insert({
+      .upsert({
         id: id,
         email: email,
         display_id: displayId,
         credits: 10,
         plan: 'free',
         updated_at: now.toISOString()
+      }, {
+        onConflict: 'id'
       });
 
     if (error) {

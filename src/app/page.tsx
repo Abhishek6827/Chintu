@@ -17,7 +17,7 @@ export default function LandingPage() {
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
   const [userCredits, setUserCredits] = React.useState<number | null>(null);
-  const [userPlan, setUserPlan] = React.useState<string>("free");
+  const [userPlan, setUserPlan] = React.useState<string>("");
 
   useEffect(() => {
     setMounted(true);
@@ -124,30 +124,40 @@ export default function LandingPage() {
               </>
             ) : (
               <div className="flex items-center gap-4">
-                {/* User Info & Badge */}
-                <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-2xl bg-indigo-50/50 border border-indigo-100 backdrop-blur-sm">
-                  <div className="flex flex-col items-end">
-                    <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Energy Sync</span>
-                    <span className="text-[11px] font-black text-indigo-600 tracking-tight flex items-center gap-1">
-                      <Zap className="w-2.5 h-2.5 fill-indigo-600" /> {userCredits ?? '--'}
-                    </span>
-                  </div>
-                  {userPlan !== 'free' && (
-                    <div className="h-6 w-[1px] bg-indigo-200/50 mx-0.5" />
-                  )}
-                  {userPlan !== 'free' && (
-                    <div className="px-2 py-1 rounded-lg bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest shadow-md">
-                      {userPlan}
+                {userPlan !== 'free' && userPlan !== '' && (
+                  <>
+                    {/* User Info & Badge */}
+                    <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-2xl bg-indigo-50/50 border border-indigo-100 backdrop-blur-sm">
+                      <div className="flex flex-col items-end">
+                        <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Energy Sync</span>
+                        <span className="text-[11px] font-black text-indigo-600 tracking-tight flex items-center gap-1">
+                          <Zap className="w-2.5 h-2.5 fill-indigo-600" /> {userCredits ?? '--'}
+                        </span>
+                      </div>
+                      <div className="h-6 w-[1px] bg-indigo-200/50 mx-0.5" />
+                      <div className="px-2 py-1 rounded-lg bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest shadow-md">
+                        {userPlan}
+                      </div>
                     </div>
-                  )}
-                </div>
 
-                <Link 
-                  href="/setup"
-                  className="relative group overflow-hidden bg-white border-2 border-indigo-100 text-indigo-600 text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3 rounded-xl hover:border-indigo-600 hover:bg-indigo-50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
-                >
-                  Enter The App <Sparkles className="w-3 h-3 fill-indigo-600" />
-                </Link>
+                    <Link 
+                      href="/setup"
+                      className="relative group overflow-hidden bg-white border-2 border-indigo-100 text-indigo-600 text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3 rounded-xl hover:border-indigo-600 hover:bg-indigo-50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                    >
+                      Enter The App <Sparkles className="w-3 h-3 fill-indigo-600" />
+                    </Link>
+                  </>
+                )}
+
+                {userPlan === 'free' && (
+                  <Link 
+                    href="/pricing"
+                    className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3.5 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                  >
+                    Upgrade Plan <Zap className="w-3 h-3 fill-current" />
+                  </Link>
+                )}
+
                 <div className="scale-105 hover:scale-110 transition-transform">
                   <UserButton afterSignOutUrl="/" />
                 </div>

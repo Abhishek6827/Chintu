@@ -132,6 +132,16 @@ export default function SetupPage() {
             body: JSON.stringify(profileUpdate),
           });
         }
+
+        // --- ADDED: Refine profile on web too if provided ---
+        if (aboutMe.trim() && !hasProfile) {
+          setStatusText("✨ AI is structuring your profile...");
+          await fetch("/api/refine-profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rawText: aboutMe.trim() }),
+          });
+        }
         
         // Save to sessionStorage for immediate use
         sessionStorage.setItem("jobDescription", jd.trim());

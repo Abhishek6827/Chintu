@@ -13,23 +13,9 @@ export async function POST(req: NextRequest) {
 
   const { amount, currency = "INR", planId, quantity = 1, billingCycle = "monthly", email, fullName } = await req.json();
 
-  // Prevent duplicate subscriptions across different accounts with the same email
-  if (email) {
-    const supabaseAdmin = createAdminClient();
-    const { data: existingProfile } = await supabaseAdmin
-      .from("profiles")
-      .select("id, plan, email")
-      .eq("email", email)
-      .neq("id", userId) // Check other accounts
-      .in("plan", ["pro", "elite"])
-      .maybeSingle();
+  // Note: Strict email check removed to allow users with multiple accounts (e.g. social vs email) 
+  // to proceed with payment. Verification route handles profile updates gracefully.
 
-    if (existingProfile) {
-      return NextResponse.json({ 
-        error: "Another account with this email already has an active subscription. Please login with that account." 
-      }, { status: 400 });
-    }
-  }
 
   const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID || "",

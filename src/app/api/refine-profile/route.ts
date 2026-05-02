@@ -91,7 +91,7 @@ Rules:
           apiKey: dashscopeKey,
         });
         response = await dashscope.chat.completions.create({
-          model: "qwen3-vl-235b-a22b-thinking", // qwen-max is the most advanced model available on DashScope
+          model: "qwen-max", // qwen-max is the most advanced model available on DashScope
           stream: false,
           messages: [
             { role: "system", content: systemPrompt },
@@ -112,7 +112,7 @@ Rules:
           console.log(`[/api/refine-profile] Trying Groq key ${i + 1} with qwen3-coder-480b-a35b-instruct...`);
           const groq = new Groq({ apiKey: apiKeys[i] });
           response = await groq.chat.completions.create({
-            model: "qwen3-coder-480b-a35b-instruct",
+            model: "llama3-70b-8192",
             stream: false,
             max_tokens: 4096,
             messages: [
@@ -139,7 +139,7 @@ Rules:
           apiKey: openRouterKey,
         });
         response = await openrouter.chat.completions.create({
-          model: "qwen3-coder-480b-a35b-instruct",
+          model: "meta-llama/llama-3-70b-instruct",
           stream: false,
           max_tokens: 4096,
           messages: [
@@ -187,15 +187,21 @@ Rules:
             }
           };
           
-          await supabase.from("profiles").update({
+          const { error: upsertError } = await supabase.from("profiles").upsert({
+            id: userId,
             profile_data: mergedData,
             raw_profile: rawText,
             updated_at: new Date().toISOString()
-          }).eq("id", userId);
-          console.log(`[/api/refine-profile] ✓ Saved to Supabase for user ${userId}`);
+          });
+
+          if (upsertError) {
+            console.error(`[/api/refine-profile] ✗ Database Error for user ${userId}:`, upsertError);
+          } else {
+            console.log(`[/api/refine-profile] ✓ Saved to Supabase for user ${userId}`);
+          }
         }
       } catch (e) {
-        console.error("[/api/refine-profile] Failed to save to Supabase:", e);
+        console.error("[/api/refine-profile] ✗ Critical failure in saveToSupabase:", e);
       }
     };
 

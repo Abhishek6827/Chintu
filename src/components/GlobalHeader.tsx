@@ -204,13 +204,15 @@ export default function GlobalHeader() {
         </div>
 
         <div className="flex items-center gap-3 no-drag">
-          <button
-            onClick={toggleTheme}
-            className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
-            title={`Switch to ${currentTheme === 'light' ? 'Dark' : 'Light'} Mode`}
-          >
-            {currentTheme === 'light' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
-          </button>
+          {userPlan !== 'free' && (
+            <button
+              onClick={toggleTheme}
+              className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
+              title={`Switch to ${currentTheme === 'light' ? 'Dark' : 'Light'} Mode`}
+            >
+              {currentTheme === 'light' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
+            </button>
+          )}
           {isScreenRecording && (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20 mr-1 animate-pulse">
               <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />

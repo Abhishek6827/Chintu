@@ -52,29 +52,25 @@ export async function POST(req: NextRequest) {
       .eq("id", userId)
       .maybeSingle();
 
-    if (!profile) {
-      return NextResponse.json({ error: "User profile not found" }, { status: 404 });
-    }
-
     // Determine plan details
     const planKey = `${planId}_${billingCycle}`; 
     const planInfo = RAZORPAY_PLANS[planKey] || RAZORPAY_PLANS["pro_monthly"];
 
     const purchasedCredits = planInfo.credits * quantity;
     const purchasedDays = planInfo.days * quantity;
-    const existingCredits = profile.credits || 0;
+    const existingCredits = profile?.credits || 0;
     const totalCredits = existingCredits + purchasedCredits;
 
     const now = new Date();
-    let currentExpiry = profile.subscription_expires_at ? new Date(profile.subscription_expires_at) : now;
+    let currentExpiry = profile?.subscription_expires_at ? new Date(profile.subscription_expires_at) : now;
     if (currentExpiry < now) currentExpiry = now;
     const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
 
     // Fallback: Get Clerk data if profile is missing name/email
-    let userEmail = profile.email;
-    let userName = profile.full_name;
+    let userEmail = profile?.email;
+    let userName = profile?.full_name;
     
-    if (!userEmail || !userName) {
+    if (!profile || !userEmail || !userName) {
       try {
         const { clerkClient } = await import("@clerk/nextjs/server");
         const client = await clerkClient();
@@ -91,19 +87,34 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Update Profile
+    // Check for email conflicts before upsert to avoid duplicate key errors
+    if (userEmail) {
+      const { data: conflict } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("email", userEmail)
+        .neq("id", userId)
+        .maybeSingle();
+      
+      if (conflict) {
+        console.warn(`[/api/razorpay/verify] Email conflict for ${userEmail}. Fulfilling without updating email field.`);
+        userEmail = null; // Don't try to update email if it belongs to someone else
+      }
+    }
+
+    // Update Profile (Upsert)
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
-      .update({
+      .upsert({
+        id: userId,
         plan: planInfo.plan,
         credits: totalCredits,
         subscription_expires_at: newExpiry.toISOString(),
         updated_at: new Date().toISOString(),
         theme: "dark",
-        full_name: userName || profile.full_name,
-        email: userEmail || profile.email
-      })
-      .eq("id", userId);
+        full_name: userName || (profile ? profile.full_name : null),
+        email: userEmail || (profile ? profile.email : null)
+      });
 
     if (updateError) throw updateError;
 

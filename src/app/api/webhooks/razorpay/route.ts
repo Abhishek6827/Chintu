@@ -76,16 +76,33 @@ export async function POST(req: Request) {
     const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
     const totalCredits = (profile?.credits || 0) + purchasedCredits;
 
-    // PERFORM FULFILLMENT
-    await supabaseAdmin.from("profiles").update({
-      email: (email && email !== "N/A") ? email : profile?.email,
+    // Check for email conflicts before upsert
+    let finalEmail = (email && email !== "N/A") ? email : profile?.email;
+    if (finalEmail) {
+      const { data: conflict } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("email", finalEmail)
+        .neq("id", userId)
+        .maybeSingle();
+      
+      if (conflict) {
+        console.warn(`[Razorpay Webhook] Email conflict for ${finalEmail}. Fulfilling without updating email field.`);
+        finalEmail = profile?.email; // Revert to existing email if it exists
+      }
+    }
+
+    // PERFORM FULFILLMENT (Upsert)
+    await supabaseAdmin.from("profiles").upsert({
+      id: userId,
+      email: finalEmail,
       full_name: fullName || profile?.full_name,
       plan: planInfo.plan,
       credits: totalCredits,
       subscription_expires_at: newExpiry.toISOString(),
       updated_at: new Date().toISOString(),
       theme: "dark"
-    }).eq("id", userId);
+    });
 
     const eventTime = new Date().toLocaleString('en-IN', { 
       timeZone: 'Asia/Kolkata',
