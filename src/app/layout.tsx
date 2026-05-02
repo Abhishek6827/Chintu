@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Chintu",
   description: "AI-powered interview assistant — invisible to screen sharing",
+  verification: {
+    google: "oIfGEpCWzg3A4gpNSe_9dTxbJeodKqcIIqyRAmgoI4M",
+  },
 };
 
 import { ClerkProvider } from "@clerk/nextjs";
