@@ -4,16 +4,35 @@ import React, { useState } from 'react';
 import { Send, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function ContactForm() {
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus('loading');
     
-    // Simulate API call
-    setTimeout(() => {
-      setStatus('success');
-    }, 1500);
+    try {
+      const response = await fetch('/api/support', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: formData.name,
+          userEmail: formData.email,
+          message: formData.message,
+          subject: "Landing Page Contact"
+        }),
+      });
+
+      if (response.ok) {
+        setStatus('success');
+        setFormData({ name: '', email: '', message: '' });
+      } else {
+        setStatus('error');
+      }
+    } catch (err) {
+      console.error("ContactForm: Submission failed", err);
+      setStatus('error');
+    }
   };
 
   if (status === 'success') {
@@ -42,6 +61,8 @@ export default function ContactForm() {
           <input 
             required
             type="text" 
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="Ghost User" 
             className="w-full bg-white border border-gray-100 px-6 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
           />
@@ -51,6 +72,8 @@ export default function ContactForm() {
           <input 
             required
             type="email" 
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             placeholder="contact@getchintu.com" 
             className="w-full bg-white border border-gray-100 px-6 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
           />
@@ -62,6 +85,8 @@ export default function ContactForm() {
         <textarea 
           required
           rows={4}
+          value={formData.message}
+          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
           placeholder="How can we help your interview strategy?" 
           className="w-full bg-white border border-gray-100 px-6 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
         />
@@ -81,6 +106,11 @@ export default function ContactForm() {
           </>
         )}
       </button>
+      {status === 'error' && (
+        <p className="text-[10px] font-black text-red-500 uppercase tracking-widest text-center mt-2">
+          Transmission Failed. Please try again.
+        </p>
+      )}
     </form>
   );
 }

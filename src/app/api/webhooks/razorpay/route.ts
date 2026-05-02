@@ -78,8 +78,8 @@ export async function POST(req: Request) {
 
     // PERFORM FULFILLMENT
     await supabaseAdmin.from("profiles").update({
-      email: email !== "N/A" ? email : profile?.email,
-      full_name: fullName,
+      email: (email && email !== "N/A") ? email : profile?.email,
+      full_name: fullName || profile?.full_name,
       plan: planInfo.plan,
       credits: totalCredits,
       subscription_expires_at: newExpiry.toISOString(),

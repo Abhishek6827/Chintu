@@ -4,15 +4,16 @@ import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+  
   try {
-    const { subject, message, userEmail, userId: userClerkId } = await req.json();
+    const { subject, message, userEmail, fullName, userId: providedUserId } = await req.json();
 
     if (!message?.trim()) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
+    }
+
+    if (!userEmail?.trim() && !userId) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
     // Send to Telegram
@@ -27,12 +28,13 @@ export async function POST(req: NextRequest) {
     const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
 
     const tgMessage =
-      `📩 <b>SUPPORT REQUEST</b>\n\n` +
-      `👤 <b>From:</b> <code>${userEmail}</code>\n` +
-      `🆔 <b>User ID:</b> <code>${userClerkId}</code>\n` +
-      `📌 <b>Subject:</b> ${subject || "General"}\n` +
+      `📩 <b>NEW SUPPORT INQUIRY</b>\n\n` +
+      `👤 <b>Name:</b> <code>${fullName || "Anonymous"}</code>\n` +
+      `📧 <b>Email:</b> <code>${userEmail}</code>\n` +
+      `🆔 <b>ID:</b> <code>${userId || providedUserId || "GUEST_SESSION"}</code>\n` +
+      `📌 <b>Subject:</b> ${subject || "General Inquiry"}\n` +
       `🕐 <b>Time:</b> ${now}\n\n` +
-      `💬 <b>Message:</b>\n<i>${message.trim()}</i>`;
+      `💬 <b>Message:</b>\n<blockquote>${message.trim()}</blockquote>`;
 
     await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
       method: "POST",

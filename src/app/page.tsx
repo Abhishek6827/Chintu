@@ -16,10 +16,33 @@ export default function LandingPage() {
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
+  const [userCredits, setUserCredits] = React.useState<number | null>(null);
+  const [userPlan, setUserPlan] = React.useState<string>("free");
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Fetch user data for badge/credits
+  useEffect(() => {
+    if (isSignedIn) {
+      const fetchProfile = async () => {
+        try {
+          const res = await fetch("/api/profile");
+          if (res.ok) {
+            const { profile } = await res.json();
+            if (profile) {
+              setUserCredits(profile.credits);
+              setUserPlan(profile.plan || "free");
+            }
+          }
+        } catch (err) {
+          console.error("LandingPage: Error fetching profile:", err);
+        }
+      };
+      fetchProfile();
+    }
+  }, [isSignedIn]);
 
   const isElectron = typeof window !== "undefined" && (!!(window as any).electronAPI || navigator.userAgent.toLowerCase().includes('electron'));
 
@@ -86,28 +109,48 @@ export default function LandingPage() {
                 unoptimized 
               />
             </div>
-            <span className="text-xl font-black tracking-tighter uppercase text-gray-900">Chintu <span className="text-indigo-600">AI</span></span>
+            <span className="text-xl font-black tracking-tighter uppercase text-gray-900">Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">AI</span></span>
           </div>
           
           <div className="flex items-center gap-4 no-drag" style={{ WebkitAppRegion: 'no-drag' } as any}>
             {!isSignedIn ? (
               <>
-                <Link href="/sign-in" className="hidden sm:block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-gray-900 transition-colors px-4">
+                <Link href="/sign-in" className="hidden sm:block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-indigo-600 transition-colors px-4">
                   Portal Login
                 </Link>
-                <Link href="/sign-up" className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-6 py-3.5 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+                <Link href="/sign-up" className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3.5 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
                   Get Started <ArrowRight className="w-3 h-3" />
                 </Link>
               </>
             ) : (
               <div className="flex items-center gap-4">
-                <button 
-                  onClick={() => router.push("/setup")}
-                  className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-6 py-3.5 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                {/* User Info & Badge */}
+                <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-2xl bg-indigo-50/50 border border-indigo-100 backdrop-blur-sm">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Energy Sync</span>
+                    <span className="text-[11px] font-black text-indigo-600 tracking-tight flex items-center gap-1">
+                      <Zap className="w-2.5 h-2.5 fill-indigo-600" /> {userCredits ?? '--'}
+                    </span>
+                  </div>
+                  {userPlan !== 'free' && (
+                    <div className="h-6 w-[1px] bg-indigo-200/50 mx-0.5" />
+                  )}
+                  {userPlan !== 'free' && (
+                    <div className="px-2 py-1 rounded-lg bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest shadow-md">
+                      {userPlan}
+                    </div>
+                  )}
+                </div>
+
+                <Link 
+                  href="/setup"
+                  className="relative group overflow-hidden bg-white border-2 border-indigo-100 text-indigo-600 text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3 rounded-xl hover:border-indigo-600 hover:bg-indigo-50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                 >
-                  Go to Dashboard <Zap className="w-3 h-3 fill-current" />
-                </button>
-                <UserButton afterSignOutUrl="/" />
+                  Enter The App <Sparkles className="w-3 h-3 fill-indigo-600" />
+                </Link>
+                <div className="scale-105 hover:scale-110 transition-transform">
+                  <UserButton afterSignOutUrl="/" />
+                </div>
               </div>
             ) }
           </div>
@@ -134,11 +177,11 @@ export default function LandingPage() {
 
           <div className="reveal flex flex-col sm:flex-row gap-6 transition-all duration-1000 delay-500">
             {isSignedIn ? (
-              <Link href="/setup" className="px-16 py-7 bg-indigo-600 text-white font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-4">
+              <Link href="/setup" className="relative group overflow-hidden px-16 py-7 bg-indigo-600 text-white font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-4">
                 Access Dashboard <Zap className="w-5 h-5 fill-current" />
               </Link>
             ) : (
-              <Link href="/sign-up" className="px-16 py-7 bg-indigo-600 text-white font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-4">
+              <Link href="/sign-up" className="relative group overflow-hidden px-16 py-7 bg-indigo-600 text-white font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-4">
                 Join the Revolution <ArrowRight className="w-5 h-5" />
               </Link>
             )}

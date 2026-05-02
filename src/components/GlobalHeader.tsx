@@ -191,6 +191,14 @@ export default function GlobalHeader() {
                   Upgrade
                 </button>
               )}
+              <button 
+                onClick={() => window.dispatchEvent(new CustomEvent('chintu-open-profile'))}
+                className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 hover:bg-indigo-500/20 transition-all shadow-sm group"
+                title="My AI Profile"
+              >
+                <Sparkles className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                <span className="text-[8px] font-black uppercase tracking-widest">Profile</span>
+              </button>
             </div>
           )}
         </div>

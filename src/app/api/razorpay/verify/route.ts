@@ -100,8 +100,8 @@ export async function POST(req: NextRequest) {
         subscription_expires_at: newExpiry.toISOString(),
         updated_at: new Date().toISOString(),
         theme: "dark",
-        full_name: userName,
-        email: userEmail
+        full_name: userName || profile.full_name,
+        email: userEmail || profile.email
       })
       .eq("id", userId);
 
