@@ -365,7 +365,7 @@ export default function RoomPage() {
       (window as any).electronAPI.getVersion().then((v: string) => setAppVersion(v));
     }
     if (isElectron && (window as any).electronAPI?.getHidden) {
-      (window as any).electronAPI.getHidden().then((hidden: boolean) => {
+      (window as any).electronAPI.getHidden().then(() => {
         // setShowUnhidePrompt(hidden); // If needed
       });
     }
@@ -1193,7 +1193,7 @@ export default function RoomPage() {
       
       return newAnswers;
     });
-  }, []);
+  }, [stopGeneration]);
 
   const sendScreenshots = useCallback(async () => {
     if (capturedScreenshots.length === 0) return;
