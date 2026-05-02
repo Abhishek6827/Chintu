@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Mic, Sun, Moon, Check, Sparkles, Crown } from "lucide-react";
+import { Check, Sparkles, Crown, Moon, Sun, Mic } from "lucide-react";
+
+
 import { useUser } from "@clerk/nextjs";
 
 
@@ -1728,7 +1730,10 @@ export default function RoomPage() {
             }
           `}
         >
-          {status === "recording" ? "Recording" : "Analysis"}
+          <div className="flex items-center gap-2">
+            {status === "recording" ? <div className="w-3 h-3 bg-white rounded-full animate-pulse" /> : <Mic className="w-4 h-4" />}
+            <span>{status === "recording" ? "Recording" : "Analysis"}</span>
+          </div>
         </InteractiveHoverButton>
 
         {/* Button 4: Screen Recording */}
@@ -1832,6 +1837,7 @@ export default function RoomPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
+                      {isLightMode ? <Sun className="w-3 h-3 text-amber-500" /> : <Moon className="w-3 h-3 text-indigo-400" />}
                       <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest">Theme</h4>
                       {userPlan === 'free' && (
                         <span className="bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase px-1.5 py-0.5 rounded tracking-widest">PRO</span>

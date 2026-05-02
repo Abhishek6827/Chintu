@@ -7,6 +7,8 @@ import { useUser } from "@clerk/nextjs";
 import { Meteors } from "@/components/magicui/meteors";
 import { PremiumWelcome } from "@/components/PremiumWelcome";
 import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
+import CardSpread from "@/components/animata/card/card-spread";
+
 
 
 
@@ -429,6 +431,17 @@ export default function SetupPage() {
             </InteractiveHoverButton>
           </div>
         </div>
+
+        {/* Strategic Spread */}
+        {mounted && (
+          <div className="mt-16 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
+             <div className="text-center mb-12">
+               <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-2">Protocol Resources</h2>
+               <p className="text-lg font-black text-gray-900 uppercase tracking-tight">Master the Interview Logic</p>
+             </div>
+             <CardSpread />
+          </div>
+        )}
       </div>
 
       {/* Footer info */}

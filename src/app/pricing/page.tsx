@@ -6,9 +6,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Check, Sparkles, Minus, Shield, Plus, HelpCircle, Trophy, Crown, ArrowRight } from "lucide-react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
 import { VideoText } from "@/components/magicui/video-text";
+import ConfirmationMessage from "@/components/animata/feature-cards/confirmation-message";
+
 
 
 
@@ -291,27 +294,13 @@ export default function PricingPage() {
               transition={{ type: "spring", damping: 15, stiffness: 100 }}
               className="relative z-10"
             >
-              <div className="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-[0_20px_50px_rgba(79,70,229,0.3)]">
-                {successPlan?.id === 'elite' ? <Crown className="w-12 h-12 text-white" /> : <Trophy className="w-12 h-12 text-white" />}
-              </div>
-
-              <motion.h1 
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="text-4xl sm:text-6xl font-black tracking-tighter text-white mb-4 uppercase"
-              >
-                Protocol <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Upgraded.</span>
-              </motion.h1>
-
-              <motion.p 
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-gray-400 text-sm sm:text-lg font-bold uppercase tracking-[0.2em] mb-12 max-w-md mx-auto leading-relaxed"
-              >
-                Welcome to the {successPlan?.name} tier. Your account has been initialized with {successPlan?.credits * quantity} credits and Dark Mode has been activated.
-              </motion.p>
+              <ConfirmationMessage
+                successMessage="Protocol Active"
+                labelName="Chintu AI"
+                labelMessage={`Welcome to the ${successPlan?.name} tier. Your account has been initialized with ${successPlan?.credits * (quantity || 1)} credits and Dark Mode has been activated.`}
+                icon={successPlan?.id === 'elite' ? <Crown className="w-8 h-8 text-white" /> : <Trophy className="w-8 h-8 text-white" />}
+                containerClassName="mb-8"
+              />
 
               <motion.div 
                 initial={{ y: 20, opacity: 0 }}
@@ -326,7 +315,7 @@ export default function PricingPage() {
                   }}
                   className="px-12 py-5 bg-white text-black font-black uppercase tracking-[0.2em] text-xs rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all"
                 >
-                  Enter the App
+                  <span className="flex items-center gap-2">Enter the App <ArrowRight className="w-4 h-4" /></span>
                 </InteractiveHoverButton>
                 <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-4">
                   Redirecting in {countdown}s...
