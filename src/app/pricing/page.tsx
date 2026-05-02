@@ -155,7 +155,9 @@ export default function PricingPage() {
           planId: plan.id, 
           quantity,
           billingCycle,
-          currency: "INR" 
+          currency: "INR",
+          email: user.primaryEmailAddress?.emailAddress || "",
+          fullName: user.fullName || ""
         }),
       });
 
@@ -379,10 +381,10 @@ export default function PricingPage() {
 
               <button
                 onClick={() => handleSubscribe(plan)}
-                disabled={currentPlan === plan.id || loading === plan.id}
-                className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${currentPlan === plan.id ? "bg-gray-100 text-gray-400 border border-gray-200" : plan.popular ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-gray-900 text-white"}`}
+                disabled={(currentPlan === 'elite' && (plan.id === 'pro' || plan.id === 'elite')) || (currentPlan === 'pro' && plan.id === 'pro') || loading === plan.id}
+                className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${(currentPlan === plan.id || (currentPlan === 'elite' && plan.id === 'pro')) ? "bg-gray-100 text-gray-400 border border-gray-200" : plan.popular ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-gray-900 text-white"}`}
               >
-                {loading === plan.id ? "Connecting..." : currentPlan === plan.id ? "Current Plan" : plan.cta}
+                {loading === plan.id ? "Connecting..." : (currentPlan === plan.id || (currentPlan === 'elite' && plan.id === 'pro')) ? "Current Plan" : plan.cta}
               </button>
             </div>
           )})}

@@ -70,6 +70,27 @@ export async function POST(req: NextRequest) {
     if (currentExpiry < now) currentExpiry = now;
     const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
 
+    // Fallback: Get Clerk data if profile is missing name/email
+    let userEmail = profile.email;
+    let userName = profile.full_name;
+    
+    if (!userEmail || !userName) {
+      try {
+        const { clerkClient } = await import("@clerk/nextjs/server");
+        const client = await clerkClient();
+        const clerkUser = await client.users.getUser(userId);
+        if (!userEmail) {
+          userEmail = clerkUser.emailAddresses.find(e => e.id === clerkUser.primaryEmailAddressId)?.emailAddress 
+                   || clerkUser.emailAddresses[0]?.emailAddress;
+        }
+        if (!userName) {
+          userName = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
+        }
+      } catch (err) {
+        console.error("Failed to fetch data from Clerk:", err);
+      }
+    }
+
     // Update Profile
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
@@ -78,7 +99,9 @@ export async function POST(req: NextRequest) {
         credits: totalCredits,
         subscription_expires_at: newExpiry.toISOString(),
         updated_at: new Date().toISOString(),
-        // We can store razorpay IDs if we want
+        theme: "dark",
+        full_name: userName,
+        email: userEmail
       })
       .eq("id", userId);
 
@@ -90,25 +113,6 @@ export async function POST(req: NextRequest) {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
     });
-    
-    // Fallback: If profile email is missing, try to get it from Clerk
-    let userEmail = profile.email;
-    if (!userEmail) {
-      try {
-        const { clerkClient } = await import("@clerk/nextjs/server");
-        const client = await clerkClient();
-        const clerkUser = await client.users.getUser(userId);
-        userEmail = clerkUser.emailAddresses.find(e => e.id === clerkUser.primaryEmailAddressId)?.emailAddress 
-                 || clerkUser.emailAddresses[0]?.emailAddress;
-        
-        // Update profile with email for future use
-        if (userEmail) {
-          await supabaseAdmin.from("profiles").update({ email: userEmail }).eq("id", userId);
-        }
-      } catch (err) {
-        console.error("Failed to fetch email from Clerk:", err);
-      }
-    }
 
     const customerName = profile.full_name || userEmail || "User";
 

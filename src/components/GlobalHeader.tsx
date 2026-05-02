@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
-import { Minus, Zap, Sparkles, CreditCard } from "lucide-react";
+import { Minus, Zap, Sparkles, CreditCard, Moon, Sun } from "lucide-react";
 
 import OnboardingModal from "@/components/OnboardingModal";
 
@@ -19,6 +19,7 @@ export default function GlobalHeader() {
   const [isScreenRecording, setIsScreenRecording] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("dark");
   const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
   useEffect(() => {
@@ -57,6 +58,9 @@ export default function GlobalHeader() {
             setUserCredits(profile.credits);
             setUserPlan(profile.plan || "free");
             setHasProfile(!!(profile.profile_data && Object.keys(profile.profile_data).length > 0));
+            if (profile.theme === "light" || profile.theme === "dark") {
+              setCurrentTheme(profile.theme);
+            }
           }
         }
       } catch (err) {
@@ -81,6 +85,33 @@ export default function GlobalHeader() {
       };
     }
   }, [isElectron]);
+
+  // Apply theme to body
+  useEffect(() => {
+    if (currentTheme === "light") {
+      document.body.classList.add("light-mode");
+    } else {
+      document.body.classList.remove("light-mode");
+    }
+  }, [currentTheme]);
+
+  const toggleTheme = async () => {
+    const newTheme = currentTheme === "light" ? "dark" : "light";
+    setCurrentTheme(newTheme);
+    
+    // Persist to Supabase
+    if (isSignedIn) {
+      try {
+        await fetch("/api/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ theme: newTheme })
+        });
+      } catch (err) {
+        console.error("Failed to persist theme:", err);
+      }
+    }
+  };
 
   const handleGhostToggle = () => {
     window.dispatchEvent(new CustomEvent('chintu-toggle-ghost'));
@@ -165,6 +196,13 @@ export default function GlobalHeader() {
         </div>
 
         <div className="flex items-center gap-3 no-drag">
+          <button
+            onClick={toggleTheme}
+            className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
+            title={`Switch to ${currentTheme === 'light' ? 'Dark' : 'Light'} Mode`}
+          >
+            {currentTheme === 'light' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
+          </button>
           {isScreenRecording && (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20 mr-1 animate-pulse">
               <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />
