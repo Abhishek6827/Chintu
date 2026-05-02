@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useState, useEffect } from "react";
+import { useUser, UserButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -88,6 +88,24 @@ export default function PricingPage() {
   const router = useRouter();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
   const [loading, setLoading] = useState<string | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<string>("free");
+
+  // Fetch current plan
+  useEffect(() => {
+    async function fetchPlan() {
+      if (!user) return;
+      try {
+        const res = await fetch("/api/profile");
+        if (res.ok) {
+          const data = await res.json();
+          setCurrentPlan(data.plan || "free");
+        }
+      } catch (err) {
+        console.error("Failed to fetch plan:", err);
+      }
+    }
+    fetchPlan();
+  }, [user]);
   
   // Quantity Selector
   const [quantity, setQuantity] = useState<number>(1);
@@ -253,6 +271,7 @@ export default function PricingPage() {
         </div>
 
         <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          <UserButton afterSignOutUrl="/" />
           <button onClick={handleMinimize} className="w-7 h-7 rounded-lg flex items-center justify-center bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-900 transition-all active:scale-90">
             <Minus className="w-3.5 h-3.5" />
           </button>
@@ -360,10 +379,10 @@ export default function PricingPage() {
 
               <button
                 onClick={() => handleSubscribe(plan)}
-                disabled={plan.id === 'free' || loading === plan.id}
-                className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${plan.id === 'free' ? "bg-gray-100 text-gray-400 border border-gray-200" : plan.popular ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-gray-900 text-white"}`}
+                disabled={currentPlan === plan.id || loading === plan.id}
+                className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${currentPlan === plan.id ? "bg-gray-100 text-gray-400 border border-gray-200" : plan.popular ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-gray-900 text-white"}`}
               >
-                {loading === plan.id ? "Connecting..." : plan.cta}
+                {loading === plan.id ? "Connecting..." : currentPlan === plan.id ? "Current Plan" : plan.cta}
               </button>
             </div>
           )})}

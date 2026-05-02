@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useUser } from "@clerk/nextjs";
+import { useUser, UserButton } from "@clerk/nextjs";
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Sparkles, Zap, Shield, Target, Cpu, MessageSquare } from 'lucide-react';
 
@@ -100,13 +100,16 @@ export default function LandingPage() {
                 </Link>
               </>
             ) : (
-              <button 
-                onClick={() => router.push("/setup")}
-                className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-6 py-3.5 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
-              >
-                Go to Dashboard <Zap className="w-3 h-3 fill-current" />
-              </button>
-            )}
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => router.push("/setup")}
+                  className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-6 py-3.5 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                >
+                  Go to Dashboard <Zap className="w-3 h-3 fill-current" />
+                </button>
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            ) }
           </div>
         </div>
       </nav>
