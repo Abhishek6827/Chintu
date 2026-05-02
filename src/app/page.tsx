@@ -15,7 +15,6 @@ import ContactForm from '@/components/ContactForm';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { MarqueeReviews } from '@/components/MarqueeReviews';
 import { TextReveal } from '@/components/magicui/text-reveal';
-import { Connector } from 'svix/dist/api/connector';
 
 export default function LandingPage() {
   const { isSignedIn, isLoaded } = useUser();
