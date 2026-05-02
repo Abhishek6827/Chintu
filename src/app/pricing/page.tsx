@@ -140,6 +140,7 @@ export default function PricingPage() {
           amount: totalAmount, 
           planId: plan.id, 
           quantity,
+          billingCycle,
           currency: "INR" 
         }),
       });
@@ -174,6 +175,7 @@ export default function PricingPage() {
               razorpay_signature: response.razorpay_signature,
               planId: plan.id,
               quantity,
+              billingCycle,
             }),
           });
 

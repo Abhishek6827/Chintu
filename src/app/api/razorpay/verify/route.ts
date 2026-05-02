@@ -41,7 +41,8 @@ export async function POST(req: NextRequest) {
       razorpay_payment_id, 
       razorpay_signature,
       planId,
-      quantity 
+      quantity,
+      billingCycle = "monthly"
     } = await req.json();
 
     // Verify signature
@@ -71,10 +72,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Determine plan details
-    // In our case, we pass planId (e.g., 'pro') and we'd know if it's monthly/annual from the amount 
-    // but for simplicity, let's assume we can derive it or we passed it.
-    // For now, I'll use a simplified mapping.
-    const planKey = `${planId}_monthly`; // Defaulting for now, we can improve this
+    const planKey = `${planId}_${billingCycle}`; 
     const planInfo = RAZORPAY_PLANS[planKey] || RAZORPAY_PLANS["pro_monthly"];
 
     const purchasedCredits = planInfo.credits * quantity;

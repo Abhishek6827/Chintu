@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 import { ClerkProvider } from "@clerk/nextjs";
 import UpdateNotification from "@/components/UpdateNotification";
 import GlobalHeader from "@/components/GlobalHeader";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function RootLayout({
   children,
@@ -30,6 +31,7 @@ export default function RootLayout({
             {children}
           </main>
           <UpdateNotification />
+          <SpeedInsights />
         </body>
       </html>
     </ClerkProvider>

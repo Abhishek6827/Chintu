@@ -15,8 +15,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
-    const { amount, currency = "INR", planId, quantity = 1 } = await req.json();
+    try {
+    const { amount, currency = "INR", planId, quantity = 1, billingCycle = "monthly" } = await req.json();
 
     if (!amount) {
       return NextResponse.json({ error: "Missing amount" }, { status: 400 });
@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
         userId,
         planId,
         quantity: quantity.toString(),
+        billingCycle,
       },
     };
 
