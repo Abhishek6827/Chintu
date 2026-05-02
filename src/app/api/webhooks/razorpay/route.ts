@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { createAdminClient } from "@/utils/supabase/server";
 export const dynamic = "force-dynamic";
 
 async function sendTelegramAlert(message: string) {
@@ -37,12 +38,43 @@ export async function POST(req: Request) {
   if (event.event === "payment.captured") {
     const payment = event.payload.payment.entity;
     const notes = payment.notes;
+    const userId = notes.userId;
     
     // Log for records
-    console.log(`[Razorpay Webhook] Payment Captured: ${payment.id} for User: ${notes.userId}`);
+    console.log(`[Razorpay Webhook] Payment Captured: ${payment.id} for User: ${userId}`);
     
-    // Notify Telegram (Optional logging)
-    await sendTelegramAlert(`💳 <b>RAZORPAY EVENT: Captured</b>\nID: <code>${payment.id}</code>\nUser: ${notes.userId}`);
+    // Fetch user details for a better alert
+    const supabaseAdmin = createAdminClient();
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("full_name, email, plan, credits")
+      .eq("id", userId)
+      .maybeSingle();
+
+    const customerName = profile?.full_name || profile?.email || "Unknown User";
+    const email = profile?.email || "N/A";
+    const eventTime = new Date().toLocaleString('en-IN', { 
+      timeZone: 'Asia/Kolkata',
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
+    });
+
+    const amountINR = payment.amount / 100;
+    const newPlan = notes.planId || "Unknown";
+    const quantity = notes.quantity || "1";
+
+    // Notify Telegram
+    await sendTelegramAlert(
+      `💰 <b>New Subscription Captured! (Razorpay Webhook)</b>\n\n` +
+      `👤 Name: <b>${customerName}</b>\n` +
+      `📧 Email: <code>${email}</code>\n` +
+      `📅 Date: <code>${eventTime}</code>\n` +
+      `💎 Plan: <b>${profile?.plan?.toUpperCase() || "FREE"} → ${newPlan.toUpperCase()}</b>\n` +
+      `💲 Price: <b>₹${amountINR.toLocaleString()}</b> (Qty: ${quantity})\n` +
+      `⚡ Current Credits: <b>${profile?.credits || 0}</b>\n` +
+      `💳 ID: <code>${payment.id}</code>\n\n` +
+      `⚠️ <i>Async webhook verification complete.</i>`
+    );
   }
 
   return NextResponse.json({ received: true });

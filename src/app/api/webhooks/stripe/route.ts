@@ -142,16 +142,13 @@ export async function POST(req: Request) {
       // ─── Send Telegram Alert ─────────────────────────────
       const eventTime = formatEventTime();
       await sendTelegramAlert(
-        `🤖 <b>CHINTU - MISSION CONTROL</b>\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `🚀 <b>New Upgrade Detected!</b>\n\n` +
-        `👤 User: <b>${customerName}</b>\n` +
+        `💰 <b>New Subscription! (Stripe)</b>\n\n` +
+        `👤 Name: <b>${customerName}</b>\n` +
         `📧 Email: <code>${session.customer_details?.email || currentProfile?.email || "N/A"}</code>\n` +
-        `📅 Sync: <code>${eventTime}</code>\n` +
-        `💎 Tier: <b>${oldPlan.toUpperCase()}</b> → <b>${plan.toUpperCase()}</b>\n` +
+        `📅 Date: <code>${eventTime}</code>\n` +
+        `💎 Plan: <b>${oldPlan.toUpperCase()}</b> → <b>${plan.toUpperCase()}</b>\n` +
         `💲 Price: <b>${price}</b> × ${quantity}\n` +
-        `⚡ Total Credits: <b>${totalCredits}</b>\n` +
-        `⏳ Expiry: <code>${newExpiry.toLocaleDateString()}</code>\n` +
+        `⚡ Credits: <b>${purchasedCredits}</b>\n` +
         `💳 Session: <code>${session.id.slice(-10)}</code>`
       );
 
@@ -229,16 +226,14 @@ export async function POST(req: Request) {
           // ─── Send Telegram Alert ─────────────────────────────
           // Telegram Alert
           await sendTelegramAlert(
-            `🤖 <b>CHINTU - MISSION CONTROL</b>\n` +
-            `━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-            `🔄 <b>Subscription Renewed</b>\n\n` +
-            `👤 User: <b>${invoiceCustomerName}</b>\n` +
+            `🔄 <b>Subscription Renewed! (Stripe)</b>\n\n` +
+            `👤 Name: <b>${invoiceCustomerName}</b>\n` +
             `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
-            `📅 Sync: <code>${eventTime}</code>\n` +
-            `💎 Tier: <b>${planInfo.plan.toUpperCase()}</b>\n` +
+            `📅 Date: <code>${eventTime}</code>\n` +
+            `💎 Plan: <b>${planInfo.plan.toUpperCase()}</b>\n` +
             `💲 Price: <b>${planInfo.price}</b> × ${quantity}\n` +
-            `⚡ Stacked Credits: <b>${totalCredits}</b>\n` +
-            `⏳ New Expiry: <code>${newExpiry.toLocaleDateString()}</code>`
+            `⚡ Total Credits: <b>${totalCredits}</b>\n` +
+            `⏳ Expiry: <code>${newExpiry.toLocaleDateString()}</code>`
           );
 
           // Email
@@ -327,15 +322,13 @@ export async function POST(req: Request) {
 
           // Telegram Alert
           await sendTelegramAlert(
-            `🤖 <b>CHINTU - MISSION CONTROL</b>\n` +
-            `━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-            `📈 <b>Operation Tier Optimized</b>\n\n` +
-            `👤 User: <b>${customerName}</b>\n` +
+            `📈 <b>Plan Optimized! (Stripe)</b>\n\n` +
+            `👤 Name: <b>${customerName}</b>\n` +
             `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
-            `📅 Sync: <code>${eventTime}</code>\n` +
+            `📅 Date: <code>${eventTime}</code>\n` +
             `💎 Evolution: <b>${oldPlan.toUpperCase()}</b> → <b>${planInfo.plan.toUpperCase()}</b>\n` +
-            `💲 Unit Price: <b>${planInfo.price}</b> × ${quantity}\n` +
-            `⚡ Total Allocation: <b>${totalCredits}</b>\n` +
+            `💲 Price: <b>${planInfo.price}</b> × ${quantity}\n` +
+            `⚡ Total Credits: <b>${totalCredits}</b>\n` +
             `⏳ Next Sync: <code>${newExpiry.toLocaleDateString()}</code>`
           );
           

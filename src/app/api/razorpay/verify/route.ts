@@ -100,16 +100,22 @@ export async function POST(req: NextRequest) {
     if (updateError) throw updateError;
 
     // Notifications
-    const eventTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+    const eventTime = new Date().toLocaleString('en-IN', { 
+      timeZone: 'Asia/Kolkata',
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
+    });
     const customerName = profile.full_name || profile.email || "User";
 
     await sendTelegramAlert(
-      `🤖 <b>CHINTU - RAZORPAY VERIFIED</b>\n` +
-      `━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `👤 User: <b>${customerName}</b>\n` +
-      `💎 Plan: <b>${planInfo.plan.toUpperCase()}</b>\n` +
-      `⚡ Credits: <b>+${purchasedCredits}</b> (Total: ${totalCredits})\n` +
-      `💳 ID: <code>${razorpay_payment_id}</code>`
+      `💰 <b>New Subscription! (Razorpay)</b>\n\n` +
+      `👤 Name: <b>${customerName}</b>\n` +
+      `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
+      `📅 Date: <code>${eventTime}</code>\n` +
+      `💎 Plan: <b>${profile.plan?.toUpperCase() || "FREE"} → ${planInfo.plan.toUpperCase()}</b>\n` +
+      `💲 Price: <b>${planInfo.price}</b> × ${quantity}\n` +
+      `⚡ Credits: <b>${purchasedCredits}</b>\n` +
+      `💳 Session: <code>${razorpay_payment_id}</code>`
     );
 
     if (profile.email) {

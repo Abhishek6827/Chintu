@@ -4,16 +4,16 @@ import Razorpay from "razorpay";
 
 export const dynamic = 'force-dynamic';
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || "",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "",
-});
-
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || "",
+    key_secret: process.env.RAZORPAY_KEY_SECRET || "",
+  });
 
     try {
     const { amount, currency = "INR", planId, quantity = 1, billingCycle = "monthly" } = await req.json();
