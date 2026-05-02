@@ -200,7 +200,7 @@ export default function GlobalHeader() {
         </div>
 
         <div className="flex items-center gap-3 no-drag">
-          {userPlan !== 'free' && (
+          {(!isElectron || userPlan !== 'free') && (
             <AnimatedThemeToggler 
               theme={currentTheme} 
               onToggle={toggleTheme} 
@@ -246,46 +246,7 @@ export default function GlobalHeader() {
             </>
           )}
           
-          {isSignedIn && (
-            <div className={`rounded-lg overflow-hidden flex items-center justify-center transition-all ${hasProfile ? "ring-2 ring-indigo-500/50 shadow-lg shadow-indigo-500/20" : "ring-1 ring-[var(--glass-border)]"}`}>
-              <UserButton 
-                appearance={{ elements: { userButtonAvatarBox: "w-7 h-7 rounded-lg" } }}
-                afterSignOutUrl="/"
-              >
-                <UserButton.MenuItems>
-                  <UserButton.Action 
-                    label="My AI Profile" 
-                    labelIcon={<Sparkles className="w-4 h-4" />} 
-                    onClick={() => {
-                      window.dispatchEvent(new CustomEvent('chintu-open-profile'));
-                    }} 
-                  />
-                  <UserButton.Action 
-                    label="Manage Subscription" 
-                    labelIcon={<CreditCard className="w-4 h-4" />} 
-                    onClick={() => {
-                      const portalUrl = "/api/stripe/portal";
-                      window.location.href = portalUrl;
-                    }} 
-                  />
-                  <UserButton.Action 
-                    label="Support" 
-                    labelIcon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>} 
-                    onClick={() => {
-                      const supportUrl = "https://www.getchintu.com/support";
-                      if (isElectron) (window as any).electronAPI.openExternal(supportUrl);
-                      else window.open(supportUrl, "_blank");
-                    }} 
-                  />
-                  <UserButton.Action 
-                    label="Operation Guide" 
-                    labelIcon={<Sparkles className="w-4 h-4" />} 
-                    onClick={() => setShowOnboarding(true)} 
-                  />
-                </UserButton.MenuItems>
-              </UserButton>
-            </div>
-          )}
+          {/* Profile button removed as requested */}
         </div>
       </div>
       {showOnboarding && <OnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} />}

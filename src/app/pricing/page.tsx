@@ -11,6 +11,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
 import { VideoText } from "@/components/magicui/video-text";
 import ConfirmationMessage from "@/components/animata/feature-cards/confirmation-message";
+import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
+
 
 
 
@@ -41,8 +43,9 @@ const PLANS = [
       "Premium AI Engines",
       "Coding & Detailed Modes",
     ],
-    cta: "Current Plan",
+    cta: "Included",
     disabled: true,
+
   },
   {
     id: "pro",
@@ -252,13 +255,36 @@ export default function PricingPage() {
     }
   };
 
+  const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
+
   const handleMinimize = () => {
-    if (typeof window !== "undefined" && (window as any).electronAPI?.minimize) {
+    if (isElectron && (window as any).electronAPI?.minimize) {
       (window as any).electronAPI.minimize();
     }
   };
 
+
+  const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("dark");
+  
+  useEffect(() => {
+    // Check initial theme
+    if (typeof document !== "undefined") {
+      setCurrentTheme(document.body.classList.contains("light-mode") ? "light" : "dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = currentTheme === "light" ? "dark" : "light";
+    setCurrentTheme(newTheme);
+    if (newTheme === "light") {
+      document.body.classList.add("light-mode");
+    } else {
+      document.body.classList.remove("light-mode");
+    }
+  };
+
   if (!isLoaded) return <div className="h-screen bg-[#f8f9fa] flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
+
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-gray-900 flex flex-col">
@@ -388,11 +414,17 @@ export default function PricingPage() {
           <span className="text-sm font-black tracking-tighter uppercase">Chintu <span className="text-indigo-600">SaaS</span></span>
         </div>
 
-        <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
-          <UserButton afterSignOutUrl="/" />
-          <button onClick={handleMinimize} className="w-7 h-7 rounded-lg flex items-center justify-center bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-900 transition-all active:scale-90">
-            <Minus className="w-3.5 h-3.5" />
-          </button>
+        <div className="flex items-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          <AnimatedThemeToggler 
+            theme={currentTheme} 
+            onToggle={toggleTheme} 
+            className="bg-white border-gray-200 text-gray-400 hover:text-gray-900 hover:border-gray-300 shadow-sm"
+          />
+          {isElectron && (
+            <button onClick={handleMinimize} className="w-7 h-7 rounded-lg flex items-center justify-center bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-900 transition-all active:scale-90">
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -452,12 +484,14 @@ export default function PricingPage() {
         <div className="px-4 sm:px-8 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {PLANS.map((plan) => {
               const isMonthly = billingCycle === "monthly";
-             const totalPrice = (isMonthly ? plan.monthlyPrice : plan.annualPrice) * quantity;
-             const oldPriceTotal = plan.oldPrice ? (isMonthly ? plan.oldPrice : plan.annualPrice * 3) * quantity : null;
-             const totalCredits = plan.credits * quantity;
+              const q = plan.id === "free" ? 1 : quantity;
+              const totalPrice = (isMonthly ? plan.monthlyPrice : plan.annualPrice) * q;
+              const oldPriceTotal = plan.oldPrice ? (isMonthly ? plan.oldPrice : plan.annualPrice * 3) * q : null;
+              const totalCredits = plan.id === "free" ? plan.credits : plan.credits * q;
 
              return (
-            <div key={plan.id} className={`group relative flex flex-col bg-white rounded-[2rem] border-2 transition-all duration-300 ${plan.popular ? "border-indigo-600 shadow-xl shadow-indigo-500/5 scale-105 z-10" : "border-gray-100 shadow-sm"} p-6 sm:p-8 overflow-hidden`}>
+            <div key={plan.id} className={`group relative flex flex-col bg-white rounded-[2rem] border-2 transition-all duration-300 ${plan.popular ? "border-indigo-600 shadow-xl shadow-indigo-500/5 scale-105 z-10" : "border-gray-100 shadow-sm"} p-6 sm:p-8`}>
+
               {plan.id === 'elite' && (
                 <div className="absolute inset-0 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
                   <VideoText src="https://cdn.magicui.design/ocean-small.webm">ELITE</VideoText>
@@ -510,9 +544,9 @@ export default function PricingPage() {
               <InteractiveHoverButton
                 onClick={() => handleSubscribe(plan)}
                 disabled={(currentPlan === 'elite' && (plan.id === 'pro' || plan.id === 'elite')) || (currentPlan === 'pro' && plan.id === 'pro') || loading === plan.id}
-                className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${(currentPlan === plan.id || (currentPlan === 'elite' && plan.id === 'pro')) ? "bg-gray-100 text-gray-400 border border-gray-200" : plan.popular ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-gray-900 text-white"}`}
+                className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${currentPlan === plan.id ? "bg-gray-100 text-gray-400 border border-gray-200" : plan.popular ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-gray-900 text-white"}`}
               >
-                {loading === plan.id ? "Connecting..." : (currentPlan === plan.id || (currentPlan === 'elite' && plan.id === 'pro')) ? "Current Plan" : plan.cta}
+                {loading === plan.id ? "Connecting..." : currentPlan === plan.id ? "Current Plan" : plan.cta}
               </InteractiveHoverButton>
             </div>
           )})}

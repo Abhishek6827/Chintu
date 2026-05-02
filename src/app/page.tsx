@@ -204,7 +204,7 @@ export default function LandingPage() {
         </section>
 
         {/* Scroll Reveal Narrative */}
-        <section className="bg-white">
+        <section className="bg-white relative">
           <TextReveal text="Chintu Intelligence is not just a tool. It is a strategic evolution for your career. Master any challenge. Instantly." />
         </section>
 
