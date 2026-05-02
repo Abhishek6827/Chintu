@@ -98,7 +98,7 @@ export default function PricingPage() {
         const res = await fetch("/api/profile");
         if (res.ok) {
           const data = await res.json();
-          setCurrentPlan(data.plan || "free");
+          setCurrentPlan(data.profile?.plan || "free");
         }
       } catch (err) {
         console.error("Failed to fetch plan:", err);

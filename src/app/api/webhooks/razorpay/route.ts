@@ -55,8 +55,10 @@ export async function POST(req: Request) {
     if (!email) {
       try {
         const { clerkClient } = await import("@clerk/nextjs/server");
-        const clerkUser = await (await clerkClient()).users.getUser(userId);
-        email = clerkUser.emailAddresses[0]?.email_address;
+        const client = await clerkClient();
+        const clerkUser = await client.users.getUser(userId);
+        email = clerkUser.emailAddresses.find(e => e.id === clerkUser.primaryEmailAddressId)?.emailAddress 
+             || clerkUser.emailAddresses[0]?.emailAddress;
       } catch (err) {
         console.error("[Razorpay Webhook] Clerk email fetch failed:", err);
       }

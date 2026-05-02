@@ -14,21 +14,6 @@ const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; price: str
   "elite_annual": { plan: "elite", credits: 12000, price: "₹24990/yr", days: 365 },
 };
 
-async function sendTelegramAlert(message: string) {
-  const botToken = process.env.TELEGRAM_PAYMENT_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!botToken || !chatId) return;
-  try {
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "HTML" }),
-    });
-  } catch (err) {
-    console.error("[Razorpay Verify] Telegram alert failed:", err);
-  }
-}
-
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) {
@@ -111,8 +96,10 @@ export async function POST(req: NextRequest) {
     if (!userEmail) {
       try {
         const { clerkClient } = await import("@clerk/nextjs/server");
-        const clerkUser = await clerkClient().users.getUser(userId);
-        userEmail = clerkUser.emailAddresses[0]?.emailAddress;
+        const client = await clerkClient();
+        const clerkUser = await client.users.getUser(userId);
+        userEmail = clerkUser.emailAddresses.find(e => e.id === clerkUser.primaryEmailAddressId)?.emailAddress 
+                 || clerkUser.emailAddresses[0]?.emailAddress;
         
         // Update profile with email for future use
         if (userEmail) {
