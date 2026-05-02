@@ -121,20 +121,20 @@ export default function PricingPage() {
         return;
       }
 
-      // Calculate price in USD cents (Razorpay takes subunits)
+      // Calculate price in INR (Razorpay takes subunits like paise)
       const basePrice = billingCycle === "monthly" ? plan.monthlyPrice : plan.annualPrice;
-      const totalAmountUSD = Math.round(basePrice * quantity * 100); 
+      const totalAmount = Math.round(basePrice * quantity * USD_TO_INR * 100); 
 
       // 1. Create Order
       const orderRes = await fetch("/api/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          amount: totalAmountUSD, 
+          amount: totalAmount, 
           planId: plan.id, 
           quantity,
           billingCycle,
-          currency: "USD" 
+          currency: "INR" 
         }),
       });
 
@@ -333,6 +333,9 @@ export default function PricingPage() {
                       ${totalPrice.toLocaleString()}
                     </span>
                     <span className="text-gray-400 text-[9px] font-black uppercase">{isMonthly ? "/month" : "/year"}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-0.5 mb-2">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">≈ ₹{(totalPrice * USD_TO_INR).toLocaleString()} INR</span>
                   </div>
                   <div className="inline-flex items-center gap-1.5 bg-indigo-50/50 text-indigo-600 px-2 py-0.5 rounded-md w-fit border border-indigo-100/50">
                     <span className="text-[7px] font-black uppercase tracking-widest">Incl. 2% Gateway Fee</span>
