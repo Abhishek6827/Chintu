@@ -61,12 +61,19 @@ export default function ProfileModal({
 }) {
   const { user } = useUser();
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [userPlan, setUserPlan] = useState("free");
+  const [savedJd, setSavedJd] = useState("");
   const [rawText, setRawText] = useState("");
   const [isRefining, setIsRefining] = useState(false);
   const [error, setError] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [editJson, setEditJson] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  
+  // JD Management State
+  const [isEditingJd, setIsEditingJd] = useState(false);
+  const [jdText, setJdText] = useState("");
+  const [isSavingJd, setIsSavingJd] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -76,10 +83,15 @@ export default function ProfileModal({
         const res = await fetch("/api/profile");
         if (res.ok) {
           const { profile: data } = await res.json();
-          if (data?.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
-            setProfile(data.profile_data);
-          } else {
-            setProfile(null);
+          if (data) {
+            setUserPlan(data.plan || "free");
+            setSavedJd(data.current_jd || "");
+            setJdText(data.current_jd || "");
+            if (data.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
+              setProfile(data.profile_data);
+            } else {
+              setProfile(null);
+            }
           }
         }
       } catch (err) {
@@ -165,6 +177,39 @@ export default function ProfileModal({
       setError("");
     } catch {
       setError("Invalid JSON — please fix the syntax");
+    }
+  };
+
+  const handleSaveJd = async () => {
+    if (!user?.id) return;
+    setIsSavingJd(true);
+    try {
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ current_jd: jdText.trim() })
+      });
+      setSavedJd(jdText.trim());
+      setIsEditingJd(false);
+    } catch (err) {
+      setError("Failed to save Job Description");
+    } finally {
+      setIsSavingJd(false);
+    }
+  };
+
+  const handleDeleteJd = async () => {
+    if (!user?.id) return;
+    try {
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ current_jd: null })
+      });
+      setSavedJd("");
+      setJdText("");
+    } catch (err) {
+      setError("Failed to delete Job Description");
     }
   };
 
@@ -266,6 +311,72 @@ export default function ProfileModal({
               {profile.summary && <p className="text-xs text-[var(--text-dim)] leading-relaxed font-medium">{profile.summary}</p>}
             </div>
 
+            {/* Job Description Subsection */}
+            <div className="space-y-2 pt-2">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">📝 Job Description</p>
+                {userPlan !== "free" && savedJd && !isEditingJd && (
+                  <div className="flex gap-2">
+                    <button onClick={() => setIsEditingJd(true)} className="text-[9px] font-black text-indigo-400 hover:text-indigo-600 uppercase tracking-widest">Edit</button>
+                    <button onClick={handleDeleteJd} className="text-[9px] font-black text-red-400 hover:text-red-600 uppercase tracking-widest">Delete</button>
+                  </div>
+                )}
+              </div>
+              
+              <div className="bg-[var(--input-bg)] rounded-2xl p-4 border border-[var(--glass-border)] group relative">
+                {isEditingJd ? (
+                  <div className="space-y-3">
+                    <textarea 
+                      value={jdText}
+                      onChange={e => setJdText(e.target.value)}
+                      className="w-full h-32 bg-black/20 border border-[var(--glass-border)] rounded-xl p-3 text-xs text-[var(--text-main)] focus:outline-none focus:ring-1 focus:ring-indigo-500/50 resize-none font-medium"
+                      placeholder="Paste Job Description..."
+                    />
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={handleSaveJd}
+                        disabled={isSavingJd}
+                        className="flex-1 py-2 bg-indigo-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-indigo-500 transition-all disabled:opacity-50"
+                      >
+                        {isSavingJd ? "Saving..." : "Save JD"}
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setIsEditingJd(false);
+                          setJdText(savedJd);
+                        }}
+                        className="px-4 py-2 bg-white/5 text-[var(--text-dim)] rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : savedJd ? (
+                  <p className="text-xs text-[var(--text-dim)] leading-relaxed font-medium line-clamp-4">
+                    {savedJd}
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-[var(--text-dim)] opacity-50 font-bold uppercase tracking-widest text-center py-2">
+                    {userPlan === "free" ? "No JD saved." : "No JD saved. You can save one from the landing page."}
+                  </p>
+                )}
+                
+                {userPlan === "free" && savedJd && (
+                   <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px] rounded-2xl">
+                     <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest bg-black/80 px-3 py-1.5 rounded-lg border border-indigo-500/30">
+                       Starter Limit: One-time fill
+                     </p>
+                   </div>
+                )}
+              </div>
+              
+              {userPlan === "free" && (
+                <p className="text-[8px] font-bold text-[var(--text-dim)]/40 uppercase tracking-widest mt-1 ml-1 leading-relaxed">
+                  Upgrade to Pro to edit or delete your Job Description.
+                </p>
+              )}
+            </div>
+
             {/* Experience */}
             {profile.experience?.length > 0 && (
               <div className="space-y-2">
@@ -361,14 +472,36 @@ export default function ProfileModal({
 
             {/* Action buttons */}
             <div className="flex gap-3 pt-2">
-              <button onClick={handleEdit} className="flex-1 py-3.5 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-[var(--glass-border)]">✏️ Edit</button>
+              <button 
+                onClick={handleEdit} 
+                disabled={userPlan === "free"}
+                className={`flex-1 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-[var(--glass-border)] ${userPlan === "free" ? "bg-white/5 text-[var(--text-dim)]/30 cursor-not-allowed" : "bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)]"}`}
+              >
+                ✏️ Edit
+              </button>
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="flex-1 py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-red-500/10"
+                disabled={userPlan === "free"}
+                className={`flex-1 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-red-500/10 ${userPlan === "free" ? "bg-red-500/5 text-red-500/20 cursor-not-allowed" : "bg-red-500/10 hover:bg-red-500/20 text-red-400"}`}
               >
                 🗑 Clear Profile
               </button>
             </div>
+            {userPlan === "free" && (
+              <div className="mt-4 bg-indigo-600/10 border border-indigo-600/20 rounded-2xl p-4 text-center">
+                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 leading-relaxed">Unlock editing & more features</p>
+                <button 
+                  onClick={() => {
+                    const pricingUrl = "https://www.getchintu.com/pricing";
+                    if (isElectron) (window as any).electronAPI.openExternal(pricingUrl);
+                    else window.open(pricingUrl, "_blank");
+                  }}
+                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-indigo-600/20"
+                >
+                  Upgrade Now →
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

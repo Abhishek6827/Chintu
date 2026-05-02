@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Check, Sparkles, Minus, Shield, Plus } from "lucide-react";
+import { Check, Sparkles, Minus, Shield, Plus, HelpCircle } from "lucide-react";
 
 const PLANS = [
   {
@@ -214,8 +214,24 @@ export default function PricingPage() {
               <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300 transform ${billingCycle === "annual" ? "translate-x-6 bg-indigo-600" : "translate-x-0"}`} />
             </button>
             <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${billingCycle === "annual" ? "text-gray-900" : "text-gray-400"}`}>
-              Annual <span className="text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded ml-1 border border-emerald-100">SAVE 20%</span>
+              Annual <span className="text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded ml-1 border border-emerald-100">SAVE UP TO 75%</span>
             </span>
+          </div>
+
+          <div className="mt-8 inline-flex items-center gap-2 bg-gray-50 border border-gray-100 px-4 py-2 rounded-xl group/tooltip relative cursor-help">
+            <HelpCircle className="w-3.5 h-3.5 text-indigo-500" />
+            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Credit System Explained</span>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white p-3 rounded-xl text-[9px] font-bold leading-relaxed opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl z-[60]">
+               <div className="flex justify-between border-b border-white/10 pb-1.5 mb-1.5">
+                 <span>1 TEXT / VOICE CHAT</span>
+                 <span className="text-emerald-400">1 CREDIT</span>
+               </div>
+               <div className="flex justify-between">
+                 <span>1 SCREENSHOT RESPONSE</span>
+                 <span className="text-emerald-400">2 CREDITS</span>
+               </div>
+               <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-gray-900" />
+            </div>
           </div>
         </div>
 
@@ -243,21 +259,27 @@ export default function PricingPage() {
                   <div className="flex items-baseline gap-2">
                     {plan.oldPrice && (
                       <span className="text-gray-400 text-sm line-through decoration-red-500/50 decoration-2 tracking-tighter">
-                        ${plan.oldPrice * quantity}
+                        ${(billingCycle === "monthly" ? plan.oldPrice : (plan.oldPrice * 12)) * quantity}
                       </span>
                     )}
-                    <span className="text-4xl font-black text-gray-900 tracking-tighter">${totalPrice}</span>
-                    <span className="text-gray-400 text-[9px] font-black uppercase">{plan.period}</span>
+                    <span className="text-4xl font-black text-gray-900 tracking-tighter">
+                      ${(billingCycle === "monthly" ? plan.monthlyPrice : plan.annualPrice) * quantity}
+                    </span>
+                    <span className="text-gray-400 text-[9px] font-black uppercase">{billingCycle === "monthly" ? "/month" : "/year"}</span>
                   </div>
                   {plan.oldPrice && (
                     <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md w-fit border border-emerald-100">
                       <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[8px] font-black uppercase tracking-widest">Early Bird - Save {Math.round((1 - plan.monthlyPrice/plan.oldPrice) * 100)}%</span>
+                      <span className="text-[8px] font-black uppercase tracking-widest">
+                        {billingCycle === "monthly" 
+                          ? `Early Bird - Save ${Math.round((1 - plan.monthlyPrice/plan.oldPrice) * 100)}%`
+                          : `Annual Deal - Save ${Math.round((1 - plan.annualPrice/(plan.oldPrice * 12)) * 100)}%`}
+                      </span>
                     </div>
                   )}
                 </div>
                 {billingCycle === "annual" && plan.annualPrice > 0 && (
-                  <p className="text-emerald-500 text-[8px] font-black uppercase mt-1">Billed annually (${plan.annualPrice * quantity})</p>
+                  <p className="text-emerald-500 text-[8px] font-black uppercase mt-1">Billed annually (${plan.annualPrice * quantity}) • Save extra ${(plan.monthlyPrice * 12 - plan.annualPrice) * quantity}</p>
                 )}
               </div>
 

@@ -15,7 +15,11 @@ export default function SetupPage() {
   const [mounted, setMounted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-  const [isInitiating, setIsInitiating] = useState(false);
+   const [isInitiating, setIsInitiating] = useState(false);
+  const [userPlan, setUserPlan] = useState("free");
+  const [isJdLocked, setIsJdLocked] = useState(false);
+  const [saveJd, setSaveJd] = useState(false);
+  const [showJdOnly, setShowJdOnly] = useState(false);
   
   const router = useRouter();
   const isElectron = typeof window !== "undefined" && (!!(window as any).electronAPI || navigator.userAgent.toLowerCase().includes('electron'));
@@ -30,11 +34,28 @@ export default function SetupPage() {
         const res = await fetch("/api/profile");
         if (res.ok) {
           const { profile: profileRow } = await res.json();
-          if (profileRow?.profile_data && Object.keys(profileRow.profile_data).length > 0) {
-            setHasProfile(true);
-            if (profileRow.raw_profile) setAboutMe(profileRow.raw_profile);
-          } else {
-            setHasProfile(false);
+          if (profileRow) {
+            setUserPlan(profileRow.plan || "free");
+            // Logic based on new requirements:
+            // If Profile + JD exist -> go to room
+            // If Profile exists but JD missing -> show JD only
+            if (profileRow.profile_data && Object.keys(profileRow.profile_data).length > 0) {
+              setHasProfile(true);
+              if (profileRow.raw_profile) setAboutMe(profileRow.raw_profile);
+              
+              if (profileRow.current_jd) {
+                setJd(profileRow.current_jd);
+                sessionStorage.setItem("jobDescription", profileRow.current_jd);
+                // Redirect directly if both exist
+                router.push("/room");
+                return;
+              } else {
+                // Profile exists but no JD saved
+                setShowJdOnly(true);
+              }
+            } else {
+              setHasProfile(false);
+            }
           }
         }
       } catch (err) {
@@ -95,11 +116,21 @@ export default function SetupPage() {
       setStatusText("☁️ Syncing configurations to cloud...");
       
       try {
-        await fetch("/api/profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ current_jd: jd.trim() }),
-        });
+        const profileUpdate: any = {};
+        if (saveJd) {
+          profileUpdate.current_jd = jd.trim();
+        }
+        
+        if (Object.keys(profileUpdate).length > 0) {
+          await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(profileUpdate),
+          });
+        }
+        
+        // Save to sessionStorage for immediate use
+        sessionStorage.setItem("jobDescription", jd.trim());
         
         setStatusText("✅ Config Synced. Please open the Desktop App.");
         setTimeout(() => setIsInitiating(false), 2000);
@@ -132,6 +163,17 @@ export default function SetupPage() {
       }
     } else {
       setStatusText("🎯 Synchronizing with neural network...");
+      
+      // Save JD to Supabase if toggle is ON (for electron/desktop too)
+      if (saveJd) {
+        fetch("/api/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ current_jd: jd.trim() }),
+        }).catch(err => console.error("Failed to save JD:", err));
+      }
+      
+      sessionStorage.setItem("jobDescription", jd.trim());
       router.push("/room?jd=" + encodeURIComponent(jd.trim()));
     }
   };
@@ -164,6 +206,12 @@ export default function SetupPage() {
             </div>
             <h1 className="text-3xl font-black tracking-tight uppercase text-gray-900 leading-none">Chintu</h1>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mt-2 text-center">AI Interview Assistant</p>
+            {showJdOnly && (
+               <div className="mt-6 bg-indigo-50 border border-indigo-100 rounded-2xl p-4 animate-in fade-in slide-in-from-top-2">
+                 <p className="text-xs font-bold text-indigo-700">Welcome back!</p>
+                 <p className="text-[10px] text-indigo-600/70 font-bold uppercase tracking-wider mt-1">Enter your Job Description to continue.</p>
+               </div>
+            )}
           </div>
 
           <div className="space-y-5">
@@ -196,26 +244,84 @@ export default function SetupPage() {
                 />
               </div>
             ) : (
-              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 shadow-sm animate-in zoom-in-95 duration-500">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <span className="text-emerald-600 text-lg">✓</span>
+              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex flex-col gap-3 shadow-sm animate-in zoom-in-95 duration-500">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                      <span className="text-emerald-600 text-lg">✓</span>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-emerald-600/60 uppercase tracking-widest">Profile Status</p>
+                      <p className="text-sm font-bold text-emerald-700">Identity Loaded</p>
+                    </div>
+                  </div>
+                  {userPlan !== "free" && (
+                    <button 
+                      onClick={() => {
+                        setHasProfile(false);
+                        setAboutMe("");
+                        setShowJdOnly(false);
+                      }}
+                      className="text-[9px] font-black text-emerald-600 uppercase tracking-widest hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors border border-emerald-200"
+                    >
+                      Reset
+                    </button>
+                  )}
                 </div>
-                <div>
-                  <p className="text-[10px] font-black text-emerald-600/60 uppercase tracking-widest">Profile Status</p>
-                  <p className="text-sm font-bold text-emerald-700">Identity Successfully Loaded</p>
-                </div>
+                {userPlan === "free" && (
+                  <div className="pt-2 border-t border-emerald-100/50">
+                    <p className="text-[8px] font-bold text-emerald-600/60 uppercase tracking-widest leading-relaxed">
+                      Starter plan limited to one-time profile. <button onClick={() => router.push("/pricing")} className="text-emerald-600 underline">Upgrade</button> to edit.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Job Description Section */}
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Job Description</label>
+              <div className="flex items-center justify-between ml-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Job Description</label>
+                {userPlan !== "free" && jd && (
+                  <button 
+                    onClick={() => setJd("")}
+                    className="text-[9px] font-black text-indigo-400 hover:text-indigo-600 uppercase tracking-widest"
+                  >
+                    Clear
+                  </button>
+                )}
+                {isJdLocked && (
+                  <span className="text-[8px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100 flex items-center gap-1">
+                    🔒 STARTER LIMIT
+                  </span>
+                )}
+              </div>
               <textarea
                 value={jd}
                 onChange={(e) => setJd(e.target.value)}
-                placeholder="Paste the job description you are interviewing for..."
-                className="w-full h-40 bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none placeholder:text-gray-300 shadow-sm"
+                readOnly={isJdLocked}
+                placeholder={isJdLocked ? "Upgrade to Pro to change Job Description" : "Paste the job description you are interviewing for..."}
+                className={`w-full h-40 bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none placeholder:text-gray-300 shadow-sm ${isJdLocked ? "opacity-60 cursor-not-allowed bg-gray-50" : ""}`}
               />
+              
+              <div className="flex items-center gap-2 mt-3 px-1">
+                <button 
+                  onClick={() => setSaveJd(!saveJd)}
+                  className={`w-10 h-5 rounded-full transition-all relative ${saveJd ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                >
+                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${saveJd ? 'left-6' : 'left-1'}`} />
+                </button>
+                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Save JD for future sessions?</span>
+              </div>
+
+              {isJdLocked && (
+                <button 
+                  onClick={() => router.push("/pricing")}
+                  className="w-full py-2 text-[8px] font-black text-indigo-600 uppercase tracking-widest hover:bg-indigo-50 rounded-lg transition-colors"
+                >
+                  ✨ Unlock Unlimited JDs with Pro
+                </button>
+              )}
             </div>
 
             {/* Action Button */}
