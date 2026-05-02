@@ -58,7 +58,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
       "llama-3.3-70b": "Standard Engine",
       "gpt-oss-120b": "Pro Engine",
       "qwen3-coder": "Coding Specialist",
-      "nemotron-3-120b": "Titan Engine",
+      "nemotron-3": "Titan Engine",
       "qwen3.6": "Turbo Engine",
       "scout": "Vision Engine",
       "llama-4": "Vision Engine"

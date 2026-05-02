@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useUser, UserButton } from "@clerk/nextjs";
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
+import { useThemeToggle } from "@/hooks/useThemeToggle";
 import GlobalFooter from '@/components/GlobalFooter';
 import ContactForm from '@/components/ContactForm';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
@@ -64,34 +65,9 @@ export default function LandingPage() {
     }
   }, [isLoaded, isElectron, isSignedIn, router]);
 
-  const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("dark");
+  const { currentTheme, toggleTheme } = useThemeToggle();
 
-  useEffect(() => {
-    if (typeof document !== "undefined") {
-      setCurrentTheme(document.body.classList.contains("light-mode") ? "light" : "dark");
-    }
-  }, []);
 
-  const toggleTheme = async () => {
-    const newTheme = currentTheme === "light" ? "dark" : "light";
-    setCurrentTheme(newTheme);
-    if (newTheme === "light") {
-      document.body.classList.add("light-mode");
-    } else {
-      document.body.classList.remove("light-mode");
-    }
-    if (isSignedIn) {
-      try {
-        await fetch("/api/profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ theme: newTheme })
-        });
-      } catch (err) {
-        console.error("Failed to persist theme:", err);
-      }
-    }
-  };
 
   useEffect(() => {
     const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
@@ -106,13 +82,13 @@ export default function LandingPage() {
   }, []);
 
   if (mounted && isElectron) return (
-    <div className="h-screen bg-[#f8f9fa] flex items-center justify-center">
+    <div className="h-screen bg-[var(--bg-app)] flex items-center justify-center">
       <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] text-gray-900 selection:bg-indigo-100 flex flex-col relative overflow-x-hidden" style={{ WebkitAppRegion: 'drag' } as any}>
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-indigo-500/20 flex flex-col relative overflow-x-hidden" style={{ WebkitAppRegion: 'drag' } as any}>
 
       {/* Background Elements */}
       <div className="fixed inset-0 pointer-events-none z-0">
@@ -121,14 +97,14 @@ export default function LandingPage() {
       </div>
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-[100] bg-white/70 backdrop-blur-2xl border-b border-gray-100 px-6 py-4">
+      <nav className="sticky top-0 z-[100] bg-[var(--bg-app)]/70 backdrop-blur-2xl border-b border-[var(--glass-border)] px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 no-drag" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <div className="flex items-center justify-center w-8 h-8 bg-indigo-500/10 rounded-xl border border-indigo-500/20 shadow-md overflow-hidden p-1.5 hover:scale-110 transition-transform">
               <Image src="https://www.getchintu.com/icon.png" alt="Chintu" className="w-full h-full object-contain" width={32} height={32} unoptimized />
             </div>
-            <span className="text-xl font-black tracking-tighter uppercase text-gray-900">
-              Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">AI</span>
+            <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)]">
+              Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">AI</span>
             </span>
           </div>
 
@@ -138,7 +114,7 @@ export default function LandingPage() {
                 <Link href="/sign-in" className="hidden sm:block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-indigo-600 transition-colors px-4">
                   Portal Login
                 </Link>
-                <Link href="/sign-up" className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3.5 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+                <Link href="/sign-up" className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3.5 rounded-xl shadow-lg shadow-indigo-500/40 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
                   Get Started <ArrowRight className="w-3 h-3" />
                 </Link>
               </>
@@ -150,9 +126,9 @@ export default function LandingPage() {
                       <AnimatedThemeToggler
                         theme={currentTheme}
                         onToggle={toggleTheme}
-                        className="bg-white border-indigo-100 text-indigo-400 hover:text-indigo-600 shadow-sm"
+                        className="bg-[var(--panel-bg)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)] shadow-sm"
                       />
-                      <div className="h-6 w-[1px] bg-indigo-200/50 mx-0.5" />
+                      <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
                       <div className="flex flex-col items-end">
                         <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Energy Sync</span>
                         <span className="text-[11px] font-black text-indigo-600 tracking-tight flex items-center gap-1">
@@ -166,9 +142,9 @@ export default function LandingPage() {
                     </div>
                     <Link
                       href="/setup"
-                      className="relative group overflow-hidden bg-white border-2 border-indigo-100 text-indigo-600 text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3 rounded-xl hover:border-indigo-600 hover:bg-indigo-50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                      className="relative group overflow-hidden bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-indigo-400 text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3 rounded-xl hover:border-indigo-500 hover:bg-indigo-500/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                     >
-                      Enter The App <Sparkles className="w-3 h-3 fill-indigo-600" />
+                      Enter The App <Sparkles className="w-3 h-3 fill-indigo-400" />
                     </Link>
                   </>
                 )}
@@ -193,15 +169,15 @@ export default function LandingPage() {
 
         {/* Hero Section */}
         <section className="min-h-[90vh] flex flex-col items-center justify-center text-center px-6 pt-24 pb-32 max-w-6xl mx-auto w-full">
-          <div className="reveal inline-flex items-center gap-2 px-5 py-2 bg-indigo-50 border border-indigo-100 rounded-full mb-10 transition-all duration-1000 shadow-sm">
-            <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
-            <span className="text-[11px] font-black text-indigo-600 uppercase tracking-[0.3em]">v2.5 Hyper-Intelligence Active</span>
+          <div className="reveal inline-flex items-center gap-2 px-5 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-10 transition-all duration-1000 shadow-sm">
+            <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
+            <span className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.3em]">v2.5 Hyper-Intelligence Active</span>
           </div>
-          <h1 className="reveal text-6xl sm:text-8xl lg:text-9xl font-black tracking-tighter text-gray-900 mb-8 leading-[0.85] transition-all duration-1000 delay-200 uppercase">
+          <h1 className="reveal text-6xl sm:text-8xl lg:text-9xl font-black tracking-tighter text-[var(--text-main)] mb-8 leading-[0.85] transition-all duration-1000 delay-200 uppercase">
             Destroy Every <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500">Assessment.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">Assessment.</span>
           </h1>
-          <p className="reveal text-sm sm:text-xl text-gray-400 mb-14 max-w-3xl leading-relaxed font-bold uppercase tracking-widest transition-all duration-1000 delay-400">
+          <p className="reveal text-sm sm:text-xl text-[var(--text-dim)] mb-14 max-w-3xl leading-relaxed font-bold uppercase tracking-widest transition-all duration-1000 delay-400">
             Interviews, Global Exams, MCQs, or Technical Tests. <br className="hidden sm:block" />
             Capture any problem. Get the perfect solution. Instantly.
           </p>
@@ -215,19 +191,19 @@ export default function LandingPage() {
                 Join the Revolution <ArrowRight className="w-5 h-5" />
               </Link>
             )}
-            <Link href="/pricing" className="px-16 py-7 bg-white border-2 border-gray-100 text-gray-400 font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl hover:border-indigo-500/50 hover:text-indigo-600 hover:bg-indigo-50/10 transition-all flex items-center justify-center">
+            <Link href="/pricing" className="px-16 py-7 bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-[var(--text-dim)] font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl hover:border-indigo-500/50 hover:text-indigo-400 hover:bg-indigo-500/5 transition-all flex items-center justify-center">
               View Access Tiers
             </Link>
           </div>
         </section>
 
         {/* Text Reveal */}
-        <section className="bg-white relative">
+        <section className="bg-[var(--bg-app)] relative">
           <TextReveal text="Chintu Intelligence is not just a tool. It is a strategic evolution for your career. Master any challenge. Instantly." />
         </section>
 
         {/* Strategic Intelligence Hub */}
-        <section className="py-24 px-6 bg-white relative">
+        <section className="py-24 px-6 bg-[var(--bg-app)] relative">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-12">
               <div className="flex-1 space-y-6">
@@ -244,42 +220,42 @@ export default function LandingPage() {
                     { icon: BookOpen, label: "Memory Bank", desc: "Session persistence" },
                     { icon: MousePointer2, label: "Direct Action", desc: "Click-to-execute logic" }
                   ].map((item, i) => (
-                    <div key={i} className="p-4 rounded-2xl border border-gray-100 hover:border-indigo-200 transition-all group">
-                      <item.icon className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 mb-2 transition-colors" />
-                      <p className="text-xs font-black uppercase tracking-tight">{item.label}</p>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase">{item.desc}</p>
+                    <div key={i} className="p-4 rounded-2xl border border-[var(--glass-border)] bg-[var(--panel-bg)] hover:border-indigo-500/50 transition-all group">
+                      <item.icon className="w-5 h-5 text-[var(--text-dim)] group-hover:text-indigo-400 mb-2 transition-colors" />
+                      <p className="text-xs font-black uppercase tracking-tight text-[var(--text-main)]">{item.label}</p>
+                      <p className="text-[10px] text-[var(--text-dim)] font-bold uppercase">{item.desc}</p>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="flex-1 bg-gray-50 rounded-[3rem] p-8 border border-gray-100 relative overflow-hidden">
+              <div className="flex-1 bg-[var(--panel-bg)] rounded-[3rem] p-8 border border-[var(--glass-border)] relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.05),transparent)] animate-pulse" />
                 <div className="relative z-10 space-y-6">
-                  <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
+                  <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)]">
                     <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
                       <Globe className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600">Global Sync</p>
-                      <p className="text-xs font-bold text-gray-500">Connected to Tactical Grid</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Global Sync</p>
+                      <p className="text-xs font-bold text-[var(--text-dim)]">Connected to Tactical Grid</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-gray-100 ml-8">
+                  <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)] ml-8">
                     <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
                       <Check className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Verified Intel</p>
-                      <p className="text-xs font-bold text-gray-500">99.9% Accuracy Rating</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Verified Intel</p>
+                      <p className="text-xs font-bold text-[var(--text-dim)]">99.9% Accuracy Rating</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
+                  <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)]">
                     <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
                       <PlayCircle className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-amber-600">Auto Pilot</p>
-                      <p className="text-xs font-bold text-gray-500">Autonomous Reasoning</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">Auto Pilot</p>
+                      <p className="text-xs font-bold text-[var(--text-dim)]">Autonomous Reasoning</p>
                     </div>
                   </div>
                 </div>
@@ -310,9 +286,9 @@ export default function LandingPage() {
                 { title: "Live Tests", desc: "Time-critical assessments & hackathons." },
                 { title: "Data Science", desc: "Statistical modeling & data interpretation." }
               ].map((item, i) => (
-                <div key={i} className="reveal bg-white/5 border border-white/10 p-8 rounded-[2.5rem] hover:bg-white/10 hover:border-indigo-500/50 transition-all duration-500 group">
+                <div key={i} className="reveal bg-[var(--panel-bg)] border border-[var(--glass-border)] p-8 rounded-[2.5rem] hover:bg-[var(--glass-bg)] hover:border-indigo-500/50 transition-all duration-500 group">
                   <h4 className="font-black text-[12px] uppercase tracking-widest text-indigo-400 mb-3 group-hover:text-white transition-colors">{item.title}</h4>
-                  <p className="text-[11px] text-gray-500 font-bold uppercase tracking-tight leading-relaxed group-hover:text-gray-300 transition-colors">{item.desc}</p>
+                  <p className="text-[11px] text-[var(--text-dim)] font-bold uppercase tracking-tight leading-relaxed group-hover:text-[var(--text-main)] transition-colors">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -323,19 +299,19 @@ export default function LandingPage() {
         <section className="py-40 px-6 max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
             <div className="reveal transition-all duration-1000">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 border border-purple-100 rounded-full mb-8">
-                <Zap className="w-4 h-4 text-purple-600 fill-current" />
-                <span className="text-[10px] font-black text-purple-600 uppercase tracking-[0.3em]">Snapshot Intelligence</span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-8">
+                <Zap className="w-4 h-4 text-purple-400 fill-current" />
+                <span className="text-[10px] font-black text-purple-400 uppercase tracking-[0.3em]">Snapshot Intelligence</span>
               </div>
-              <h2 className="text-5xl sm:text-7xl font-black tracking-tighter text-gray-900 mb-8 uppercase leading-[0.9]">
-                See it. <br /><span className="text-purple-600">Solve it.</span>
+              <h2 className="text-5xl sm:text-7xl font-black tracking-tighter text-[var(--text-main)] mb-8 uppercase leading-[0.9]">
+                See it. <br /><span className="text-purple-400">Solve it.</span>
               </h2>
-              <p className="text-gray-400 font-bold uppercase tracking-widest leading-relaxed mb-10 max-w-md text-sm sm:text-base">
+              <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest leading-relaxed mb-10 max-w-md text-sm sm:text-base">
                 Stuck on a complex MCQ or a difficult equation? Just take a screenshot. Our vision engine processes the context, identifies the core problem, and generates the exact answer in milliseconds.
               </p>
               <ul className="space-y-5">
                 {['Instant OCR Processing', 'Multi-Step Logical Proofs', 'Source Verification', 'Context-Aware Hints'].map((li, i) => (
-                  <li key={i} className="flex items-center gap-4 text-[11px] font-black uppercase tracking-widest text-gray-600">
+                  <li key={i} className="flex items-center gap-4 text-[11px] font-black uppercase tracking-widest text-[var(--text-dim)]">
                     <div className="w-6 h-6 rounded-lg bg-purple-600 text-white flex items-center justify-center text-[10px]">✓</div>
                     {li}
                   </li>
@@ -344,13 +320,13 @@ export default function LandingPage() {
             </div>
             <div className="reveal relative transition-all duration-1000 delay-300">
               <div className="absolute -inset-4 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-[4rem] blur-3xl opacity-20 animate-pulse" />
-              <div className="relative bg-white border border-gray-100 p-4 rounded-[4rem] shadow-2xl">
-                <div className="bg-[#0a0a0c] rounded-[3rem] aspect-video flex items-center justify-center overflow-hidden border border-white/5">
+              <div className="relative bg-[var(--panel-bg)] border border-[var(--glass-border)] p-4 rounded-[4rem] shadow-2xl">
+                <div className="bg-[var(--bg-app)] rounded-[3rem] aspect-video flex items-center justify-center overflow-hidden border border-[var(--glass-border)]">
                   <div className="text-center px-10">
-                    <div className="w-20 h-20 bg-indigo-500/20 rounded-full mx-auto mb-6 flex items-center justify-center">
+                    <div className="w-20 h-20 bg-indigo-500/10 rounded-full mx-auto mb-6 flex items-center justify-center">
                       <Target className="w-10 h-10 text-indigo-400" />
                     </div>
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em]">Vision Engine Processing...</p>
+                    <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.5em]">Vision Engine Processing...</p>
                   </div>
                 </div>
               </div>
@@ -361,33 +337,33 @@ export default function LandingPage() {
         <TestimonialsSection />
 
         {/* Features Grid */}
-        <section className="py-32 px-6 bg-indigo-50/30 border-y border-gray-100">
+        <section className="py-32 px-6 bg-[var(--bg-app)] border-y border-[var(--glass-border)]">
           <div className="max-w-7xl mx-auto">
             <div className="reveal text-center mb-24 transition-all duration-1000">
-              <h2 className="text-xs font-black text-indigo-600 uppercase tracking-[0.5em] mb-4">Tactical Superiority</h2>
-              <p className="text-4xl sm:text-5xl font-black tracking-tight text-gray-900 uppercase">Engineered for Success</p>
+              <h2 className="text-xs font-black text-indigo-400 uppercase tracking-[0.5em] mb-4">Tactical Superiority</h2>
+              <p className="text-4xl sm:text-5xl font-black tracking-tight text-[var(--text-main)] uppercase">Engineered for Success</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <div className="reveal bg-white p-12 rounded-[4rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 group">
-                <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-emerald-500/5">
+              <div className="reveal bg-[var(--panel-bg)] p-12 rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 group">
+                <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-emerald-500/5">
                   <Shield className="w-8 h-8" />
                 </div>
-                <h3 className="font-black uppercase tracking-[0.2em] text-[13px] mb-6 text-gray-900">Ghost Protocol</h3>
-                <p className="text-[13px] text-gray-400 font-bold uppercase tracking-wide leading-relaxed">Advanced hardware-level abstraction that keeps your AI companion invisible to all proctoring and monitoring systems.</p>
+                <h3 className="font-black uppercase tracking-[0.2em] text-[13px] mb-6 text-[var(--text-main)]">Ghost Protocol</h3>
+                <p className="text-[13px] text-[var(--text-dim)] font-bold uppercase tracking-wide leading-relaxed">Advanced hardware-level abstraction that keeps your AI companion invisible to all proctoring and monitoring systems.</p>
               </div>
-              <div className="reveal bg-white p-12 rounded-[4rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 delay-200 group">
-                <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-indigo-500/5">
+              <div className="reveal bg-[var(--panel-bg)] p-12 rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 delay-200 group">
+                <div className="w-16 h-16 bg-indigo-500/10 text-indigo-500 rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-indigo-500/5">
                   <Cpu className="w-8 h-8" />
                 </div>
-                <h3 className="font-black uppercase tracking-[0.2em] text-[13px] mb-6 text-gray-900">Quantum Synthesis</h3>
-                <p className="text-[13px] text-gray-400 font-bold uppercase tracking-wide leading-relaxed">Proprietary LLM orchestration that combines multiple specialized models for zero-error technical and logical accuracy.</p>
+                <h3 className="font-black uppercase tracking-[0.2em] text-[13px] mb-6 text-[var(--text-main)]">Quantum Synthesis</h3>
+                <p className="text-[13px] text-[var(--text-dim)] font-bold uppercase tracking-wide leading-relaxed">Proprietary LLM orchestration that combines multiple specialized models for zero-error technical and logical accuracy.</p>
               </div>
-              <div className="reveal bg-white p-12 rounded-[4rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 delay-400 group">
-                <div className="w-16 h-16 bg-purple-50 text-purple-600 rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-purple-500/5">
+              <div className="reveal bg-[var(--panel-bg)] p-12 rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 delay-400 group">
+                <div className="w-16 h-16 bg-purple-500/10 text-purple-500 rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-purple-500/5">
                   <Sparkles className="w-8 h-8" />
                 </div>
-                <h3 className="font-black uppercase tracking-[0.2em] text-[13px] mb-6 text-gray-900">Stealth Overlay</h3>
-                <p className="text-[13px] text-gray-400 font-bold uppercase tracking-wide leading-relaxed">Ultra-minimalist floating interface that stays exactly where you need it, hidden from screenshots and screen recordings.</p>
+                <h3 className="font-black uppercase tracking-[0.2em] text-[13px] mb-6 text-[var(--text-main)]">Stealth Overlay</h3>
+                <p className="text-[13px] text-[var(--text-dim)] font-bold uppercase tracking-wide leading-relaxed">Ultra-minimalist floating interface that stays exactly where you need it, hidden from screenshots and screen recordings.</p>
               </div>
             </div>
           </div>
@@ -397,36 +373,36 @@ export default function LandingPage() {
         <section className="py-40 px-6 max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
             <div className="reveal transition-all duration-1000">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full mb-8">
-                <MessageSquare className="w-4 h-4 text-indigo-600" />
-                <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">Support Command</span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-8">
+                <MessageSquare className="w-4 h-4 text-indigo-400" />
+                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Support Command</span>
               </div>
-              <h2 className="text-5xl sm:text-6xl font-black tracking-tighter text-gray-900 mb-8 uppercase leading-[0.9]">
-                Deploy <br /><span className="text-indigo-600">Intelligence.</span>
+              <h2 className="text-5xl sm:text-6xl font-black tracking-tighter text-[var(--text-main)] mb-8 uppercase leading-[0.9]">
+                Deploy <br /><span className="text-indigo-400">Intelligence.</span>
               </h2>
-              <p className="text-gray-400 font-bold uppercase tracking-widest leading-relaxed mb-12 max-w-md text-sm sm:text-base">
+              <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest leading-relaxed mb-12 max-w-md text-sm sm:text-base">
                 Have questions about deployment or strategy? Our elite support team is active 24/7 to ensure your total success.
               </p>
               <div className="space-y-8">
                 <div className="flex items-center gap-5">
-                  <div className="w-12 h-12 rounded-2xl bg-white border border-gray-100 flex items-center justify-center shadow-xl shadow-indigo-500/5 text-xl">📧</div>
+                  <div className="w-12 h-12 rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] flex items-center justify-center shadow-xl shadow-indigo-500/5 text-xl">📧</div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest mb-1">Secure Comms</span>
-                    <span className="text-[13px] font-black uppercase tracking-[0.1em] text-gray-700">contact@getchintu.com</span>
+                    <span className="text-[9px] font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Secure Comms</span>
+                    <span className="text-[13px] font-black uppercase tracking-[0.1em] text-[var(--text-main)]">contact@getchintu.com</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-5">
-                  <div className="w-12 h-12 rounded-2xl bg-white border border-gray-100 flex items-center justify-center shadow-xl shadow-indigo-500/5 text-xl">🌐</div>
+                  <div className="w-12 h-12 rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] flex items-center justify-center shadow-xl shadow-indigo-500/5 text-xl">🌐</div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest mb-1">Status</span>
+                    <span className="text-[9px] font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Status</span>
                     <span className="text-[13px] font-black uppercase tracking-[0.1em] text-emerald-500">Global Infrastructure Active</span>
                   </div>
                 </div>
               </div>
             </div>
             <div className="reveal transition-all duration-1000 delay-300">
-              <div className="bg-white p-10 sm:p-16 rounded-[4.5rem] border border-gray-100 shadow-[0_50px_100px_-20px_rgba(79,70,229,0.12)] relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-[4.5rem] -mr-10 -mt-10" />
+              <div className="bg-[var(--panel-bg)] p-10 sm:p-16 rounded-[4.5rem] border border-[var(--glass-border)] shadow-[0_50px_100px_-20px_rgba(79,70,229,0.12)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-[4.5rem] -mr-10 -mt-10" />
                 <ContactForm />
               </div>
             </div>
@@ -438,20 +414,20 @@ export default function LandingPage() {
       <MarqueeReviews />
 
       {/* Community Ecosystem Bar */}
-      <div className="bg-white py-12 px-6 border-t border-gray-100">
+      <div className="bg-[var(--bg-app)] py-12 px-6 border-t border-[var(--glass-border)]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 rounded-2xl border border-indigo-100">
-              <Star className="w-3.5 h-3.5 text-indigo-600 fill-indigo-600" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">Rated #1 Tactical AI</span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
+              <Star className="w-3.5 h-3.5 text-indigo-400 fill-indigo-400" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Rated #1 Tactical AI</span>
             </div>
             <div className="flex items-center -space-x-2">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="w-7 h-7 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center overflow-hidden">
+                <div key={i} className="w-7 h-7 rounded-full border-2 border-[var(--bg-app)] bg-[var(--panel-bg)] flex items-center justify-center overflow-hidden">
                   <Image src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" width={28} height={28} unoptimized />
                 </div>
               ))}
-              <div className="w-7 h-7 rounded-full border-2 border-white bg-indigo-600 flex items-center justify-center text-[8px] font-black text-white">+10k</div>
+              <div className="w-7 h-7 rounded-full border-2 border-[var(--bg-app)] bg-indigo-600 flex items-center justify-center text-[8px] font-black text-white">+10k</div>
             </div>
           </div>
           <div className="flex items-center gap-8">

@@ -1,5 +1,7 @@
 const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, desktopCapturer, session } = require("electron");
 const log = require("electron-log");
+const path = require("path");
+const fs = require("fs");
 
 // Configure logging first
 log.transports.file.level = "info";
@@ -39,8 +41,6 @@ if (process.defaultApp) {
 }
 // ─────────────────────────────────────────────────────────────
 
-const path = require("path");
-const fs = require("fs");
 const { createServer } = require("./server");
 
 // Load token as early as possible for auto-updater
@@ -194,17 +194,35 @@ function hideWindow() {
 }
 
 // ─── Helper: Show window (visible to user, STILL invisible to screen capture) ─
-function showWindow() {
+function showStealthWindow() {
   if (!mainWindow) return;
   isHidden = false;
-  mainWindow.setContentProtection(false); // Disable protection before showing
-  mainWindow.setSkipTaskbar(false);        // Show in taskbar before focus
-  mainWindow.show();                       // Bring to front and focus
-  mainWindow.setOpacity(1);                // Make visible
+  mainWindow.setContentProtection(true); 
+  mainWindow.setSkipTaskbar(true);
+  mainWindow.show();
+  mainWindow.setOpacity(1);
   mainWindow.setIgnoreMouseEvents(false);
   mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
   mainWindow.webContents.send("window-hidden-change", false);
+  mainWindow.webContents.send("stealth-mode-change", true);
 }
+
+// ─── Helper: Show window in NORMAL MODE (Visible to everyone, in taskbar) ──
+function showNormalWindow() {
+  if (!mainWindow) return;
+  isHidden = false;
+  mainWindow.setContentProtection(false); 
+  mainWindow.setSkipTaskbar(false);
+  mainWindow.show();
+  mainWindow.setOpacity(1);
+  mainWindow.setIgnoreMouseEvents(false);
+  mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
+  mainWindow.webContents.send("window-hidden-change", false);
+  mainWindow.webContents.send("stealth-mode-change", false);
+}
+
+// Re-map old showWindow for compatibility if needed, or just use specific ones
+const showWindow = showStealthWindow; 
 
 // ─── Helper: Bring window to front WITHOUT changing hidden state ─
 function bringToFront() {
@@ -239,10 +257,7 @@ function createWindow() {
 
   mainWindow.setIcon(path.join(__dirname, "icon.png"));
 
-  mainWindow.once("ready-to-show", () => {
-    if (isHidden) hideWindow();
-    else showWindow();
-  });
+  // Initial visibility is handled manually below
 
   mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
@@ -251,10 +266,13 @@ function createWindow() {
   mainWindow.setContentProtection(true);
   mainWindow.setSkipTaskbar(true);
   
-  // ─── Set initial hidden state (Default to HIDDEN for stealth) ───
-  isHidden = true;
+  // ─── Set initial state: Visible on screen, HIDDEN from taskbar, and PROTECTED from screen capture ───
+  isHidden = false;
+  mainWindow.show();
+  mainWindow.setOpacity(1);
+  mainWindow.setSkipTaskbar(true);
   mainWindow.setContentProtection(true);
-  mainWindow.webContents.send("window-hidden-change", true);
+  mainWindow.webContents.send("stealth-mode-change", true);
 
   // ─── System Audio Loopback ──────────────────────────────
   session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
@@ -395,8 +413,12 @@ function createTray() {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: "Bring to Front",
-      click: () => bringToFront(),
+      label: "Show Chintu",
+      click: () => showWindow(),
+    },
+    {
+      label: "Hide Chintu",
+      click: () => hideWindow(),
     },
     { type: "separator" },
     {
@@ -411,8 +433,11 @@ function createTray() {
   tray.setToolTip("Chintu");
   tray.setContextMenu(contextMenu);
 
-  // Tray click only brings window to front — NEVER changes hidden state
-  tray.on("click", () => bringToFront());
+  // Tray click toggles visibility (Always restores to STEALTH)
+  tray.on("click", () => {
+    if (isHidden) showStealthWindow();
+    else hideWindow();
+  });
 }
 
 // ─── IPC handlers ────────────────────────────────────────
@@ -421,11 +446,31 @@ ipcMain.on("window-minimize", () => mainWindow?.minimize());
 // Close button → invisible hide (NOT minimize, NOT taskbar)
 ipcMain.on("window-close", () => hideWindow());
 
-// Hide/Unhide toggle from renderer
+// Hide/Unhide toggle from renderer (Visible vs Invisible to USER)
 ipcMain.handle("window-hide-toggle", () => {
   if (!mainWindow) return isHidden;
-  if (!isHidden) hideWindow();   // opacity=0, protection ON, taskbar hidden
-  else showWindow();              // opacity=userOpacity, protection OFF, taskbar visible
+  
+  if (isHidden) {
+    showStealthWindow();
+  } else {
+    hideWindow();
+  }
+  
+  return isHidden;
+});
+
+// Ghost Mode toggle from renderer (Protected vs Normal)
+ipcMain.handle("window-ghost-toggle", () => {
+  if (!mainWindow) return isHidden;
+  
+  const isProtected = mainWindow.isContentProtected();
+  
+  if (isProtected) {
+    showNormalWindow();
+  } else {
+    showStealthWindow();
+  }
+  
   return isHidden;
 });
 

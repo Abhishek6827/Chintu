@@ -434,7 +434,6 @@ Rules:
       if (!stream) {
         // ─── OpenRouter fallback ────────────────────────────────
         if (openRouterKey) {
-          console.log(`[/api/answer] 🔄 All Groq keys failed. Trying OpenRouter...`);
           try {
             const openrouter = new OpenAI({
               baseURL: "https://openrouter.ai/api/v1",

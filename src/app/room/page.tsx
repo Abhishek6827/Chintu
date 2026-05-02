@@ -97,10 +97,19 @@ export default function RoomPage() {
   const [selectedModel, setSelectedModel] = useState<ModelKey>("llama-3.3-70b");
   const selectedModelRef = useRef<ModelKey>("llama-3.3-70b");
   const [userPlan, setUserPlan] = useState<string>("free");
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const stopGeneration = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setStatus("idle");
+    setAnswers(prev => prev.map(a => a.isStreaming ? { ...a, isStreaming: false } : a));
+  }, []);
 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
-  const [isWindowHidden, setIsWindowHidden] = useState(false);
-  const [credits, setCredits] = useState<number | null>(null);
+  const [isStealthMode, setIsStealthMode] = useState(true);
 
   // ─── Vision conversation history ──────────────────────────
   // Keeps track of previous screenshot exchanges so the model
@@ -179,9 +188,9 @@ export default function RoomPage() {
     try {
       const res = await fetch("/api/profile");
       if (res.ok) {
-        const { profile } = await res.json();
-        if (profile) {
-          setCredits(profile.credits ?? null);
+        const data = await res.json();
+        if (data.profile) {
+          setUserPlan((data.profile.plan || 'free').toLowerCase());
         }
       }
     } catch (err) {
@@ -237,7 +246,6 @@ export default function RoomPage() {
 
             const plan = (profile.plan || 'free').toLowerCase();
             setUserPlan(plan);
-            setCredits(profile.credits ?? null);
 
             // Plan Gating Logic
             if (plan === 'free') {
@@ -274,6 +282,12 @@ export default function RoomPage() {
   const saveToHistory = useCallback(async () => {
     if (answers.length === 0 || !user?.id) return;
     
+    // Only save history for Pro and Elite plans
+    if (userPlan === "free") {
+      console.log("History saving skipped: Free plan");
+      return;
+    }
+    
     const newSession: HistorySession = {
       id: Date.now().toString(),
       timestamp: Date.now(),
@@ -285,12 +299,20 @@ export default function RoomPage() {
     setHistory(updatedHistory);
     
     // Save to API via secure backend
-    await fetch('/api/profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ history: updatedHistory })
-    });
-  }, [answers, history, user?.id]);
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ history: updatedHistory })
+      });
+      
+      if (!res.ok && isElectron) {
+        (window as any).electronAPI.log(`History Save Failed: ${res.status}`);
+      }
+    } catch (err) {
+      if (isElectron) (window as any).electronAPI.log(`History Save Error: ${err}`);
+    }
+  }, [answers, history, user?.id, userPlan]);
 
   const clearHistory = async () => {
     if (!user?.id) return;
@@ -344,26 +366,25 @@ export default function RoomPage() {
     }
     if (isElectron && (window as any).electronAPI?.getHidden) {
       (window as any).electronAPI.getHidden().then((hidden: boolean) => {
-        setIsWindowHidden(hidden);
+        // setShowUnhidePrompt(hidden); // If needed
       });
     }
   }, []);
 
-  const handleHide = useCallback(async () => {
+
+  const handleGhostToggle = useCallback(async () => {
     if (isElectron) {
-      if (isWindowHidden) {
+      if (isStealthMode) {
         setShowUnhidePrompt(true);
       } else {
-        const hidden = await (window as any).electronAPI.hideToggle();
-        setIsWindowHidden(hidden);
+        await (window as any).electronAPI.ghostToggle();
       }
     }
-  }, [isWindowHidden]);
+  }, [isStealthMode]);
 
   useEffect(() => {
     if (isElectron && (window as any).electronAPI?.onHiddenChange) {
       return (window as any).electronAPI.onHiddenChange((hidden: boolean) => {
-        setIsWindowHidden(hidden);
         if (!hidden) {
           setShowUnhidePrompt(false); // Close prompt if unhidden via other means
         }
@@ -374,7 +395,7 @@ export default function RoomPage() {
   useEffect(() => {
     const handleOpenProfile = () => setShowProfile(true);
     const handleUnhideRequest = () => setShowUnhidePrompt(true);
-    const handleToggleGhost = () => handleHide();
+    const handleToggleGhost = () => handleGhostToggle();
 
     window.addEventListener('chintu-open-profile', handleOpenProfile);
     window.addEventListener('chintu-unhide-request', handleUnhideRequest);
@@ -385,7 +406,15 @@ export default function RoomPage() {
       window.removeEventListener('chintu-unhide-request', handleUnhideRequest);
       window.removeEventListener('chintu-toggle-ghost', handleToggleGhost);
     };
-  }, [handleHide]);
+  }, [handleGhostToggle]);
+
+  useEffect(() => {
+    if (isElectron && (window as any).electronAPI?.onStealthChange) {
+      return (window as any).electronAPI.onStealthChange((stealth: boolean) => {
+        setIsStealthMode(stealth);
+      });
+    }
+  }, []);
 
   // ─── Listen for auto-update events ────────────────────────
   const updateCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -883,16 +912,17 @@ export default function RoomPage() {
     const fullTranscript = transcript + aiContext + profileReminder;
 
     const startTime = Date.now();
-    const modelName = MODELS.find(m => m.key === selectedModelRef.current)?.name || selectedModelRef.current;
-    setAnswers((prev) => [...prev, { id: entryId, question: transcript, answer: "", isStreaming: true, mode: responseLengthRef.current, model: modelName, startTime }]);
+    setAnswers((prev) => [...prev, { id: entryId, question: transcript, answer: "", isStreaming: true, mode: responseLengthRef.current, model: selectedModelRef.current, startTime }]);
     setAiSpeechBubbles([]);
 
     const historyToSend = [...chatConversationHistory];
+    abortControllerRef.current = new AbortController();
 
     try {
       const res = await fetch("/api/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: abortControllerRef.current.signal,
         body: JSON.stringify({
           transcript: fullTranscript,
           jobDescription,
@@ -905,9 +935,8 @@ export default function RoomPage() {
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Failed"); }
       if (!res.body) throw new Error("No response body");
 
-      const actualModelUsed = res.headers.get("X-Model-Used") || modelName;
-      const displayModelName = MODELS.find(m => m.key === actualModelUsed)?.name || actualModelUsed;
-      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: displayModelName } : a));
+      const actualModelUsed = res.headers.get("X-Model-Used") || selectedModelRef.current;
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: actualModelUsed } : a));
 
       let fullResponse = "";
       const reader = res.body.getReader();
@@ -963,11 +992,11 @@ export default function RoomPage() {
     const fullTranscript = textToUse + aiContext + profileReminder;
 
     const startTime = Date.now();
-    const modelName = MODELS.find(m => m.key === selectedModelRef.current)?.name || selectedModelRef.current;
-    setAnswers((prev) => [...prev, { id: entryId, question: textToUse, answer: "", isStreaming: true, mode: responseLengthRef.current, model: modelName, startTime }]);
+    setAnswers((prev) => [...prev, { id: entryId, question: textToUse, answer: "", isStreaming: true, mode: responseLengthRef.current, model: selectedModelRef.current, startTime }]);
     setAiSpeechBubbles([]);
 
     const historyToSend = [...chatConversationHistory];
+    abortControllerRef.current = new AbortController();
 
     const tryModels = selectedModelRef.current === "qwen3.6" 
       ? [selectedModelRef.current] 
@@ -982,6 +1011,7 @@ export default function RoomPage() {
         const res = await fetch("/api/answer", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          signal: abortControllerRef.current.signal,
           body: JSON.stringify({
             transcript: fullTranscript,
             jobDescription,
@@ -1009,9 +1039,8 @@ export default function RoomPage() {
       const res = response;
       if (!res.body) throw new Error("No response body");
 
-      const actualModelUsed = res.headers.get("X-Model-Used") || modelName;
-      const displayModelName = MODELS.find(m => m.key === actualModelUsed)?.name || actualModelUsed;
-      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: displayModelName } : a));
+      const actualModelUsed = res.headers.get("X-Model-Used") || selectedModelRef.current;
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: actualModelUsed } : a));
 
       let fullResponse = "";
       const reader = res.body.getReader();
@@ -1145,6 +1174,7 @@ export default function RoomPage() {
   };
 
   const handleUndo = useCallback((id: string, question: string) => {
+    stopGeneration();
     setAnswers((prev) => {
       const idx = prev.findIndex((a) => a.id === id);
       if (idx === -1) return prev;
@@ -1177,12 +1207,16 @@ export default function RoomPage() {
     const contextText = inputText.trim();
 
     const startTime = Date.now();
-    const modelName = MODELS.find(m => m.key === selectedModelRef.current)?.name || selectedModelRef.current;
-    setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true, mode: responseLengthRef.current, model: `Scout + ${modelName}`, startTime }]);
+    setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true, mode: responseLengthRef.current, model: `scout + ${selectedModelRef.current}`, startTime }]);
 
     // ─── Snapshot current screenshots & context before clearing ─
     const screenshotsToSend = [...capturedScreenshots];
     const historyToSend = [...visionConversationHistory];
+    abortControllerRef.current = new AbortController();
+    
+    // Clear screenshots and input immediately
+    setCapturedScreenshots([]);
+    setInputText("");
 
     const tryModels = selectedModelRef.current === "qwen3.6" 
       ? [selectedModelRef.current] 
@@ -1197,6 +1231,7 @@ export default function RoomPage() {
         const res = await fetch("/api/answer-vision", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          signal: abortControllerRef.current.signal,
           body: JSON.stringify({
             images: screenshotsToSend,
             jobDescription,
@@ -1226,8 +1261,7 @@ export default function RoomPage() {
       if (!res.body) throw new Error("No response body");
 
       const actualModelUsed = res.headers.get("X-Model-Used") || selectedModelRef.current;
-      const displayModelName = `Scout + ${MODELS.find(m => m.key === actualModelUsed)?.name || actualModelUsed}`;
-      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: displayModelName } : a));
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: `scout + ${actualModelUsed}` } : a));
 
       // ─── Accumulate full response for history ──────────────
       let fullResponse = "";
@@ -1243,8 +1277,6 @@ export default function RoomPage() {
 
       setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, isStreaming: false, timeTaken: (Date.now() - startTime) / 1000 } : a));
 
-      // ─── Save this exchange to vision history ──────────────
-      // Keep last 6 messages (3 exchanges) to avoid token overflow
       setVisionConversationHistory((prev) => {
         const userMsg: HistoryMessage = {
           role: "user",
@@ -1271,8 +1303,6 @@ export default function RoomPage() {
         return updated.slice(-20); // keep last 20 messages = 10 exchanges
       });
 
-      setCapturedScreenshots([]);
-      setInputText("");
       setStatus("idle");
       refreshCredits(); // Update credits badge after screenshot response
 
@@ -1301,32 +1331,31 @@ export default function RoomPage() {
   const confirmUnhide = async () => {
     setShowUnhidePrompt(false);
     if (isElectron) {
-      const hidden = await (window as any).electronAPI.hideToggle();
-      setIsWindowHidden(hidden);
+      await (window as any).electronAPI.ghostToggle();
     }
   };
 
   if (!isElectron) {
     return (
-      <div className="h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
+      <div className="h-screen bg-[var(--bg-app)] flex flex-col items-center justify-center p-8 text-center">
         <div className="max-w-md">
-          <div className="w-20 h-20 bg-indigo-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8">
+          <div className="w-20 h-20 bg-indigo-500/10 border border-indigo-500/20 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-xl">
             <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={40} height={40} unoptimized />
           </div>
-          <h1 className="text-3xl font-black tracking-tighter text-gray-900 mb-4 uppercase">Desktop Exclusive.</h1>
-          <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed mb-10">
+          <h1 className="text-3xl font-black tracking-tighter text-[var(--text-main)] mb-4 uppercase">Desktop Exclusive.</h1>
+          <p className="text-[11px] text-[var(--text-dim)] font-bold uppercase tracking-widest leading-relaxed mb-10">
             The Chintu Room is a strategic environment designed exclusively for our Desktop Application. Please launch Chintu on your computer to access live synthesis and stealth mode.
           </p>
           <div className="flex flex-col gap-4">
              <a href="https://www.getchintu.com/download" className="bg-indigo-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 transition-all">Download Chintu</a>
-             <button onClick={() => router.push('/')} className="text-[10px] text-gray-400 font-black uppercase tracking-widest hover:text-gray-900 transition-colors">Return to Home</button>
+             <button onClick={() => router.push('/')} className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest hover:text-[var(--text-main)] transition-colors">Return to Home</button>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!isLoaded) return <div className="h-screen bg-[#f8f9fa] flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
+  if (!isLoaded) return <div className="h-screen bg-[var(--bg-app)] flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
 
   if (!mounted) {
     return <div className="app-container" />;
@@ -1677,20 +1706,6 @@ export default function RoomPage() {
         
         {/* Button 1: Settings */}
         <div className="flex items-center gap-2">
-          {credits !== null && (
-            <div 
-              className={`
-                no-drag h-10 sm:h-11 px-3 rounded-xl sm:rounded-2xl flex items-center gap-2 border transition-all
-                ${credits > 5 
-                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
-                  : "bg-amber-500/10 border-amber-500/20 text-amber-400"}
-              `}
-              title="Tactical Credits"
-            >
-              <div className={`w-1.5 h-1.5 rounded-full ${credits > 5 ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
-              <span className="text-[10px] font-black tracking-tight uppercase">{credits}</span>
-            </div>
-          )}
           
           <button
             onClick={() => setShowSettings(true)}
@@ -1720,19 +1735,29 @@ export default function RoomPage() {
         </button>
 
         <InteractiveHoverButton
-          onClick={handleMicButton}
-          disabled={!micReady || status === "generating"}
+          onClick={status === "generating" ? stopGeneration : handleMicButton}
+          disabled={!micReady}
           className={`
             no-drag flex-initial w-auto min-w-[120px] h-12 sm:h-14 rounded-xl sm:rounded-3xl flex items-center justify-center transition-all duration-500 active:scale-95 overflow-hidden group
             ${status === "recording"
               ? "bg-red-500 text-white shadow-[0_0_50px_rgba(239,68,68,0.4)]"
-              : "bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 animate-gradient text-white shadow-[0_20px_40px_rgba(99,102,241,0.3)]"
+              : status === "generating"
+                ? "bg-amber-500 text-white shadow-[0_0_50px_rgba(245,158,11,0.4)]"
+                : "bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 animate-gradient text-white shadow-[0_20px_40px_rgba(99,102,241,0.3)]"
             }
           `}
         >
           <div className="flex items-center gap-2">
-            {status === "recording" ? <div className="w-3 h-3 bg-white rounded-full animate-pulse" /> : <Mic className="w-4 h-4" />}
-            <span>{status === "recording" ? "Recording" : "Analysis"}</span>
+            {status === "recording" ? (
+              <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+            ) : status === "generating" ? (
+              <div className="w-3 h-3 bg-white rounded-sm animate-spin" />
+            ) : (
+              <Mic className="w-4 h-4" />
+            )}
+            <span>
+              {status === "recording" ? "Recording" : status === "generating" ? "Stop" : "Analysis"}
+            </span>
           </div>
         </InteractiveHoverButton>
 
@@ -1941,77 +1966,79 @@ export default function RoomPage() {
 
 
               {/* History Section */}
-              <div 
-                className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)]"
-                style={{ padding: 'clamp(8px, 3vw, 20px)', display: 'flex', flexDirection: 'column', gap: 'clamp(8px, 2vw, 16px)' }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">History</h4>
-                    <p style={{ fontSize: 'clamp(8px, 2vw, 12px)' }} className="font-bold text-[var(--text-main)] uppercase tracking-tight">{history.length} Sessions</p>
-                  </div>
-                  <div className="flex gap-1.5">
-                    <button
-                      onClick={exportHistory}
-                      className="rounded-xl bg-[var(--glass-bg)] text-[var(--text-main)] flex items-center justify-center hover:bg-indigo-500/20 transition-all border border-[var(--glass-border)]"
-                      style={{ width: 'clamp(24px, 6vw, 40px)', height: 'clamp(24px, 6vw, 40px)' }}
-                      title="Export History"
-                    >
-                      <svg style={{ width: 'clamp(12px, 3vw, 20px)', height: 'clamp(12px, 3vw, 20px)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                    </button>
-                    <button
-                      onClick={() => setShowClearHistoryConfirm(true)}
-                      className="rounded-xl bg-[var(--glass-bg)] text-red-400 flex items-center justify-center hover:bg-red-500/20 transition-all border border-[var(--glass-border)]"
-                      style={{ width: 'clamp(24px, 6vw, 40px)', height: 'clamp(24px, 6vw, 40px)' }}
-                      title="Clear History"
-                    >
-                      <svg style={{ width: 'clamp(12px, 3vw, 20px)', height: 'clamp(12px, 3vw, 20px)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    </button>
-                  </div>
-                </div>
-                
-                {history.length > 0 && (
-                  <div 
-                    className="overflow-y-auto space-y-1.5 pr-1.5 custom-scrollbar"
-                    style={{ maxHeight: 'clamp(80px, 25vh, 200px)' }}
-                  >
-                    {history.map((session) => (
+              {userPlan !== "free" && (
+                <div 
+                  className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)]"
+                  style={{ padding: 'clamp(8px, 3vw, 20px)', display: 'flex', flexDirection: 'column', gap: 'clamp(8px, 2vw, 16px)' }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">History</h4>
+                      <p style={{ fontSize: 'clamp(8px, 2vw, 12px)' }} className="font-bold text-[var(--text-main)] uppercase tracking-tight">{history.length} Sessions</p>
+                    </div>
+                    <div className="flex gap-1.5">
                       <button
-                        key={session.id}
-                        onClick={() => {
-                          if (answers.length > 0) {
-                            saveToHistory();
-                          }
-                          setAnswers(session.answers);
-                          setAiSpeechBubbles([]);
-                          setVisionConversationHistory([]);
-                          setChatConversationHistory([]);
-                          setShowSettings(false);
-                        }}
-                        className="w-full text-left rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] hover:border-indigo-500/50 transition-all group flex items-center justify-between"
-                        style={{ padding: 'clamp(6px, 1.5vw, 12px)' }}
+                        onClick={exportHistory}
+                        className="rounded-xl bg-[var(--glass-bg)] text-[var(--text-main)] flex items-center justify-center hover:bg-indigo-500/20 transition-all border border-[var(--glass-border)]"
+                        style={{ width: 'clamp(24px, 6vw, 40px)', height: 'clamp(24px, 6vw, 40px)' }}
+                        title="Export History"
                       >
-                        <div className="flex-1 min-w-0 pr-2">
-                          <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="font-bold text-[var(--text-main)] truncate">{session.title}</p>
-                          <p style={{ fontSize: 'clamp(6px, 1.2vw, 8px)' }} className="text-[var(--text-dim)] uppercase tracking-tighter mt-0.5">
-                            {new Date(session.timestamp).toLocaleString()}
-                          </p>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSessionToDelete(session.id);
-                          }}
-                          className="rounded-lg bg-red-500/10 text-red-400 opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
-                          style={{ width: 'clamp(20px, 5vw, 32px)', height: 'clamp(20px, 5vw, 32px)' }}
-                        >
-                          <svg style={{ width: 'clamp(10px, 2.5vw, 16px)', height: 'clamp(10px, 2.5vw, 16px)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>
+                        <svg style={{ width: 'clamp(12px, 3vw, 20px)', height: 'clamp(12px, 3vw, 20px)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                       </button>
-                    ))}
+                      <button
+                        onClick={() => setShowClearHistoryConfirm(true)}
+                        className="rounded-xl bg-[var(--glass-bg)] text-red-400 flex items-center justify-center hover:bg-red-500/20 transition-all border border-[var(--glass-border)]"
+                        style={{ width: 'clamp(24px, 6vw, 40px)', height: 'clamp(24px, 6vw, 40px)' }}
+                        title="Clear History"
+                      >
+                        <svg style={{ width: 'clamp(12px, 3vw, 20px)', height: 'clamp(12px, 3vw, 20px)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
+                    </div>
                   </div>
-                )}
-              </div>
+                  
+                  {history.length > 0 && (
+                    <div 
+                      className="overflow-y-auto space-y-1.5 pr-1.5 custom-scrollbar"
+                      style={{ maxHeight: 'clamp(80px, 25vh, 200px)' }}
+                    >
+                      {history.map((session) => (
+                        <button
+                          key={session.id}
+                          onClick={() => {
+                            if (answers.length > 0) {
+                              saveToHistory();
+                            }
+                            setAnswers(session.answers);
+                            setAiSpeechBubbles([]);
+                            setVisionConversationHistory([]);
+                            setChatConversationHistory([]);
+                            setShowSettings(false);
+                          }}
+                          className="w-full text-left rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] hover:border-indigo-500/50 transition-all group flex items-center justify-between"
+                          style={{ padding: 'clamp(6px, 1.5vw, 12px)' }}
+                        >
+                          <div className="flex-1 min-w-0 pr-2">
+                            <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="font-bold text-[var(--text-main)] truncate">{session.title}</p>
+                            <p style={{ fontSize: 'clamp(6px, 1.2vw, 8px)' }} className="text-[var(--text-dim)] uppercase tracking-tighter mt-0.5">
+                              {new Date(session.timestamp).toLocaleString()}
+                            </p>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSessionToDelete(session.id);
+                            }}
+                            className="rounded-lg bg-red-500/10 text-red-400 opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                            style={{ width: 'clamp(20px, 5vw, 32px)', height: 'clamp(20px, 5vw, 32px)' }}
+                          >
+                            <svg style={{ width: 'clamp(10px, 2.5vw, 16px)', height: 'clamp(10px, 2.5vw, 16px)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          </button>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
 
               {/* Update Section */}
