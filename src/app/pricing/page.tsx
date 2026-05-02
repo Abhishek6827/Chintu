@@ -238,8 +238,9 @@ export default function PricingPage() {
         {/* Plans Grid */}
         <div className="px-4 sm:px-8 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {PLANS.map((plan) => {
-             const planPrice = billingCycle === "monthly" ? plan.monthlyPrice : Math.floor(plan.annualPrice / 12);
-             const totalPrice = planPrice * quantity;
+             const isMonthly = billingCycle === "monthly";
+             const totalPrice = (isMonthly ? plan.monthlyPrice : plan.annualPrice) * quantity;
+             const oldPriceTotal = plan.oldPrice ? (isMonthly ? plan.oldPrice : (plan.oldPrice * 12)) * quantity : null;
              const totalCredits = plan.credits * quantity;
 
              return (
@@ -257,15 +258,15 @@ export default function PricingPage() {
                 
                 <div className="mt-4 flex flex-col gap-1">
                   <div className="flex items-baseline gap-2">
-                    {plan.oldPrice && (
+                    {oldPriceTotal && (
                       <span className="text-gray-400 text-sm line-through decoration-red-500/50 decoration-2 tracking-tighter">
-                        ${(billingCycle === "monthly" ? plan.oldPrice : (plan.oldPrice * 12)) * quantity}
+                        ${oldPriceTotal}
                       </span>
                     )}
                     <span className="text-4xl font-black text-gray-900 tracking-tighter">
-                      ${(billingCycle === "monthly" ? plan.monthlyPrice : plan.annualPrice) * quantity}
+                      ${totalPrice}
                     </span>
-                    <span className="text-gray-400 text-[9px] font-black uppercase">{billingCycle === "monthly" ? "/month" : "/year"}</span>
+                    <span className="text-gray-400 text-[9px] font-black uppercase">{isMonthly ? "/month" : "/year"}</span>
                   </div>
                   {plan.oldPrice && (
                     <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md w-fit border border-emerald-100">

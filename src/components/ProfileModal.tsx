@@ -94,8 +94,8 @@ export default function ProfileModal({
             }
           }
         }
-      } catch (err) {
-        console.error("Error fetching profile:", err);
+      } catch (err: any) {
+        console.error("Error fetching profile:", err.message || err);
       }
     };
 
@@ -181,8 +181,9 @@ export default function ProfileModal({
       });
       setSavedJd(jdText.trim());
       setIsEditingJd(false);
-    } catch (err) {
-      setError("Failed to save Job Description");
+    } catch (err: any) {
+      console.error("Save JD error:", err);
+      setError(`Failed to save Job Description: ${err.message || "Unknown error"}`);
     } finally {
       setIsSavingJd(false);
     }
@@ -198,8 +199,9 @@ export default function ProfileModal({
       });
       setSavedJd("");
       setJdText("");
-    } catch (err) {
-      setError("Failed to delete Job Description");
+    } catch (err: any) {
+      console.error("Delete JD error:", err);
+      setError(`Failed to delete Job Description: ${err.message || "Unknown error"}`);
     }
   };
 

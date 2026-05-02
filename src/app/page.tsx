@@ -9,6 +9,8 @@ import { ArrowRight, Sparkles, Zap, Shield, Target, Cpu, MessageSquare } from 'l
 
 import GlobalFooter from '@/components/GlobalFooter';
 import ContactForm from '@/components/ContactForm';
+import { TestimonialsSection } from '@/components/TestimonialsSection';
+import { MarqueeReviews } from '@/components/MarqueeReviews';
 
 export default function LandingPage() {
   const { isSignedIn, isLoaded } = useUser();
@@ -218,6 +220,8 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <TestimonialsSection />
+
         {/* Features Grid */}
         <section className="py-32 px-6 bg-indigo-50/30 border-y border-gray-100">
           <div className="max-w-7xl mx-auto">
@@ -296,6 +300,7 @@ export default function LandingPage() {
         </section>
       </main>
 
+      <MarqueeReviews />
       <GlobalFooter />
 
       <style jsx global>{`

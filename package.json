@@ -20,11 +20,14 @@
     "@google/generative-ai": "^0.24.1",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
+    "@tabler/icons-react": "^3.41.1",
     "axios": "^1.15.2",
+    "clsx": "^2.1.1",
     "dotenv": "^16.6.1",
     "electron-log": "^5.4.3",
     "electron-updater": "^6.8.3",
     "express": "^4.22.1",
+    "framer-motion": "^12.38.0",
     "groq-sdk": "^1.1.2",
     "lucide-react": "^1.11.0",
     "multer": "^1.4.5-lts.1",
@@ -37,7 +40,8 @@
     "remark-gfm": "^4.0.1",
     "resend": "^6.12.2",
     "stripe": "^22.1.0",
-    "svix": "^1.92.2"
+    "svix": "^1.92.2",
+    "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
     "@types/node": "^20",

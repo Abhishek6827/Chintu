@@ -185,6 +185,12 @@ export default function RoomPage() {
     const initRoom = async () => {
       if (!isLoaded || !isSignedIn || !user?.id) return;
       
+      // BLOCK WEB ACCESS: Room is only for Electron EXE app
+      if (!isElectron) {
+        router.push("/");
+        return;
+      }
+      
       // Read JD from URL param (primary) or sessionStorage (fallback)
       const params = new URLSearchParams(window.location.search);
       const jdFromUrl = params.get("jd");
@@ -1038,6 +1044,36 @@ export default function RoomPage() {
   useEffect(() => { stopRecordingRef.current = stopRecordingAndGenerate; }, [stopRecordingAndGenerate]);
   useEffect(() => { spaceModeRef.current = spaceMode; }, [spaceMode]);
 
+  // ─── Screenshot functions ─────────────────────────────────
+  const captureScreenshot = useCallback(async () => {
+    if (!isElectron || !(window as any).electronAPI?.captureScreenshot) {
+      setError("Screenshot only works in the desktop app");
+      return;
+    }
+    setIsCapturing(true);
+    try {
+      const dataUrl = await (window as any).electronAPI.captureScreenshot();
+      if (dataUrl) {
+        setCapturedScreenshots((prev) => {
+          const updated = [...prev, dataUrl];
+          if (updated.length > 20) {
+            return updated.slice(updated.length - 20);
+          }
+          return updated;
+        });
+      } else {
+        setError("Failed to capture screenshot");
+      }
+    } catch {
+      setError("Screenshot capture failed");
+    }
+    setIsCapturing(false);
+  }, []);
+
+  const removeScreenshot = (index: number) => {
+    setCapturedScreenshots((prev) => prev.filter((_, i) => i !== index));
+  };
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space" || e.key === " ") {
@@ -1079,7 +1115,7 @@ export default function RoomPage() {
       window.removeEventListener("keydown", onKeyDown, true);
       window.removeEventListener("keyup", onKeyUp, true);
     };
-  }, []);
+  }, [captureScreenshot]);
 
   useEffect(() => {
     if (isElectron && (window as any).electronAPI?.setFocusable) {
@@ -1098,36 +1134,6 @@ export default function RoomPage() {
   const handleMicButton = () => {
     if (isRecordingRef.current) stopRecordingAndGenerate();
     else startRecording();
-  };
-
-  // ─── Screenshot functions ─────────────────────────────────
-  const captureScreenshot = useCallback(async () => {
-    if (!isElectron || !(window as any).electronAPI?.captureScreenshot) {
-      setError("Screenshot only works in the desktop app");
-      return;
-    }
-    setIsCapturing(true);
-    try {
-      const dataUrl = await (window as any).electronAPI.captureScreenshot();
-      if (dataUrl) {
-        setCapturedScreenshots((prev) => {
-          const updated = [...prev, dataUrl];
-          if (updated.length > 20) {
-            return updated.slice(updated.length - 20);
-          }
-          return updated;
-        });
-      } else {
-        setError("Failed to capture screenshot");
-      }
-    } catch {
-      setError("Screenshot capture failed");
-    }
-    setIsCapturing(false);
-  }, []);
-
-  const removeScreenshot = (index: number) => {
-    setCapturedScreenshots((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleUndo = useCallback((id: string, question: string) => {

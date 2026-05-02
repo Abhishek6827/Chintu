@@ -12,15 +12,25 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
-      animation: {
-        'spin-slow': 'spin 3s linear infinite',
-        'shimmer': 'shimmer 2s infinite',
-      },
       keyframes: {
         shimmer: {
-          '100%': { transform: 'translateX(200%)' },
-        }
-      }
+          "100%": { transform: "translateX(200%)" },
+        },
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(calc(-100% - var(--gap)))" },
+        },
+        "marquee-vertical": {
+          from: { transform: "translateY(0)" },
+          to: { transform: "translateY(calc(-100% - var(--gap)))" },
+        },
+      },
+      animation: {
+        "spin-slow": "spin 3s linear infinite",
+        shimmer: "shimmer 2s infinite",
+        marquee: "marquee var(--duration) linear infinite",
+        "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
+      },
     },
   },
   plugins: [],
