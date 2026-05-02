@@ -20,16 +20,17 @@ const PLANS = [
     color: "emerald",
     features: [
       "10 Credits (one-time)",
+      "One-time Profile & Resume Upload",
       "Standard Engine only",
       "Basic Response Types",
       "Standard History",
       "Community Support",
     ],
     locked: [
+      "Unlimited Profile Updates",
       "Premium AI Engines",
       "Coding & Detailed Modes",
       "Stealth Session Recording",
-      "Custom Themes & UI",
     ],
     cta: "Current Plan",
     disabled: true,
@@ -48,6 +49,7 @@ const PLANS = [
     popular: true,
     features: [
       "200 Credits / month per unit",
+      "Unlimited Profile & Job Description Updates",
       "All Premium Engines Unlocked",
       "All Response Types",
       "Stealth Session Recording",
@@ -69,6 +71,7 @@ const PLANS = [
     color: "amber",
     features: [
       "1000 Credits / month per unit",
+      "Unlimited Profile & Job Description Updates",
       "All Pro Features",
       "Stealth Session Recording",
       "Dedicated Support",

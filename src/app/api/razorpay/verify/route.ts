@@ -105,34 +105,47 @@ export async function POST(req: NextRequest) {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
     });
-    const customerName = profile.full_name || profile.email || "User";
+    
+    // Fallback: If profile email is missing, try to get it from Clerk
+    let userEmail = profile.email;
+    if (!userEmail) {
+      try {
+        const { clerkClient } = await import("@clerk/nextjs/server");
+        const clerkUser = await clerkClient().users.getUser(userId);
+        userEmail = clerkUser.emailAddresses[0]?.emailAddress;
+        
+        // Update profile with email for future use
+        if (userEmail) {
+          await supabaseAdmin.from("profiles").update({ email: userEmail }).eq("id", userId);
+        }
+      } catch (err) {
+        console.error("Failed to fetch email from Clerk:", err);
+      }
+    }
 
-    await sendTelegramAlert(
-      `💰 <b>New Subscription! (Razorpay)</b>\n\n` +
-      `👤 Name: <b>${customerName}</b>\n` +
-      `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
-      `📅 Date: <code>${eventTime}</code>\n` +
-      `💎 Plan: <b>${profile.plan?.toUpperCase() || "FREE"} → ${planInfo.plan.toUpperCase()}</b>\n` +
-      `💲 Price: <b>${planInfo.price}</b> × ${quantity}\n` +
-      `⚡ Credits: <b>${purchasedCredits}</b>\n` +
-      `💳 Session: <code>${razorpay_payment_id}</code>`
-    );
+    const customerName = profile.full_name || userEmail || "User";
 
-    if (profile.email) {
-      await resend.emails.send({
-        from: 'Chintu Intelligence <welcome@getchintu.com>',
-        to: profile.email,
-        subject: 'CHINTU: PROTOCOL UPGRADE VERIFIED ⚡',
-        html: getPaymentEmailHtml(
-          customerName,
-          planInfo.plan,
-          profile.plan || "free",
-          totalCredits,
-          planInfo.price,
-          eventTime,
-          process.env.NEXT_PUBLIC_APP_URL || 'https://getchintu.com'
-        ),
-      });
+    // Send Email via Resend
+    if (userEmail) {
+      try {
+        await resend.emails.send({
+          from: 'Chintu Intelligence <welcome@getchintu.com>',
+          to: userEmail,
+          subject: 'CHINTU: PROTOCOL UPGRADE VERIFIED ⚡',
+          html: getPaymentEmailHtml(
+            customerName,
+            planInfo.plan,
+            profile.plan || "free",
+            totalCredits,
+            planInfo.price,
+            eventTime,
+            process.env.NEXT_PUBLIC_APP_URL || 'https://getchintu.com'
+          ),
+        });
+        console.log(`[/api/razorpay/verify] Payment email sent to ${userEmail}`);
+      } catch (emailErr) {
+        console.error("Failed to send payment email:", emailErr);
+      }
     }
 
     return NextResponse.json({ success: true });

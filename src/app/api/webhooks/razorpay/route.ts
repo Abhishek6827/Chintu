@@ -51,8 +51,19 @@ export async function POST(req: Request) {
       .eq("id", userId)
       .maybeSingle();
 
-    const customerName = profile?.full_name || profile?.email || "Unknown User";
-    const email = profile?.email || "N/A";
+    let email = profile?.email;
+    if (!email) {
+      try {
+        const { clerkClient } = await import("@clerk/nextjs/server");
+        const clerkUser = await (await clerkClient()).users.getUser(userId);
+        email = clerkUser.emailAddresses[0]?.email_address;
+      } catch (err) {
+        console.error("[Razorpay Webhook] Clerk email fetch failed:", err);
+      }
+    }
+
+    const customerName = profile?.full_name || email || "Unknown User";
+    const displayEmail = email || "N/A";
     const eventTime = new Date().toLocaleString('en-IN', { 
       timeZone: 'Asia/Kolkata',
       day: '2-digit', month: 'short', year: 'numeric',
@@ -67,7 +78,7 @@ export async function POST(req: Request) {
     await sendTelegramAlert(
       `💰 <b>New Subscription Captured! (Razorpay Webhook)</b>\n\n` +
       `👤 Name: <b>${customerName}</b>\n` +
-      `📧 Email: <code>${email}</code>\n` +
+      `📧 Email: <code>${displayEmail}</code>\n` +
       `📅 Date: <code>${eventTime}</code>\n` +
       `💎 Plan: <b>${profile?.plan?.toUpperCase() || "FREE"} → ${newPlan.toUpperCase()}</b>\n` +
       `💲 Price: <b>₹${amountINR.toLocaleString()}</b> (Qty: ${quantity})\n` +

@@ -20,6 +20,7 @@ export default function SetupPage() {
   const [isJdLocked, setIsJdLocked] = useState(false);
   const [saveJd, setSaveJd] = useState(false);
   const [showJdOnly, setShowJdOnly] = useState(false);
+  const [showAppPrompt, setShowAppPrompt] = useState(false);
   
   const router = useRouter();
   const isElectron = typeof window !== "undefined" && (!!(window as any).electronAPI || navigator.userAgent.toLowerCase().includes('electron'));
@@ -135,8 +136,13 @@ export default function SetupPage() {
         // Save to sessionStorage for immediate use
         sessionStorage.setItem("jobDescription", jd.trim());
         
-        setStatusText("✅ Config Synced. Please open the Desktop App.");
-        setTimeout(() => setIsInitiating(false), 2000);
+        setStatusText("✅ Config Synced.");
+        setTimeout(() => {
+          setIsInitiating(false);
+          setShowAppPrompt(true);
+          // Try to launch app via deep link
+          window.location.href = "chintu://open";
+        }, 1500);
       } catch (err) {
         console.error("Failed to sync JD:", err);
         setIsInitiating(false);
@@ -461,6 +467,59 @@ export default function SetupPage() {
               <span className="text-[8px] font-medium text-indigo-400 tracking-normal normal-case">Profile will refine in background</span>
             </button>
           )}
+        </div>
+      )}
+
+      {/* App Prompt Overlay */}
+      {showAppPrompt && (
+        <div className="fixed inset-0 z-[110] flex flex-col items-center justify-center bg-[#f8f9fa] animate-in fade-in zoom-in duration-500">
+          <div className="max-w-sm w-full px-8 text-center">
+             <div className="relative w-32 h-32 mx-auto mb-10">
+                <div className="absolute inset-0 bg-indigo-500/10 rounded-[2.5rem] animate-pulse" />
+                <div className="absolute inset-4 bg-white rounded-[2rem] shadow-xl flex items-center justify-center border border-gray-100 overflow-hidden">
+                   <Image 
+                    src="https://www.getchintu.com/icon.png" 
+                    alt="Chintu" 
+                    width={60} 
+                    height={60} 
+                    unoptimized 
+                   />
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white w-8 h-8 rounded-full border-4 border-white flex items-center justify-center animate-bounce">
+                   <span className="text-sm font-bold">✓</span>
+                </div>
+             </div>
+             
+             <h2 className="text-2xl font-black tracking-tight text-gray-900 uppercase mb-2 leading-none">Sync Complete!</h2>
+             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-relaxed mb-10">
+               Your interview workspace is ready. Launch the desktop app to begin.
+             </p>
+             
+             <div className="space-y-3">
+               <button 
+                 onClick={() => window.location.href = "chintu://open"}
+                 className="w-full py-4 bg-indigo-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all"
+               >
+                 Launch Desktop App
+               </button>
+               
+               <a 
+                 href="https://www.getchintu.com/download" 
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 className="block w-full py-4 bg-white text-gray-400 border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-gray-900 hover:bg-gray-50 transition-all text-center"
+               >
+                 Download Chintu App
+               </a>
+             </div>
+             
+             <button 
+               onClick={() => setShowAppPrompt(false)}
+               className="mt-12 text-[10px] font-black text-gray-300 uppercase tracking-widest hover:text-indigo-500 transition-colors"
+             >
+               Return to Setup
+             </button>
+          </div>
         </div>
       )}
     </div>

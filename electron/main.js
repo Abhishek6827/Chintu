@@ -10,6 +10,35 @@ log.errorHandler.startCatching();
 
 log.info("[Main] Application starting...");
 log.info("[Main] Version:", app.getVersion());
+
+// ─── Single Instance Lock & Protocol Registration ───────────
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", (event, commandLine) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      showWindow();
+      mainWindow.focus();
+    }
+    // Deep link handling for Windows
+    const url = commandLine.pop();
+    if (url && url.startsWith("chintu://")) {
+      console.log("[Main] Deep link received (second-instance):", url);
+    }
+  });
+}
+
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient("chintu", process.execPath, [path.resolve(process.argv[1])]);
+  }
+} else {
+  app.setAsDefaultProtocolClient("chintu");
+}
+// ─────────────────────────────────────────────────────────────
+
 const path = require("path");
 const fs = require("fs");
 const { createServer } = require("./server");

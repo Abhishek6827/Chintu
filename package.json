@@ -63,6 +63,14 @@
   "build": {
     "appId": "com.chintu.app",
     "productName": "Chintu",
+    "protocols": [
+      {
+        "name": "chintu-protocol",
+        "schemes": [
+          "chintu"
+        ]
+      }
+    ],
     "directories": {
       "output": "dist-electron"
     },

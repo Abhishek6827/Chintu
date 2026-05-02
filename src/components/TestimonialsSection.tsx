@@ -42,7 +42,7 @@ export function TestimonialsSection() {
       quote: "The real-time code optimization suggestions saved my life during the GPU kernel design round. NVIDIA's interview was tough, but Chintu was tougher.",
       name: "David Chen",
       designation: "Senior Architect at NVIDIA",
-      src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=3540&auto=format&fit=crop",
+      src: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=3540&auto=format&fit=crop",
     },
     {
       quote: "Chintu's behavioral mode prepared me for the toughest cross-functional leadership questions. I felt like I had a script for success.",
@@ -102,13 +102,13 @@ export function TestimonialsSection() {
       quote: "The most robust interview companion I've ever tested. It handled advanced Kubernetes orchestration questions without breaking a sweat.",
       name: "Alex Rivera",
       designation: "Cloud Architect at DigitalOcean",
-      src: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=3540&auto=format&fit=crop",
+      src: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=3540&auto=format&fit=crop",
     },
     {
       quote: "Secured my lead role at Tesla. Chintu's real-time analysis of hardware-software integration was simply mind-blowing.",
       name: "Jameson Ford",
       designation: "Systems Engineer at Tesla",
-      src: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=3540&auto=format&fit=crop",
+      src: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=3540&auto=format&fit=crop",
     },
     {
       quote: "As a non-native speaker, the articulation support in voice mode was invaluable. I landed my dream role at LinkedIn.",
@@ -144,7 +144,7 @@ export function TestimonialsSection() {
       quote: "The ability to switch between coding specialist and turbo engines based on the question type is a stroke of brilliance.",
       name: "Alice Cooper",
       designation: "Mobile Lead at Snap",
-      src: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=3540&auto=format&fit=crop",
+      src: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=3540&auto=format&fit=crop",
     },
     {
       quote: "Chintu's understanding of the Rust borrow checker is better than most humans I know. Saved my systems programming interview.",
@@ -174,7 +174,7 @@ export function TestimonialsSection() {
       quote: "The best tool for anyone serious about their tech career. It's like having a private coach 24/7.",
       name: "Thomas Wright",
       designation: "Engineering Manager at Slack",
-      src: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=3540&auto=format&fit=crop",
+      src: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=3540&auto=format&fit=crop",
     },
     {
       quote: "Chintu's logic for complex database sharding was what got me through the door at Oracle.",
