@@ -106,6 +106,7 @@ export default function ProfileModal({
     if (!rawText.trim()) return;
     setIsRefining(true);
     setError("");
+    let succeeded = false;
 
     try {
       const res = await fetch("/api/refine-profile", {
@@ -117,26 +118,15 @@ export default function ProfileModal({
       const data = await res.json();
       if (data.profile) {
         setProfile(data.profile);
-        if (user?.id) {
-          // Note: The /api/refine-profile endpoint already saves the result.
-          // If we need to save manually, we should use the POST /api/profile endpoint
-          await fetch('/api/profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              profile_data: data.profile,
-              raw_profile: rawText.trim()
-            })
-          });
-        }
         setRawText("");
+        succeeded = true;
       }
     } catch (err: any) {
       setError(err.message || "Failed to refine profile");
     } finally {
       setIsRefining(false);
-      if (!error && onSuccess) {
-         onSuccess();
+      if (succeeded && onSuccess) {
+        onSuccess();
       }
     }
   };

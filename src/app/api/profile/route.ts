@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       if ((body.profile_data || body.raw_profile) && (existing?.profile_data || existing?.raw_profile)) {
         return new NextResponse("Starter plan is limited to 1 profile. Upgrade to Pro for unlimited updates.", { status: 403 });
       }
-      if (body.current_jd && existing?.current_jd && body.current_jd !== existing.current_jd) {
+      if ("current_jd" in body && existing?.current_jd) {
         return new NextResponse("Starter plan is limited to 1 job description. Upgrade to Pro for unlimited JDs.", { status: 403 });
       }
     }

@@ -46,6 +46,9 @@ export default function SetupPage() {
               if (profileRow.current_jd) {
                 setJd(profileRow.current_jd);
                 sessionStorage.setItem("jobDescription", profileRow.current_jd);
+                if ((profileRow.plan || "free") === "free") {
+                  setIsJdLocked(true);
+                }
                 // Redirect directly if both exist
                 router.push("/room");
                 return;
@@ -148,6 +151,15 @@ export default function SetupPage() {
       setIsRefining(true);
       setStatusText("✨ AI is structuring your profile...");
 
+      // Save JD to Supabase if toggle is ON
+      if (saveJd) {
+        fetch("/api/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ current_jd: jd.trim() }),
+        }).catch(err => console.error("Failed to save JD:", err));
+      }
+
       try {
         await fetch("/api/refine-profile", {
           method: "POST",
@@ -156,9 +168,11 @@ export default function SetupPage() {
         });
         
         setStatusText("🎯 Finalizing workspace...");
+        sessionStorage.setItem("jobDescription", jd.trim());
         router.push("/room?jd=" + encodeURIComponent(jd.trim()));
       } catch (err) {
         console.error("Failed to start refinement:", err);
+        sessionStorage.setItem("jobDescription", jd.trim());
         router.push("/room?jd=" + encodeURIComponent(jd.trim()));
       }
     } else {
@@ -182,6 +196,17 @@ export default function SetupPage() {
     if (!isElectron) {
       return;
     }
+    
+    // Save JD to Supabase if toggle is ON
+    if (saveJd) {
+      fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ current_jd: jd.trim() }),
+      }).catch(err => console.error("Failed to save JD on skip:", err));
+    }
+    
+    sessionStorage.setItem("jobDescription", jd.trim());
     router.push("/room?jd=" + encodeURIComponent(jd.trim()));
   };
 
@@ -305,13 +330,17 @@ export default function SetupPage() {
               />
               
               <div className="flex items-center gap-2 mt-3 px-1">
-                <button 
-                  onClick={() => setSaveJd(!saveJd)}
-                  className={`w-10 h-5 rounded-full transition-all relative ${saveJd ? 'bg-indigo-600' : 'bg-gray-200'}`}
-                >
-                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${saveJd ? 'left-6' : 'left-1'}`} />
-                </button>
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Save JD for future sessions?</span>
+                {!isJdLocked && (
+                  <>
+                    <button 
+                      onClick={() => setSaveJd(!saveJd)}
+                      className={`w-10 h-5 rounded-full transition-all relative ${saveJd ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                    >
+                      <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${saveJd ? 'left-6' : 'left-1'}`} />
+                    </button>
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Save JD for future sessions?</span>
+                  </>
+                )}
               </div>
 
               {isJdLocked && (
