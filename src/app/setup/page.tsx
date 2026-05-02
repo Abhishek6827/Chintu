@@ -8,6 +8,7 @@ import { Meteors } from "@/components/magicui/meteors";
 import { PremiumWelcome } from "@/components/PremiumWelcome";
 import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
 import CardSpread from "@/components/animata/card/card-spread";
+import NeuralLoading from "@/components/NeuralLoading";
 
 
 
@@ -108,9 +109,9 @@ export default function SetupPage() {
 
 
 
-  // If not mounted or Clerk not loaded yet, show empty shell
+  // If not mounted or Clerk not loaded yet, show premium loading
   if (!mounted || !isLoaded) {
-    return <div className="min-h-screen bg-[var(--bg-app)]" />;
+    return <NeuralLoading text="Establishing Neural Link" subtext="Chintu AI Interface" />;
   }
 
   // Double check auth (Middleware should handle this, but for safety)
@@ -451,37 +452,7 @@ export default function SetupPage() {
 
       {/* Full Page Loading Animation (Refining or Initiating) */}
       {(isRefining || isInitiating) && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--bg-app)]/95 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="relative flex items-center justify-center w-32 h-32 mb-8">
-            <div className="absolute inset-0 rounded-full border-[3px] border-indigo-600/10 animate-[spin_3s_linear_infinite]"></div>
-            <div className="absolute inset-2 rounded-full border-[3px] border-t-purple-600 border-purple-600/10 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
-            <div className="absolute inset-4 rounded-full border-[3px] border-b-cyan-500 border-cyan-500/10 animate-[spin_2s_linear_infinite]"></div>
-            <div className="absolute inset-0 flex items-center justify-center text-4xl animate-pulse">
-              {isInitiating ? "🚀" : "✨"}
-            </div>
-          </div>
-          <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 animate-pulse tracking-tight mb-3 text-center px-6">
-            {statusText}
-          </h2>
-          <div className="flex gap-2 items-center mb-10">
-            <div className="w-2 h-2 rounded-full bg-indigo-600 animate-bounce" style={{ animationDelay: "0ms" }}></div>
-            <div className="w-2 h-2 rounded-full bg-purple-600 animate-bounce" style={{ animationDelay: "150ms" }}></div>
-            <div className="w-2 h-2 rounded-full bg-cyan-600 animate-bounce" style={{ animationDelay: "300ms" }}></div>
-          </div>
-          <p className="text-[10px] text-[var(--text-dim)] font-black tracking-[0.3em] uppercase text-center max-w-xs leading-relaxed opacity-60">
-            {isInitiating ? "Initializing Ghost Interface" : "Calibrating Neural Synthesis"}
-          </p>
-          {/* Skip Button — navigate immediately, refining continues in background */}
-          {isRefining && jd.trim() && (
-            <button
-              onClick={handleSkipAndStart}
-              className="mt-8 px-8 py-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500/20 transition-all active:scale-95 shadow-sm flex flex-col items-center gap-1"
-            >
-              <span>Skip & Start Interview</span>
-              <span className="text-[8px] font-medium text-indigo-400/60 tracking-normal normal-case">Profile will refine in background</span>
-            </button>
-          )}
-        </div>
+        <NeuralLoading text={statusText} />
       )}
 
       {/* App Prompt Overlay */}

@@ -15,6 +15,7 @@ import CustomDropdown from "@/components/CustomDropdown";
 import { Meteors } from "@/components/magicui/meteors";
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
 import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
+import NeuralLoading from "@/components/NeuralLoading";
 
 
 
@@ -1355,10 +1356,10 @@ export default function RoomPage() {
     );
   }
 
-  if (!isLoaded) return <div className="h-screen bg-[var(--bg-app)] flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
+  if (!isLoaded) return <NeuralLoading text="Authenticating Session" subtext="Securing Neural Connection" />;
 
   if (!mounted) {
-    return <div className="app-container" />;
+    return <NeuralLoading text="Calibrating Neural Synthesis" subtext="Optimizing Interface" />;
   }
 
   return (
