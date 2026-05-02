@@ -14,6 +14,8 @@ const PLANS = [
     description: "Explore Chintu's capabilities",
     monthlyPrice: 0,
     annualPrice: 0,
+    monthlyPriceINR: 0,
+    annualPriceINR: 0,
     period: "forever",
     credits: 10,
     badge: "🌱",
@@ -39,8 +41,10 @@ const PLANS = [
     name: "Professional",
     description: "Best for active interviewees",
     monthlyPrice: 9,
-    oldPrice: 29, // Added oldPrice
+    oldPrice: 29, 
     annualPrice: 89,
+    monthlyPriceINR: 799,
+    annualPriceINR: 7990,
     period: "/month",
     credits: 200,
     badge: "⚡",
@@ -63,8 +67,10 @@ const PLANS = [
     name: "Elite",
     description: "Unrestricted career growth",
     monthlyPrice: 29,
-    oldPrice: 79, // Added oldPrice
+    oldPrice: 79, 
     annualPrice: 279,
+    monthlyPriceINR: 2499,
+    annualPriceINR: 24990,
     period: "/month",
     credits: 1000,
     badge: "👑",
@@ -101,33 +107,104 @@ export default function PricingPage() {
     router.push(jd ? "/room" : "/setup");
   };
 
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handleSubscribe = async (plan: any) => {
     if (!user) return;
-    const priceId = billingCycle === "monthly" ? plan.stripePriceId : plan.annualStripePriceId;
-    if (!priceId || priceId.includes("STRIPE")) {
-      alert("Please configure real Stripe Price IDs.");
-      return;
-    }
-
+    
     setLoading(plan.id);
     try {
-      const res = await fetch("/api/checkout", {
+      const res = await loadRazorpay();
+      if (!res) {
+        alert("Razorpay SDK failed to load. Are you online?");
+        setLoading(null);
+        return;
+      }
+
+      const amount = billingCycle === "monthly" ? plan.monthlyPriceINR : plan.annualPriceINR;
+      const totalAmount = amount * quantity;
+
+      // 1. Create Order
+      const orderRes = await fetch("/api/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId, quantity }),
+        body: JSON.stringify({ 
+          amount: totalAmount, 
+          planId: plan.id, 
+          quantity,
+          currency: "INR" 
+        }),
       });
 
-      if (res.ok) {
-        const { url } = await res.json();
-        if (url) window.location.href = url;
-      } else {
-        const error = await res.json();
-        alert(error.error || "Failed to create checkout session.");
+      if (!orderRes.ok) {
+        const error = await orderRes.json();
+        alert(error.error || "Failed to create Razorpay order.");
+        setLoading(null);
+        return;
       }
-    } catch {
-      alert("Something went wrong.");
-    } finally {
-      setTimeout(() => setLoading(null), 5000); 
+
+      const order = await orderRes.json();
+
+      // 2. Open Razorpay Modal
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Chintu Intelligence",
+        description: `${plan.name} Plan Upgrade`,
+        image: "https://www.getchintu.com/icon.png",
+        order_id: order.id,
+        handler: async function (response: any) {
+          setLoading(plan.id);
+          // 3. Verify Payment
+          const verifyRes = await fetch("/api/razorpay/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              planId: plan.id,
+              quantity,
+            }),
+          });
+
+          const result = await verifyRes.json();
+          if (result.success) {
+            router.push("/room?payment=success");
+          } else {
+            alert(result.error || "Payment verification failed.");
+          }
+          setLoading(null);
+        },
+        prefill: {
+          name: user.fullName || "",
+          email: user.primaryEmailAddress?.emailAddress || "",
+        },
+        theme: {
+          color: "#4f46e5",
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(null);
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      console.error("Razorpay Error:", err);
+      alert("Something went wrong with the payment.");
+      setLoading(null);
     }
   };
 
@@ -238,9 +315,9 @@ export default function PricingPage() {
         {/* Plans Grid */}
         <div className="px-4 sm:px-8 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {PLANS.map((plan) => {
-             const isMonthly = billingCycle === "monthly";
-             const totalPrice = (isMonthly ? plan.monthlyPrice : plan.annualPrice) * quantity;
-             const oldPriceTotal = plan.oldPrice ? (isMonthly ? plan.oldPrice : (plan.oldPrice * 12)) * quantity : null;
+              const isMonthly = billingCycle === "monthly";
+             const totalPrice = (isMonthly ? plan.monthlyPriceINR : plan.annualPriceINR) * quantity;
+             const oldPriceTotal = plan.oldPrice ? (isMonthly ? (plan.oldPrice * 85) : (plan.oldPrice * 12 * 85)) * quantity : null;
              const totalCredits = plan.credits * quantity;
 
              return (
@@ -258,29 +335,29 @@ export default function PricingPage() {
                 
                 <div className="mt-4 flex flex-col gap-1">
                   <div className="flex items-baseline gap-2">
-                    {oldPriceTotal && (
+                    {oldPriceTotal && oldPriceTotal > 0 && (
                       <span className="text-gray-400 text-sm line-through decoration-red-500/50 decoration-2 tracking-tighter">
-                        ${oldPriceTotal}
+                        ₹{oldPriceTotal.toLocaleString()}
                       </span>
                     )}
                     <span className="text-4xl font-black text-gray-900 tracking-tighter">
-                      ${totalPrice}
+                      ₹{totalPrice.toLocaleString()}
                     </span>
                     <span className="text-gray-400 text-[9px] font-black uppercase">{isMonthly ? "/month" : "/year"}</span>
                   </div>
-                  {plan.oldPrice && (
+                  {plan.oldPrice && plan.oldPrice > 0 && (
                     <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md w-fit border border-emerald-100">
                       <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                       <span className="text-[8px] font-black uppercase tracking-widest">
                         {billingCycle === "monthly" 
-                          ? `Early Bird - Save ${Math.round((1 - plan.monthlyPrice/plan.oldPrice) * 100)}%`
-                          : `Annual Deal - Save ${Math.round((1 - plan.annualPrice/(plan.oldPrice * 12)) * 100)}%`}
+                          ? `Early Bird - Save ${Math.round((1 - plan.monthlyPriceINR/(plan.oldPrice * 85)) * 100)}%`
+                          : `Annual Deal - Save ${Math.round((1 - plan.annualPriceINR/(plan.oldPrice * 12 * 85)) * 100)}%`}
                       </span>
                     </div>
                   )}
                 </div>
-                {billingCycle === "annual" && plan.annualPrice > 0 && (
-                  <p className="text-emerald-500 text-[8px] font-black uppercase mt-1">Billed annually (${plan.annualPrice * quantity}) • Save extra ${(plan.monthlyPrice * 12 - plan.annualPrice) * quantity}</p>
+                {billingCycle === "annual" && plan.annualPriceINR > 0 && (
+                  <p className="text-emerald-500 text-[8px] font-black uppercase mt-1">Billed annually (₹{(plan.annualPriceINR * quantity).toLocaleString()}) • Save extra ₹{((plan.monthlyPriceINR * 12 - plan.annualPriceINR) * quantity).toLocaleString()}</p>
                 )}
               </div>
 
