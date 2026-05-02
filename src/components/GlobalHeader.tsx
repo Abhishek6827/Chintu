@@ -136,20 +136,25 @@ export default function GlobalHeader() {
     }
   };
 
-  // Hide GlobalHeader on public marketing pages where custom premium headers are used
-  const publicPages = ["/", "/privacy", "/terms", "/pricing", "/sign-in", "/sign-up"];
-  
-  // Use startsWith for auth pages in case of catch-all routes like /sign-in/factor-one
-  const isPublicPage = publicPages.some(page => pathname === page || pathname.startsWith(page + "/"));
-  
-  if (isPublicPage) {
+  // Hide GlobalHeader on web platform - it's specifically for the EXE app frame
+  if (!isElectron) {
     return null;
   }
+
+  // Use publicPages and pathname for a breadcrumb or title
+  const publicPages = ["/", "/privacy", "/terms", "/pricing", "/sign-in", "/sign-up"];
+  const isPublicPage = publicPages.some(page => pathname === page || pathname.startsWith(page + "/"));
+  const pageTitle = pathname.split("/").filter(Boolean).pop() || "Home";
 
   return (
     <>
       <div className="drag-region flex items-center justify-between px-4 h-12 shrink-0 relative z-[100] w-full bg-[var(--bg-app)] border-b border-[var(--glass-border)] shadow-sm">
         <div className="flex items-center gap-3 no-drag">
+          <div className="flex items-center gap-2 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 mr-2">
+            <div className={`w-1 h-1 rounded-full ${isPublicPage ? 'bg-gray-400' : 'bg-emerald-500 animate-pulse'}`} />
+            <span className="text-[7px] font-black uppercase text-[var(--text-dim)] tracking-widest">{isPublicPage ? 'Public View' : 'App Active'}</span>
+          </div>
+
           <div 
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => {
@@ -173,6 +178,8 @@ export default function GlobalHeader() {
               />
             </div>
             <span className="text-[var(--text-main)] text-sm font-black tracking-tight uppercase">Chintu</span>
+            <div className="h-4 w-[1px] bg-[var(--glass-border)] mx-1" />
+            <span className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-[0.2em]">{pageTitle}</span>
           </div>
           
           {isSignedIn && userCredits !== null && (
@@ -246,7 +253,17 @@ export default function GlobalHeader() {
             </>
           )}
           
-          {/* Profile button removed as requested */}
+          {/* Profile Status Badge */}
+          <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-[var(--input-bg)] border border-[var(--glass-border)]">
+            {hasProfile ? (
+              <Sparkles className="w-3 h-3 text-indigo-500 animate-pulse" />
+            ) : (
+              <CreditCard className="w-3 h-3 text-amber-500" />
+            )}
+            <div className="w-6 h-6 rounded-md overflow-hidden ring-1 ring-white/10">
+              <UserButton afterSignOutUrl="/" />
+            </div>
+          </div>
         </div>
       </div>
       {showOnboarding && <OnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} />}

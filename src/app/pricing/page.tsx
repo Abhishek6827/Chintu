@@ -469,7 +469,7 @@ export default function PricingPage() {
             <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Credit System Explained</span>
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white p-3 rounded-xl text-[9px] font-bold leading-relaxed opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl z-[60]">
                <div className="flex justify-between border-b border-white/10 pb-1.5 mb-1.5">
-                 <span>1 TEXT / VOICE CHAT</span>
+                 <span>1 TEXT / VOICE CHAT RESPONSE</span>
                  <span className="text-emerald-400">1 CREDIT</span>
                </div>
                <div className="flex justify-between">
@@ -570,22 +570,21 @@ export default function PricingPage() {
             </p>
           </div>
           
-          <div className="grid grid-cols-2 gap-12">
+          <div className="grid grid-cols-2 gap-12 items-start">
             <div>
-              <h4 className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] mb-4">Support</h4>
-              <ul className="space-y-2">
+              <h4 className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] mb-4 text-center sm:text-left">Support</h4>
+              <ul className="space-y-2 text-center sm:text-left">
                 <li><a href="mailto:contact@getchintu.com" className="text-[10px] text-gray-400 hover:text-indigo-600 font-bold uppercase transition-colors">Contact Us</a></li>
                 <li><Link href="/support" className="text-[10px] text-gray-400 hover:text-indigo-600 font-bold uppercase transition-colors">Help Center</Link></li>
                 <li><Link href="/terms" className="text-[10px] text-gray-400 hover:text-indigo-600 font-bold uppercase transition-colors">Terms of Service</Link></li>
               </ul>
             </div>
-            <div>
-              <h4 className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] mb-4">Ecosystem</h4>
-              <ul className="space-y-2">
-                <li><Link href="/" className="text-[10px] text-gray-400 hover:text-indigo-600 font-bold uppercase transition-colors">Home</Link></li>
-                <li><Link href="/pricing" className="text-[10px] text-gray-400 hover:text-indigo-600 font-bold uppercase transition-colors">Pricing</Link></li>
-                <li><Link href="/setup" className="text-[10px] text-gray-400 hover:text-indigo-600 font-bold uppercase transition-colors">Dashboard</Link></li>
-              </ul>
+            <div className="flex flex-col items-center sm:items-end">
+              <h4 className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] mb-4">Account</h4>
+              <div className="p-1 rounded-xl bg-gray-50 border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                <UserButton afterSignOutUrl="/" />
+              </div>
+              <p className="text-[8px] text-gray-400 font-black uppercase mt-2 tracking-widest">Active Profile</p>
             </div>
           </div>
         </div>
