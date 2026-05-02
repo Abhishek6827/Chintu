@@ -8,28 +8,28 @@ export function TestimonialsSection() {
         "The ghost overlay is a game-changer. I could see system design patterns directly on my screen during the live round without anyone noticing. It's like an unfair advantage.",
       name: "Aman Gupta",
       designation: "SDE at Google",
-      src: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=3560&auto=format&fit=crop&ixlib=rb-4.0.3",
+      src: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=3540&auto=format&fit=crop",
     },
     {
       quote:
         "Chintu accurately predicted 100% of the React hooks questions based on the job description I uploaded. It's not just an assistant; it's a career accelerator.",
       name: "Priya Sharma",
       designation: "Frontend Engineer at Meta",
-      src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3",
+      src: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=3540&auto=format&fit=crop",
     },
     {
       quote:
         "The voice response mode allowed me to practice technical explanations until they were perfect. I used to struggle with articulation, but not anymore.",
       name: "Rohan Mehta",
       designation: "Backend Developer at Amazon",
-      src: "https://images.unsplash.com/photo-1623582854588-d60de57fa33f?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3",
+      src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=3540&auto=format&fit=crop",
     },
     {
       quote:
         "I was amazed at how easily Chintu handled complex DSA problems. It read my screen, understood the constraints, and provided a clean, optimized solution in seconds.",
       name: "Sneha Reddy",
       designation: "Full Stack Developer",
-      src: "https://images.unsplash.com/photo-1636041293178-808a6762ab39?q=80&w=3464&auto=format&fit=crop&ixlib=rb-4.0.3",
+      src: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?q=80&w=3540&auto=format&fit=crop",
     },
     {
       quote:

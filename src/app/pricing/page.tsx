@@ -14,8 +14,6 @@ const PLANS = [
     description: "Explore Chintu's capabilities",
     monthlyPrice: 0,
     annualPrice: 0,
-    monthlyPriceINR: 0,
-    annualPriceINR: 0,
     period: "forever",
     credits: 10,
     badge: "🌱",
@@ -40,18 +38,14 @@ const PLANS = [
     id: "pro",
     name: "Professional",
     description: "Best for active interviewees",
-    monthlyPrice: 9,
+    monthlyPrice: 9.18, // $9 + 2% gateway charge
     oldPrice: 29, 
-    annualPrice: 89,
-    monthlyPriceINR: 799,
-    annualPriceINR: 7990,
+    annualPrice: 89.99,
     period: "/month",
     credits: 200,
     badge: "⚡",
     color: "indigo",
     popular: true,
-    stripePriceId: "price_1TRu3pLYcsTnVrvkVfZIjTLC",
-    annualStripePriceId: "price_1TRu4ILYcsTnVrvkcfBbwSBr",
     features: [
       "200 Credits / month per unit",
       "All Premium Engines Unlocked",
@@ -66,17 +60,13 @@ const PLANS = [
     id: "elite",
     name: "Elite",
     description: "Unrestricted career growth",
-    monthlyPrice: 29,
+    monthlyPrice: 29.58, // $29 + 2% gateway charge
     oldPrice: 79, 
-    annualPrice: 279,
-    monthlyPriceINR: 2499,
-    annualPriceINR: 24990,
+    annualPrice: 279.99,
     period: "/month",
     credits: 1000,
     badge: "👑",
     color: "amber",
-    stripePriceId: "price_1TRu4jLYcsTnVrvkJ7gkHA91",
-    annualStripePriceId: "price_1TRu5ALYcsTnVrvk3dMorbBe",
     features: [
       "1000 Credits / month per unit",
       "All Pro Features",
@@ -101,7 +91,9 @@ export default function PricingPage() {
   const minQty = 1;
   const maxQty = 10;
 
-  // Handle back button
+  // Conversion rate (approx 1 USD = 85 INR for Razorpay processing)
+  const USD_TO_INR = 85;
+
   const handleBack = () => {
     const jd = sessionStorage.getItem("jobDescription");
     router.push(jd ? "/room" : "/setup");
@@ -129,15 +121,17 @@ export default function PricingPage() {
         return;
       }
 
-      const amount = billingCycle === "monthly" ? plan.monthlyPriceINR : plan.annualPriceINR;
-      const totalAmount = amount * quantity;
+      // Calculate price based on USD but process in INR for Razorpay (Standard approach)
+      const basePrice = billingCycle === "monthly" ? plan.monthlyPrice : plan.annualPrice;
+      const totalUSD = basePrice * quantity;
+      const totalAmountINR = Math.round(totalUSD * USD_TO_INR);
 
       // 1. Create Order
       const orderRes = await fetch("/api/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          amount: totalAmount, 
+          amount: totalAmountINR, 
           planId: plan.id, 
           quantity,
           billingCycle,
@@ -146,10 +140,8 @@ export default function PricingPage() {
       });
 
       if (!orderRes.ok) {
-        const error = await orderRes.json();
-        alert(error.error || "Failed to create Razorpay order.");
-        setLoading(null);
-        return;
+        const errorData = await orderRes.json();
+        throw new Error(errorData.error || "Order creation failed");
       }
 
       const order = await orderRes.json();
@@ -205,7 +197,7 @@ export default function PricingPage() {
       rzp.open();
     } catch (err: any) {
       console.error("Razorpay Error:", err);
-      alert("Something went wrong with the payment.");
+      alert(`Payment Error: ${err.message || "Something went wrong"}`);
       setLoading(null);
     }
   };
@@ -266,14 +258,12 @@ export default function PricingPage() {
       </div>
 
       <div className="flex-1 pb-16 selection:bg-indigo-100">
-        {/* Title & Billing Toggle */}
         <div className="text-center px-4 pt-12 pb-8">
           <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-6 border border-indigo-100">
             <Sparkles className="w-3 h-3 animate-pulse" /> Premium Access
           </div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tighter mb-4 text-gray-900 leading-none uppercase">Elevate Your Career.</h1>
           
-          {/* Quantity Selector */}
           <div className="max-w-[280px] mx-auto mb-10 bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">
                Select Multiplier (Quantity)
@@ -286,7 +276,6 @@ export default function PricingPage() {
              <p className="text-[8px] font-bold text-gray-400 uppercase mt-2">Credits & Price will be multiplied by {quantity}</p>
           </div>
 
-          {/* Toggle Switch */}
           <div className="flex items-center justify-center gap-4">
             <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${billingCycle === "monthly" ? "text-gray-900" : "text-gray-400"}`}>Monthly</span>
             <button onClick={() => setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")} className="w-12 h-6 bg-gray-200 rounded-full relative p-1 transition-colors">
@@ -314,12 +303,11 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Plans Grid */}
         <div className="px-4 sm:px-8 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {PLANS.map((plan) => {
               const isMonthly = billingCycle === "monthly";
-             const totalPrice = (isMonthly ? plan.monthlyPriceINR : plan.annualPriceINR) * quantity;
-             const oldPriceTotal = plan.oldPrice ? (isMonthly ? (plan.oldPrice * 85) : (plan.oldPrice * 12 * 85)) * quantity : null;
+             const totalPrice = (isMonthly ? plan.monthlyPrice : plan.annualPrice) * quantity;
+             const oldPriceTotal = plan.oldPrice ? (isMonthly ? plan.oldPrice : plan.annualPrice * 3) * quantity : null;
              const totalCredits = plan.credits * quantity;
 
              return (
@@ -337,29 +325,22 @@ export default function PricingPage() {
                 
                 <div className="mt-4 flex flex-col gap-1">
                   <div className="flex items-baseline gap-2">
-                    {oldPriceTotal && oldPriceTotal > 0 && (
+                    {oldPriceTotal && oldPriceTotal > totalPrice && (
                       <span className="text-gray-400 text-sm line-through decoration-red-500/50 decoration-2 tracking-tighter">
-                        ₹{oldPriceTotal.toLocaleString()}
+                        ${oldPriceTotal.toLocaleString()}
                       </span>
                     )}
                     <span className="text-4xl font-black text-gray-900 tracking-tighter">
-                      ₹{totalPrice.toLocaleString()}
+                      ${totalPrice.toLocaleString()}
                     </span>
                     <span className="text-gray-400 text-[9px] font-black uppercase">{isMonthly ? "/month" : "/year"}</span>
                   </div>
-                  {plan.oldPrice && plan.oldPrice > 0 && (
-                    <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md w-fit border border-emerald-100">
-                      <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[8px] font-black uppercase tracking-widest">
-                        {billingCycle === "monthly" 
-                          ? `Early Bird - Save ${Math.round((1 - plan.monthlyPriceINR/(plan.oldPrice * 85)) * 100)}%`
-                          : `Annual Deal - Save ${Math.round((1 - plan.annualPriceINR/(plan.oldPrice * 12 * 85)) * 100)}%`}
-                      </span>
-                    </div>
-                  )}
+                  <div className="inline-flex items-center gap-1.5 bg-indigo-50/50 text-indigo-600 px-2 py-0.5 rounded-md w-fit border border-indigo-100/50">
+                    <span className="text-[7px] font-black uppercase tracking-widest">Incl. 2% Gateway Fee</span>
+                  </div>
                 </div>
-                {billingCycle === "annual" && plan.annualPriceINR > 0 && (
-                  <p className="text-emerald-500 text-[8px] font-black uppercase mt-1">Billed annually (₹{(plan.annualPriceINR * quantity).toLocaleString()}) • Save extra ₹{((plan.monthlyPriceINR * 12 - plan.annualPriceINR) * quantity).toLocaleString()}</p>
+                {billingCycle === "annual" && plan.annualPrice > 0 && (
+                  <p className="text-emerald-500 text-[8px] font-black uppercase mt-1">Billed annually (${(plan.annualPrice * quantity).toFixed(2)})</p>
                 )}
               </div>
 
@@ -374,14 +355,18 @@ export default function PricingPage() {
 
               <button
                 onClick={() => handleSubscribe(plan)}
-                disabled={plan.disabled || loading === plan.id}
-                className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${plan.disabled ? "bg-gray-100 text-gray-400 border border-gray-200" : plan.popular ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-gray-900 text-white"}`}
+                disabled={plan.id === 'free' || loading === plan.id}
+                className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${plan.id === 'free' ? "bg-gray-100 text-gray-400 border border-gray-200" : plan.popular ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-gray-900 text-white"}`}
               >
-                {loading === plan.id ? "..." : plan.cta}
+                {loading === plan.id ? "Connecting..." : plan.cta}
               </button>
             </div>
           )})}
         </div>
+        
+        <p className="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-12">
+          Secure Payments by Razorpay • Global Access Enabled
+        </p>
       </div>
 
       {/* Footer */}
@@ -421,14 +406,8 @@ export default function PricingPage() {
           <p className="text-[9px] text-gray-300 font-black uppercase tracking-[0.2em]">
             © 2026 CHINTU INTELLIGENCE ECOSYSTEM • ALL RIGHTS RESERVED
           </p>
-          <div className="flex gap-6">
-            <span className="text-[9px] text-gray-300 font-black uppercase tracking-widest flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Systems Active
-            </span>
-          </div>
         </div>
       </footer>
     </div>
   );
 }
-
