@@ -22,9 +22,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing amount" }, { status: 400 });
     }
 
-    // Razorpay amount is in paise (1 INR = 100 paise)
+    // Razorpay amount is in subunits (1 INR = 100 paise, 1 USD = 100 cents)
     const options = {
-      amount: Math.round(amount * 100), 
+      amount: Math.round(amount), 
       currency,
       receipt: `receipt_${Date.now()}`,
       notes: {

@@ -121,21 +121,20 @@ export default function PricingPage() {
         return;
       }
 
-      // Calculate price based on USD but process in INR for Razorpay (Standard approach)
+      // Calculate price in USD cents (Razorpay takes subunits)
       const basePrice = billingCycle === "monthly" ? plan.monthlyPrice : plan.annualPrice;
-      const totalUSD = basePrice * quantity;
-      const totalAmountINR = Math.round(totalUSD * USD_TO_INR);
+      const totalAmountUSD = Math.round(basePrice * quantity * 100); 
 
       // 1. Create Order
       const orderRes = await fetch("/api/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          amount: totalAmountINR, 
+          amount: totalAmountUSD, 
           planId: plan.id, 
           quantity,
           billingCycle,
-          currency: "INR" 
+          currency: "USD" 
         }),
       });
 
