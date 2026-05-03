@@ -261,7 +261,8 @@ export default function PricingPage() {
           const result = await verifyRes.json();
           if (result.success) {
             // Auto-switch to Dark Mode
-            document.body.classList.remove("light-mode");
+            window.dispatchEvent(new CustomEvent("chintu-theme-sync", { detail: { theme: "dark" } }));
+            
             setSuccessPlan(plan);
             setShowSuccess(true);
             

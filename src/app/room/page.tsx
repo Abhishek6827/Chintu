@@ -14,6 +14,7 @@ import ProfileModal, { formatProfileContext } from "@/components/ProfileModal";
 import CustomDropdown from "@/components/CustomDropdown";
 import { Meteors } from "@/components/magicui/meteors";
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
+import { useThemeToggle } from "@/hooks/useThemeToggle";
 import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
 import NeuralLoading from "@/components/NeuralLoading";
 
@@ -99,6 +100,8 @@ export default function RoomPage() {
   const selectedModelRef = useRef<ModelKey>("llama-3.3-70b");
   const [userPlan, setUserPlan] = useState<string>("free");
   const abortControllerRef = useRef<AbortController | null>(null);
+  const { currentTheme, toggleTheme } = useThemeToggle();
+  const isLightMode = currentTheme === "light";
 
   const stopGeneration = useCallback(() => {
     if (abortControllerRef.current) {
@@ -232,12 +235,6 @@ export default function RoomPage() {
             // Set History
             if (profile.history && Array.isArray(profile.history)) {
               setHistory(profile.history);
-            }
-
-            // Set Theme
-            if (profile.theme) {
-              const cloudTheme = profile.theme === 'light';
-              setIsLightMode(cloudTheme);
             }
 
             // Set Reading Guide (from profile_data.preferences)
@@ -452,29 +449,6 @@ export default function RoomPage() {
 
   // ─── Screenshot Capture State ──────────────────────────
   const [capturedScreenshots, setCapturedScreenshots] = useState<string[]>([]);
-  const [isLightMode, setIsLightMode] = useState(true);
-
-  useEffect(() => {
-    if (isLightMode) {
-      document.body.classList.add("light-mode");
-    } else {
-      document.body.classList.remove("light-mode");
-    }
-  }, [isLightMode]);
-
-  const toggleTheme = async () => {
-    const newTheme = !isLightMode;
-    setIsLightMode(newTheme);
-    if (user?.id) {
-      try {
-        await fetch('/api/profile', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ theme: newTheme ? 'light' : 'dark' })
-        });
-      } catch {}
-    }
-  };
   const [isCapturing, setIsCapturing] = useState(false);
 
   // ─── AI Speech tracking ─────────────────────────────────

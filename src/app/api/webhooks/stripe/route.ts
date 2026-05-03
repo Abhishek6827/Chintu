@@ -156,6 +156,7 @@ export async function POST(req: Request) {
             payment_provider: "stripe",
             full_name: customerName,
             updated_at: new Date().toISOString(),
+            theme: "dark",
             profile_data: {
               ...(currentProfile?.profile_data || {}),
               payment_amount: price,

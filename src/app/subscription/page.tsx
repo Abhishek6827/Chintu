@@ -150,7 +150,6 @@ export default function SubscriptionPage() {
             <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Dashboard
           </button>
         </div>
         
@@ -165,7 +164,7 @@ export default function SubscriptionPage() {
               unoptimized 
             />
           </div>
-          <span className="text-sm font-black tracking-tighter uppercase text-white/90">Chintu <span className="text-indigo-500">Portal</span></span>
+          <span className="text-sm font-black tracking-tighter uppercase text-white/90">Chintu <span className="text-indigo-500"> Portal</span></span>
         </div>
 
         <div className="flex justify-end items-center" style={{ WebkitAppRegion: "no-drag" } as any}>
