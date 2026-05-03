@@ -71,10 +71,24 @@ export async function POST(req: Request) {
     const purchasedDays = planInfo.days * quantity;
     
     const now = new Date();
-    let currentExpiry = profile?.subscription_expires_at ? new Date(profile.subscription_expires_at) : now;
+    
+    // RESOLVE TARGET USER: Fallback to email if userId lookup fails
+    let targetProfile = profile;
+    if (!targetProfile && email && email !== "N/A") {
+      console.warn(`[Razorpay Webhook] Profile not found for ID ${userId}. Falling back to email ${email}`);
+      const { data: profileByEmail } = await supabaseAdmin
+        .from("profiles")
+        .select("id, plan, email, credits, subscription_expires_at, profile_data")
+        .eq("email", email)
+        .maybeSingle();
+      targetProfile = profileByEmail;
+    }
+
+    const targetUserId = targetProfile?.id || userId;
+    let currentExpiry = targetProfile?.subscription_expires_at ? new Date(targetProfile.subscription_expires_at) : now;
     if (currentExpiry < now) currentExpiry = now;
     const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
-    const totalCredits = (profile?.credits || 0) + purchasedCredits;
+    const totalCredits = (targetProfile?.credits || 0) + purchasedCredits;
 
     // Check for email conflicts before upsert
     let finalEmail = (email && email !== "N/A") ? email : profile?.email;
@@ -105,18 +119,31 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true, alreadyProcessed: true });
     }
 
-    await supabaseAdmin.from("profiles").upsert({
-      id: userId,
+    const amountINR = Number(payment.amount) / 100;
+    const gatewayFee = (Number(payment.fee) || 0) / 100;
+    const gatewayTax = (Number(payment.tax) || 0) / 100;
+    const totalFees = gatewayFee + gatewayTax;
+    const netAmount = amountINR - totalFees;
+
+    await supabaseAdmin.from("profiles").update({
       email: finalEmail,
-      full_name: fullName || profile?.full_name,
+      full_name: fullName || targetProfile?.full_name,
       plan: planInfo.plan,
       credits: totalCredits,
       subscription_expires_at: newExpiry.toISOString(),
       payment_provider: "razorpay",
       razorpay_payment_id: payment.id,
       updated_at: new Date().toISOString(),
-      theme: "dark"
-    });
+      profile_data: {
+        ...(targetProfile?.profile_data || {}),
+        payment_amount: amountINR,
+        payment_type: "razorpay",
+        last_payment_id: payment.id,
+        last_gateway: "razorpay",
+        last_payment_at: new Date().toISOString(),
+        gateway_fee: totalFees
+      }
+    }).eq("id", targetUserId);
 
     const eventTime = new Date().toLocaleString('en-IN', { 
       timeZone: 'Asia/Kolkata',
@@ -124,27 +151,20 @@ export async function POST(req: Request) {
       hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
     }).replace(/,/g, '');
 
-    const amountINR = Number(payment.amount) / 100;
     const newPlan = notes.planId || "Unknown";
-    
-    // Gateway Fees calculation (Razorpay subunits)
-    const gatewayFee = (Number(payment.fee) || 0) / 100;
-    const gatewayTax = (Number(payment.tax) || 0) / 100;
-    const totalFees = gatewayFee + gatewayTax;
-    const netAmount = amountINR - totalFees;
 
     // Notify Telegram
     await sendTelegramAlert(
-      `💰 <b>New Subscription Captured! (Razorpay)</b>\n\n` +
-      `👤 Name: <b>${fullName}</b>\n` +
-      `📧 Email: <code>${email}</code>\n` +
-      `📅 Date: <code>${eventTime}</code>\n` +
-      `💎 Plan: <b>${profile?.plan?.toUpperCase() || "FREE"} → ${newPlan.toUpperCase()}</b>\n` +
-      `💰 Amount: <b>₹${amountINR.toLocaleString()}</b> (Qty: ${quantity})\n` +
-      `💸 Gateway Fees: <b>₹${totalFees.toFixed(2)}</b> (Incl. Tax)\n` +
-      `🏦 Net Settlement: <b>₹${netAmount.toFixed(2)}</b>\n` +
-      `⚡ Total Credits: <b>${totalCredits}</b>\n` +
-      `🆔 ID: <code>${payment.id}</code>\n\n` +
+      `💰 <b>New Subscription Captured! (Razorpay)</b> 💳\n\n` +
+      `👤 <b>Name:</b> ${fullName}\n` +
+      `📧 <b>Email:</b> <code>${email}</code>\n` +
+      `📅 <b>Date:</b> <code>${eventTime}</code>\n` +
+      `💎 <b>Plan:</b> <b>${profile?.plan?.toUpperCase() || "FREE"} → ${newPlan.toUpperCase()}</b>\n` +
+      `💰 <b>Amount:</b> <b>₹${amountINR.toLocaleString()}</b> (Qty: ${quantity})\n` +
+      `💸 <b>Gateway Fees:</b> <b>₹${totalFees.toFixed(2)}</b> (Incl. Tax)\n` +
+      `🏦 <b>Net Settlement:</b> <b>₹${netAmount.toFixed(2)}</b>\n` +
+      `⚡ <b>Total Credits:</b> <b>${totalCredits}</b>\n` +
+      `🆔 <b>ID:</b> <code>${payment.id}</code>\n\n` +
       `✅ <i>Razorpay Secure fulfillment verified.</i>`
     );
 

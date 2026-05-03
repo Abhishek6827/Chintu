@@ -113,12 +113,24 @@ export async function POST(req: Request) {
         }
 
         // Fetch user's current status for stacking
-        const { data: currentProfile } = await supabaseAdmin
+        let { data: currentProfile } = await supabaseAdmin
           .from("profiles")
-          .select("plan, email, credits, subscription_expires_at, profile_data")
+          .select("id, plan, email, credits, subscription_expires_at, profile_data")
           .eq("id", userId)
           .maybeSingle();
 
+        // FALLBACK: If not found by ID, try email (crucial if userId mismatch occurs)
+        if (!currentProfile && session.customer_details?.email) {
+          console.warn(`[Stripe Webhook] Profile not found for ID ${userId}. Falling back to email ${session.customer_details.email}`);
+          const { data: profileByEmail } = await supabaseAdmin
+            .from("profiles")
+            .select("id, plan, email, credits, subscription_expires_at, profile_data")
+            .eq("email", session.customer_details.email)
+            .maybeSingle();
+          currentProfile = profileByEmail;
+        }
+
+        const targetUserId = currentProfile?.id || userId;
         const oldPlan = currentProfile?.plan || "free";
         const existingCredits = currentProfile?.credits || 0;
         
@@ -143,6 +155,12 @@ export async function POST(req: Request) {
 
         console.log(`[Stripe Webhook] Stacking for user ${userId}: Credits ${existingCredits} + ${purchasedCredits} = ${totalCredits}`);
         
+        // 2. DEDUPLICATION CHECK: Prevent double fulfillment if invoice.payment_succeeded already fired
+        if (currentProfile?.profile_data?.last_payment_id === session.id) {
+          console.log(`[Stripe Webhook] Session ${session.id} already processed. Skipping.`);
+          return NextResponse.json({ received: true, alreadyProcessed: true });
+        }
+        
         // Update Supabase Profile
         const customerName = session.customer_details?.name || session.customer_details?.email || "Unknown";
         const { error } = await supabaseAdmin
@@ -156,16 +174,16 @@ export async function POST(req: Request) {
             payment_provider: "stripe",
             full_name: customerName,
             updated_at: new Date().toISOString(),
-            theme: "dark",
             profile_data: {
               ...(currentProfile?.profile_data || {}),
               payment_amount: price,
               payment_type: paymentMethodDisplay,
               last_payment_id: session.id,
-              last_gateway: "stripe"
+              last_gateway: "stripe",
+              last_payment_at: new Date().toISOString()
             }
           })
-          .eq("id", userId);
+          .eq("id", targetUserId);
 
       if (error) {
         console.error("[Stripe Webhook] Error updating profile:", error.message);
@@ -175,20 +193,20 @@ export async function POST(req: Request) {
       // ─── Send Telegram Alert ─────────────────────────────
       const statusLabel = isDowngrade ? "DOWNGRADE 🔻" : (oldPlan === 'free' ? "NEW UPGRADE ⚡" : "UPGRADE ⚡");
       const telegramMsg = `
-<b>${statusLabel} | STRIPE</b>
-<b>Customer:</b> ${customerName}
-<b>Email:</b> ${session.customer_details?.email || 'N/A'}
-<b>Payment ID:</b> <code>${session.id}</code>
-<b>Method:</b> ${paymentMethodDisplay}
-<b>Amount:</b> ${price}
+<b>${statusLabel} | STRIPE</b> 💳
+👤 <b>Customer:</b> ${customerName}
+📧 <b>Email:</b> <code>${session.customer_details?.email || 'N/A'}</code>
+🆔 <b>Payment ID:</b> <code>${session.id}</code>
+🛠️ <b>Method:</b> ${paymentMethodDisplay}
+💰 <b>Amount:</b> ${price}
 --------------------------
-<b>Old Plan:</b> ${oldPlan.toUpperCase()}
-<b>New Plan:</b> ${plan.toUpperCase()}
-<b>Old Credits:</b> ${existingCredits}
-<b>New Credits:</b> ${totalCredits} ${bonusCredits > 0 ? `(+${bonusCredits} Pro-rata)` : ""}
-<b>Expiry:</b> ${newExpiry.toLocaleDateString('en-IN')}
+📊 <b>Old Plan:</b> ${oldPlan.toUpperCase()}
+🚀 <b>New Plan:</b> ${plan.toUpperCase()}
+📉 <b>Old Credits:</b> ${existingCredits}
+📈 <b>New Credits:</b> ${totalCredits} ${bonusCredits > 0 ? `(+${bonusCredits} Pro-rata)` : ""}
+📅 <b>Expiry:</b> ${newExpiry.toLocaleDateString('en-IN')}
 --------------------------
-<b>Status:</b> SUCCESSFUL
+✅ <b>Status:</b> SUCCESSFUL
 `;
       await sendTelegramAlert(telegramMsg);
 
@@ -222,15 +240,41 @@ export async function POST(req: Request) {
     const invoice = event.data.object as any;
     const subscriptionId = invoice.subscription as string;
 
+    // SKIP if this is the first invoice of a new subscription (handled by checkout.session.completed)
+    if (invoice.billing_reason === "subscription_create") {
+      console.log(`[Stripe Webhook] Invoice ${invoice.id} is for initial creation. Skipping to avoid double-crediting.`);
+      return NextResponse.json({ received: true });
+    }
+
     if (subscriptionId) {
       // Find user by subscription ID
-      const { data: profile, error: findError } = await supabaseAdmin
+      const result = await supabaseAdmin
         .from("profiles")
-        .select("id, plan, email, credits, subscription_expires_at")
+        .select("id, plan, email, credits, subscription_expires_at, profile_data")
         .eq("stripe_subscription_id", subscriptionId)
         .maybeSingle();
+      
+      let profile = result.data;
+      const findError = result.error;
+
+      // FALLBACK: If not found by sub ID, try email from invoice
+      if (!profile && invoice.customer_email) {
+        console.warn(`[Stripe Webhook] Profile not found for sub ${subscriptionId}. Falling back to email ${invoice.customer_email}`);
+        const { data: profileByEmail } = await supabaseAdmin
+          .from("profiles")
+          .select("id, plan, email, credits, subscription_expires_at, profile_data")
+          .eq("email", invoice.customer_email)
+          .maybeSingle();
+        profile = profileByEmail;
+      }
 
       if (profile && !findError) {
+        // DEDUPLICATION: Check if this invoice was already processed
+        if (profile?.profile_data?.last_payment_id === invoice.id) {
+          console.log(`[Stripe Webhook] Invoice ${invoice.id} already processed. Skipping.`);
+          return NextResponse.json({ received: true });
+        }
+
         // Stack credits and extend days based on plan
         const priceId = invoice.lines?.data?.[0]?.price?.id;
         const planInfo = PRICE_ID_MAP[priceId || ""];
@@ -261,7 +305,13 @@ export async function POST(req: Request) {
               credits: totalCredits, 
               subscription_expires_at: newExpiry.toISOString(),
               full_name: invoiceCustomerName,
-              updated_at: new Date().toISOString() 
+              updated_at: new Date().toISOString(),
+              profile_data: {
+                ...(profile?.profile_data || {}),
+                last_payment_id: invoice.id,
+                last_gateway: "stripe_invoice",
+                last_payment_at: new Date().toISOString()
+              }
             })
             .eq("id", profile.id);
 
@@ -315,11 +365,29 @@ export async function POST(req: Request) {
       const planInfo = PRICE_ID_MAP[priceId || ""];
       if (planInfo && subscription.status === "active") {
         // Find user by subscription ID
-        const { data: profile } = await supabaseAdmin
+        let { data: profile } = await supabaseAdmin
           .from("profiles")
-          .select("id, plan, email, credits, subscription_expires_at")
+          .select("id, plan, email, credits, subscription_expires_at, profile_data")
           .eq("stripe_subscription_id", subscription.id)
           .maybeSingle();
+
+        // FALLBACK: Try email
+        if (!profile) {
+          try {
+            const stripeCustomer = await stripe.customers.retrieve(subscription.customer as string);
+            if (stripeCustomer && !stripeCustomer.deleted) {
+              const customerEmail = (stripeCustomer as Stripe.Customer).email;
+              if (customerEmail) {
+                const { data: profileByEmail } = await supabaseAdmin
+                  .from("profiles")
+                  .select("id, plan, email, credits, subscription_expires_at, profile_data")
+                  .eq("email", customerEmail)
+                  .maybeSingle();
+                profile = profileByEmail;
+              }
+            }
+          } catch {}
+        }
 
         if (profile) {
           const oldPlan = profile.plan || "free";

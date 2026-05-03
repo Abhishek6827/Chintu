@@ -354,7 +354,7 @@ export default function PricingPage() {
               <ConfirmationMessage
                 successMessage="Protocol Active"
                 labelName="Chintu AI"
-                labelMessage={`Welcome to the ${successPlan?.name} tier. Your account has been initialized with ${successPlan?.credits * (quantity || 1)} credits and Dark Mode has been activated.`}
+                labelMessage={`Welcome to the ${successPlan?.name} tier. Your account has been initialized with ${successPlan?.credits * (quantity || 1)} credits. All premium strategic modules are now unlocked.`}
                 icon={successPlan?.id === 'elite' ? <Crown className="w-8 h-8 text-white" /> : <Trophy className="w-8 h-8 text-white" />}
                 containerClassName="mb-8"
               />

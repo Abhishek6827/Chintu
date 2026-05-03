@@ -72,40 +72,14 @@ export async function POST(req: NextRequest) {
     const supabaseAdmin = createAdminClient();
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    // Get user profile
+    // 1. Initial Profile Fetch
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("*")
       .eq("id", userId)
       .maybeSingle();
 
-    // Determine plan details
-    const planKey = `${planId}_${billingCycle}`; 
-    const planInfo = RAZORPAY_PLANS[planKey] || RAZORPAY_PLANS["pro_monthly"];
-
-    const purchasedCredits = planInfo.credits * quantity;
-    const purchasedDays = planInfo.days * quantity;
-    const existingCredits = profile?.credits || 0;
-
-
-    const now = new Date();
-    let currentExpiry = profile?.subscription_expires_at ? new Date(profile.subscription_expires_at) : now;
-    if (currentExpiry < now) currentExpiry = now;
-    
-    // Pro-rata logic for Downgrades (Elite -> Pro)
-    let bonusCredits = 0;
-    const isDowngrade = profile?.plan === 'elite' && planInfo.plan === 'pro';
-    if (isDowngrade && currentExpiry > now) {
-      const remainingDays = Math.ceil((currentExpiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      // Add value of remaining Elite days as extra credits for the new Pro plan
-      // Elite (1000) vs Pro (200) -> 800 credits difference per month
-      bonusCredits = Math.round((800 / 30) * remainingDays);
-    }
-
-    const totalCredits = existingCredits + purchasedCredits + bonusCredits;
-    const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
-
-    // Fallback: Get Clerk data if profile is missing name/email
+    // 2. Resolve Contact Info (Clerk Fallback)
     let userEmail = profile?.email;
     let userName = profile?.full_name;
     
@@ -114,17 +88,47 @@ export async function POST(req: NextRequest) {
         const { clerkClient } = await import("@clerk/nextjs/server");
         const client = await clerkClient();
         const clerkUser = await client.users.getUser(userId);
-        if (!userEmail) {
-          userEmail = clerkUser.emailAddresses.find(e => e.id === clerkUser.primaryEmailAddressId)?.emailAddress 
-                   || clerkUser.emailAddresses[0]?.emailAddress;
-        }
-        if (!userName) {
-          userName = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
-        }
+        userEmail = userEmail || clerkUser.emailAddresses[0]?.emailAddress;
+        userName = userName || `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
       } catch (err) {
-        console.error("Failed to fetch data from Clerk:", err);
+        console.error("Clerk fetch failed:", err);
       }
     }
+
+    // 3. Resolve Target Profile (Email Fallback for ID mismatches)
+    let targetProfile = profile;
+    if (!targetProfile && userEmail) {
+      const { data: profileByEmail } = await supabaseAdmin
+        .from("profiles")
+        .select("*")
+        .eq("email", userEmail)
+        .maybeSingle();
+      targetProfile = profileByEmail;
+    }
+    const targetUserId = targetProfile?.id || userId;
+
+    // 4. Calculate Credits & Expiry
+    const planKey = `${planId}_${billingCycle}`; 
+    const planInfo = RAZORPAY_PLANS[planKey] || RAZORPAY_PLANS["pro_monthly"];
+
+    const purchasedCredits = planInfo.credits * quantity;
+    const purchasedDays = planInfo.days * quantity;
+
+    const now = new Date();
+    let currentExpiry = targetProfile?.subscription_expires_at ? new Date(targetProfile.subscription_expires_at) : now;
+    if (currentExpiry < now) currentExpiry = now;
+    
+    // Pro-rata logic for Downgrades (Elite -> Pro)
+    let bonusCredits = 0;
+    const isDowngrade = targetProfile?.plan === 'elite' && planInfo.plan === 'pro';
+    if (isDowngrade && currentExpiry > now) {
+      const remainingDays = Math.ceil((currentExpiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      bonusCredits = Math.round((800 / 30) * remainingDays);
+    }
+
+    const existingCredits = (targetProfile?.credits || 0);
+    const totalCredits = existingCredits + purchasedCredits + bonusCredits;
+    const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
 
     // Check for email conflicts before upsert to avoid duplicate key errors
     if (userEmail) {
@@ -153,28 +157,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, alreadyProcessed: true });
     }
 
-    // Update Profile (Upsert)
+    // Gateway Fees calculation (Razorpay subunits)
+    const gatewayFee = (Number(payment.fee) || 0) / 100;
+    const gatewayTax = (Number(payment.tax) || 0) / 100;
+    const totalFees = gatewayFee + gatewayTax;
+    const netAmount = (Number(payment.amount) / 100) - totalFees;
+
+    // Update Profile (from upsert to update for safety)
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
-      .upsert({
-        id: userId,
+      .update({
         plan: planInfo.plan,
         credits: totalCredits,
         subscription_expires_at: newExpiry.toISOString(),
         payment_provider: "razorpay",
         razorpay_payment_id: razorpay_payment_id,
         updated_at: new Date().toISOString(),
-        theme: "dark",
-        full_name: userName || (profile ? profile.full_name : null),
-        email: userEmail || (profile ? profile.email : null),
+        full_name: userName || (targetProfile ? targetProfile.full_name : null),
+        email: userEmail || (targetProfile ? targetProfile.email : null),
         profile_data: {
-          ...(profile?.profile_data || {}),
+          ...(targetProfile?.profile_data || {}),
           payment_amount: `${planInfo.price}`,
           payment_type: paymentTypeDisplay,
           last_payment_id: razorpay_payment_id,
-          last_gateway: "razorpay"
+          last_gateway: "razorpay",
+          last_payment_at: new Date().toISOString(),
+          gateway_fee: totalFees
         }
-      });
+      })
+      .eq("id", targetUserId);
 
     if (updateError) throw updateError;
 
@@ -185,12 +196,6 @@ export async function POST(req: NextRequest) {
     }).replace(/,/g, '');
 
     const customerName = profile?.full_name || userName || userEmail || "User";
-    
-    // Gateway Fees calculation (Razorpay subunits)
-    const gatewayFee = (Number(payment.fee) || 0) / 100;
-    const gatewayTax = (Number(payment.tax) || 0) / 100;
-    const totalFees = gatewayFee + gatewayTax;
-    const netAmount = (Number(payment.amount) / 100) - totalFees;
 
     // Send Telegram Alert
     const statusLabel = isDowngrade ? "DOWNGRADE 🔻" : (profile?.plan === 'free' ? "NEW SUBSCRIPTION 💰" : "UPGRADE ⚡");
