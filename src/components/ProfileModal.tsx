@@ -74,6 +74,26 @@ export default function ProfileModal({
   const [isEditingJd, setIsEditingJd] = useState(false);
   const [jdText, setJdText] = useState("");
   const [isSavingJd, setIsSavingJd] = useState(false);
+  const [isManagingSubscription, setIsManagingSubscription] = useState(false);
+
+  const handleManageSubscription = async () => {
+    setIsManagingSubscription(true);
+    try {
+      const res = await fetch("/api/create-portal-session", { method: "POST" });
+      const data = await res.json();
+      if (data.url) {
+        if (isElectron) (window as any).electronAPI.openExternal(data.url);
+        else window.location.href = data.url;
+      } else {
+        setError(data.error || "Failed to load billing portal.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error loading billing portal.");
+    } finally {
+      setIsManagingSubscription(false);
+    }
+  };
 
   useEffect(() => {
     if (!user?.id) return;
@@ -84,9 +104,13 @@ export default function ProfileModal({
         if (res.ok) {
           const { profile: data } = await res.json();
           if (data) {
-            setUserPlan(data.plan || "free");
-            setSavedJd(data.current_jd || "");
-            setJdText(data.current_jd || "");
+            setUserPlan((data.plan || "free").toLowerCase());
+            const dbJd = data.current_jd || "";
+            const sessionJd = typeof window !== "undefined" ? sessionStorage.getItem("jobDescription") || "" : "";
+            const activeJd = dbJd || sessionJd;
+            
+            setSavedJd(activeJd);
+            setJdText(activeJd);
             if (data.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
               setProfile(data.profile_data);
             } else {
@@ -145,6 +169,10 @@ export default function ProfileModal({
     setProfile(null);
     setEditMode(false);
     setShowDeleteConfirm(false);
+    // Clear session storage to prevent stale redirects
+    sessionStorage.removeItem("jobDescription");
+    // Notify room to clear JD state
+    window.dispatchEvent(new CustomEvent('chintu-jd-updated', { detail: { jd: "" } }));
   };
 
   const handleEdit = () => {
@@ -173,13 +201,18 @@ export default function ProfileModal({
   const handleSaveJd = async () => {
     if (!user?.id) return;
     setIsSavingJd(true);
+    const trimmedJd = jdText.trim();
     try {
       await fetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ current_jd: jdText.trim() })
+        body: JSON.stringify({ current_jd: trimmedJd })
       });
-      setSavedJd(jdText.trim());
+      setSavedJd(trimmedJd);
+      // Sync to session storage too
+      sessionStorage.setItem("jobDescription", trimmedJd);
+      // Notify room to update its local state
+      window.dispatchEvent(new CustomEvent('chintu-jd-updated', { detail: { jd: trimmedJd } }));
       setIsEditingJd(false);
     } catch (err: any) {
       console.error("Save JD error:", err);
@@ -199,6 +232,10 @@ export default function ProfileModal({
       });
       setSavedJd("");
       setJdText("");
+      // Clear session storage to prevent stale redirects
+      sessionStorage.removeItem("jobDescription");
+      // Notify room to clear JD state
+      window.dispatchEvent(new CustomEvent('chintu-jd-updated', { detail: { jd: "" } }));
     } catch (err: any) {
       console.error("Delete JD error:", err);
       setError(`Failed to delete Job Description: ${err.message || "Unknown error"}`);
@@ -224,6 +261,29 @@ export default function ProfileModal({
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
+
+        {/* Manage Subscription Button (Pro/Elite Only) */}
+        {userPlan !== "free" && !editMode && (
+          <button 
+            onClick={handleManageSubscription}
+            disabled={isManagingSubscription}
+            className="w-full mb-6 py-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-indigo-500/20 transition-all flex items-center justify-center gap-2 shadow-sm"
+          >
+            {isManagingSubscription ? (
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+                <span>Redirecting...</span>
+              </div>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Manage Subscription
+              </>
+            )}
+          </button>
+        )}
 
         {error && (
           <div className="mb-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs px-4 py-3 rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-top-2">

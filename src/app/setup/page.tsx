@@ -78,13 +78,6 @@ export default function SetupPage() {
 
 
     if (isLoaded && isSignedIn && user) {
-      // If we already have a JD in this session, jump straight to the room
-      const sessionJd = sessionStorage.getItem("jobDescription");
-      if (sessionJd && isElectron) {
-        router.push("/room");
-        return;
-      }
-
       checkProfile().then(async () => {
         // Sync name if missing in profile_data
         try {
@@ -406,30 +399,6 @@ export default function SetupPage() {
               )}
             </div>
 
-            <InteractiveHoverButton 
-              onClick={async () => {
-                try {
-                  setStatusText("Opening Billing Portal...");
-                  setIsInitiating(true);
-                  const res = await fetch("/api/create-portal-session", { method: "POST" });
-                  const data = await res.json();
-                  if (data.url) {
-                    window.location.href = data.url;
-                  } else {
-                    alert(data.error || "Failed to load portal.");
-                    setIsInitiating(false);
-                  }
-                } catch (err) {
-                  console.error(err);
-                  alert("Error loading billing portal.");
-                  setIsInitiating(false);
-                }
-              }}
-              disabled={isRefining || isInitiating}
-              className="w-full py-3 mt-2 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 text-[var(--text-dim)] hover:text-[var(--text-main)]"
-            >
-              Manage Subscription
-            </InteractiveHoverButton>
           </div>
         </div>
 

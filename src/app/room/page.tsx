@@ -397,15 +397,22 @@ export default function RoomPage() {
     const handleOpenProfile = () => setShowProfile(true);
     const handleUnhideRequest = () => setShowUnhidePrompt(true);
     const handleToggleGhost = () => handleGhostToggle();
+    const handleJdUpdate = (e: any) => {
+      if (e.detail?.jd !== undefined) {
+        setJobDescription(e.detail.jd);
+      }
+    };
 
     window.addEventListener('chintu-open-profile', handleOpenProfile);
     window.addEventListener('chintu-unhide-request', handleUnhideRequest);
     window.addEventListener('chintu-toggle-ghost', handleToggleGhost);
+    window.addEventListener('chintu-jd-updated', handleJdUpdate);
 
     return () => {
       window.removeEventListener('chintu-open-profile', handleOpenProfile);
       window.removeEventListener('chintu-unhide-request', handleUnhideRequest);
       window.removeEventListener('chintu-toggle-ghost', handleToggleGhost);
+      window.removeEventListener('chintu-jd-updated', handleJdUpdate);
     };
   }, [handleGhostToggle]);
 

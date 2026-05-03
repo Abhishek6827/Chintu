@@ -73,6 +73,16 @@ export default function GlobalHeader() {
     const interval = setInterval(fetchProfile, 10000);
     return () => clearInterval(interval);
   }, [isLoaded, isSignedIn, user?.id]);
+  
+  // Close modals when signed out
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      setShowProfileModal(false);
+      setShowOnboarding(false);
+      // Clear session storage on logout to ensure JD is requested again next time
+      sessionStorage.removeItem("jobDescription");
+    }
+  }, [isLoaded, isSignedIn]);
 
   const [showUnhidePrompt, setShowUnhidePrompt] = useState(false);
   const [isStealthMode, setIsStealthMode] = useState(true); // Default to true based on main.js
@@ -123,8 +133,25 @@ export default function GlobalHeader() {
     }
   };
 
+  const handleManageSubscription = async () => {
+    try {
+      const res = await fetch("/api/create-portal-session", { method: "POST" });
+      const data = await res.json();
+      if (data.url) {
+        if (isElectron) (window as any).electronAPI.openExternal(data.url);
+        else window.location.href = data.url;
+      } else {
+        alert(data.error || "Failed to load billing portal.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error loading billing portal.");
+    }
+  };
+
   // Hide GlobalHeader on web platform - it's specifically for the EXE app frame
-  if (!isElectron) {
+  // Use 'mounted' to prevent hydration errors
+  if (!mounted || !isElectron) {
     return null;
   }
 
@@ -224,24 +251,33 @@ export default function GlobalHeader() {
             </>
           )}
           
-          <div className="flex items-center gap-1.5 ml-1">
-            <div className="w-7 h-7 rounded-lg overflow-hidden ring-1 ring-white/10 hover:scale-105 transition-transform">
-              <UserButton afterSignOutUrl="/">
-                <UserButton.MenuItems>
-                  <UserButton.Action 
-                    label="My AI Profile" 
-                    labelIcon={<Sparkles className="w-4 h-4" />} 
-                    onClick={() => setShowProfileModal(true)} 
-                  />
-                  <UserButton.Action 
-                    label="Support" 
-                    labelIcon={<Zap className="w-4 h-4" />} 
-                    onClick={handleUpgrade} 
-                  />
-                </UserButton.MenuItems>
-              </UserButton>
+          {isSignedIn && (
+            <div className="flex items-center gap-1.5 ml-1">
+              <div className="w-7 h-7 rounded-lg overflow-hidden ring-1 ring-white/10 hover:scale-105 transition-transform">
+                <UserButton afterSignOutUrl="/">
+                  <UserButton.MenuItems>
+                    {userPlan !== "free" && (
+                      <UserButton.Action 
+                        label="Manage Subscription" 
+                        labelIcon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>} 
+                        onClick={handleManageSubscription} 
+                      />
+                    )}
+                    <UserButton.Action 
+                      label="My AI Profile" 
+                      labelIcon={<Sparkles className="w-4 h-4" />} 
+                      onClick={() => setShowProfileModal(true)} 
+                    />
+                    <UserButton.Action 
+                      label="Support" 
+                      labelIcon={<Zap className="w-4 h-4" />} 
+                      onClick={handleUpgrade} 
+                    />
+                  </UserButton.MenuItems>
+                </UserButton>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
       {showOnboarding && <OnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} />}
