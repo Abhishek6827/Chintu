@@ -155,9 +155,12 @@ export async function POST(req: Request) {
 
         console.log(`[Stripe Webhook] Stacking for user ${userId}: Credits ${existingCredits} + ${purchasedCredits} = ${totalCredits}`);
         
-        // 2. DEDUPLICATION CHECK: Prevent double fulfillment if invoice.payment_succeeded already fired
-        if (currentProfile?.profile_data?.last_payment_id === session.id) {
-          console.log(`[Stripe Webhook] Session ${session.id} already processed. Skipping.`);
+        // 2. DEDUPLICATION CHECK: Use Payment Intent if available, fallback to Session ID
+        const paymentIntentId = session.payment_intent as string;
+        const dedupId = paymentIntentId || session.id;
+
+        if (currentProfile?.profile_data?.last_payment_id === dedupId) {
+          console.log(`[Stripe Webhook] Payment ${dedupId} already processed. Skipping.`);
           return NextResponse.json({ received: true, alreadyProcessed: true });
         }
         
@@ -178,7 +181,7 @@ export async function POST(req: Request) {
               ...(currentProfile?.profile_data || {}),
               payment_amount: price,
               payment_type: paymentMethodDisplay,
-              last_payment_id: session.id,
+              last_payment_id: dedupId,
               last_gateway: "stripe",
               last_payment_at: new Date().toISOString()
             }
@@ -269,9 +272,12 @@ export async function POST(req: Request) {
       }
 
       if (profile && !findError) {
-        // DEDUPLICATION: Check if this invoice was already processed
-        if (profile?.profile_data?.last_payment_id === invoice.id) {
-          console.log(`[Stripe Webhook] Invoice ${invoice.id} already processed. Skipping.`);
+        // DEDUPLICATION: Use Payment Intent if available
+        const paymentIntentId = invoice.payment_intent as string;
+        const dedupId = paymentIntentId || invoice.id;
+
+        if (profile?.profile_data?.last_payment_id === dedupId) {
+          console.log(`[Stripe Webhook] Payment ${dedupId} already processed via invoice. Skipping.`);
           return NextResponse.json({ received: true });
         }
 
@@ -308,8 +314,10 @@ export async function POST(req: Request) {
               updated_at: new Date().toISOString(),
               profile_data: {
                 ...(profile?.profile_data || {}),
-                last_payment_id: invoice.id,
-                last_gateway: "stripe_invoice",
+                payment_amount: planInfo.price,
+                payment_type: "recurring",
+                last_payment_id: dedupId,
+                last_gateway: "stripe",
                 last_payment_at: new Date().toISOString()
               }
             })
@@ -404,6 +412,23 @@ export async function POST(req: Request) {
           
           if (currentExpiry < now) currentExpiry = now;
           const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
+
+          // LOGIC GUARD: If this is a status change from incomplete -> active, it's already handled by checkout session
+          const isInitialActivation = previousAttributes?.status === 'incomplete' && subscription.status === 'active';
+          
+          if (isInitialActivation) {
+            console.log(`[Stripe Webhook] Subscription ${subscription.id} activated from incomplete status. Skipping credits (handled by checkout).`);
+            // We still update the profile metadata but NOT the credits
+            await supabaseAdmin
+              .from("profiles")
+              .update({ 
+                plan: planInfo.plan,
+                subscription_expires_at: newExpiry.toISOString(),
+                updated_at: new Date().toISOString() 
+              })
+              .eq("id", profile.id);
+            return NextResponse.json({ received: true, info: "Activation handled, credits skipped" });
+          }
 
           console.log(`[Stripe Webhook] Subscription Updated for user ${profile.id}: ${oldPlan} → ${planInfo.plan}, Qty ${quantity}`);
           
