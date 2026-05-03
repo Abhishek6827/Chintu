@@ -175,7 +175,8 @@ export default function PricingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           priceId, 
-          quantity 
+          quantity,
+          email: user.primaryEmailAddress?.emailAddress
         }),
       });
 

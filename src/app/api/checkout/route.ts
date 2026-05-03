@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const { priceId, quantity = 1 } = await req.json();
+        const { priceId, quantity = 1, email } = await req.json();
 
         if (!priceId) {
             return NextResponse.json({ error: "Missing priceId" }, { status: 400 });
@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
         const session = await stripe.checkout.sessions.create({
             mode: "subscription",
             payment_method_types: ["card"],
+            customer_email: email,
             line_items: [{ price: priceId, quantity }],
             success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://getchintu.com"}/room?payment=success`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://getchintu.com"}/pricing?payment=cancelled`,
