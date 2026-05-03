@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
-import { Minus, Zap, Sparkles } from "lucide-react";
+import { Minus, Zap, Sparkles, CreditCard } from "lucide-react";
 
 
 
@@ -56,7 +56,7 @@ export default function GlobalHeader() {
           const { profile } = await res.json();
           if (profile) {
             setUserCredits(profile.credits);
-            setUserPlan(profile.plan || "free");
+            setUserPlan((profile.plan || "free").toLowerCase());
             if (profile.profile_data && Object.keys(profile.profile_data).length > 0) {
               // Profile exists
             }
@@ -256,13 +256,13 @@ export default function GlobalHeader() {
               <div className="w-7 h-7 rounded-lg overflow-hidden ring-1 ring-white/10 hover:scale-105 transition-transform">
                 <UserButton afterSignOutUrl="/">
                   <UserButton.MenuItems>
-                    {userPlan !== "free" && (
+                    {userPlan !== "free" ? (
                       <UserButton.Action 
                         label="Manage Subscription" 
-                        labelIcon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>} 
+                        labelIcon={<CreditCard className="w-4 h-4" />} 
                         onClick={handleManageSubscription} 
                       />
-                    )}
+                    ) : null}
                     <UserButton.Action 
                       label="My AI Profile" 
                       labelIcon={<Sparkles className="w-4 h-4" />} 
