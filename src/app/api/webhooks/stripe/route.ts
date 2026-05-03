@@ -129,6 +129,7 @@ export async function POST(req: Request) {
           subscription_expires_at: newExpiry.toISOString(),
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: session.subscription as string,
+          payment_provider: "stripe",
           full_name: customerName,
           updated_at: new Date().toISOString(),
         })

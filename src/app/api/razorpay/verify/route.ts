@@ -110,6 +110,8 @@ export async function POST(req: NextRequest) {
         plan: planInfo.plan,
         credits: totalCredits,
         subscription_expires_at: newExpiry.toISOString(),
+        payment_provider: "razorpay",
+        razorpay_payment_id: razorpay_payment_id,
         updated_at: new Date().toISOString(),
         theme: "dark",
         full_name: userName || (profile ? profile.full_name : null),

@@ -57,9 +57,6 @@ export default function GlobalHeader() {
           if (profile) {
             setUserCredits(profile.credits);
             setUserPlan((profile.plan || "free").toLowerCase());
-            if (profile.profile_data && Object.keys(profile.profile_data).length > 0) {
-              // Profile exists
-            }
           }
         }
       } catch (err) {
@@ -135,17 +132,24 @@ export default function GlobalHeader() {
 
   const handleManageSubscription = async () => {
     try {
-      const res = await fetch("/api/create-portal-session", { method: "POST" });
+      const res = await fetch("/api/manage-subscription");
       const data = await res.json();
+      
       if (data.url) {
+        // Stripe portal URL
         if (isElectron) (window as any).electronAPI.openExternal(data.url);
         else window.location.href = data.url;
+      } else if (data.provider === "razorpay") {
+        // Razorpay: redirect to support for now
+        const supportUrl = data.supportUrl || "/support";
+        if (isElectron) (window as any).electronAPI.openExternal(supportUrl);
+        else router.push(supportUrl);
       } else {
-        alert(data.error || "Failed to load billing portal.");
+        alert(data.error || "Failed to load subscription portal.");
       }
     } catch (err) {
       console.error(err);
-      alert("Error loading billing portal.");
+      alert("Error loading subscription portal.");
     }
   };
 
@@ -256,13 +260,13 @@ export default function GlobalHeader() {
               <div className="w-7 h-7 rounded-lg overflow-hidden ring-1 ring-white/10 hover:scale-105 transition-transform">
                 <UserButton afterSignOutUrl="/">
                   <UserButton.MenuItems>
-                    {userPlan !== "free" ? (
+                    {userPlan !== "free" && (
                       <UserButton.Action 
                         label="Manage Subscription" 
                         labelIcon={<CreditCard className="w-4 h-4" />} 
                         onClick={handleManageSubscription} 
                       />
-                    ) : null}
+                    )}
                     <UserButton.Action 
                       label="My AI Profile" 
                       labelIcon={<Sparkles className="w-4 h-4" />} 

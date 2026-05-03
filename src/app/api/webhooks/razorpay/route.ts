@@ -100,6 +100,8 @@ export async function POST(req: Request) {
       plan: planInfo.plan,
       credits: totalCredits,
       subscription_expires_at: newExpiry.toISOString(),
+      payment_provider: "razorpay",
+      razorpay_payment_id: payment.id,
       updated_at: new Date().toISOString(),
       theme: "dark"
     });
