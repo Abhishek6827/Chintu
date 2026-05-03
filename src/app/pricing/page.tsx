@@ -635,64 +635,157 @@ export default function PricingPage() {
       {/* Payment Selection Modal */}
       <AnimatePresence>
         {showPaymentModal && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 sm:p-6">
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowPaymentModal(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 bg-[#0a0a0c]/80 backdrop-blur-md"
             />
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-sm bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-[2rem] shadow-2xl overflow-hidden p-8"
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="relative w-full max-w-4xl bg-[var(--bg-app)] border border-[var(--glass-border)] rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col md:flex-row h-auto min-h-[500px]"
             >
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-500/20">
-                  <Shield className="w-8 h-8 text-indigo-500" />
+              {/* Left Section: Order Summary (Stripe-like) */}
+              <div className="w-full md:w-1/2 bg-[var(--panel-bg)] p-8 md:p-12 border-b md:border-b-0 md:border-r border-[var(--glass-border)] flex flex-col relative overflow-hidden">
+                {/* Background Glow */}
+                <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
+                
+                <button 
+                  onClick={() => setShowPaymentModal(false)}
+                  className="group flex items-center gap-2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-all text-[10px] font-black uppercase tracking-widest mb-12 relative z-10"
+                >
+                  <ArrowRight className="w-3 h-3 rotate-180 transition-transform group-hover:-translate-x-1" /> 
+                  Back to plans
+                </button>
+
+                <div className="flex items-center gap-3 mb-10 relative z-10">
+                  <div className="w-9 h-9 bg-indigo-500/10 rounded-xl flex items-center justify-center border border-indigo-500/20 shadow-inner">
+                    <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={24} height={24} unoptimized />
+                  </div>
+                  <span className="text-sm font-black tracking-tighter uppercase text-[var(--text-main)]">Chintu <span className="text-indigo-500 font-black">SaaS</span></span>
                 </div>
-                <h3 className="text-xl font-black text-[var(--text-main)] uppercase tracking-tighter mb-2">Select Gateway</h3>
-                <p className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-widest">Choose your preferred payment method</p>
+
+                <div className="mb-auto relative z-10">
+                  <p className="text-[var(--text-dim)] text-[11px] font-black uppercase tracking-widest mb-3 opacity-60">Checkout Summary</p>
+                  <h2 className="text-2xl font-black text-[var(--text-main)] uppercase tracking-tighter mb-1">
+                    Chintu {selectedPlanForPayment?.name}
+                  </h2>
+                  <div className="flex items-baseline gap-2 mb-8">
+                    <span className="text-5xl font-black text-[var(--text-main)] tracking-tighter">
+                      ${((billingCycle === 'monthly' ? selectedPlanForPayment?.monthlyPrice : selectedPlanForPayment?.annualPrice) * quantity).toLocaleString()}
+                    </span>
+                    <span className="text-[var(--text-dim)] text-sm font-black uppercase opacity-60">
+                      {billingCycle === 'monthly' ? '/ month' : '/ year'}
+                    </span>
+                  </div>
+
+                  <div className="relative group rounded-3xl overflow-hidden border border-[var(--glass-border)] bg-black/20 aspect-square max-w-[240px] flex flex-col items-center justify-center p-8 transition-transform hover:scale-[1.02] duration-500">
+                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-50 group-hover:opacity-80 transition-opacity" />
+                     <Image 
+                       src="https://www.getchintu.com/icon.png" 
+                       alt="Chintu" 
+                       width={100} 
+                       height={100} 
+                       className="relative z-10 drop-shadow-[0_0_30px_rgba(99,102,241,0.4)] transition-all group-hover:scale-110 duration-500" 
+                       unoptimized 
+                     />
+                     <h4 className="relative z-10 text-white font-black text-xl uppercase tracking-tighter mt-4 mb-0.5">CHINTU</h4>
+                     <p className="relative z-10 text-indigo-400/80 font-black text-[8px] uppercase tracking-[0.4em]">AI ASSISTANT</p>
+                  </div>
+                </div>
+
+                <div className="mt-10 pt-8 border-t border-[var(--glass-border)] space-y-4 relative z-10">
+                  <div className="flex justify-between text-[11px] font-bold text-[var(--text-dim)] uppercase">
+                    <span>{selectedPlanForPayment?.name} Protocol (×{quantity})</span>
+                    <span className="text-[var(--text-main)]">${((billingCycle === 'monthly' ? selectedPlanForPayment?.monthlyPrice : selectedPlanForPayment?.annualPrice) * quantity).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-[11px] font-bold text-[var(--text-dim)] uppercase">
+                    <span>Allocated Strategic Credits</span>
+                    <span className="text-emerald-400">+{selectedPlanForPayment?.credits * quantity} UNITS</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-black text-[var(--text-main)] uppercase pt-4 border-t border-[var(--glass-border)]">
+                    <span>Total due today</span>
+                    <span className="text-indigo-500 tracking-tighter text-xl">${((billingCycle === 'monthly' ? selectedPlanForPayment?.monthlyPrice : selectedPlanForPayment?.annualPrice) * quantity).toFixed(2)}</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="grid gap-4">
-                <button 
-                  onClick={handleStripeCheckout}
-                  className="group relative flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all text-left"
-                >
-                  <div className="w-10 h-10 bg-[#635BFF] rounded-lg flex items-center justify-center shrink-0">
-                    <span className="text-white font-bold text-xs">S</span>
-                  </div>
-                  <div>
-                    <span className="block text-xs font-black text-[var(--text-main)] uppercase tracking-tight">Stripe</span>
-                    <span className="block text-[8px] font-bold text-[var(--text-dim)] uppercase tracking-widest">Cards, Link, Google Pay</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 ml-auto text-[var(--text-dim)] group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
-                </button>
+              {/* Right Section: Gateway Selection */}
+              <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-[var(--bg-app)] relative">
+                {/* Subtle Grid Background */}
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--text-main) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                
+                <div className="mb-12 text-center md:text-left relative z-10">
+                  <h3 className="text-2xl font-black text-[var(--text-main)] uppercase tracking-tighter mb-3">Select Gateway</h3>
+                  <p className="text-[11px] font-bold text-[var(--text-dim)] uppercase tracking-widest opacity-60">Authorize Secure Payment Protocol</p>
+                </div>
 
-                <button 
-                  onClick={handleRazorpayCheckout}
-                  className="group relative flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all text-left"
-                >
-                  <div className="w-10 h-10 bg-[#3395FF] rounded-lg flex items-center justify-center shrink-0">
-                    <span className="text-white font-bold text-xs">R</span>
+                <div className="space-y-4 relative z-10">
+                  {/* Stripe */}
+                  <button 
+                    onClick={handleStripeCheckout}
+                    className="group relative w-full flex items-center gap-5 p-6 rounded-[2rem] bg-[var(--panel-bg)] border border-[var(--glass-border)] hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all duration-300 text-left overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 to-indigo-500/0 group-hover:from-indigo-500/5 transition-all" />
+                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shrink-0 shadow-xl shadow-indigo-500/10 group-hover:scale-105 transition-transform duration-300 p-3">
+                       <Image 
+                         src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" 
+                         alt="Stripe" 
+                         width={40} 
+                         height={40} 
+                         className="w-full h-full object-contain"
+                         unoptimized 
+                       />
+                    </div>
+                    <div>
+                      <span className="block text-[13px] font-black text-[var(--text-main)] uppercase tracking-tight mb-0.5">Stripe Global</span>
+                      <span className="block text-[9px] font-bold text-[var(--text-dim)] uppercase tracking-widest opacity-60">Visa, Mastercard, Link, Apple Pay</span>
+                    </div>
+                    <div className="ml-auto bg-[var(--glass-bg)] w-10 h-10 rounded-full flex items-center justify-center border border-[var(--glass-border)] group-hover:border-indigo-500/50 group-hover:text-indigo-400 transition-all">
+                      <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5" />
+                    </div>
+                  </button>
+
+                  {/* Razorpay */}
+                  <button 
+                    onClick={handleRazorpayCheckout}
+                    className="group relative w-full flex items-center gap-5 p-6 rounded-[2rem] bg-[var(--panel-bg)] border border-[var(--glass-border)] hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all duration-300 text-left overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/5 transition-all" />
+                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shrink-0 shadow-xl shadow-emerald-500/10 group-hover:scale-105 transition-transform duration-300 p-3">
+                       <Image 
+                         src="https://raw.githubusercontent.com/razorpay/razorpay-logo/master/razorpay-icon.png" 
+                         alt="Razorpay" 
+                         width={40} 
+                         height={40} 
+                         className="w-full h-full object-contain"
+                         unoptimized 
+                       />
+                    </div>
+                    <div>
+                      <span className="block text-[13px] font-black text-[var(--text-main)] uppercase tracking-tight mb-0.5">Razorpay India</span>
+                      <span className="block text-[9px] font-bold text-[var(--text-dim)] uppercase tracking-widest opacity-60">UPI, Netbanking, Local Cards</span>
+                    </div>
+                    <div className="ml-auto bg-[var(--glass-bg)] w-10 h-10 rounded-full flex items-center justify-center border border-[var(--glass-border)] group-hover:border-emerald-500/50 group-hover:text-emerald-400 transition-all">
+                      <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5" />
+                    </div>
+                  </button>
+                </div>
+
+                <div className="mt-12 text-center relative z-10">
+                  <div className="inline-flex items-center gap-2 bg-emerald-500/5 text-emerald-500 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] mb-6 border border-emerald-500/10">
+                    <Shield className="w-3.5 h-3.5" /> BANK-GRADE AES-256 ENCRYPTION
                   </div>
-                  <div>
-                    <span className="block text-xs font-black text-[var(--text-main)] uppercase tracking-tight">Razorpay</span>
-                    <span className="block text-[8px] font-bold text-[var(--text-dim)] uppercase tracking-widest">UPI, Cards, Netbanking</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 ml-auto text-[var(--text-dim)] group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
-                </button>
+                  <p className="text-[8px] text-[var(--text-dim)] uppercase tracking-[0.2em] leading-relaxed opacity-50 max-w-[280px] mx-auto">
+                    Your data is secured by industry leading encryption protocols. 
+                    Authorized payment partners handle all sensitive information.
+                  </p>
+                </div>
               </div>
-
-              <button 
-                onClick={() => setShowPaymentModal(false)}
-                className="w-full mt-6 py-3 text-[9px] font-black text-[var(--text-dim)] hover:text-[var(--text-main)] uppercase tracking-[0.2em] transition-colors"
-              >
-                Cancel Transaction
-              </button>
             </motion.div>
           </div>
         )}
