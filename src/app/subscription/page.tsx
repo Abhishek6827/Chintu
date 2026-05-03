@@ -39,7 +39,7 @@ export default function SubscriptionPage() {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch("/api/profile");
+        const res = await fetch(`/api/profile?t=${Date.now()}`, { cache: "no-store" });
         if (res.ok) {
           const { profile } = await res.json();
           if (profile) {
