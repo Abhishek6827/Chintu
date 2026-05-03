@@ -648,7 +648,7 @@ export default function PricingPage() {
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative w-full max-w-4xl bg-[var(--bg-app)] border border-[var(--glass-border)] rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col md:flex-row h-auto min-h-[500px]"
+              className="relative w-full max-w-4xl bg-[var(--bg-app)] border border-[var(--glass-border)] rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-y-auto flex flex-col md:flex-row h-auto max-h-[95vh] custom-scrollbar"
             >
               {/* Left Section: Order Summary (Stripe-like) */}
               <div className="w-full md:w-1/2 bg-[var(--panel-bg)] p-8 md:p-12 border-b md:border-b-0 md:border-r border-[var(--glass-border)] flex flex-col relative overflow-hidden">
@@ -657,13 +657,13 @@ export default function PricingPage() {
                 
                 <button 
                   onClick={() => setShowPaymentModal(false)}
-                  className="group flex items-center gap-2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-all text-[10px] font-black uppercase tracking-widest mb-12 relative z-10"
+                  className="group flex items-center gap-2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-all text-[10px] font-black uppercase tracking-widest mb-8 relative z-10"
                 >
                   <ArrowRight className="w-3 h-3 rotate-180 transition-transform group-hover:-translate-x-1" /> 
                   Back to plans
                 </button>
 
-                <div className="flex items-center gap-3 mb-10 relative z-10">
+                <div className="flex items-center gap-3 mb-8 relative z-10">
                   <div className="w-9 h-9 bg-indigo-500/10 rounded-xl flex items-center justify-center border border-indigo-500/20 shadow-inner">
                     <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={24} height={24} unoptimized />
                   </div>
@@ -684,17 +684,17 @@ export default function PricingPage() {
                     </span>
                   </div>
 
-                  <div className="relative group rounded-3xl overflow-hidden border border-[var(--glass-border)] bg-black/20 aspect-square max-w-[240px] flex flex-col items-center justify-center p-8 transition-transform hover:scale-[1.02] duration-500">
+                  <div className="relative group rounded-3xl overflow-hidden border border-[var(--glass-border)] bg-black/20 aspect-square max-w-[180px] mx-auto md:mx-0 flex flex-col items-center justify-center p-6 transition-transform hover:scale-[1.02] duration-500">
                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-50 group-hover:opacity-80 transition-opacity" />
                      <Image 
                        src="https://www.getchintu.com/icon.png" 
                        alt="Chintu" 
-                       width={100} 
-                       height={100} 
+                       width={80} 
+                       height={80} 
                        className="relative z-10 drop-shadow-[0_0_30px_rgba(99,102,241,0.4)] transition-all group-hover:scale-110 duration-500" 
                        unoptimized 
                      />
-                     <h4 className="relative z-10 text-white font-black text-xl uppercase tracking-tighter mt-4 mb-0.5">CHINTU</h4>
+                     <h4 className="relative z-10 text-white font-black text-lg uppercase tracking-tighter mt-3 mb-0.5">CHINTU</h4>
                      <p className="relative z-10 text-indigo-400/80 font-black text-[8px] uppercase tracking-[0.4em]">AI ASSISTANT</p>
                   </div>
                 </div>
@@ -720,7 +720,7 @@ export default function PricingPage() {
                 {/* Subtle Grid Background */}
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--text-main) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
                 
-                <div className="mb-12 text-center md:text-left relative z-10">
+                <div className="mb-8 text-center md:text-left relative z-10">
                   <h3 className="text-2xl font-black text-[var(--text-main)] uppercase tracking-tighter mb-3">Select Gateway</h3>
                   <p className="text-[11px] font-bold text-[var(--text-dim)] uppercase tracking-widest opacity-60">Authorize Secure Payment Protocol</p>
                 </div>
@@ -777,7 +777,7 @@ export default function PricingPage() {
                   </button>
                 </div>
 
-                <div className="mt-12 text-center relative z-10">
+                <div className="mt-8 text-center relative z-10">
                   <div className="inline-flex items-center gap-2 bg-emerald-500/5 text-emerald-500 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] mb-6 border border-emerald-500/10">
                     <Shield className="w-3.5 h-3.5" /> BANK-GRADE AES-256 ENCRYPTION
                   </div>
