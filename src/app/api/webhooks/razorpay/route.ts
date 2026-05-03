@@ -93,6 +93,18 @@ export async function POST(req: Request) {
     }
 
     // PERFORM FULFILLMENT (Upsert)
+    // DEDUPLICATION CHECK: Check if this payment was already processed (e.g. by verify route)
+    const { data: alreadyProcessed } = await supabaseAdmin
+      .from("profiles")
+      .select("razorpay_payment_id")
+      .eq("razorpay_payment_id", payment.id)
+      .maybeSingle();
+
+    if (alreadyProcessed) {
+      console.log(`[Razorpay Webhook] Payment ${payment.id} already processed. Skipping duplicate fulfillment.`);
+      return NextResponse.json({ received: true, alreadyProcessed: true });
+    }
+
     await supabaseAdmin.from("profiles").upsert({
       id: userId,
       email: finalEmail,
@@ -110,10 +122,16 @@ export async function POST(req: Request) {
       timeZone: 'Asia/Kolkata',
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
-    });
+    }).replace(/,/g, '');
 
-    const amountINR = payment.amount / 100;
+    const amountINR = Number(payment.amount) / 100;
     const newPlan = notes.planId || "Unknown";
+    
+    // Gateway Fees calculation (Razorpay subunits)
+    const gatewayFee = (Number(payment.fee) || 0) / 100;
+    const gatewayTax = (Number(payment.tax) || 0) / 100;
+    const totalFees = gatewayFee + gatewayTax;
+    const netAmount = amountINR - totalFees;
 
     // Notify Telegram
     await sendTelegramAlert(
@@ -122,9 +140,11 @@ export async function POST(req: Request) {
       `📧 Email: <code>${email}</code>\n` +
       `📅 Date: <code>${eventTime}</code>\n` +
       `💎 Plan: <b>${profile?.plan?.toUpperCase() || "FREE"} → ${newPlan.toUpperCase()}</b>\n` +
-      `💲 Price: <b>₹${amountINR.toLocaleString()}</b> (Qty: ${quantity})\n` +
+      `💰 Amount: <b>₹${amountINR.toLocaleString()}</b> (Qty: ${quantity})\n` +
+      `💸 Gateway Fees: <b>₹${totalFees.toFixed(2)}</b> (Incl. Tax)\n` +
+      `🏦 Net Settlement: <b>₹${netAmount.toFixed(2)}</b>\n` +
       `⚡ Total Credits: <b>${totalCredits}</b>\n` +
-      `💳 ID: <code>${payment.id}</code>\n\n` +
+      `🆔 ID: <code>${payment.id}</code>\n\n` +
       `✅ <i>Razorpay Secure fulfillment verified.</i>`
     );
 

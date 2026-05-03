@@ -732,13 +732,13 @@ export default function PricingPage() {
                     className="group relative w-full flex items-center gap-5 p-6 rounded-[2rem] bg-[var(--panel-bg)] border border-[var(--glass-border)] hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all duration-300 text-left overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 to-indigo-500/0 group-hover:from-indigo-500/5 transition-all" />
-                    <div className="w-24 h-12 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl flex items-center justify-center shrink-0 shadow-2xl group-hover:border-indigo-500/50 group-hover:bg-indigo-500/10 transition-all duration-500 p-3">
+                    <div className="w-32 h-12 flex items-center justify-center shrink-0 transition-all duration-500">
                        <Image 
                          src="https://www.vectorlogo.zone/logos/stripe/stripe-ar21.svg" 
                          alt="Stripe" 
-                         width={80} 
-                         height={32} 
-                         className="w-full h-full object-contain filter brightness-110"
+                         width={120} 
+                         height={40} 
+                         className="w-full h-full object-contain filter brightness-125"
                          unoptimized 
                        />
                     </div>
@@ -757,13 +757,13 @@ export default function PricingPage() {
                     className="group relative w-full flex items-center gap-5 p-6 rounded-[2rem] bg-[var(--panel-bg)] border border-[var(--glass-border)] hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all duration-300 text-left overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/5 transition-all" />
-                    <div className="w-24 h-12 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl flex items-center justify-center shrink-0 shadow-2xl group-hover:border-emerald-500/50 group-hover:bg-emerald-500/10 transition-all duration-500 p-3">
+                    <div className="w-32 h-12 flex items-center justify-center shrink-0 transition-all duration-500">
                        <Image 
                          src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" 
                          alt="Razorpay" 
-                         width={80} 
-                         height={32} 
-                         className="w-full h-full object-contain filter brightness-110"
+                         width={120} 
+                         height={40} 
+                         className="w-full h-full object-contain filter brightness-125"
                          unoptimized 
                        />
                     </div>

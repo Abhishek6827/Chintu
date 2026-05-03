@@ -141,6 +141,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // DEDUPLICATION CHECK: Check if this payment was already processed (e.g. by webhook)
+    const { data: alreadyProcessed } = await supabaseAdmin
+      .from("profiles")
+      .select("razorpay_payment_id")
+      .eq("razorpay_payment_id", razorpay_payment_id)
+      .maybeSingle();
+
+    if (alreadyProcessed) {
+      console.log(`[/api/razorpay/verify] Payment ${razorpay_payment_id} already processed. Skipping duplicate fulfillment.`);
+      return NextResponse.json({ success: true, alreadyProcessed: true });
+    }
+
     // Update Profile (Upsert)
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
@@ -170,27 +182,38 @@ export async function POST(req: NextRequest) {
       timeZone: 'Asia/Kolkata',
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
-    });
+    }).replace(/,/g, '');
 
     const customerName = profile?.full_name || userName || userEmail || "User";
+    
+    // Gateway Fees calculation (Razorpay subunits)
+    const gatewayFee = (Number(payment.fee) || 0) / 100;
+    const gatewayTax = (Number(payment.tax) || 0) / 100;
+    const totalFees = gatewayFee + gatewayTax;
+    const netAmount = (Number(payment.amount) / 100) - totalFees;
 
     // Send Telegram Alert
-    const statusLabel = isDowngrade ? "DOWNGRADE 🔻" : (profile?.plan === 'free' ? "NEW UPGRADE ⚡" : "UPGRADE ⚡");
+    const statusLabel = isDowngrade ? "DOWNGRADE 🔻" : (profile?.plan === 'free' ? "NEW SUBSCRIPTION 💰" : "UPGRADE ⚡");
     const telegramMsg = `
 <b>${statusLabel} | RAZORPAY</b>
-<b>Customer:</b> ${customerName}
-<b>Email:</b> ${userEmail || 'N/A'}
-<b>Payment ID:</b> <code>${razorpay_payment_id}</code>
-<b>Method:</b> ${paymentTypeDisplay}
-<b>Amount:</b> ${planInfo.price}
+
+👤 <b>Name:</b> ${customerName}
+📧 <b>Email:</b> <code>${userEmail || 'N/A'}</code>
+📅 <b>Date:</b> <code>${eventTime}</code>
+💳 <b>Method:</b> ${paymentTypeDisplay}
+💰 <b>Amount:</b> ₹${(Number(payment.amount) / 100).toLocaleString()}
+💸 <b>Gateway Fees:</b> ₹${totalFees.toFixed(2)} (Incl. Tax)
+🏦 <b>Net Settlement:</b> ₹${netAmount.toFixed(2)}
+
 --------------------------
-<b>Old Plan:</b> ${profile?.plan?.toUpperCase() || "FREE"}
-<b>New Plan:</b> ${planInfo.plan.toUpperCase()}
-<b>Old Credits:</b> ${existingCredits}
-<b>New Credits:</b> ${totalCredits} ${bonusCredits > 0 ? `(+${bonusCredits} Pro-rata)` : ""}
-<b>Expiry:</b> ${newExpiry.toLocaleDateString('en-IN')}
+💎 <b>Old Plan:</b> ${profile?.plan?.toUpperCase() || "FREE"}
+💎 <b>New Plan:</b> ${planInfo.plan.toUpperCase()}
+⚡ <b>Old Credits:</b> ${existingCredits}
+⚡ <b>New Credits:</b> ${totalCredits} ${bonusCredits > 0 ? `(+${bonusCredits} Pro-rata)` : ""}
+📅 <b>Expiry:</b> ${newExpiry.toLocaleDateString('en-IN')}
 --------------------------
-<b>Status:</b> SUCCESSFUL
+✅ <b>Status:</b> SUCCESSFUL
+🆔 <b>Payment ID:</b> <code>${razorpay_payment_id}</code>
 `;
     await sendTelegramAlert(telegramMsg);
 
@@ -206,7 +229,7 @@ export async function POST(req: NextRequest) {
             planInfo.plan,
             profile?.plan || "free",
             totalCredits,
-            planInfo.price,
+            `₹${(Number(payment.amount) / 100).toLocaleString()}`,
             eventTime,
             process.env.NEXT_PUBLIC_APP_URL || 'https://getchintu.com'
           ),
