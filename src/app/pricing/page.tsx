@@ -525,7 +525,7 @@ export default function PricingPage() {
 
               <InteractiveHoverButton
                 onClick={() => handleSubscribe(plan)}
-                disabled={(currentPlan === 'elite' && (plan.id === 'pro' || plan.id === 'elite')) || (currentPlan === 'pro' && plan.id === 'pro') || loading === plan.id}
+                disabled={plan.id === 'free' || loading === plan.id}
                 className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${currentPlan === plan.id ? "bg-[var(--glass-bg)] text-[var(--text-dim)] border border-[var(--glass-border)]" : plan.popular ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-[var(--text-main)] text-[var(--bg-app)]"}`}
               >
                 {loading === plan.id ? "Connecting..." : currentPlan === plan.id ? "Current Plan" : plan.cta}

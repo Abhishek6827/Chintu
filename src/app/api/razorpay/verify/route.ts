@@ -115,7 +115,12 @@ export async function POST(req: NextRequest) {
         updated_at: new Date().toISOString(),
         theme: "dark",
         full_name: userName || (profile ? profile.full_name : null),
-        email: userEmail || (profile ? profile.email : null)
+        email: userEmail || (profile ? profile.email : null),
+        profile_data: {
+          ...(profile?.profile_data || {}),
+          payment_amount: `${planInfo.price}`,
+          payment_type: "Razorpay"
+        }
       });
 
     if (updateError) throw updateError;

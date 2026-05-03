@@ -261,13 +261,11 @@ export default function GlobalHeader() {
               <div className="w-7 h-7 rounded-lg overflow-hidden ring-1 ring-white/10 hover:scale-105 transition-transform">
                 <UserButton afterSignOutUrl="/">
                   <UserButton.MenuItems>
-                    {userPlan !== "free" && (
-                      <UserButton.Action 
-                        label="Manage Subscription" 
-                        labelIcon={<CreditCard className="w-4 h-4" />} 
-                        onClick={handleManageSubscription} 
-                      />
-                    )}
+                    <UserButton.Action 
+                      label="Manage Subscription" 
+                      labelIcon={<CreditCard className="w-4 h-4" />} 
+                      onClick={handleManageSubscription} 
+                    />
                     <UserButton.Action 
                       label="My AI Profile" 
                       labelIcon={<Sparkles className="w-4 h-4" />} 

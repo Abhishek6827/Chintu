@@ -94,7 +94,7 @@ export async function POST(req: Request) {
       // Fetch user's current status for stacking
       const { data: currentProfile } = await supabaseAdmin
         .from("profiles")
-        .select("plan, email, credits, subscription_expires_at")
+        .select("plan, email, credits, subscription_expires_at, profile_data")
         .eq("id", userId)
         .maybeSingle();
 
@@ -132,6 +132,11 @@ export async function POST(req: Request) {
           payment_provider: "stripe",
           full_name: customerName,
           updated_at: new Date().toISOString(),
+          profile_data: {
+            ...(currentProfile?.profile_data || {}),
+            payment_amount: price,
+            payment_type: "Card"
+          }
         })
         .eq("id", userId);
 
