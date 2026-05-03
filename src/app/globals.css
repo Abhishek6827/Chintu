@@ -5,22 +5,8 @@
 @tailwind utilities;
 
 :root {
-  /* Default Dark Mode (Ghost) */
+  /* Default LIGHT Mode (Premium Professional) */
   --app-opacity: 1;
-  --text-main: rgba(255, 255, 255, var(--app-opacity, 1));
-  --text-dim: rgba(255, 255, 255, calc(0.4 * var(--app-opacity, 1)));
-  --glass-bg: rgba(255, 255, 255, calc(0.03 * var(--app-opacity, 1)));
-  --glass-border: rgba(255, 255, 255, calc(0.08 * var(--app-opacity, 1)));
-  --bubble-bg: rgba(255, 255, 255, calc(0.04 * var(--app-opacity, 1)));
-  --accent: #818cf8;
-  --accent-glow: rgba(129, 140, 248, calc(0.5 * var(--app-opacity, 1)));
-  --panel-bg: rgba(15, 15, 25, calc(0.8 * var(--app-opacity, 1)));
-  --input-bg: rgba(255, 255, 255, calc(0.05 * var(--app-opacity, 1)));
-  --bg-app: rgba(10, 10, 18, var(--app-opacity, 1));
-  --toolbar-bg: rgba(10, 10, 18, var(--app-opacity, 1));
-}
-
-.light-mode {
   --text-main: rgba(26, 26, 46, var(--app-opacity, 1));
   --text-dim: rgba(26, 26, 46, calc(0.5 * var(--app-opacity, 1)));
   --glass-bg: rgba(0, 0, 0, calc(0.02 * var(--app-opacity, 1)));
@@ -32,6 +18,21 @@
   --input-bg: rgba(0, 0, 0, calc(0.04 * var(--app-opacity, 1)));
   --bg-app: rgba(245, 247, 250, var(--app-opacity, 1));
   --toolbar-bg: rgba(245, 247, 250, var(--app-opacity, 1));
+}
+
+.dark-mode {
+  /* Premium DARK Mode (Ghost) */
+  --text-main: rgba(255, 255, 255, var(--app-opacity, 1));
+  --text-dim: rgba(255, 255, 255, calc(0.4 * var(--app-opacity, 1)));
+  --glass-bg: rgba(255, 255, 255, calc(0.03 * var(--app-opacity, 1)));
+  --glass-border: rgba(255, 255, 255, calc(0.08 * var(--app-opacity, 1)));
+  --bubble-bg: rgba(255, 255, 255, calc(0.04 * var(--app-opacity, 1)));
+  --accent: #818cf8;
+  --accent-glow: rgba(129, 140, 248, calc(0.5 * var(--app-opacity, 1)));
+  --panel-bg: rgba(15, 15, 25, calc(0.8 * var(--app-opacity, 1)));
+  --input-bg: rgba(255, 255, 255, calc(0.05 * var(--app-opacity, 1)));
+  --bg-app: rgba(10, 10, 18, var(--app-opacity, 1));
+  --toolbar-bg: rgba(10, 10, 18, var(--app-opacity, 1));
 }
 
 /* Global fluid scaling */
@@ -61,7 +62,7 @@ html {
 html, body, #__next, [data-reactroot] {
   overflow-x: hidden;
   overflow-y: auto;
-  background: transparent !important;
+  background: #f5f7fa !important;
   margin: 0;
   padding: 0;
 }
@@ -70,6 +71,7 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   color: var(--text-main);
+  color-scheme: light;
 }
 
 /* Premium Scrollbar */
@@ -615,17 +617,17 @@ input[type="range"]::-moz-range-thumb {
   font-weight: 700;
 }
 
-.light-mode .custom-dropdown-menu {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(0, 0, 0, 0.08);
+.dark-mode .custom-dropdown-menu {
+  background: rgba(15, 15, 25, 0.95);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
-.light-mode .custom-dropdown-item:hover {
-  background: rgba(0, 0, 0, 0.03);
+.dark-mode .custom-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.light-mode .custom-dropdown-item.selected {
-  background: rgba(79, 70, 229, 0.08);
+.dark-mode .custom-dropdown-item.selected {
+  background: rgba(129, 140, 248, 0.15);
 }
 
 /* ─── Reading Guide / Highlighter ─────────────────── */
@@ -654,13 +656,13 @@ input[type="range"]::-moz-range-thumb {
   animation: reading-focus-pulse 1.5s infinite alternate ease-in-out;
 }
 
-.light-mode .reading-guide-active p:last-child,
-.light-mode .reading-guide-active li:last-child {
+.dark-mode .reading-guide-active p:last-child,
+.dark-mode .reading-guide-active li:last-child {
   background: linear-gradient(90deg, 
-    rgba(79, 70, 229, 0.08) 0%, 
-    rgba(79, 70, 229, 0.02) 100%
+    rgba(129, 140, 248, 0.12) 0%, 
+    rgba(129, 140, 248, 0.05) 100%
   ) !important;
-  border-left-color: #4f46e5 !important;
+  border-left-color: #818cf8 !important;
 }
 
 @keyframes reading-focus-pulse {
