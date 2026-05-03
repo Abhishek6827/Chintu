@@ -15,20 +15,20 @@ export const TextReveal = ({
   const [container, setContainer] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    const main = document.querySelector('main');
+    const main = document.getElementById('main-content');
     if (main) setContainer(main);
   }, []);
 
   const { scrollYProgress } = useScroll({
     target: targetRef,
     container: container ? { current: container } : undefined,
-    offset: ["start start", "end end"],
+    offset: ["start 0.7", "end 0.3"],
   });
 
   const words = text.split(" ");
 
   return (
-    <div ref={targetRef} className={cn("relative z-0 h-[140vh]", className)}>
+    <div ref={targetRef} className={cn("relative z-0 h-[120vh]", className)}>
       <div className="sticky inset-0 h-screen w-full flex flex-col items-center justify-center bg-transparent px-6 overflow-hidden pointer-events-none">
         <p className="max-w-5xl text-3xl font-black text-[var(--text-main)] md:text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter leading-[0.85] text-center flex flex-wrap justify-center">
           {words.map((word, i) => {

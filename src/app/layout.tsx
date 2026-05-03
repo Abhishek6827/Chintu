@@ -55,7 +55,7 @@ export default async function RootLayout({
         </head>
         <body className="bg-transparent h-screen flex flex-col">
           <GlobalHeader />
-          <main className="flex-1 min-h-0 relative overflow-y-auto overflow-x-hidden">
+          <main id="main-content" className="flex-1 min-h-0 relative overflow-y-auto overflow-x-hidden">
             {children}
           </main>
           <UpdateNotification />

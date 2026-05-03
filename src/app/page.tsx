@@ -207,8 +207,8 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-12">
               <div className="flex-1 space-y-6">
-                <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                  <Layers className="w-3 h-3" /> System Architecture
+                <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
+                  <Layers className="w-3.5 h-3.5" /> System Architecture
                 </div>
                 <h2 className="text-4xl font-black tracking-tighter uppercase leading-none">
                   Advanced <span className="text-indigo-600">Strategic</span> Modules
@@ -220,8 +220,8 @@ export default function LandingPage() {
                     { icon: BookOpen, label: "Memory Bank", desc: "Session persistence" },
                     { icon: MousePointer2, label: "Direct Action", desc: "Click-to-execute logic" }
                   ].map((item, i) => (
-                    <div key={i} className="p-4 rounded-2xl border border-[var(--glass-border)] bg-[var(--panel-bg)] hover:border-indigo-500/50 transition-all group">
-                      <item.icon className="w-5 h-5 text-[var(--text-dim)] group-hover:text-indigo-400 mb-2 transition-colors" />
+                    <div key={i} className="p-6 rounded-[2rem] border border-[var(--glass-border)] bg-[var(--panel-bg)] hover:border-indigo-500/50 hover:bg-[var(--glass-bg)] transition-all group cursor-default">
+                      <item.icon className="w-6 h-6 text-[var(--text-dim)] group-hover:text-indigo-400 mb-3 transition-colors" />
                       <p className="text-xs font-black uppercase tracking-tight text-[var(--text-main)]">{item.label}</p>
                       <p className="text-[10px] text-[var(--text-dim)] font-bold uppercase">{item.desc}</p>
                     </div>
@@ -231,7 +231,7 @@ export default function LandingPage() {
               <div className="flex-1 bg-[var(--panel-bg)] rounded-[3rem] p-8 border border-[var(--glass-border)] relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.05),transparent)] animate-pulse" />
                 <div className="relative z-10 space-y-6">
-                  <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)]">
+                  <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-indigo-500/30 transition-all group">
                     <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
                       <Globe className="w-5 h-5" />
                     </div>
@@ -240,7 +240,7 @@ export default function LandingPage() {
                       <p className="text-xs font-bold text-[var(--text-dim)]">Connected to Tactical Grid</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)] ml-8">
+                  <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-emerald-500/30 transition-all group">
                     <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
                       <Check className="w-5 h-5" />
                     </div>
@@ -249,7 +249,7 @@ export default function LandingPage() {
                       <p className="text-xs font-bold text-[var(--text-dim)]">99.9% Accuracy Rating</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)]">
+                  <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-amber-500/30 transition-all group">
                     <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
                       <PlayCircle className="w-5 h-5" />
                     </div>
@@ -265,12 +265,12 @@ export default function LandingPage() {
         </section>
 
         {/* Total Coverage Section — FIX: was missing opening <section> tag */}
-        <section className="py-32 px-6 bg-[#0a0a0c] relative overflow-hidden">
+        <section className="py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="reveal text-center mb-24 transition-all duration-1000">
               <h2 className="text-xs font-black text-indigo-400 uppercase tracking-[0.5em] mb-6">Omniscient Intelligence</h2>
-              <p className="text-4xl sm:text-6xl font-black tracking-tighter uppercase leading-none text-white">
+              <p className="text-4xl sm:text-6xl font-black tracking-tighter uppercase leading-none text-[var(--text-main)]">
                 Zero Gaps. <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Total Dominance.</span>
               </p>
@@ -287,7 +287,7 @@ export default function LandingPage() {
                 { title: "Data Science", desc: "Statistical modeling & data interpretation." }
               ].map((item, i) => (
                 <div key={i} className="reveal bg-[var(--panel-bg)] border border-[var(--glass-border)] p-8 rounded-[2.5rem] hover:bg-[var(--glass-bg)] hover:border-indigo-500/50 transition-all duration-500 group">
-                  <h4 className="font-black text-[12px] uppercase tracking-widest text-indigo-400 mb-3 group-hover:text-white transition-colors">{item.title}</h4>
+                  <h4 className="font-black text-[12px] uppercase tracking-widest text-indigo-400 mb-3 group-hover:text-[var(--text-main)] transition-colors">{item.title}</h4>
                   <p className="text-[11px] text-[var(--text-dim)] font-bold uppercase tracking-tight leading-relaxed group-hover:text-[var(--text-main)] transition-colors">{item.desc}</p>
                 </div>
               ))}
