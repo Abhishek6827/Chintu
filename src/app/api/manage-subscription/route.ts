@@ -46,12 +46,9 @@ export async function GET() {
 
   // ─── Razorpay ───────────────────────────────────────────
   if (provider === "razorpay") {
-    // Razorpay does not have a self-service customer portal for one-time payments.
-    // Return a flag so the frontend can show the appropriate message or redirect.
     return NextResponse.json({ 
-      provider: "razorpay",
-      message: "Razorpay customer portal is not yet configured. Please contact support to manage your subscription.",
-      supportUrl: `${appUrl}/support`
+      url: `${appUrl}/subscription`,
+      provider: "razorpay"
     });
   }
 

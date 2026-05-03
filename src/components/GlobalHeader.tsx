@@ -136,14 +136,15 @@ export default function GlobalHeader() {
       const data = await res.json();
       
       if (data.url) {
-        // Stripe portal URL
-        if (isElectron) (window as any).electronAPI.openExternal(data.url);
-        else window.location.href = data.url;
-      } else if (data.provider === "razorpay") {
-        // Razorpay: redirect to support for now
-        const supportUrl = data.supportUrl || "/support";
-        if (isElectron) (window as any).electronAPI.openExternal(supportUrl);
-        else router.push(supportUrl);
+        if (data.provider === "razorpay") {
+          // Internal page — navigate within app
+          router.push("/subscription");
+        } else if (isElectron) {
+          // Stripe portal — open externally in Electron
+          (window as any).electronAPI.openExternal(data.url);
+        } else {
+          window.location.href = data.url;
+        }
       } else {
         alert(data.error || "Failed to load subscription portal.");
       }
