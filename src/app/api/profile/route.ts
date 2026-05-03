@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 import { createAdminClient } from "@/utils/supabase/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 export async function POST(req: Request) {
   try {
@@ -11,13 +11,25 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
+    const userObj = await clerkClient().users.getUser(userId);
+    const email = userObj.emailAddresses[0]?.emailAddress;
+
     // Fetch existing profile to check plan and current data
     const supabaseAdmin = createAdminClient();
-    const { data: existing } = await supabaseAdmin
+    let { data: existing } = await supabaseAdmin
       .from("profiles")
       .select("*")
-      .eq("id", userId)
+      .eq("email", email)
       .maybeSingle();
+
+    if (!existing) {
+      const { data: idData } = await supabaseAdmin
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+      existing = idData;
+    }
 
     const plan = (existing?.plan || "free").toLowerCase();
 
@@ -38,7 +50,9 @@ export async function POST(req: Request) {
 
     // List of columns that DEFINITELY exist in the profiles table
     const allowedColumns = ["id", "full_name", "profile_data", "raw_profile", "theme", "plan", "credits", "history", "updated_at", "payment_provider", "razorpay_payment_id"];
-    const updateData: any = { id: userId, updated_at: new Date().toISOString() };
+    
+    const targetId = existing?.id || userId;
+    const updateData: any = { id: targetId, updated_at: new Date().toISOString() };
 
     // Map rest of body to allowed columns
     Object.keys(rest).forEach(key => {
@@ -81,12 +95,24 @@ export async function GET() {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
+    const userObj = await clerkClient().users.getUser(userId);
+    const email = userObj.emailAddresses[0]?.emailAddress;
+
     const supabaseAdmin = createAdminClient();
-    const { data } = await supabaseAdmin
+    let { data } = await supabaseAdmin
       .from("profiles")
       .select("*")
-      .eq("id", userId)
+      .eq("email", email)
       .maybeSingle();
+
+    if (!data) {
+      const { data: idData } = await supabaseAdmin
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+      data = idData;
+    }
 
     if (data) {
       // Inject virtual current_jd from profile_data for frontend compatibility

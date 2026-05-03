@@ -28,10 +28,20 @@ export async function POST(req: NextRequest) {
     }, { status: 400 });
   }
 
-  // Note: Strict email conflict check was removed to allow multi-account users to proceed.
-  // Verification route handles profile updates gracefully.
-
-
+  if (email) {
+    const { data: existingUser } = await supabaseAdmin
+      .from("profiles")
+      .select("id, plan, payment_provider")
+      .eq("email", email)
+      .neq("id", userId)
+      .maybeSingle();
+      
+    if (existingUser && (existingUser.plan === "pro" || existingUser.plan === "elite")) {
+      return NextResponse.json({ 
+        error: `An active ${existingUser.plan.toUpperCase()} subscription via ${existingUser.payment_provider || 'another provider'} already exists for this email under a different account.`
+      }, { status: 400 });
+    }
+  }
 
   const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID || "",
