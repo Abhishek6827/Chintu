@@ -15,18 +15,7 @@ export async function POST(req: NextRequest) {
 
   // Use admin client to fetch user profile for backend validation
   const supabaseAdmin = createAdminClient();
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("plan")
-    .eq("id", userId)
-    .maybeSingle();
 
-  // Prevent downgrades (Elite -> Pro) at the API level
-  if (profile?.plan === "elite" && planId === "pro") {
-    return NextResponse.json({ 
-      error: "You are already on the Elite plan. Downgrades are not allowed via this portal." 
-    }, { status: 400 });
-  }
 
   if (email) {
     const { data: existingUser } = await supabaseAdmin

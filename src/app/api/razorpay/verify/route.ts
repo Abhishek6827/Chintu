@@ -4,6 +4,23 @@ import crypto from "crypto";
 import { createAdminClient } from "@/utils/supabase/server";
 import { Resend } from "resend";
 import { getPaymentEmailHtml } from "@/utils/email-templates";
+import Razorpay from "razorpay";
+
+const sendTelegramAlert = async (message: string) => {
+  const botToken = process.env.TELEGRAM_PAYMENT_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!botToken || !chatId) return;
+
+  try {
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "HTML" }),
+    });
+  } catch (err) {
+    console.error("Telegram alert failed:", err);
+  }
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +58,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
+    // Fetch Payment Details from Razorpay for extra metadata
+    const rzp = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID || "",
+      key_secret: process.env.RAZORPAY_KEY_SECRET || "",
+    });
+    const payment = await rzp.payments.fetch(razorpay_payment_id);
+    const method = payment.method; // card, upi, netbanking
+    const cardDetails = payment.card ? `${payment.card.network} ${payment.card.type} (****${payment.card.last4})` : "";
+    const paymentTypeDisplay = method === 'card' ? `Card (${cardDetails})` : method.toUpperCase();
+
     // Fulfill Order
     const supabaseAdmin = createAdminClient();
     const resend = new Resend(process.env.RESEND_API_KEY);
@@ -59,11 +86,23 @@ export async function POST(req: NextRequest) {
     const purchasedCredits = planInfo.credits * quantity;
     const purchasedDays = planInfo.days * quantity;
     const existingCredits = profile?.credits || 0;
-    const totalCredits = existingCredits + purchasedCredits;
+
 
     const now = new Date();
     let currentExpiry = profile?.subscription_expires_at ? new Date(profile.subscription_expires_at) : now;
     if (currentExpiry < now) currentExpiry = now;
+    
+    // Pro-rata logic for Downgrades (Elite -> Pro)
+    let bonusCredits = 0;
+    const isDowngrade = profile?.plan === 'elite' && planInfo.plan === 'pro';
+    if (isDowngrade && currentExpiry > now) {
+      const remainingDays = Math.ceil((currentExpiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      // Add value of remaining Elite days as extra credits for the new Pro plan
+      // Elite (1000) vs Pro (200) -> 800 credits difference per month
+      bonusCredits = Math.round((800 / 30) * remainingDays);
+    }
+
+    const totalCredits = existingCredits + purchasedCredits + bonusCredits;
     const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
 
     // Fallback: Get Clerk data if profile is missing name/email
@@ -119,20 +158,41 @@ export async function POST(req: NextRequest) {
         profile_data: {
           ...(profile?.profile_data || {}),
           payment_amount: `${planInfo.price}`,
-          payment_type: "Razorpay"
+          payment_type: paymentTypeDisplay,
+          last_payment_id: razorpay_payment_id,
+          last_gateway: "razorpay"
         }
       });
 
     if (updateError) throw updateError;
 
-    // Notifications
     const eventTime = new Date().toLocaleString('en-IN', { 
       timeZone: 'Asia/Kolkata',
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
     });
 
-    const customerName = profile.full_name || userEmail || "User";
+    const customerName = profile?.full_name || userName || userEmail || "User";
+
+    // Send Telegram Alert
+    const statusLabel = isDowngrade ? "DOWNGRADE 🔻" : (profile?.plan === 'free' ? "NEW UPGRADE ⚡" : "UPGRADE ⚡");
+    const telegramMsg = `
+<b>${statusLabel} | RAZORPAY</b>
+<b>Customer:</b> ${customerName}
+<b>Email:</b> ${userEmail || 'N/A'}
+<b>Payment ID:</b> <code>${razorpay_payment_id}</code>
+<b>Method:</b> ${paymentTypeDisplay}
+<b>Amount:</b> ${planInfo.price}
+--------------------------
+<b>Old Plan:</b> ${profile?.plan?.toUpperCase() || "FREE"}
+<b>New Plan:</b> ${planInfo.plan.toUpperCase()}
+<b>Old Credits:</b> ${existingCredits}
+<b>New Credits:</b> ${totalCredits} ${bonusCredits > 0 ? `(+${bonusCredits} Pro-rata)` : ""}
+<b>Expiry:</b> ${newExpiry.toLocaleDateString('en-IN')}
+--------------------------
+<b>Status:</b> SUCCESSFUL
+`;
+    await sendTelegramAlert(telegramMsg);
 
     // Send Email via Resend
     if (userEmail) {
@@ -140,11 +200,11 @@ export async function POST(req: NextRequest) {
         await resend.emails.send({
           from: 'Chintu Intelligence <welcome@getchintu.com>',
           to: userEmail,
-          subject: 'CHINTU: PROTOCOL UPGRADE VERIFIED ⚡',
+          subject: `CHINTU: ${statusLabel} VERIFIED ⚡`,
           html: getPaymentEmailHtml(
             customerName,
             planInfo.plan,
-            profile.plan || "free",
+            profile?.plan || "free",
             totalCredits,
             planInfo.price,
             eventTime,

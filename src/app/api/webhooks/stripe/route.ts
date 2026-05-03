@@ -78,67 +78,93 @@ export async function POST(req: Request) {
       return new NextResponse("No userId in metadata", { status: 400 });
     }
 
-    // Retrieve line items to get the Price ID
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-    const priceId = lineItems.data[0]?.price?.id;
+      // Retrieve line items to get the Price ID
+      const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+      const priceId = lineItems.data[0]?.price?.id;
 
-    if (!priceId || !PRICE_ID_MAP[priceId]) {
-      console.error(`[Stripe Webhook] Unknown or missing Price ID: ${priceId}`);
-      // Fallback or handle error
-    } else {
-      const { plan, credits, price, days } = PRICE_ID_MAP[priceId];
-      const quantity = lineItems.data[0]?.quantity || 1;
-      const purchasedCredits = credits * quantity;
-      const purchasedDays = days * quantity;
+      if (!priceId || !PRICE_ID_MAP[priceId]) {
+        console.error(`[Stripe Webhook] Unknown or missing Price ID: ${priceId}`);
+      } else {
+        const { plan, credits, price, days } = PRICE_ID_MAP[priceId];
+        const quantity = lineItems.data[0]?.quantity || 1;
+        const purchasedCredits = credits * quantity;
+        const purchasedDays = days * quantity;
 
-      // Fetch user's current status for stacking
-      const { data: currentProfile } = await supabaseAdmin
-        .from("profiles")
-        .select("plan, email, credits, subscription_expires_at, profile_data")
-        .eq("id", userId)
-        .maybeSingle();
-
-      const oldPlan = currentProfile?.plan || "free";
-      const existingCredits = currentProfile?.credits || 0;
-      
-      // 1. Stack Credits
-      const totalCredits = existingCredits + purchasedCredits;
-
-      // 2. Pro-rata Date Extension
-      const now = new Date();
-      let currentExpiry = currentProfile?.subscription_expires_at 
-        ? new Date(currentProfile.subscription_expires_at) 
-        : now;
-      
-      // If current expiry is in the past, start from now
-      if (currentExpiry < now) currentExpiry = now;
-      const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
-
-      console.log(`[Stripe Webhook] Stacking for user ${userId}: Credits ${existingCredits} + ${purchasedCredits} = ${totalCredits}`);
-      console.log(`[Stripe Webhook] Extending expiry for user ${userId}: to ${newExpiry.toISOString()}`);
-
-      // Get customer name from Stripe
-      const customerName = session.customer_details?.name || session.customer_details?.email || "Unknown";
-
-      // Update Supabase Profile
-      const { error } = await supabaseAdmin
-        .from("profiles")
-        .update({
-          plan: plan,
-          credits: totalCredits,
-          subscription_expires_at: newExpiry.toISOString(),
-          stripe_customer_id: session.customer as string,
-          stripe_subscription_id: session.subscription as string,
-          payment_provider: "stripe",
-          full_name: customerName,
-          updated_at: new Date().toISOString(),
-          profile_data: {
-            ...(currentProfile?.profile_data || {}),
-            payment_amount: price,
-            payment_type: "Card"
+        // Fetch Payment Method details
+        let paymentMethodDisplay = "Card";
+        try {
+          if (session.payment_intent) {
+            const intent = await stripe.paymentIntents.retrieve(session.payment_intent as string, {
+              expand: ['payment_method']
+            });
+            const pm = intent.payment_method as Stripe.PaymentMethod;
+            if (pm) {
+              if (pm.type === 'card') {
+                paymentMethodDisplay = `Card (${pm.card?.brand.toUpperCase()} ${pm.card?.funding.toUpperCase()} ****${pm.card?.last4})`;
+              } else if (pm.type === 'link') {
+                paymentMethodDisplay = "Link (Stripe)";
+              } else {
+                paymentMethodDisplay = pm.type.toUpperCase();
+              }
+            }
           }
-        })
-        .eq("id", userId);
+        } catch (pmErr) {
+          console.error("[Stripe Webhook] PM detail fetch failed:", pmErr);
+        }
+
+        // Fetch user's current status for stacking
+        const { data: currentProfile } = await supabaseAdmin
+          .from("profiles")
+          .select("plan, email, credits, subscription_expires_at, profile_data")
+          .eq("id", userId)
+          .maybeSingle();
+
+        const oldPlan = currentProfile?.plan || "free";
+        const existingCredits = currentProfile?.credits || 0;
+        
+        // 1. Stack Credits
+        const now = new Date();
+        let currentExpiry = currentProfile?.subscription_expires_at 
+          ? new Date(currentProfile.subscription_expires_at) 
+          : now;
+        
+        if (currentExpiry < now) currentExpiry = now;
+
+        // Pro-rata logic for Downgrades (Elite -> Pro)
+        let bonusCredits = 0;
+        const isDowngrade = oldPlan === 'elite' && plan === 'pro';
+        if (isDowngrade && currentExpiry > now) {
+          const remainingDays = Math.ceil((currentExpiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          bonusCredits = Math.round((800 / 30) * remainingDays);
+        }
+
+        const totalCredits = existingCredits + purchasedCredits + bonusCredits;
+        const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
+
+        console.log(`[Stripe Webhook] Stacking for user ${userId}: Credits ${existingCredits} + ${purchasedCredits} = ${totalCredits}`);
+        
+        // Update Supabase Profile
+        const customerName = session.customer_details?.name || session.customer_details?.email || "Unknown";
+        const { error } = await supabaseAdmin
+          .from("profiles")
+          .update({
+            plan: plan,
+            credits: totalCredits,
+            subscription_expires_at: newExpiry.toISOString(),
+            stripe_customer_id: session.customer as string,
+            stripe_subscription_id: session.subscription as string,
+            payment_provider: "stripe",
+            full_name: customerName,
+            updated_at: new Date().toISOString(),
+            profile_data: {
+              ...(currentProfile?.profile_data || {}),
+              payment_amount: price,
+              payment_type: paymentMethodDisplay,
+              last_payment_id: session.id,
+              last_gateway: "stripe"
+            }
+          })
+          .eq("id", userId);
 
       if (error) {
         console.error("[Stripe Webhook] Error updating profile:", error.message);
@@ -146,37 +172,46 @@ export async function POST(req: Request) {
       }
 
       // ─── Send Telegram Alert ─────────────────────────────
-      const eventTime = formatEventTime();
-      await sendTelegramAlert(
-        `💰 <b>New Subscription! (Stripe)</b>\n\n` +
-        `👤 Name: <b>${customerName}</b>\n` +
-        `📧 Email: <code>${session.customer_details?.email || currentProfile?.email || "N/A"}</code>\n` +
-        `📅 Date: <code>${eventTime}</code>\n` +
-        `💎 Plan: <b>${oldPlan.toUpperCase()}</b> → <b>${plan.toUpperCase()}</b>\n` +
-        `💲 Price: <b>${price}</b> × ${quantity}\n` +
-        `⚡ Credits: <b>${purchasedCredits}</b>\n` +
-        `💳 Session: <code>${session.id.slice(-10)}</code>`
-      );
+      const statusLabel = isDowngrade ? "DOWNGRADE 🔻" : (oldPlan === 'free' ? "NEW UPGRADE ⚡" : "UPGRADE ⚡");
+      const telegramMsg = `
+<b>${statusLabel} | STRIPE</b>
+<b>Customer:</b> ${customerName}
+<b>Email:</b> ${session.customer_details?.email || 'N/A'}
+<b>Payment ID:</b> <code>${session.id}</code>
+<b>Method:</b> ${paymentMethodDisplay}
+<b>Amount:</b> ${price}
+--------------------------
+<b>Old Plan:</b> ${oldPlan.toUpperCase()}
+<b>New Plan:</b> ${plan.toUpperCase()}
+<b>Old Credits:</b> ${existingCredits}
+<b>New Credits:</b> ${totalCredits} ${bonusCredits > 0 ? `(+${bonusCredits} Pro-rata)` : ""}
+<b>Expiry:</b> ${newExpiry.toLocaleDateString('en-IN')}
+--------------------------
+<b>Status:</b> SUCCESSFUL
+`;
+      await sendTelegramAlert(telegramMsg);
 
-      // ─── Send Premium Email ─────────────────────────────
+      // Send Email via Resend
       const userEmail = session.customer_details?.email;
       if (userEmail) {
-        await resend.emails.send({
-          from: 'Chintu Intelligence <welcome@getchintu.com>',
-          replyTo: 'contact@getchintu.com',
-          to: userEmail,
-          subject: 'CHINTU: PROTOCOL UPGRADE VERIFIED ⚡',
-          html: getPaymentEmailHtml(
-            customerName,
-            plan,
-            oldPlan,
-            totalCredits,
-            price,
-            eventTime,
-            process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-          ),
-          text: `Your upgrade to the ${plan.toUpperCase()} tier is verified. Advanced strategic engines and high-priority features are now fully operational.\n\nTactical Credit Allocation: ${totalCredits} Credits Provisioned\n\nQuestions? Contact our support team at contact@getchintu.com\n\nYou are receiving this receipt because of a recent transaction on your Chintu Intelligence account.\nChintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105\n\n© 2026 Chintu Intelligence Ecosystem • Professional Tier Verified`
-        });
+        try {
+          await resend.emails.send({
+            from: 'Chintu Intelligence <welcome@getchintu.com>',
+            to: userEmail,
+            subject: `CHINTU: ${statusLabel} VERIFIED ⚡`,
+            html: getPaymentEmailHtml(
+              customerName,
+              plan,
+              oldPlan,
+              totalCredits,
+              price,
+              formatEventTime(),
+              process.env.NEXT_PUBLIC_APP_URL || 'https://getchintu.com'
+            ),
+          });
+        } catch (emailErr) {
+          console.error("[Stripe Webhook] Email alert failed:", emailErr);
+        }
       }
     }
   }

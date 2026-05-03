@@ -70,6 +70,8 @@ const PLANS = [
       "UI Customization",
     ],
     cta: "Upgrade to Pro",
+    stripePriceIdMonthly: "price_1TRu3pLYcsTnVrvkVfZIjTLC",
+    stripePriceIdAnnual: "price_1TRu4ILYcsTnVrvkcfBbwSBr",
   },
   {
     id: "elite",
@@ -93,6 +95,8 @@ const PLANS = [
       "Early Access",
     ],
     cta: "Go Elite",
+    stripePriceIdMonthly: "price_1TRu4jLYcsTnVrvkJ7gkHA91",
+    stripePriceIdAnnual: "price_1TRu5ALYcsTnVrvk3dMorbBe",
   },
 ];
 
@@ -105,6 +109,8 @@ export default function PricingPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successPlan, setSuccessPlan] = useState<any>(null);
   const [countdown, setCountdown] = useState(5);
+  const [selectedPlanForPayment, setSelectedPlanForPayment] = useState<any>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
 
   // Fetch current plan
@@ -149,7 +155,48 @@ export default function PricingPage() {
 
   const handleSubscribe = async (plan: any) => {
     if (!user) return;
+    setSelectedPlanForPayment(plan);
+    setShowPaymentModal(true);
+  };
+
+  const handleStripeCheckout = async () => {
+    if (!selectedPlanForPayment || !user) return;
     
+    setLoading(selectedPlanForPayment.id);
+    setShowPaymentModal(false);
+    
+    try {
+      const priceId = billingCycle === "monthly" 
+        ? selectedPlanForPayment.stripePriceIdMonthly 
+        : selectedPlanForPayment.stripePriceIdAnnual;
+
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          priceId, 
+          quantity 
+        }),
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || "Failed to create checkout session");
+      }
+    } catch (err: any) {
+      console.error("Stripe Error:", err);
+      alert(`Stripe Error: ${err.message}`);
+      setLoading(null);
+    }
+  };
+
+  const handleRazorpayCheckout = async () => {
+    if (!selectedPlanForPayment || !user) return;
+    
+    const plan = selectedPlanForPayment;
+    setShowPaymentModal(false);
     setLoading(plan.id);
     try {
       const res = await loadRazorpay();
@@ -528,7 +575,13 @@ export default function PricingPage() {
                 disabled={plan.id === 'free' || loading === plan.id}
                 className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${currentPlan === plan.id ? "bg-[var(--glass-bg)] text-[var(--text-dim)] border border-[var(--glass-border)]" : plan.popular ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-[var(--text-main)] text-[var(--bg-app)]"}`}
               >
-                {loading === plan.id ? "Connecting..." : currentPlan === plan.id ? "Current Plan" : plan.cta}
+                {loading === plan.id 
+                  ? "Connecting..." 
+                  : currentPlan === plan.id 
+                    ? "Current Plan" 
+                    : (currentPlan === 'elite' && plan.id === 'pro')
+                      ? "Downgrade to Pro"
+                      : plan.cta}
               </InteractiveHoverButton>
             </div>
           )})}
@@ -577,6 +630,72 @@ export default function PricingPage() {
           </p>
         </div>
       </footer>
+
+      {/* Payment Selection Modal */}
+      <AnimatePresence>
+        {showPaymentModal && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 sm:p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPaymentModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-sm bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-[2rem] shadow-2xl overflow-hidden p-8"
+            >
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-500/20">
+                  <Shield className="w-8 h-8 text-indigo-500" />
+                </div>
+                <h3 className="text-xl font-black text-[var(--text-main)] uppercase tracking-tighter mb-2">Select Gateway</h3>
+                <p className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-widest">Choose your preferred payment method</p>
+              </div>
+
+              <div className="grid gap-4">
+                <button 
+                  onClick={handleStripeCheckout}
+                  className="group relative flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all text-left"
+                >
+                  <div className="w-10 h-10 bg-[#635BFF] rounded-lg flex items-center justify-center shrink-0">
+                    <span className="text-white font-bold text-xs">S</span>
+                  </div>
+                  <div>
+                    <span className="block text-xs font-black text-[var(--text-main)] uppercase tracking-tight">Stripe</span>
+                    <span className="block text-[8px] font-bold text-[var(--text-dim)] uppercase tracking-widest">Cards, Link, Google Pay</span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 ml-auto text-[var(--text-dim)] group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
+                </button>
+
+                <button 
+                  onClick={handleRazorpayCheckout}
+                  className="group relative flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all text-left"
+                >
+                  <div className="w-10 h-10 bg-[#3395FF] rounded-lg flex items-center justify-center shrink-0">
+                    <span className="text-white font-bold text-xs">R</span>
+                  </div>
+                  <div>
+                    <span className="block text-xs font-black text-[var(--text-main)] uppercase tracking-tight">Razorpay</span>
+                    <span className="block text-[8px] font-bold text-[var(--text-dim)] uppercase tracking-widest">UPI, Cards, Netbanking</span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 ml-auto text-[var(--text-dim)] group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
+                </button>
+              </div>
+
+              <button 
+                onClick={() => setShowPaymentModal(false)}
+                className="w-full mt-6 py-3 text-[9px] font-black text-[var(--text-dim)] hover:text-[var(--text-main)] uppercase tracking-[0.2em] transition-colors"
+              >
+                Cancel Transaction
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
