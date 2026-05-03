@@ -179,34 +179,38 @@ export default function GlobalHeader() {
               }
             }}
           >
-            <div className="flex items-center justify-center w-7 h-7 bg-indigo-500/10 rounded-lg border border-indigo-500/20 shadow-sm overflow-hidden p-1">
+            <div className="flex items-center justify-center w-8 h-8 bg-indigo-500/10 rounded-xl border border-indigo-500/20 shadow-md overflow-hidden p-1.5 hover:scale-110 transition-transform">
               <Image 
                 src="https://www.getchintu.com/icon.png" 
                 alt="Chintu" 
                 className="w-full h-full object-contain" 
-                width={28} 
-                height={28} 
+                width={32} 
+                height={32} 
                 unoptimized 
               />
             </div>
-            <span className="text-[var(--text-main)] text-sm font-black tracking-tight uppercase">Chintu</span>
+            <span className="text-sm font-black tracking-tighter uppercase text-[var(--text-main)]">
+              Chintu <span className="text-indigo-500">AI</span>
+            </span>
           </div>
           
           {isSignedIn && userCredits !== null && (
-            <div className="flex items-center gap-2">
-              <div className={`flex items-center gap-2 px-2.5 py-1 rounded-full border shadow-sm ${
-                userCredits > 5 
-                  ? 'bg-emerald-500/5 text-emerald-500 border-emerald-500/10' 
-                  : 'bg-amber-500/5 text-amber-500 border-amber-500/10'
-              }`}>
-                <span className="text-[10px] font-black tracking-tight">{userCredits}</span>
-                <div className="w-[1px] h-3 bg-current opacity-20 mx-0.5" />
-                <span className="text-[8px] font-black uppercase tracking-[0.1em] opacity-60">{userPlan}</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
+                <div className="flex flex-col items-end leading-none">
+                  <span className="text-[6px] font-black text-indigo-400 uppercase tracking-widest mb-0.5">Energy Sync</span>
+                  <div className="flex items-center gap-1">
+                    <Zap className="w-2 h-2 text-indigo-500 fill-indigo-500" />
+                    <span className="text-[10px] font-black text-[var(--text-main)]">{userCredits}</span>
+                  </div>
+                </div>
+                <div className="h-4 w-[1px] bg-[var(--glass-border)] mx-0.5" />
+                <span className="text-[8px] font-black uppercase tracking-widest text-indigo-500">{userPlan}</span>
               </div>
               {userPlan === 'free' && (
                 <button 
                   onClick={handleUpgrade}
-                  className="px-3 py-1 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-indigo-500 transition-all shadow-md shadow-indigo-500/10 active:scale-95"
+                  className="px-4 py-1.5 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
                 >
                   Upgrade
                 </button>

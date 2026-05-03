@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -12,19 +12,25 @@ export const TextReveal = ({
   className?: string;
 }) => {
   const targetRef = useRef<HTMLDivElement | null>(null);
+  const [container, setContainer] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const main = document.querySelector('main');
+    if (main) setContainer(main);
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: targetRef,
-    offset: ["start end", "end start"],
+    container: container ? { current: container } : undefined,
+    offset: ["start start", "end end"],
   });
 
   const words = text.split(" ");
 
   return (
-    <div ref={targetRef} className={cn("relative z-0 h-[200vh]", className)}>
-      <div className="sticky top-0 mx-auto flex h-[50vh] max-w-4xl items-center bg-transparent px-[1rem]">
-
-        <p className="flex flex-wrap p-5 text-2xl font-black text-black/10 dark:text-white/10 md:p-8 md:text-3xl lg:p-10 lg:text-4xl xl:text-5xl uppercase tracking-tighter leading-none">
+    <div ref={targetRef} className={cn("relative z-0 h-[140vh]", className)}>
+      <div className="sticky inset-0 h-screen w-full flex flex-col items-center justify-center bg-transparent px-6 overflow-hidden pointer-events-none">
+        <p className="max-w-5xl text-3xl font-black text-[var(--text-main)] md:text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter leading-[0.85] text-center flex flex-wrap justify-center">
           {words.map((word, i) => {
             const start = i / words.length;
             const end = start + 1 / words.length;
@@ -51,9 +57,9 @@ const Word = ({
 }) => {
   const opacity = useTransform(progress, range, [0, 1]);
   return (
-    <span className="relative mx-1 lg:mx-2.5">
-      <span className="absolute opacity-30">{children}</span>
-      <motion.span style={{ opacity: opacity }} className="text-black dark:text-white">
+    <span className="relative mx-1.5 lg:mx-3">
+      <span className="absolute text-[var(--text-main)] opacity-[0.15]">{children}</span>
+      <motion.span style={{ opacity: opacity }} className="text-[var(--text-main)]">
         {children}
       </motion.span>
     </span>

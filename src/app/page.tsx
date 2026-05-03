@@ -122,21 +122,21 @@ export default function LandingPage() {
               <div className="flex items-center gap-4">
                 {userPlan !== 'free' && userPlan !== '' && (
                   <>
-                    <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-2xl bg-indigo-50/50 border border-indigo-100 backdrop-blur-sm">
+                    <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
                       <AnimatedThemeToggler
                         theme={currentTheme}
                         onToggle={toggleTheme}
-                        className="bg-[var(--panel-bg)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)] shadow-sm"
+                        className="bg-[var(--bg-app)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)] shadow-sm"
                       />
                       <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
                       <div className="flex flex-col items-end">
                         <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Energy Sync</span>
-                        <span className="text-[11px] font-black text-indigo-600 tracking-tight flex items-center gap-1">
-                          <Zap className="w-2.5 h-2.5 fill-indigo-600" /> {userCredits ?? '--'}
+                        <span className="text-[11px] font-black text-indigo-400 tracking-tight flex items-center gap-1">
+                          <Zap className="w-2.5 h-2.5 fill-indigo-400" /> {userCredits ?? '--'}
                         </span>
                       </div>
-                      <div className="h-6 w-[1px] bg-indigo-200/50 mx-0.5" />
-                      <div className="px-2 py-1 rounded-lg bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest shadow-md">
+                      <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
+                      <div className="px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20">
                         {userPlan}
                       </div>
                     </div>
