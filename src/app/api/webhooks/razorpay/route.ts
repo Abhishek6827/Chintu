@@ -18,7 +18,6 @@ function buildTelegramMessage({
   paymentMethod,
   gatewayFees,
   netSettlement,
-  symbol,
   oldCredits,
   newCredits,
   expiryDate,
@@ -37,7 +36,6 @@ function buildTelegramMessage({
   paymentMethod: string;
   gatewayFees: string;
   netSettlement: string;
-  symbol: string;
   oldCredits: number;
   newCredits: number;
   expiryDate: string;
@@ -229,7 +227,6 @@ export async function POST(req: Request) {
         paymentMethod: paymentMethodDisplay,
         gatewayFees: `₹${totalFees.toFixed(2)}`,
         netSettlement: `₹${netAmount.toFixed(2)}`,
-        symbol: "₹",
         oldCredits,
         newCredits: totalCredits,
         expiryDate: newExpiry.toLocaleDateString("en-IN"),

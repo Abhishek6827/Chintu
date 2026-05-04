@@ -65,7 +65,6 @@ function buildTelegramMessage({
   paymentMethod,
   gatewayFees,
   netSettlement,
-  symbol,
   oldCredits,
   newCredits,
   expiryDate,
@@ -84,7 +83,6 @@ function buildTelegramMessage({
   paymentMethod: string;
   gatewayFees: string;
   netSettlement: string;
-  symbol: string;
   oldCredits: number;
   newCredits: number;
   expiryDate: string;
@@ -339,7 +337,6 @@ export async function POST(req: Request) {
         paymentMethod: paymentMethodDisplay,
         gatewayFees: `${symbol}${gatewayFee.toFixed(2)}`,
         netSettlement: `${symbol}${netAmount.toFixed(2)}`,
-        symbol,
         oldCredits,
         newCredits,
         expiryDate: newExpiry.toLocaleDateString("en-IN"),
@@ -464,7 +461,6 @@ export async function POST(req: Request) {
         paymentMethod: "Card (Recurring)",
         gatewayFees: `${symbol}${gatewayFee.toFixed(2)}`,
         netSettlement: `${symbol}${netAmount.toFixed(2)}`,
-        symbol,
         oldCredits,
         newCredits,
         expiryDate: newExpiry.toLocaleDateString("en-IN"),
@@ -546,7 +542,6 @@ export async function POST(req: Request) {
         paymentMethod: "—",
         gatewayFees: "—",
         netSettlement: "—",
-        symbol: "$",
         oldCredits: profile.credits || 0,
         newCredits: profile.credits || 0,
         expiryDate: profile.subscription_expires_at
@@ -605,7 +600,6 @@ export async function POST(req: Request) {
         paymentMethod: "—",
         gatewayFees: "$0.00",
         netSettlement: "$0.00",
-        symbol: "$",
         oldCredits: 0,
         newCredits: 10,
         expiryDate: "—",
@@ -656,7 +650,6 @@ export async function POST(req: Request) {
         paymentMethod: "—",
         gatewayFees: "$0.00",
         netSettlement: "$0.00",
-        symbol: "$",
         oldCredits: 0,
         newCredits: 10,
         expiryDate: "—",
