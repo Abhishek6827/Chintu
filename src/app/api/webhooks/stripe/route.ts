@@ -149,14 +149,43 @@ export async function POST(req: Request) {
         .maybeSingle();
       profile = data;
     }
-    if (!profile && email) {
-      console.warn(`[Webhook] Profile not found by userId. Trying email: ${email}`);
-      const { data } = await supabaseAdmin
+
+    if (email) {
+      const { data: profileByEmail } = await supabaseAdmin
         .from("profiles")
         .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
         .eq("email", email)
         .maybeSingle();
-      profile = data;
+
+      if (profileByEmail) {
+        if (!profile || profile.id === profileByEmail.id) {
+          return profileByEmail;
+        }
+
+        // MERGE LOGIC
+        console.log(`[Stripe Webhook] Found legacy profile ${profileByEmail.id} for email ${email}. Merging into ${profile.id}.`);
+        
+        const mergedCredits = (profile.credits || 0) + (profileByEmail.credits || 0);
+        const legacyExp = profileByEmail.subscription_expires_at ? new Date(profileByEmail.subscription_expires_at) : null;
+        const currentExp = profile.subscription_expires_at ? new Date(profile.subscription_expires_at) : null;
+        let finalExp = profile.subscription_expires_at;
+        
+        if (legacyExp && (!currentExp || legacyExp > currentExp)) {
+          finalExp = legacyExp.toISOString();
+        }
+
+        await supabaseAdmin
+          .from("profiles")
+          .update({
+            email: `migrated_${Date.now()}_${email}`,
+            credits: 0,
+            plan: "free"
+          })
+          .eq("id", profileByEmail.id);
+
+        profile.credits = mergedCredits;
+        profile.subscription_expires_at = finalExp;
+      }
     }
     return profile;
   }

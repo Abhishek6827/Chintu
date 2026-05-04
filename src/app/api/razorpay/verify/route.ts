@@ -95,17 +95,45 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 3. Resolve Target Profile (Email Fallback for ID mismatches)
-    let targetProfile = profile;
-    if (!targetProfile && userEmail) {
-      const { data: profileByEmail } = await supabaseAdmin
+    // 3. Resolve Profile & Handle Merging (Legacy Account Migration)
+    let baseCredits = profile?.credits || 0;
+    let baseExpiryStr = profile?.subscription_expires_at;
+
+    if (userEmail) {
+      const { data: legacyProfile } = await supabaseAdmin
         .from("profiles")
-        .select("*")
+        .select("id, credits, subscription_expires_at, plan, profile_data")
         .eq("email", userEmail)
+        .neq("id", userId) // Look for OTHER accounts with same email
         .maybeSingle();
-      targetProfile = profileByEmail;
+
+      if (legacyProfile) {
+        console.log(`[/api/razorpay/verify] Found legacy profile ${legacyProfile.id} for email ${userEmail}. Merging into ${userId}.`);
+        
+        // Merge Credits
+        baseCredits += (legacyProfile.credits || 0);
+        
+        // Merge Expiry (take latest)
+        const legacyExp = legacyProfile.subscription_expires_at ? new Date(legacyProfile.subscription_expires_at) : null;
+        const currentExp = baseExpiryStr ? new Date(baseExpiryStr) : null;
+        if (legacyExp && (!currentExp || legacyExp > currentExp)) {
+          baseExpiryStr = legacyExp.toISOString();
+        }
+
+        // Deactivate legacy profile to prevent future email conflicts
+        await supabaseAdmin
+          .from("profiles")
+          .update({ 
+            email: `migrated_${Date.now()}_${userEmail}`,
+            credits: 0,
+            plan: "free"
+          })
+          .eq("id", legacyProfile.id);
+      }
     }
-    const targetUserId = targetProfile?.id || userId;
+
+    const targetProfile = profile; // The one we are actually updating
+    const targetUserId = userId; 
 
     // 4. Calculate Credits & Expiry
     const planKey = `${planId}_${billingCycle}`; 
@@ -115,28 +143,15 @@ export async function POST(req: NextRequest) {
     const purchasedDays = planInfo.days * quantity;
 
     const now = new Date();
-    let currentExpiry = targetProfile?.subscription_expires_at ? new Date(targetProfile.subscription_expires_at) : now;
+    let currentExpiry = baseExpiryStr ? new Date(baseExpiryStr) : now;
     if (currentExpiry < now) currentExpiry = now;
     
-    const isDowngrade = targetProfile?.plan === 'elite' && planInfo.plan === 'pro';
-    const existingCredits = (targetProfile?.credits || 0);
+    const isDowngrade = (profile?.plan === 'elite' || baseCredits > 1000) && planInfo.plan === 'pro';
+    const existingCredits = baseCredits;
     const totalCredits = existingCredits + purchasedCredits;
     const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
 
-    // Check for email conflicts before upsert to avoid duplicate key errors
-    if (userEmail) {
-      const { data: conflict } = await supabaseAdmin
-        .from("profiles")
-        .select("id")
-        .eq("email", userEmail)
-        .neq("id", userId)
-        .maybeSingle();
-      
-      if (conflict) {
-        console.warn(`[/api/razorpay/verify] Email conflict for ${userEmail}. Fulfilling without updating email field.`);
-        userEmail = null; // Don't try to update email if it belongs to someone else
-      }
-    }
+    // Email conflicts already handled by legacy migration above
 
     // DEDUPLICATION CHECK: Check if this payment was already processed (e.g. by webhook)
     const { data: alreadyProcessed } = await supabaseAdmin

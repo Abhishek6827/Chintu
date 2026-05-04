@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import Razorpay from "razorpay";
-import { createAdminClient } from "@/utils/supabase/server";
 
 export const dynamic = 'force-dynamic';
 
@@ -13,24 +12,9 @@ export async function POST(req: NextRequest) {
 
   const { amount, currency = "INR", planId, quantity = 1, billingCycle = "monthly", email, fullName } = await req.json();
 
-  // Use admin client to fetch user profile for backend validation
-  const supabaseAdmin = createAdminClient();
 
-
-  if (email) {
-    const { data: existingUser } = await supabaseAdmin
-      .from("profiles")
-      .select("id, plan, payment_provider")
-      .eq("email", email)
-      .neq("id", userId)
-      .maybeSingle();
-      
-    if (existingUser && (existingUser.plan === "pro" || existingUser.plan === "elite")) {
-      return NextResponse.json({ 
-        error: `An active ${existingUser.plan.toUpperCase()} subscription via ${existingUser.payment_provider || 'another provider'} already exists for this email under a different account.`
-      }, { status: 400 });
-    }
-  }
+  // Allow flexibility: We will handle account merging/migration in the verification step
+  // if the email is associated with a different userId.
 
   const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID || "",
