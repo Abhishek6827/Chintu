@@ -17,6 +17,7 @@ import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggle
 import { useThemeToggle } from "@/hooks/useThemeToggle";
 import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
 import NeuralLoading from "@/components/NeuralLoading";
+import { PremiumWelcome } from "@/components/PremiumWelcome";
 
 
 
@@ -141,6 +142,8 @@ export default function RoomPage() {
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [showReadingGuide, setShowReadingGuide] = useState(false);
   const [isBackgroundRefining, setIsBackgroundRefining] = useState(false);
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
+  const [showSuccessScreen, setShowSuccessScreen] = useState(false);
 
   useEffect(() => {
     // Check if refining from URL
@@ -177,6 +180,49 @@ export default function RoomPage() {
         } catch {}
       }, 3000);
       
+      return () => clearInterval(poll);
+    }
+  }, []);
+
+  // 🔴 FIX 3: Payment Success Handling
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") === "success") {
+      setIsPaymentProcessing(true);
+      
+      // Clean up URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete("payment");
+      window.history.replaceState({}, "", url.toString());
+
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        if (attempts > 30) { // 1 minute
+          clearInterval(poll);
+          setIsPaymentProcessing(false);
+          setToast({ message: "Payment verification is taking longer than expected. Please check back in a moment.", type: "info" });
+          return;
+        }
+
+        try {
+          const res = await fetch("/api/profile");
+          if (res.ok) {
+            const { profile } = await res.json();
+            if (profile && profile.plan !== "free") {
+              clearInterval(poll);
+              setIsPaymentProcessing(false);
+              setShowSuccessScreen(true);
+              setUserPlan(profile.plan);
+              setToast({ message: `Upgrade Successful! Welcome to ${profile.plan.toUpperCase()} tier.`, type: "success" });
+              
+              // Hide success screen after 5 seconds
+              setTimeout(() => setShowSuccessScreen(false), 5000);
+            }
+          }
+        } catch {}
+      }, 2000);
+
       return () => clearInterval(poll);
     }
   }, []);
@@ -1555,6 +1601,29 @@ export default function RoomPage() {
               <span className="font-bold tracking-tight">AI is optimizing your profile in the background...</span>
             </div>
             <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Almost Done</span>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Processing Indicator */}
+      {isPaymentProcessing && (
+        <div className="px-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-xl px-4 py-3 text-xs flex items-center justify-between shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
+              <span className="font-bold tracking-tight">Verifying your payment and unlocking premium features...</span>
+            </div>
+            <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Security Check</span>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Success Screen */}
+      {showSuccessScreen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-6 animate-in fade-in duration-500">
+          <div className="w-full max-w-sm">
+            <PremiumWelcome plan={userPlan} />
+            <p className="text-center text-white/40 text-[10px] font-black uppercase tracking-[0.2em] mt-6 animate-pulse">Initializing Premium Protocols...</p>
           </div>
         </div>
       )}

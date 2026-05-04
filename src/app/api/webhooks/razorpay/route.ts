@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     const supabaseAdmin = createAdminClient();
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("full_name, email, plan, credits, display_id")
+      .select("id, full_name, email, plan, credits, display_id, subscription_expires_at, profile_data")
       .eq("id", userId)
       .maybeSingle();
 
@@ -160,11 +160,12 @@ export async function POST(req: Request) {
       `👤 <b>Name:</b> ${fullName}\n` +
       `📧 <b>Email:</b> <code>${email}</code>\n` +
       `📅 <b>Date:</b> <code>${eventTime}</code>\n` +
-      `💎 <b>Plan:</b> <b>${profile?.plan?.toUpperCase() || "FREE"} → ${newPlan.toUpperCase()}</b>\n` +
+      `💎 <b>Plan:</b> <b>${targetProfile?.plan?.toUpperCase() || "FREE"} → ${newPlan.toUpperCase()}</b>\n` +
       `📅 <b>Expiry Date:</b> <b>${newExpiry.toLocaleDateString('en-IN')}</b>\n` +
       `💰 <b>Amount:</b> <b>₹${amountINR.toLocaleString()}</b> (Qty: ${quantity})\n` +
       `💸 <b>Gateway Fees:</b> <b>₹${totalFees.toFixed(2)}</b> (Incl. Tax)\n` +
       `🏦 <b>Net Settlement:</b> <b>₹${netAmount.toFixed(2)}</b>\n` +
+      `📉 <b>Old Credits:</b> ${targetProfile?.credits || 0}\n` +
       `⚡ <b>Total Credits:</b> <b>${totalCredits}</b>\n` +
       `🆔 <b>ID:</b> <code>${payment.id}</code>\n\n` +
       `✅ <i>Razorpay Secure fulfillment verified.</i>`
