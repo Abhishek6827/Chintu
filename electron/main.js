@@ -549,16 +549,24 @@ app.whenReady().then(async () => {
   if (!PROFILE_FILE) PROFILE_FILE = path.join(app.getPath("userData"), "profile.json");
   loadEnv();
   
-  // ─── Resolve Razorpay 'unsafe header' warnings by exposing headers ───
+  // ─── Resolve Razorpay 'unsafe header' and Permissions-Policy warnings ───
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const exposeHeaders = ['x-rtb-fingerprint-id', 'request-id', 'x-razorpay-signature'];
-    if (details.responseHeaders) {
-      const existing = details.responseHeaders['access-control-expose-headers'] || details.responseHeaders['Access-Control-Expose-Headers'] || [];
-      const current = Array.isArray(existing) ? existing : [existing];
-      const combined = Array.from(new Set([...current, ...exposeHeaders]));
-      details.responseHeaders['Access-Control-Expose-Headers'] = combined;
-    }
-    callback({ responseHeaders: details.responseHeaders });
+    const responseHeaders = details.responseHeaders || {};
+
+    // Standardize lowercase for consistency with common browser expectations
+    const exposeKey = 'access-control-expose-headers';
+    const existingExpose = responseHeaders[exposeKey] || responseHeaders['Access-Control-Expose-Headers'] || [];
+    const currentExpose = Array.isArray(existingExpose) ? existingExpose : [existingExpose];
+    const combinedExpose = Array.from(new Set([...currentExpose, ...exposeHeaders]));
+    
+    // Set both to be safe, though most modern systems prefer lowercase
+    responseHeaders[exposeKey] = combinedExpose;
+    
+    // Also inject Permissions-Policy header directly (often more effective than meta tag)
+    responseHeaders['Permissions-Policy'] = 'accelerometer=*, camera=(), geolocation=(), gyroscope=*, magnetometer=*, microphone=(), payment=(self), usb=()';
+
+    callback({ responseHeaders });
   });
 
 
