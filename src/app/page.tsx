@@ -157,7 +157,7 @@ export default function LandingPage() {
                   </Link>
                 )}
                 <div className="scale-105 hover:scale-110 transition-transform">
-                  <UserButton afterSignOutUrl="/" />
+                  <UserButton />
                 </div>
               </div>
             )}

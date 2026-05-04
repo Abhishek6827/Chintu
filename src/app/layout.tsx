@@ -52,6 +52,8 @@ export default async function RootLayout({
       <html lang="en" className={themeClass}>
         <head>
           <link rel="icon" href="https://www.getchintu.com/icon.png" />
+          {/* Suppress sensor-related warnings from third-party scripts (like Razorpay) */}
+          <meta http-equiv="Permissions-Policy" content="accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(self), usb=()" />
         </head>
         <body className="bg-transparent h-screen flex flex-col">
           <GlobalHeader />

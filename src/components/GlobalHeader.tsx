@@ -262,7 +262,7 @@ export default function GlobalHeader() {
           {isSignedIn && (
             <div className="flex items-center gap-1.5 ml-1">
               <div className="w-7 h-7 rounded-lg overflow-hidden ring-1 ring-white/10 hover:scale-105 transition-transform">
-                <UserButton afterSignOutUrl="/">
+                <UserButton>
                   <UserButton.MenuItems>
                     <UserButton.Action 
                       label="Manage Subscription" 

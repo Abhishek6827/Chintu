@@ -619,7 +619,7 @@ export default function PricingPage() {
             <div className="flex flex-col items-center sm:items-end">
               <h4 className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-[0.2em] mb-4">Account</h4>
               <div className="p-1 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm hover:shadow-md transition-all">
-                <UserButton afterSignOutUrl="/" />
+                <UserButton />
               </div>
               <p className="text-[8px] text-[var(--text-dim)] font-black uppercase mt-2 tracking-widest">Active Profile</p>
             </div>
