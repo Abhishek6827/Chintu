@@ -161,11 +161,11 @@ export async function POST(req: Request) {
       `📧 <b>Email:</b> <code>${email}</code>\n` +
       `📅 <b>Date:</b> <code>${eventTime}</code>\n` +
       `💎 <b>Plan:</b> <b>${profile?.plan?.toUpperCase() || "FREE"} → ${newPlan.toUpperCase()}</b>\n` +
+      `📅 <b>Expiry Date:</b> <b>${newExpiry.toLocaleDateString('en-IN')}</b>\n` +
       `💰 <b>Amount:</b> <b>₹${amountINR.toLocaleString()}</b> (Qty: ${quantity})\n` +
       `💸 <b>Gateway Fees:</b> <b>₹${totalFees.toFixed(2)}</b> (Incl. Tax)\n` +
       `🏦 <b>Net Settlement:</b> <b>₹${netAmount.toFixed(2)}</b>\n` +
       `⚡ <b>Total Credits:</b> <b>${totalCredits}</b>\n` +
-      `📅 <b>Expiry:</b> <code>${newExpiry.toLocaleDateString('en-IN')}</code>\n` +
       `🆔 <b>ID:</b> <code>${payment.id}</code>\n\n` +
       `✅ <i>Razorpay Secure fulfillment verified.</i>`
     );

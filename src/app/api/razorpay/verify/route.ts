@@ -118,16 +118,9 @@ export async function POST(req: NextRequest) {
     let currentExpiry = targetProfile?.subscription_expires_at ? new Date(targetProfile.subscription_expires_at) : now;
     if (currentExpiry < now) currentExpiry = now;
     
-    // Pro-rata logic for Downgrades (Elite -> Pro)
-    let bonusCredits = 0;
     const isDowngrade = targetProfile?.plan === 'elite' && planInfo.plan === 'pro';
-    if (isDowngrade && currentExpiry > now) {
-      const remainingDays = Math.ceil((currentExpiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      bonusCredits = Math.round((800 / 30) * remainingDays);
-    }
-
     const existingCredits = (targetProfile?.credits || 0);
-    const totalCredits = existingCredits + purchasedCredits + bonusCredits;
+    const totalCredits = existingCredits + purchasedCredits;
     const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
 
     // Check for email conflicts before upsert to avoid duplicate key errors
@@ -215,8 +208,8 @@ export async function POST(req: NextRequest) {
 💎 <b>Old Plan:</b> ${profile?.plan?.toUpperCase() || "FREE"}
 💎 <b>New Plan:</b> ${planInfo.plan.toUpperCase()}
 ⚡ <b>Old Credits:</b> ${existingCredits}
-⚡ <b>New Credits:</b> ${totalCredits} ${bonusCredits > 0 ? `(+${bonusCredits} Pro-rata)` : ""}
-📅 <b>Expiry:</b> ${newExpiry.toLocaleDateString('en-IN')}
+⚡ <b>New Credits:</b> ${totalCredits}
+📅 <b>Expiry:</b> <code>${newExpiry.toLocaleDateString('en-IN')}</code>
 --------------------------
 ✅ <b>Status:</b> SUCCESSFUL
 🆔 <b>Payment ID:</b> <code>${razorpay_payment_id}</code>

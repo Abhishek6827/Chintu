@@ -70,8 +70,8 @@ const PLANS = [
       "UI Customization",
     ],
     cta: "Upgrade to Pro",
-    stripePriceIdMonthly: "price_1TRu3pLYcsTnVrvkVfZIjTLC",
-    stripePriceIdAnnual: "price_1TRu4ILYcsTnVrvkcfBbwSBr",
+    stripePriceIdMonthly: "price_1TTF8WLYcsTnVrvkaLcpMyel",
+    stripePriceIdAnnual: "price_1TTFChLYcsTnVrvkUllytzc2",
   },
   {
     id: "elite",
@@ -95,8 +95,8 @@ const PLANS = [
       "Early Access",
     ],
     cta: "Go Elite",
-    stripePriceIdMonthly: "price_1TRu4jLYcsTnVrvkJ7gkHA91",
-    stripePriceIdAnnual: "price_1TRu5ALYcsTnVrvk3dMorbBe",
+    stripePriceIdMonthly: "price_1TTFBELYcsTnVrvkKpZSsGRN",
+    stripePriceIdAnnual: "price_1TTFDhLYcsTnVrvkGGjCkxv5",
   },
 ];
 
@@ -743,7 +743,7 @@ export default function PricingPage() {
                        />
                     </div>
                     <div>
-                      <span className="block text-[13px] font-black text-[var(--text-main)] uppercase tracking-tight mb-0.5">Stripe Global</span>
+                      <span className="block text-[13px] font-black text-[var(--text-main)] uppercase tracking-tight mb-0.5">Stripe</span>
                       <span className="block text-[9px] font-bold text-[var(--text-dim)] uppercase tracking-widest opacity-60">Visa, Mastercard, Link, Apple Pay</span>
                     </div>
                     <div className="ml-auto bg-[var(--glass-bg)] w-10 h-10 rounded-full flex items-center justify-center border border-[var(--glass-border)] group-hover:border-indigo-500/50 group-hover:text-indigo-400 transition-all">
@@ -768,8 +768,8 @@ export default function PricingPage() {
                        />
                     </div>
                     <div>
-                      <span className="block text-[13px] font-black text-[var(--text-main)] uppercase tracking-tight mb-0.5">Razorpay India</span>
-                      <span className="block text-[9px] font-bold text-[var(--text-dim)] uppercase tracking-widest opacity-60">UPI, Netbanking, Local Cards</span>
+                      <span className="block text-[13px] font-black text-[var(--text-main)] uppercase tracking-tight mb-0.5">Razorpay</span>
+                      <span className="block text-[9px] font-bold text-[var(--text-dim)] uppercase tracking-widest opacity-60">UPI, Netbanking, Cards,Wallets</span>
                     </div>
                     <div className="ml-auto bg-[var(--glass-bg)] w-10 h-10 rounded-full flex items-center justify-center border border-[var(--glass-border)] group-hover:border-emerald-500/50 group-hover:text-emerald-400 transition-all">
                       <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5" />

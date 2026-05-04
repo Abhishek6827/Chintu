@@ -142,16 +142,26 @@ export async function POST(req: Request) {
         
         if (currentExpiry < now) currentExpiry = now;
 
-        // Pro-rata logic for Downgrades (Elite -> Pro)
-        let bonusCredits = 0;
-        const isDowngrade = oldPlan === 'elite' && plan === 'pro';
-        if (isDowngrade && currentExpiry > now) {
-          const remainingDays = Math.ceil((currentExpiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-          bonusCredits = Math.round((800 / 30) * remainingDays);
-        }
-
-        const totalCredits = existingCredits + purchasedCredits + bonusCredits;
+        const totalCredits = existingCredits + purchasedCredits;
         const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
+
+        // Fetch Gateway Fees
+        let gatewayFee = 0;
+        let netAmount = (session.amount_total || 0) / 100;
+        try {
+          if (session.payment_intent) {
+            const pi = await stripe.paymentIntents.retrieve(session.payment_intent as string, {
+              expand: ['latest_charge.balance_transaction'],
+            });
+            const charge = pi.latest_charge as any;
+            if (charge?.balance_transaction) {
+              gatewayFee = (charge.balance_transaction.fee || 0) / 100;
+              netAmount = (charge.balance_transaction.net || 0) / 100;
+            }
+          }
+        } catch (feeErr) {
+          console.error("[Stripe Webhook] Fee calculation failed:", feeErr);
+        }
 
         console.log(`[Stripe Webhook] Stacking for user ${userId}: Credits ${existingCredits} + ${purchasedCredits} = ${totalCredits}`);
         
@@ -195,6 +205,7 @@ export async function POST(req: Request) {
       }
 
       // ─── Send Telegram Alert ─────────────────────────────
+      const isDowngrade = oldPlan === 'elite' && plan === 'pro';
       const statusLabel = isDowngrade ? "DOWNGRADE 🔻" : (oldPlan === 'free' ? "NEW UPGRADE ⚡" : "UPGRADE ⚡");
       const telegramMsg = `
 <b>${statusLabel} | STRIPE</b> 💳
@@ -202,13 +213,15 @@ export async function POST(req: Request) {
 📧 <b>Email:</b> <code>${session.customer_details?.email || 'N/A'}</code>
 🆔 <b>Payment ID:</b> <code>${session.id}</code>
 🛠️ <b>Method:</b> ${paymentMethodDisplay}
-💰 <b>Amount:</b> ${price}
+💰 <b>Amount:</b> ${price} (Qty: ${quantity})
+💸 <b>Gateway Fees:</b> <b>${session.currency?.toUpperCase() === 'INR' ? '₹' : '$'}${gatewayFee.toFixed(2)}</b>
+🏦 <b>Net Settlement:</b> <b>${session.currency?.toUpperCase() === 'INR' ? '₹' : '$'}${netAmount.toFixed(2)}</b>
 --------------------------
 📊 <b>Old Plan:</b> ${oldPlan.toUpperCase()}
 🚀 <b>New Plan:</b> ${plan.toUpperCase()}
 📉 <b>Old Credits:</b> ${existingCredits}
-📈 <b>New Credits:</b> ${totalCredits} ${bonusCredits > 0 ? `(+${bonusCredits} Pro-rata)` : ""}
-📅 <b>Expiry:</b> ${newExpiry.toLocaleDateString('en-IN')}
+📈 <b>New Credits:</b> ${totalCredits}
+📅 <b>Expiry:</b> <code>${newExpiry.toLocaleDateString('en-IN')}</code>
 --------------------------
 ✅ <b>Status:</b> SUCCESSFUL
 `;
@@ -307,6 +320,25 @@ export async function POST(req: Request) {
           const invoiceCustomerName = invoice.customer_name || invoice.customer_email || profile.email || "Unknown";
           const eventTime = formatEventTime();
 
+          // Fetch Gateway Fees for Renewal
+          let gatewayFee = 0;
+          let netAmount = (invoice.amount_paid || 0) / 100;
+          try {
+            const chargeId = invoice.charge as string;
+            if (chargeId) {
+              const charge = await stripe.charges.retrieve(chargeId, {
+                expand: ['balance_transaction'],
+              });
+              if (charge.balance_transaction && typeof charge.balance_transaction === 'object') {
+                const bt = charge.balance_transaction as any;
+                gatewayFee = (bt.fee || 0) / 100;
+                netAmount = (bt.net || 0) / 100;
+              }
+            }
+          } catch (err) {
+            console.error("[Stripe Webhook] Renewal fee calculation failed:", err);
+          }
+
           await supabaseAdmin
             .from("profiles")
             .update({ 
@@ -334,9 +366,11 @@ export async function POST(req: Request) {
             `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
             `📅 Date: <code>${eventTime}</code>\n` +
             `💎 Plan: <b>${planInfo.plan.toUpperCase()}</b>\n` +
-            `💲 Price: <b>${planInfo.price}</b> × ${quantity}\n` +
+            `💰 Amount: <b>${invoice.currency?.toUpperCase() === 'INR' ? '₹' : '$'}${(invoice.amount_paid / 100).toFixed(2)}</b> (Qty: ${quantity})\n` +
+            `💸 Gateway Fees: <b>${invoice.currency?.toUpperCase() === 'INR' ? '₹' : '$'}${gatewayFee.toFixed(2)}</b>\n` +
+            `🏦 Net Settlement: <b>${invoice.currency?.toUpperCase() === 'INR' ? '₹' : '$'}${netAmount.toFixed(2)}</b>\n` +
             `⚡ Total Credits: <b>${totalCredits}</b>\n` +
-            `⏳ Expiry: <code>${newExpiry.toLocaleDateString()}</code>`
+            `⏳ Expiry: <b>${newExpiry.toLocaleDateString('en-IN')}</b>`
           );
 
           // Email
@@ -447,6 +481,22 @@ export async function POST(req: Request) {
 
           const eventTime = formatEventTime();
 
+          // Fetch Fees for Update
+          let gatewayFee = 0;
+          let netAmount = 0;
+          try {
+            const latestInvoice = await stripe.invoices.retrieve(subscription.latest_invoice as string, {
+              expand: ['charge.balance_transaction'],
+            });
+            if ((latestInvoice as any).charge && typeof (latestInvoice as any).charge === 'object') {
+              const charge = (latestInvoice as any).charge as any;
+              if (charge.balance_transaction) {
+                gatewayFee = (charge.balance_transaction.fee || 0) / 100;
+                netAmount = (charge.balance_transaction.net || 0) / 100;
+              }
+            }
+          } catch {}
+
           // Update Supabase
           await supabaseAdmin
             .from("profiles")
@@ -467,9 +517,11 @@ export async function POST(req: Request) {
             `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
             `📅 Date: <code>${eventTime}</code>\n` +
             `💎 Evolution: <b>${oldPlan.toUpperCase()}</b> → <b>${planInfo.plan.toUpperCase()}</b>\n` +
-            `💲 Price: <b>${planInfo.price}</b> × ${quantity}\n` +
+            `💰 Amount: <b>${planInfo.price}</b> × ${quantity}\n` +
+            `💸 Gateway Fees: <b>$${gatewayFee.toFixed(2)}</b>\n` +
+            `🏦 Net Settlement: <b>$${netAmount.toFixed(2)}</b>\n` +
             `⚡ Total Credits: <b>${totalCredits}</b>\n` +
-            `⏳ Next Sync: <code>${newExpiry.toLocaleDateString()}</code>`
+            `⏳ Expiry: <b>${newExpiry.toLocaleDateString('en-IN')}</b>`
           );
           
           // Send Email
