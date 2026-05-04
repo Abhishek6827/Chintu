@@ -16,9 +16,9 @@ function buildTelegramMessage({
   amount,
   quantity = 1,
   paymentMethod,
-  gatewayFees,
   oldCredits,
   newCredits,
+
 
   expiryDate,
   transactionId,
@@ -34,9 +34,9 @@ function buildTelegramMessage({
   amount: string;
   quantity?: number;
   paymentMethod: string;
-  gatewayFees: string;
   oldCredits: number;
   newCredits: number;
+
 
   expiryDate: string;
   transactionId: string;
@@ -51,8 +51,8 @@ function buildTelegramMessage({
     `📊 <b>Plan:</b> <b>${oldPlan.toUpperCase()} → ${newPlan.toUpperCase()}</b>\n` +
     `💰 <b>Amount:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
     `💳 <b>Payment Method:</b> ${paymentMethod}\n` +
-    `💸 <b>Gateway Fees:</b> <b>${gatewayFees}</b> (Incl. Tax)\n` +
     `⚡ <b>Credits:</b> ${oldCredits} → <b>${newCredits}</b>\n` +
+
 
     `📆 <b>Expiry Date:</b> <b>${expiryDate}</b>\n` +
     `🆔 <b>Transaction ID:</b> <code>${transactionId}</code>\n` +
@@ -224,11 +224,13 @@ export async function POST(req: Request) {
         oldPlan: `${oldPlan}${targetProfile?.profile_data?.last_frequency ? ` (${targetProfile.profile_data.last_frequency})` : ""}`,
         newPlan: `${newPlan} (${planInfo.frequency})`,
         amount: `₹${amountINR.toLocaleString("en-IN")}`,
+
         quantity,
         paymentMethod: paymentMethodDisplay,
-        gatewayFees: `₹${totalFees.toFixed(2)}`,
         oldCredits,
         newCredits: totalCredits,
+
+
 
 
         expiryDate: newExpiry.toLocaleDateString("en-IN"),

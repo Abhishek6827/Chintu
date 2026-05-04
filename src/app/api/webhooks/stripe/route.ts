@@ -68,9 +68,9 @@ function buildTelegramMessage({
   amount,
   quantity = 1,
   paymentMethod,
-  gatewayFees,
   oldCredits,
   newCredits,
+
 
   expiryDate,
   transactionId,
@@ -86,9 +86,9 @@ function buildTelegramMessage({
   amount: string;
   quantity?: number;
   paymentMethod: string;
-  gatewayFees: string;
   oldCredits: number;
   newCredits: number;
+
 
   expiryDate: string;
   transactionId: string;
@@ -103,8 +103,8 @@ function buildTelegramMessage({
     `📊 <b>Plan:</b> <b>${oldPlan.toUpperCase()} → ${newPlan.toUpperCase()}</b>\n` +
     `💰 <b>Amount:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
     `💳 <b>Payment Method:</b> ${paymentMethod}\n` +
-    `💸 <b>Gateway Fees:</b> <b>${gatewayFees}</b> (Incl. Tax)\n` +
     `⚡ <b>Credits:</b> ${oldCredits} → <b>${newCredits}</b>\n` +
+
 
     `📆 <b>Expiry Date:</b> <b>${expiryDate}</b>\n` +
     `🆔 <b>Transaction ID:</b> <code>${transactionId}</code>\n` +
@@ -379,14 +379,16 @@ export async function POST(req: Request) {
     }
 
 
-    const { totalAmount: stripeTotal, symbol, transactionId } = await fetchFees(
+    const { totalAmount: stripeTotal, transactionId } = await fetchFees(
       session.payment_intent as string,
       session.invoice as string,
       session.currency || "usd"
     );
 
+
     const amountPaidRaw = stripeTotal || (session.amount_total! / 100);
-    const { gatewayFee: displayGatewayFee, totalPaid: amountToDisplay } = calculateDisplayFees(amountPaidRaw);
+    const { gatewayFee: displayGatewayFee } = calculateDisplayFees(amountPaidRaw);
+
 
     console.log(`[Webhook] Payment Success | Total: ${amountPaidRaw} | 2% Fee: ${displayGatewayFee}`);
 
@@ -428,7 +430,9 @@ export async function POST(req: Request) {
     }
 
 
-    const statusLabel = "💰 Plan Purchased | STRIPE 💳";
+    const isDowngrade = oldPlan === "elite" && plan === "pro";
+    const statusLabel = isDowngrade ? "DOWNGRADE 🔻 | STRIPE 💳" : oldPlan === "free" ? "🎉 New Subscription! | STRIPE 💳" : "⚡ Upgrade! | STRIPE 💳";
+
 
 
     await sendTelegramAlert(
@@ -439,12 +443,13 @@ export async function POST(req: Request) {
         dateTime: eventTime,
         oldPlan: `${oldPlan}${profile.profile_data?.last_frequency ? ` (${profile.profile_data.last_frequency})` : ""}`,
         newPlan: `${plan} (${frequency})`,
-        amount: `${symbol}${amountToDisplay}${frequency ? `/${frequency.toLowerCase() === "annual" ? "yr" : "mo"}` : ""}`,
+        amount: price,
         quantity: 1,
         paymentMethod: paymentMethodDisplay,
-        gatewayFees: `${symbol}${displayGatewayFee}`,
         oldCredits,
         newCredits,
+
+
 
 
 
@@ -459,7 +464,8 @@ export async function POST(req: Request) {
         await resend.emails.send({
           from: "Chintu Intelligence <welcome@getchintu.com>",
           to: customerEmail,
-          subject: `CHINTU: PROTOCOL UPGRADE VERIFIED ⚡`,
+          subject: `CHINTU: ${isDowngrade ? "PLAN UPDATED" : "PROTOCOL UPGRADE VERIFIED"} ⚡`,
+
 
           html: getPaymentEmailHtml(
             customerName, plan, oldPlan, newCredits, price, eventTime,
@@ -520,14 +526,16 @@ export async function POST(req: Request) {
     const newExpiry = stackExpiry(profile.subscription_expires_at, addDays);
 
 
-    const { totalAmount: stripeTotal, symbol, transactionId } = await fetchFees(
+    const { totalAmount: stripeTotal, transactionId } = await fetchFees(
       invoice.payment_intent as string,
       invoice.id as string,
       invoice.currency || "usd"
     );
 
+
     const amountPaidRaw = stripeTotal || (invoice.amount_paid / 100);
-    const { gatewayFee: displayGatewayFee, totalPaid: amountToDisplay } = calculateDisplayFees(amountPaidRaw);
+    const { gatewayFee: displayGatewayFee } = calculateDisplayFees(amountPaidRaw);
+
 
     console.log(`[Webhook] Renewal Success | Total: ${amountPaidRaw} | 2% Fee: ${displayGatewayFee}`);
 
@@ -574,12 +582,13 @@ export async function POST(req: Request) {
         dateTime: eventTime,
         oldPlan: `${planInfo.plan} (${planInfo.frequency})`,
         newPlan: `${planInfo.plan} (${planInfo.frequency})`,
-        amount: `${symbol}${amountToDisplay}`,
+        amount: planInfo.price,
         quantity,
         paymentMethod: "Card (Recurring)",
-        gatewayFees: `${symbol}${displayGatewayFee}`,
         oldCredits,
         newCredits,
+
+
 
 
         expiryDate: newExpiry.toLocaleDateString("en-IN"),
@@ -669,8 +678,8 @@ export async function POST(req: Request) {
         amount: planInfo.price,
         quantity: 1,
         paymentMethod: "—",
-        gatewayFees: "—",
         oldCredits: profile.credits || 0,
+
 
         newCredits: profile.credits || 0,
         expiryDate: profile.subscription_expires_at
@@ -734,8 +743,8 @@ export async function POST(req: Request) {
         amount: "$0.00",
         quantity: 1,
         paymentMethod: "—",
-        gatewayFees: "$0.00",
         oldCredits: 0,
+
 
         newCredits: 10,
         expiryDate: "—",
@@ -790,8 +799,8 @@ export async function POST(req: Request) {
         amount: "$0.00",
         quantity: 1,
         paymentMethod: "—",
-        gatewayFees: "$0.00",
         oldCredits: 0,
+
 
         newCredits: 10,
         expiryDate: "—",

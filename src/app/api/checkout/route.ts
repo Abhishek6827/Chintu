@@ -31,8 +31,9 @@ export async function POST(req: NextRequest) {
             .maybeSingle();
 
         const session = await stripe.checkout.sessions.create({
-            mode: "payment",
+            mode: "subscription",
             payment_method_types: ["card"],
+
 
             // If customer exists, reuse it; otherwise use customer_email
             ...(profile?.stripe_customer_id ? { customer: profile.stripe_customer_id } : { customer_email: email }),
@@ -42,7 +43,13 @@ export async function POST(req: NextRequest) {
             metadata: {
                 userId,
             },
+            subscription_data: {
+                metadata: {
+                    userId,
+                },
+            },
         });
+
 
 
         return NextResponse.json({ url: session.url });
