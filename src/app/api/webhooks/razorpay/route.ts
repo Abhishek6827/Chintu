@@ -17,9 +17,9 @@ function buildTelegramMessage({
   quantity = 1,
   paymentMethod,
   gatewayFees,
-  netSettlement,
   oldCredits,
   newCredits,
+
   expiryDate,
   transactionId,
   status = "SUCCESSFUL",
@@ -35,9 +35,9 @@ function buildTelegramMessage({
   quantity?: number;
   paymentMethod: string;
   gatewayFees: string;
-  netSettlement: string;
   oldCredits: number;
   newCredits: number;
+
   expiryDate: string;
   transactionId: string;
   status?: string;
@@ -52,8 +52,8 @@ function buildTelegramMessage({
     `💰 <b>Amount:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
     `💳 <b>Payment Method:</b> ${paymentMethod}\n` +
     `💸 <b>Gateway Fees:</b> <b>${gatewayFees}</b> (Incl. Tax)\n` +
-    `🏦 <b>Net Settlement:</b> <b>${netSettlement}</b>\n` +
     `⚡ <b>Credits:</b> ${oldCredits} → <b>${newCredits}</b>\n` +
+
     `📆 <b>Expiry Date:</b> <b>${expiryDate}</b>\n` +
     `🆔 <b>Transaction ID:</b> <code>${transactionId}</code>\n` +
     `✅ <b>Status:</b> ${status}` +
@@ -165,10 +165,10 @@ export async function POST(req: Request) {
     }
 
     const amountINR = Number(payment.amount) / 100;
-    const gatewayFee = (Number(payment.fee) || 0) / 100;
-    const gatewayTax = (Number(payment.tax) || 0) / 100;
-    const totalFees = gatewayFee + gatewayTax;
-    const netAmount = amountINR - totalFees;
+    // ✅ FIX: Use 2% business model fee for display
+    const totalFees = amountINR * 0.02;
+
+
 
     // Razorpay payment method
     let paymentMethodDisplay = "UPI";
@@ -227,9 +227,10 @@ export async function POST(req: Request) {
         quantity,
         paymentMethod: paymentMethodDisplay,
         gatewayFees: `₹${totalFees.toFixed(2)}`,
-        netSettlement: `₹${netAmount.toFixed(2)}`,
         oldCredits,
         newCredits: totalCredits,
+
+
         expiryDate: newExpiry.toLocaleDateString("en-IN"),
         transactionId: payment.id,
         extraNote: "Razorpay Secure fulfillment verified.",

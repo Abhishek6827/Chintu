@@ -31,8 +31,9 @@ export async function POST(req: NextRequest) {
             .maybeSingle();
 
         const session = await stripe.checkout.sessions.create({
-            mode: "subscription",
+            mode: "payment",
             payment_method_types: ["card"],
+
             // If customer exists, reuse it; otherwise use customer_email
             ...(profile?.stripe_customer_id ? { customer: profile.stripe_customer_id } : { customer_email: email }),
             line_items: [{ price: priceId, quantity }],
@@ -41,13 +42,8 @@ export async function POST(req: NextRequest) {
             metadata: {
                 userId,
             },
-            // 🔴 FIX 1: Attach metadata to subscription so it's available in all invoice events
-            subscription_data: {
-                metadata: {
-                    userId,
-                },
-            },
         });
+
 
         return NextResponse.json({ url: session.url });
     } catch (error: any) {
