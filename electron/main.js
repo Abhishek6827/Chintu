@@ -548,6 +548,19 @@ app.whenReady().then(async () => {
   app.setAppUserModelId("com.chintu.app");
   if (!PROFILE_FILE) PROFILE_FILE = path.join(app.getPath("userData"), "profile.json");
   loadEnv();
+  
+  // ─── Resolve Razorpay 'unsafe header' warnings by exposing headers ───
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    const exposeHeaders = ['x-rtb-fingerprint-id', 'request-id', 'x-razorpay-signature'];
+    if (details.responseHeaders) {
+      const existing = details.responseHeaders['access-control-expose-headers'] || details.responseHeaders['Access-Control-Expose-Headers'] || [];
+      const current = Array.isArray(existing) ? existing : [existing];
+      const combined = Array.from(new Set([...current, ...exposeHeaders]));
+      details.responseHeaders['Access-Control-Expose-Headers'] = combined;
+    }
+    callback({ responseHeaders: details.responseHeaders });
+  });
+
 
 
   if (!isDev && false) { // Disabled local server for SaaS mode
