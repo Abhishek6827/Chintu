@@ -28,7 +28,6 @@ export default function Page() {
         <button 
           onClick={() => (window as any).electronAPI?.minimize()}
           className="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-200 shadow-sm"
-          title="Minimize"
         >
           ─
         </button>

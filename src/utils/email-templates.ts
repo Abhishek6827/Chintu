@@ -102,7 +102,8 @@ export const getPaymentEmailHtml = (
   credits: number,
   price: string,
   timestamp: string,
-  appUrl: string
+  appUrl: string,
+  expiry: string
 ) => `
 <!DOCTYPE html>
 <html>
@@ -155,9 +156,13 @@ export const getPaymentEmailHtml = (
                     </td>
                   </tr>
                   <tr>
-                    <td>
+                    <td style="padding-bottom: 15px;">
                       <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Tactical Credit Allocation:</span>
                       <div style="font-size: 14px; font-weight: 700; color: #10b981;">${credits} Credits Stacked</div>
+                    </td>
+                    <td style="padding-bottom: 15px; text-align: right;">
+                      <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Protocol Expiry:</span>
+                      <div style="font-size: 14px; font-weight: 700; color: #1a1a1c;">${expiry}</div>
                     </td>
                   </tr>
                 </table>

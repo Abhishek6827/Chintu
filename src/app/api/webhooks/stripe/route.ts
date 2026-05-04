@@ -115,7 +115,7 @@ export async function POST(req: Request) {
         // Fetch user's current status for stacking
         let { data: currentProfile } = await supabaseAdmin
           .from("profiles")
-          .select("id, plan, email, credits, subscription_expires_at, profile_data")
+          .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
           .eq("id", userId)
           .maybeSingle();
 
@@ -124,7 +124,7 @@ export async function POST(req: Request) {
           console.warn(`[Stripe Webhook] Profile not found for ID ${userId}. Falling back to email ${session.customer_details.email}`);
           const { data: profileByEmail } = await supabaseAdmin
             .from("profiles")
-            .select("id, plan, email, credits, subscription_expires_at, profile_data")
+            .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
             .eq("email", session.customer_details.email)
             .maybeSingle();
           currentProfile = profileByEmail;
@@ -169,6 +169,7 @@ export async function POST(req: Request) {
         const { error } = await supabaseAdmin
           .from("profiles")
           .update({
+            display_id: currentProfile?.display_id || `CHINTU-STRIPE-${new Date().toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(/\//g, '-')}-${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).replace(':', '')}`,
             plan: plan,
             credits: totalCredits,
             subscription_expires_at: newExpiry.toISOString(),
@@ -228,7 +229,8 @@ export async function POST(req: Request) {
               totalCredits,
               price,
               formatEventTime(),
-              process.env.NEXT_PUBLIC_APP_URL || 'https://getchintu.com'
+              process.env.NEXT_PUBLIC_APP_URL || 'https://getchintu.com',
+              newExpiry.toLocaleDateString('en-IN')
             ),
           });
         } catch (emailErr) {
@@ -253,7 +255,7 @@ export async function POST(req: Request) {
       // Find user by subscription ID
       const result = await supabaseAdmin
         .from("profiles")
-        .select("id, plan, email, credits, subscription_expires_at, profile_data")
+        .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
         .eq("stripe_subscription_id", subscriptionId)
         .maybeSingle();
       
@@ -265,7 +267,7 @@ export async function POST(req: Request) {
         console.warn(`[Stripe Webhook] Profile not found for sub ${subscriptionId}. Falling back to email ${invoice.customer_email}`);
         const { data: profileByEmail } = await supabaseAdmin
           .from("profiles")
-          .select("id, plan, email, credits, subscription_expires_at, profile_data")
+          .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
           .eq("email", invoice.customer_email)
           .maybeSingle();
         profile = profileByEmail;
@@ -308,6 +310,7 @@ export async function POST(req: Request) {
           await supabaseAdmin
             .from("profiles")
             .update({ 
+              display_id: profile.display_id || `CHINTU-STRIPE-${new Date().toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(/\//g, '-')}-${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).replace(':', '')}`,
               credits: totalCredits, 
               subscription_expires_at: newExpiry.toISOString(),
               full_name: invoiceCustomerName,
@@ -350,7 +353,8 @@ export async function POST(req: Request) {
                 totalCredits,
                 planInfo.price,
                 eventTime,
-                process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+                process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+                newExpiry.toLocaleDateString('en-IN')
               ),
               text: `Your subscription to the ${planInfo.plan.toUpperCase()} tier has been successfully renewed.\n\nTactical Credit Allocation: ${totalCredits} Credits Provisioned (Stacked)\n\nQuestions? Contact our support team at contact@getchintu.com\n\nYou are receiving this receipt because of a recent transaction on your Chintu Intelligence account.\nChintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105\n\n© 2026 Chintu Intelligence Ecosystem • Professional Tier Verified`
             });
@@ -375,7 +379,7 @@ export async function POST(req: Request) {
         // Find user by subscription ID
         let { data: profile } = await supabaseAdmin
           .from("profiles")
-          .select("id, plan, email, credits, subscription_expires_at, profile_data")
+          .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
           .eq("stripe_subscription_id", subscription.id)
           .maybeSingle();
 
@@ -388,7 +392,7 @@ export async function POST(req: Request) {
               if (customerEmail) {
                 const { data: profileByEmail } = await supabaseAdmin
                   .from("profiles")
-                  .select("id, plan, email, credits, subscription_expires_at, profile_data")
+                  .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
                   .eq("email", customerEmail)
                   .maybeSingle();
                 profile = profileByEmail;
@@ -447,6 +451,7 @@ export async function POST(req: Request) {
           await supabaseAdmin
             .from("profiles")
             .update({ 
+              display_id: profile.display_id || `CHINTU-STRIPE-${new Date().toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(/\//g, '-')}-${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).replace(':', '')}`,
               plan: planInfo.plan,
               credits: totalCredits, 
               subscription_expires_at: newExpiry.toISOString(),
@@ -481,7 +486,8 @@ export async function POST(req: Request) {
                 totalCredits,
                 planInfo.price,
                 eventTime,
-                process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+                process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+                newExpiry.toLocaleDateString('en-IN')
               ),
               text: `Your subscription to the ${planInfo.plan.toUpperCase()} tier has been successfully updated.\n\nTactical Credit Allocation: ${totalCredits} Credits Provisioned\n\nQuestions? Contact our support team at contact@getchintu.com\n\nYou are receiving this receipt because of a recent transaction on your Chintu Intelligence account.\nChintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105\n\n© 2026 Chintu Intelligence Ecosystem • Professional Tier Verified`
             });

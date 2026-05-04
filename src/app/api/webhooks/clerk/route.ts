@@ -58,22 +58,19 @@ export async function POST(req: Request) {
       return new Response('No email found, skipping sync', { status: 200 });
     }
 
-    // --- Generate Standard Display ID & IST Time ---
     const now = new Date();
     const istOptions: Intl.DateTimeFormatOptions = { 
       timeZone: 'Asia/Kolkata', 
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit', hour12: true 
     };
-    const istString = now.toLocaleString('en-IN', istOptions); // e.g. "30/04/2026, 11:44 pm"
-    
-    // For Display ID, keep it URL/ID friendly
-    const dateStr = now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(/\//g, '-');
-    const displayTimeStr = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).replace(':', '');
-    
+    const istString = now.toLocaleString('en-IN', istOptions);
+
     // Extract provider safely
     const externalAccounts = (evt.data as any).external_accounts || [];
     const provider = externalAccounts[0]?.provider || 'email';
+    const dateStr = now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(/\//g, '-');
+    const displayTimeStr = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).replace(':', '');
     const displayId = `CHINTU-${provider.toUpperCase()}-${dateStr}-${displayTimeStr}`;
 
     console.log(`[/api/webhooks/clerk] Syncing user ${id} with Display ID ${displayId}`);

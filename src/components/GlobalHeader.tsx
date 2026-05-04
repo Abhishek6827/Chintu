@@ -253,7 +253,6 @@ export default function GlobalHeader() {
               <button 
                 onClick={handleMinimize} 
                 className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
-                title="Minimize"
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>

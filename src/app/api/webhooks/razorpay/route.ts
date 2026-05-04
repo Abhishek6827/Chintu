@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     const supabaseAdmin = createAdminClient();
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("full_name, email, plan, credits")
+      .select("full_name, email, plan, credits, display_id")
       .eq("id", userId)
       .maybeSingle();
 
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
       console.warn(`[Razorpay Webhook] Profile not found for ID ${userId}. Falling back to email ${email}`);
       const { data: profileByEmail } = await supabaseAdmin
         .from("profiles")
-        .select("id, plan, email, credits, subscription_expires_at, profile_data")
+        .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
         .eq("email", email)
         .maybeSingle();
       targetProfile = profileByEmail;
@@ -126,6 +126,7 @@ export async function POST(req: Request) {
     const netAmount = amountINR - totalFees;
 
     await supabaseAdmin.from("profiles").update({
+      display_id: targetProfile?.display_id || `CHINTU-RAZORPAY-${new Date().toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(/\//g, '-')}-${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).replace(':', '')}`,
       email: finalEmail,
       full_name: fullName || targetProfile?.full_name,
       plan: planInfo.plan,
@@ -164,6 +165,7 @@ export async function POST(req: Request) {
       `💸 <b>Gateway Fees:</b> <b>₹${totalFees.toFixed(2)}</b> (Incl. Tax)\n` +
       `🏦 <b>Net Settlement:</b> <b>₹${netAmount.toFixed(2)}</b>\n` +
       `⚡ <b>Total Credits:</b> <b>${totalCredits}</b>\n` +
+      `📅 <b>Expiry:</b> <code>${newExpiry.toLocaleDateString('en-IN')}</code>\n` +
       `🆔 <b>ID:</b> <code>${payment.id}</code>\n\n` +
       `✅ <i>Razorpay Secure fulfillment verified.</i>`
     );
@@ -186,7 +188,8 @@ export async function POST(req: Request) {
             totalCredits,
             `₹${amountINR}`,
             eventTime,
-            process.env.NEXT_PUBLIC_APP_URL || 'https://getchintu.com'
+            process.env.NEXT_PUBLIC_APP_URL || 'https://getchintu.com',
+            newExpiry.toLocaleDateString('en-IN')
           ),
         });
         console.log(`[Razorpay Webhook] Confirmation email sent to ${email}`);

@@ -167,6 +167,7 @@ export async function POST(req: NextRequest) {
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
       .update({
+        display_id: targetProfile?.display_id || `CHINTU-RAZORPAY-${new Date().toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(/\//g, '-')}-${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).replace(':', '')}`,
         plan: planInfo.plan,
         credits: totalCredits,
         subscription_expires_at: newExpiry.toISOString(),
@@ -236,7 +237,8 @@ export async function POST(req: NextRequest) {
             totalCredits,
             `₹${(Number(payment.amount) / 100).toLocaleString()}`,
             eventTime,
-            process.env.NEXT_PUBLIC_APP_URL || 'https://getchintu.com'
+            process.env.NEXT_PUBLIC_APP_URL || 'https://getchintu.com',
+            newExpiry.toLocaleDateString('en-IN')
           ),
         });
         console.log(`[/api/razorpay/verify] Payment email sent to ${userEmail}`);
