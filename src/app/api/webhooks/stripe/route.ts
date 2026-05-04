@@ -1,3 +1,4 @@
+
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
@@ -7,13 +8,9 @@ import { Resend } from "resend";
 import { getPaymentEmailHtml } from "@/utils/email-templates";
 
 const PRICE_ID_MAP: Record<string, { plan: string; credits: number; price: string; days: number }> = {
-  // Pro Monthly
   "price_1TTF8WLYcsTnVrvkaLcpMyel": { plan: "pro", credits: 200, price: "$9/mo", days: 30 },
-  // Pro Annual
   "price_1TTFChLYcsTnVrvkUllytzc2": { plan: "pro", credits: 2400, price: "$89/yr", days: 365 },
-  // Elite Monthly
   "price_1TTFBELYcsTnVrvkKpZSsGRN": { plan: "elite", credits: 1000, price: "$29/mo", days: 30 },
-  // Elite Annual
   "price_1TTFDhLYcsTnVrvkGGjCkxv5": { plan: "elite", credits: 12000, price: "$279/yr", days: 365 },
 };
 
@@ -55,6 +52,64 @@ function generateDisplayId(): string {
   return `CHINTU-STRIPE-${date}-${time}`;
 }
 
+// ─── Consistent Telegram Message Builder ────────────────────
+function buildTelegramMessage({
+  header,
+  name,
+  email,
+  dateTime,
+  oldPlan,
+  newPlan,
+  amount,
+  quantity = 1,
+  paymentMethod,
+  gatewayFees,
+  netSettlement,
+  symbol,
+  oldCredits,
+  newCredits,
+  expiryDate,
+  transactionId,
+  status = "SUCCESSFUL",
+  extraNote,
+}: {
+  header: string;
+  name: string;
+  email: string;
+  dateTime: string;
+  oldPlan: string;
+  newPlan: string;
+  amount: string;
+  quantity?: number;
+  paymentMethod: string;
+  gatewayFees: string;
+  netSettlement: string;
+  symbol: string;
+  oldCredits: number;
+  newCredits: number;
+  expiryDate: string;
+  transactionId: string;
+  status?: string;
+  extraNote?: string;
+}): string {
+  return (
+    `<b>${header}</b>\n` +
+    `👤 <b>Name:</b> ${name}\n` +
+    `📧 <b>Email:</b> <code>${email}</code>\n` +
+    `📅 <b>Date & Time:</b> <code>${dateTime}</code>\n` +
+    `📊 <b>Plan:</b> <b>${oldPlan.toUpperCase()} → ${newPlan.toUpperCase()}</b>\n` +
+    `💰 <b>Amount:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
+    `💳 <b>Payment Method:</b> ${paymentMethod}\n` +
+    `💸 <b>Gateway Fees:</b> <b>${gatewayFees}</b> (Incl. Tax)\n` +
+    `🏦 <b>Net Settlement:</b> <b>${netSettlement}</b>\n` +
+    `⚡ <b>Credits:</b> ${oldCredits} → <b>${newCredits}</b>\n` +
+    `📆 <b>Expiry Date:</b> <b>${expiryDate}</b>\n` +
+    `🆔 <b>Transaction ID:</b> <code>${transactionId}</code>\n` +
+    `✅ <b>Status:</b> ${status}` +
+    (extraNote ? `\n\n<i>${extraNote}</i>` : "")
+  );
+}
+
 // ─── Main Handler ────────────────────────────────────────────
 
 export async function POST(req: Request) {
@@ -64,7 +119,6 @@ export async function POST(req: Request) {
   });
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
 
-  // 🔴 FIX 1: headers() is async in Next.js 15 — must be awaited
   const headersList = await headers();
   const signature = headersList.get("Stripe-Signature");
 
@@ -87,10 +141,8 @@ export async function POST(req: Request) {
 
   const supabaseAdmin = createAdminClient();
 
-  // ─── Helper: Find profile by userId with email fallback ───
   async function findProfile(userId?: string | null, email?: string | null) {
     let profile = null;
-
     if (userId) {
       const { data } = await supabaseAdmin
         .from("profiles")
@@ -99,7 +151,6 @@ export async function POST(req: Request) {
         .maybeSingle();
       profile = data;
     }
-
     if (!profile && email) {
       console.warn(`[Webhook] Profile not found by userId. Trying email: ${email}`);
       const { data } = await supabaseAdmin
@@ -109,27 +160,21 @@ export async function POST(req: Request) {
         .maybeSingle();
       profile = data;
     }
-
     return profile;
   }
 
-  // ─── Helper: Find profile by subscription ID with email fallback ───
   async function findProfileBySubscription(subscriptionId: string, email?: string | null) {
     const { data } = await supabaseAdmin
       .from("profiles")
       .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
       .eq("stripe_subscription_id", subscriptionId)
       .maybeSingle();
-
     if (data) return data;
-
-    // 🔴 BUG 1 FIX: If not found in DB, check Stripe Subscription metadata
     console.warn(`[Webhook] Profile not found by stripe_subscription_id=${subscriptionId}. Checking Stripe metadata...`);
     try {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
       const userId = subscription.metadata?.userId;
       if (userId) {
-        console.log(`[Webhook] Found userId=${userId} in subscription metadata. Fetching profile...`);
         const { data: byUserId } = await supabaseAdmin
           .from("profiles")
           .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
@@ -140,9 +185,7 @@ export async function POST(req: Request) {
     } catch (err) {
       console.error("[Webhook] Stripe subscription retrieve failed:", err);
     }
-
     if (email) {
-      console.warn(`[Webhook] Still not found. Trying email: ${email}`);
       const { data: byEmail } = await supabaseAdmin
         .from("profiles")
         .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
@@ -150,11 +193,9 @@ export async function POST(req: Request) {
         .maybeSingle();
       return byEmail;
     }
-
     return null;
   }
 
-  // ─── Helper: Calculate stacked expiry ───
   function stackExpiry(currentExpiry: string | null, addDays: number): Date {
     const now = new Date();
     const base = currentExpiry ? new Date(currentExpiry) : now;
@@ -162,7 +203,6 @@ export async function POST(req: Request) {
     return new Date(from.getTime() + addDays * 24 * 60 * 60 * 1000);
   }
 
-  // ─── Helper: Fetch gateway fees ───
   async function fetchFees(paymentIntentId: string | null, currency: string) {
     const symbol = currency?.toUpperCase() === "INR" ? "₹" : "$";
     let gatewayFee = 0;
@@ -186,7 +226,6 @@ export async function POST(req: Request) {
 
   // ════════════════════════════════════════════════════════════
   // EVENT: checkout.session.completed
-  // Triggered on: new subscription purchase
   // ════════════════════════════════════════════════════════════
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
@@ -199,16 +238,13 @@ export async function POST(req: Request) {
 
     if (!profile) {
       console.error(`[Webhook] ❌ No profile found for userId=${userId} email=${customerEmail}`);
-      // Return 200 so Stripe doesn't retry indefinitely — log and investigate manually
       return NextResponse.json({ received: true, error: "Profile not found" });
     }
 
-    // Get line items and price
     let priceId: string | undefined;
     try {
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
       priceId = lineItems.data[0]?.price?.id;
-      console.log(`[Webhook] Price ID from line items: ${priceId}`);
     } catch (err) {
       console.error("[Webhook] Failed to fetch line items:", err);
     }
@@ -220,7 +256,6 @@ export async function POST(req: Request) {
 
     const { plan, credits, price, days } = PRICE_ID_MAP[priceId];
 
-    // 🔴 FIX 2: Dedup check — use payment_intent first, fallback to session.id
     const dedupId = (session.payment_intent as string) || session.id;
     if (profile.profile_data?.last_payment_id === dedupId) {
       console.log(`[Webhook] ⏭️ Already processed payment ${dedupId} — skipping`);
@@ -228,7 +263,8 @@ export async function POST(req: Request) {
     }
 
     const oldPlan = profile.plan || "free";
-    const newCredits = (profile.credits || 0) + credits;
+    const oldCredits = profile.credits || 0;
+    const newCredits = oldCredits + credits;
     const newExpiry = stackExpiry(profile.subscription_expires_at, days);
 
     // Fetch payment method details
@@ -257,8 +293,8 @@ export async function POST(req: Request) {
     );
 
     const customerName = session.customer_details?.name || customerEmail || "Unknown";
+    const eventTime = formatEventTime();
 
-    // ✅ Update Supabase
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
       .update({
@@ -287,29 +323,28 @@ export async function POST(req: Request) {
       return new NextResponse("DB update failed", { status: 500 });
     }
 
-    console.log(`[Webhook] ✅ Profile updated: ${profile.id} | ${oldPlan} → ${plan} | credits: ${newCredits}`);
-
-    // Alerts (non-blocking — don't let these fail the response)
     const isDowngrade = oldPlan === "elite" && plan === "pro";
-    const statusLabel = isDowngrade ? "DOWNGRADE 🔻" : oldPlan === "free" ? "NEW UPGRADE ⚡" : "UPGRADE ⚡";
-    const eventTime = formatEventTime();
+    const statusLabel = isDowngrade ? "DOWNGRADE 🔻 | STRIPE 💳" : oldPlan === "free" ? "🎉 New Subscription! | STRIPE 💳" : "⚡ Upgrade! | STRIPE 💳";
 
     await sendTelegramAlert(
-      `<b>${statusLabel} | STRIPE</b> 💳\n` +
-      `👤 <b>Customer:</b> ${customerName}\n` +
-      `📧 <b>Email:</b> <code>${customerEmail || "N/A"}</code>\n` +
-      `🆔 <b>Session ID:</b> <code>${session.id}</code>\n` +
-      `🛠️ <b>Method:</b> ${paymentMethodDisplay}\n` +
-      `💰 <b>Amount:</b> ${price}\n` +
-      `💸 <b>Gateway Fees:</b> ${symbol}${gatewayFee.toFixed(2)}\n` +
-      `🏦 <b>Net Settlement:</b> ${symbol}${netAmount.toFixed(2)}\n` +
-      `--------------------------\n` +
-      `📊 <b>Old Plan:</b> ${oldPlan.toUpperCase()}\n` +
-      `🚀 <b>New Plan:</b> ${plan.toUpperCase()}\n` +
-      `📈 <b>Credits:</b> ${profile.credits || 0} → ${newCredits}\n` +
-      `📅 <b>Expiry:</b> <code>${newExpiry.toLocaleDateString("en-IN")}</code>\n` +
-      `--------------------------\n` +
-      `✅ <b>Status:</b> SUCCESSFUL`
+      buildTelegramMessage({
+        header: statusLabel,
+        name: customerName,
+        email: customerEmail || "N/A",
+        dateTime: eventTime,
+        oldPlan,
+        newPlan: plan,
+        amount: price,
+        quantity: 1,
+        paymentMethod: paymentMethodDisplay,
+        gatewayFees: `${symbol}${gatewayFee.toFixed(2)}`,
+        netSettlement: `${symbol}${netAmount.toFixed(2)}`,
+        symbol,
+        oldCredits,
+        newCredits,
+        expiryDate: newExpiry.toLocaleDateString("en-IN"),
+        transactionId: session.id,
+      })
     );
 
     if (customerEmail) {
@@ -317,14 +352,13 @@ export async function POST(req: Request) {
         await resend.emails.send({
           from: "Chintu Intelligence <welcome@getchintu.com>",
           to: customerEmail,
-          subject: `CHINTU: ${statusLabel} VERIFIED ⚡`,
+          subject: `CHINTU: ${isDowngrade ? "PLAN UPDATED" : "PROTOCOL UPGRADE VERIFIED"} ⚡`,
           html: getPaymentEmailHtml(
             customerName, plan, oldPlan, newCredits, price, eventTime,
             process.env.NEXT_PUBLIC_APP_URL || "https://getchintu.com",
             newExpiry.toLocaleDateString("en-IN")
           ),
         });
-        console.log(`[Webhook] ✅ Email sent to ${customerEmail}`);
       } catch (emailErr) {
         console.error("[Webhook] Email failed:", emailErr);
       }
@@ -332,19 +366,15 @@ export async function POST(req: Request) {
   }
 
   // ════════════════════════════════════════════════════════════
-  // EVENT: invoice.payment_succeeded
-  // Triggered on: subscription renewals only (creation is skipped)
+  // EVENT: invoice.payment_succeeded (Renewals)
   // ════════════════════════════════════════════════════════════
   if (event.type === "invoice.payment_succeeded") {
     const invoice = event.data.object as any;
 
-    // ✅ Skip initial creation — handled by checkout.session.completed
     if (invoice.billing_reason === "subscription_create") {
-      console.log(`[Webhook] ⏭️ Skipping invoice for initial subscription creation (handled by checkout)`);
+      console.log(`[Webhook] ⏭️ Skipping invoice for initial subscription creation`);
       return NextResponse.json({ received: true });
     }
-
-    console.log(`[Webhook] invoice.payment_succeeded | reason: ${invoice.billing_reason} | sub: ${invoice.subscription}`);
 
     const profile = await findProfileBySubscription(invoice.subscription, invoice.customer_email);
 
@@ -355,7 +385,6 @@ export async function POST(req: Request) {
 
     const dedupId = (invoice.payment_intent as string) || invoice.id;
     if (profile.profile_data?.last_payment_id === dedupId) {
-      console.log(`[Webhook] ⏭️ Already processed invoice ${dedupId} — skipping`);
       return NextResponse.json({ received: true, alreadyProcessed: true });
     }
 
@@ -370,14 +399,14 @@ export async function POST(req: Request) {
     const quantity = invoice.lines?.data?.[0]?.quantity || 1;
     const addCredits = planInfo.credits * quantity;
     const addDays = planInfo.days * quantity;
-
-    const newCredits = (profile.credits || 0) + addCredits;
+    const oldCredits = profile.credits || 0;
+    const newCredits = oldCredits + addCredits;
     const newExpiry = stackExpiry(profile.subscription_expires_at, addDays);
 
-    // Fetch fees
     let gatewayFee = 0;
     let netAmount = (invoice.amount_paid || 0) / 100;
     const symbol = invoice.currency?.toUpperCase() === "INR" ? "₹" : "$";
+
     try {
       if (invoice.charge) {
         const charge = await stripe.charges.retrieve(invoice.charge as string, {
@@ -395,6 +424,7 @@ export async function POST(req: Request) {
 
     const customerName = invoice.customer_name || invoice.customer_email || profile.email || "Unknown";
     const eventTime = formatEventTime();
+    const amountPaid = (invoice.amount_paid / 100).toFixed(2);
 
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
@@ -421,19 +451,25 @@ export async function POST(req: Request) {
       return new NextResponse("DB update failed", { status: 500 });
     }
 
-    console.log(`[Webhook] ✅ Renewal processed: ${profile.id} | credits: ${newCredits} | expiry: ${newExpiry.toLocaleDateString("en-IN")}`);
-
     await sendTelegramAlert(
-      `🔄 <b>Subscription Renewed! (Stripe)</b>\n\n` +
-      `👤 Name: <b>${customerName}</b>\n` +
-      `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
-      `📅 Date: <code>${eventTime}</code>\n` +
-      `💎 Plan: <b>${planInfo.plan.toUpperCase()}</b>\n` +
-      `💰 Amount: <b>${symbol}${(invoice.amount_paid / 100).toFixed(2)}</b> (Qty: ${quantity})\n` +
-      `💸 Gateway Fees: <b>${symbol}${gatewayFee.toFixed(2)}</b>\n` +
-      `🏦 Net Settlement: <b>${symbol}${netAmount.toFixed(2)}</b>\n` +
-      `⚡ Total Credits: <b>${newCredits}</b>\n` +
-      `⏳ Expiry: <b>${newExpiry.toLocaleDateString("en-IN")}</b>`
+      buildTelegramMessage({
+        header: "🔄 Subscription Renewed! | STRIPE 💳",
+        name: customerName,
+        email: profile.email || "N/A",
+        dateTime: eventTime,
+        oldPlan: planInfo.plan,
+        newPlan: planInfo.plan,
+        amount: `${symbol}${amountPaid}`,
+        quantity,
+        paymentMethod: "Card (Recurring)",
+        gatewayFees: `${symbol}${gatewayFee.toFixed(2)}`,
+        netSettlement: `${symbol}${netAmount.toFixed(2)}`,
+        symbol,
+        oldCredits,
+        newCredits,
+        expiryDate: newExpiry.toLocaleDateString("en-IN"),
+        transactionId: invoice.id,
+      })
     );
 
     if (profile.email) {
@@ -458,45 +494,24 @@ export async function POST(req: Request) {
 
   // ════════════════════════════════════════════════════════════
   // EVENT: customer.subscription.updated
-  // Triggered on: plan upgrade/downgrade, quantity change, status change
-  // 🔴 FIX 3: Do NOT stack credits here — only update plan metadata
-  // Credits are handled by invoice.payment_succeeded
   // ════════════════════════════════════════════════════════════
   if (event.type === "customer.subscription.updated") {
     const subscription = event.data.object as Stripe.Subscription;
     const previousAttributes = event.data.previous_attributes as any;
 
-    console.log(`[Webhook] customer.subscription.updated | sub: ${subscription.id} | prevAttrs: ${JSON.stringify(Object.keys(previousAttributes || {}))}`);
-
-    // Only act on plan/item changes or status activations
     if (!previousAttributes || (!previousAttributes.items && !previousAttributes.status)) {
-      console.log(`[Webhook] ⏭️ No relevant changes in subscription update — skipping`);
       return NextResponse.json({ received: true });
     }
 
-    // Skip incomplete → active transition (handled by checkout.session.completed)
     const isInitialActivation =
       previousAttributes?.status === "incomplete" && subscription.status === "active";
-
-    if (isInitialActivation) {
-      console.log(`[Webhook] ⏭️ Subscription activated from incomplete — skipping (checkout handles this)`);
-      return NextResponse.json({ received: true });
-    }
-
-    if (subscription.status !== "active") {
-      console.log(`[Webhook] ⏭️ Subscription not active (status: ${subscription.status}) — skipping`);
-      return NextResponse.json({ received: true });
-    }
+    if (isInitialActivation) return NextResponse.json({ received: true });
+    if (subscription.status !== "active") return NextResponse.json({ received: true });
 
     const priceId = subscription.items.data[0]?.price?.id;
     const planInfo = PRICE_ID_MAP[priceId || ""];
+    if (!planInfo) return NextResponse.json({ received: true });
 
-    if (!planInfo) {
-      console.error(`[Webhook] ❌ Unknown priceId in subscription update: ${priceId}`);
-      return NextResponse.json({ received: true });
-    }
-
-    // Find profile
     let customerEmail: string | null = null;
     try {
       const stripeCustomer = await stripe.customers.retrieve(subscription.customer as string);
@@ -508,50 +523,46 @@ export async function POST(req: Request) {
     }
 
     const profile = await findProfileBySubscription(subscription.id, customerEmail);
-
-    if (!profile) {
-      console.error(`[Webhook] ❌ Profile not found for subscription: ${subscription.id}`);
-      return NextResponse.json({ received: true, error: "Profile not found" });
-    }
+    if (!profile) return NextResponse.json({ received: true, error: "Profile not found" });
 
     const oldPlan = profile.plan || "free";
-
-    // 🔴 FIX 3: ONLY update plan — do NOT touch credits or expiry here
-    // Credits will be handled by invoice.payment_succeeded when payment actually occurs
-    const { error: updateError } = await supabaseAdmin
-      .from("profiles")
-      .update({
-        plan: planInfo.plan,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", profile.id);
-
-    if (updateError) {
-      console.error("[Webhook] ❌ Subscription update DB failed:", updateError.message);
-    } else {
-      console.log(`[Webhook] ✅ Plan updated: ${profile.id} | ${oldPlan} → ${planInfo.plan}`);
-    }
-
-    const eventTime = formatEventTime();
     const isDowngrade = ["elite"].includes(oldPlan) && planInfo.plan === "pro";
 
+    await supabaseAdmin
+      .from("profiles")
+      .update({ plan: planInfo.plan, updated_at: new Date().toISOString() })
+      .eq("id", profile.id);
+
     await sendTelegramAlert(
-      `📈 <b>Plan ${isDowngrade ? "Downgraded" : "Upgraded"}! (Stripe)</b>\n\n` +
-      `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
-      `📅 Date: <code>${eventTime}</code>\n` +
-      `💎 Evolution: <b>${oldPlan.toUpperCase()}</b> → <b>${planInfo.plan.toUpperCase()}</b>\n` +
-      `ℹ️ Credits unchanged here — will update on invoice payment`
+      buildTelegramMessage({
+        header: `${isDowngrade ? "DOWNGRADE 🔻" : "⚡ Upgrade!"} | STRIPE 💳`,
+        name: profile.email || "Unknown",
+        email: profile.email || "N/A",
+        dateTime: formatEventTime(),
+        oldPlan,
+        newPlan: planInfo.plan,
+        amount: planInfo.price,
+        quantity: 1,
+        paymentMethod: "—",
+        gatewayFees: "—",
+        netSettlement: "—",
+        symbol: "$",
+        oldCredits: profile.credits || 0,
+        newCredits: profile.credits || 0,
+        expiryDate: profile.subscription_expires_at
+          ? new Date(profile.subscription_expires_at).toLocaleDateString("en-IN")
+          : "—",
+        transactionId: subscription.id,
+        extraNote: "Credits unchanged — will update on next invoice payment",
+      })
     );
   }
 
   // ════════════════════════════════════════════════════════════
   // EVENT: customer.subscription.deleted
-  // Triggered on: cancellation
   // ════════════════════════════════════════════════════════════
   if (event.type === "customer.subscription.deleted") {
     const subscription = event.data.object as Stripe.Subscription;
-
-    console.log(`[Webhook] customer.subscription.deleted | sub: ${subscription.id}`);
 
     const { data: profile } = await supabaseAdmin
       .from("profiles")
@@ -559,10 +570,7 @@ export async function POST(req: Request) {
       .eq("stripe_subscription_id", subscription.id)
       .maybeSingle();
 
-    if (!profile) {
-      console.error(`[Webhook] Profile not found for cancelled sub: ${subscription.id}`);
-      return NextResponse.json({ received: true });
-    }
+    if (!profile) return NextResponse.json({ received: true });
 
     const oldPlan = profile.plan || "unknown";
 
@@ -576,8 +584,6 @@ export async function POST(req: Request) {
       })
       .eq("id", profile.id);
 
-    console.log(`[Webhook] ✅ Subscription cancelled: ${profile.id} | ${oldPlan} → free`);
-
     let customerName = profile.email || "Unknown";
     try {
       const stripeCustomer = await stripe.customers.retrieve(subscription.customer as string);
@@ -587,13 +593,25 @@ export async function POST(req: Request) {
     } catch { }
 
     await sendTelegramAlert(
-      `❌ <b>Subscription Cancelled</b>\n\n` +
-      `👤 Name: <b>${customerName}</b>\n` +
-      `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
-      `📅 Date: <code>${formatEventTime()}</code>\n` +
-      `💎 Old Plan: <b>${oldPlan.toUpperCase()}</b> → <b>FREE</b>\n` +
-      `💰 Credits reset to: <b>10</b>\n\n` +
-      `⚠️ <i>Consider sending a re-engagement offer.</i>`
+      buildTelegramMessage({
+        header: "❌ Subscription Cancelled | STRIPE 💳",
+        name: customerName,
+        email: profile.email || "N/A",
+        dateTime: formatEventTime(),
+        oldPlan,
+        newPlan: "FREE",
+        amount: "$0.00",
+        quantity: 1,
+        paymentMethod: "—",
+        gatewayFees: "$0.00",
+        netSettlement: "$0.00",
+        symbol: "$",
+        oldCredits: 0,
+        newCredits: 10,
+        expiryDate: "—",
+        transactionId: subscription.id,
+        extraNote: "Consider sending a re-engagement offer.",
+      })
     );
   }
 
@@ -603,18 +621,13 @@ export async function POST(req: Request) {
   if (event.type === "customer.deleted") {
     const customer = event.data.object as Stripe.Customer;
 
-    console.log(`[Webhook] customer.deleted | customerId: ${customer.id}`);
-
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("id, email, plan")
       .eq("stripe_customer_id", customer.id)
       .maybeSingle();
 
-    if (!profile) {
-      console.error(`[Webhook] Profile not found for deleted customer: ${customer.id}`);
-      return NextResponse.json({ received: true });
-    }
+    if (!profile) return NextResponse.json({ received: true });
 
     const oldPlan = profile.plan || "unknown";
     const customerName = customer.name || customer.email || profile.email || "Unknown";
@@ -630,15 +643,26 @@ export async function POST(req: Request) {
       })
       .eq("id", profile.id);
 
-    console.log(`[Webhook] ✅ Customer deleted: ${profile.id}`);
-
     await sendTelegramAlert(
-      `🗑️ <b>Customer Deleted</b>\n\n` +
-      `👤 Name: <b>${customerName}</b>\n` +
-      `📧 Email: <code>${profile.email || "N/A"}</code>\n` +
-      `📅 Date: <code>${formatEventTime()}</code>\n` +
-      `💎 Plan was: <b>${oldPlan.toUpperCase()}</b> → <b>FREE</b>\n` +
-      `⚠️ Stripe records wiped, downgraded to FREE.`
+      buildTelegramMessage({
+        header: "🗑️ Customer Deleted | STRIPE 💳",
+        name: customerName,
+        email: profile.email || "N/A",
+        dateTime: formatEventTime(),
+        oldPlan,
+        newPlan: "FREE",
+        amount: "$0.00",
+        quantity: 1,
+        paymentMethod: "—",
+        gatewayFees: "$0.00",
+        netSettlement: "$0.00",
+        symbol: "$",
+        oldCredits: 0,
+        newCredits: 10,
+        expiryDate: "—",
+        transactionId: customer.id,
+        extraNote: "Stripe records wiped, downgraded to FREE.",
+      })
     );
   }
 

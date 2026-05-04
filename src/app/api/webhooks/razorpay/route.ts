@@ -1,8 +1,67 @@
+
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { createAdminClient } from "@/utils/supabase/server";
 export const dynamic = "force-dynamic";
+
+// ─── Shared buildTelegramMessage helper (copy from stripe webhook or move to utils) ───
+function buildTelegramMessage({
+  header,
+  name,
+  email,
+  dateTime,
+  oldPlan,
+  newPlan,
+  amount,
+  quantity = 1,
+  paymentMethod,
+  gatewayFees,
+  netSettlement,
+  symbol,
+  oldCredits,
+  newCredits,
+  expiryDate,
+  transactionId,
+  status = "SUCCESSFUL",
+  extraNote,
+}: {
+  header: string;
+  name: string;
+  email: string;
+  dateTime: string;
+  oldPlan: string;
+  newPlan: string;
+  amount: string;
+  quantity?: number;
+  paymentMethod: string;
+  gatewayFees: string;
+  netSettlement: string;
+  symbol: string;
+  oldCredits: number;
+  newCredits: number;
+  expiryDate: string;
+  transactionId: string;
+  status?: string;
+  extraNote?: string;
+}): string {
+  return (
+    `<b>${header}</b>\n` +
+    `👤 <b>Name:</b> ${name}\n` +
+    `📧 <b>Email:</b> <code>${email}</code>\n` +
+    `📅 <b>Date & Time:</b> <code>${dateTime}</code>\n` +
+    `📊 <b>Plan:</b> <b>${oldPlan.toUpperCase()} → ${newPlan.toUpperCase()}</b>\n` +
+    `💰 <b>Amount:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
+    `💳 <b>Payment Method:</b> ${paymentMethod}\n` +
+    `💸 <b>Gateway Fees:</b> <b>${gatewayFees}</b> (Incl. Tax)\n` +
+    `🏦 <b>Net Settlement:</b> <b>${netSettlement}</b>\n` +
+    `⚡ <b>Credits:</b> ${oldCredits} → <b>${newCredits}</b>\n` +
+    `📆 <b>Expiry Date:</b> <b>${expiryDate}</b>\n` +
+    `🆔 <b>Transaction ID:</b> <code>${transactionId}</code>\n` +
+    `✅ <b>Status:</b> ${status}` +
+    (extraNote ? `\n\n<i>${extraNote}</i>` : "")
+  );
+}
 
 async function sendTelegramAlert(message: string) {
   const botToken = process.env.TELEGRAM_PAYMENT_BOT_TOKEN;
@@ -21,7 +80,7 @@ async function sendTelegramAlert(message: string) {
 
 export async function POST(req: Request) {
   const body = await req.text();
-  const signature = headers().get("X-Razorpay-Signature") as string;
+  const signature = (await headers()).get("X-Razorpay-Signature") as string;
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || "";
 
   const expectedSignature = crypto
@@ -39,11 +98,9 @@ export async function POST(req: Request) {
     const payment = event.payload.payment.entity;
     const notes = payment.notes;
     const userId = notes.userId;
-    
-    // Log for records
+
     console.log(`[Razorpay Webhook] Payment Captured: ${payment.id} for User: ${userId}`);
-    
-    // Fetch user details for a better alert
+
     const supabaseAdmin = createAdminClient();
     const { data: profile } = await supabaseAdmin
       .from("profiles")
@@ -51,11 +108,9 @@ export async function POST(req: Request) {
       .eq("id", userId)
       .maybeSingle();
 
-    // Razorpay payment entity has the email used during checkout
     const email = payment.email || notes.email || profile?.email || "N/A";
-    const fullName = notes.fullName || profile?.full_name || email.split('@')[0] || "User";
-    
-    // Update profile in DB
+    const fullName = notes.fullName || profile?.full_name || email.split("@")[0] || "User";
+
     const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; days: number }> = {
       "pro_monthly": { plan: "pro", credits: 200, days: 30 },
       "pro_annual": { plan: "pro", credits: 2400, days: 365 },
@@ -69,13 +124,11 @@ export async function POST(req: Request) {
 
     const purchasedCredits = planInfo.credits * quantity;
     const purchasedDays = planInfo.days * quantity;
-    
+
     const now = new Date();
-    
-    // RESOLVE TARGET USER: Fallback to email if userId lookup fails
+
     let targetProfile = profile;
-    if (!targetProfile && email && email !== "N/A") {
-      console.warn(`[Razorpay Webhook] Profile not found for ID ${userId}. Falling back to email ${email}`);
+    if (!targetProfile && email !== "N/A") {
       const { data: profileByEmail } = await supabaseAdmin
         .from("profiles")
         .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
@@ -88,10 +141,10 @@ export async function POST(req: Request) {
     let currentExpiry = targetProfile?.subscription_expires_at ? new Date(targetProfile.subscription_expires_at) : now;
     if (currentExpiry < now) currentExpiry = now;
     const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
-    const totalCredits = (targetProfile?.credits || 0) + purchasedCredits;
+    const oldCredits = targetProfile?.credits || 0;
+    const totalCredits = oldCredits + purchasedCredits;
 
-    // Check for email conflicts before upsert
-    let finalEmail = (email && email !== "N/A") ? email : profile?.email;
+    let finalEmail = email !== "N/A" ? email : profile?.email;
     if (finalEmail) {
       const { data: conflict } = await supabaseAdmin
         .from("profiles")
@@ -99,15 +152,9 @@ export async function POST(req: Request) {
         .eq("email", finalEmail)
         .neq("id", userId)
         .maybeSingle();
-      
-      if (conflict) {
-        console.warn(`[Razorpay Webhook] Email conflict for ${finalEmail}. Fulfilling without updating email field.`);
-        finalEmail = profile?.email; // Revert to existing email if it exists
-      }
+      if (conflict) finalEmail = profile?.email;
     }
 
-    // PERFORM FULFILLMENT (Upsert)
-    // DEDUPLICATION CHECK: Check if this payment was already processed (e.g. by verify route)
     const { data: alreadyProcessed } = await supabaseAdmin
       .from("profiles")
       .select("razorpay_payment_id")
@@ -115,7 +162,7 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (alreadyProcessed) {
-      console.log(`[Razorpay Webhook] Payment ${payment.id} already processed. Skipping duplicate fulfillment.`);
+      console.log(`[Razorpay Webhook] Payment ${payment.id} already processed. Skipping.`);
       return NextResponse.json({ received: true, alreadyProcessed: true });
     }
 
@@ -125,8 +172,28 @@ export async function POST(req: Request) {
     const totalFees = gatewayFee + gatewayTax;
     const netAmount = amountINR - totalFees;
 
+    // Razorpay payment method
+    let paymentMethodDisplay = "UPI";
+    if (payment.method === "card") {
+      paymentMethodDisplay = `Card (${payment.card?.network?.toUpperCase() || "CARD"} ****${payment.card?.last4 || "XXXX"})`;
+    } else if (payment.method === "netbanking") {
+      paymentMethodDisplay = `Netbanking (${payment.bank || "Bank"})`;
+    } else if (payment.method === "wallet") {
+      paymentMethodDisplay = `Wallet (${payment.wallet || "Wallet"})`;
+    } else if (payment.method === "upi") {
+      paymentMethodDisplay = `UPI (${payment.vpa || "UPI"})`;
+    } else if (payment.method) {
+      paymentMethodDisplay = payment.method.toUpperCase();
+    }
+
+    const eventTime = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit", month: "short", year: "numeric",
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
+    });
+
     await supabaseAdmin.from("profiles").update({
-      display_id: targetProfile?.display_id || `CHINTU-RAZORPAY-${new Date().toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(/\//g, '-')}-${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).replace(':', '')}`,
+      display_id: targetProfile?.display_id || `CHINTU-RAZORPAY-${new Date().toLocaleDateString("en-GB", { timeZone: "Asia/Kolkata" }).replace(/\//g, "-")}-${new Date().toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit" }).replace(":", "")}`,
       email: finalEmail,
       full_name: fullName || targetProfile?.full_name,
       plan: planInfo.plan,
@@ -142,58 +209,56 @@ export async function POST(req: Request) {
         last_payment_id: payment.id,
         last_gateway: "razorpay",
         last_payment_at: new Date().toISOString(),
-        gateway_fee: totalFees
-      }
+        gateway_fee: totalFees,
+      },
     }).eq("id", targetUserId);
 
-    const eventTime = new Date().toLocaleString('en-IN', { 
-      timeZone: 'Asia/Kolkata',
-      day: '2-digit', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
-    }).replace(/,/g, '');
+    const newPlan = notes.planId || planInfo.plan;
+    const oldPlan = targetProfile?.plan || "free";
 
-    const newPlan = notes.planId || "Unknown";
-
-    // Notify Telegram
     await sendTelegramAlert(
-      `💰 <b>New Subscription Captured! (Razorpay)</b> 💳\n\n` +
-      `👤 <b>Name:</b> ${fullName}\n` +
-      `📧 <b>Email:</b> <code>${email}</code>\n` +
-      `📅 <b>Date:</b> <code>${eventTime}</code>\n` +
-      `💎 <b>Plan:</b> <b>${targetProfile?.plan?.toUpperCase() || "FREE"} → ${newPlan.toUpperCase()}</b>\n` +
-      `📅 <b>Expiry Date:</b> <b>${newExpiry.toLocaleDateString('en-IN')}</b>\n` +
-      `💰 <b>Amount:</b> <b>₹${amountINR.toLocaleString()}</b> (Qty: ${quantity})\n` +
-      `💸 <b>Gateway Fees:</b> <b>₹${totalFees.toFixed(2)}</b> (Incl. Tax)\n` +
-      `🏦 <b>Net Settlement:</b> <b>₹${netAmount.toFixed(2)}</b>\n` +
-      `📉 <b>Old Credits:</b> ${targetProfile?.credits || 0}\n` +
-      `⚡ <b>Total Credits:</b> <b>${totalCredits}</b>\n` +
-      `🆔 <b>ID:</b> <code>${payment.id}</code>\n\n` +
-      `✅ <i>Razorpay Secure fulfillment verified.</i>`
+      buildTelegramMessage({
+        header: "💰 New Subscription Captured! | RAZORPAY 💳",
+        name: fullName,
+        email,
+        dateTime: eventTime,
+        oldPlan,
+        newPlan,
+        amount: `₹${amountINR.toLocaleString("en-IN")}`,
+        quantity,
+        paymentMethod: paymentMethodDisplay,
+        gatewayFees: `₹${totalFees.toFixed(2)}`,
+        netSettlement: `₹${netAmount.toFixed(2)}`,
+        symbol: "₹",
+        oldCredits,
+        newCredits: totalCredits,
+        expiryDate: newExpiry.toLocaleDateString("en-IN"),
+        transactionId: payment.id,
+        extraNote: "Razorpay Secure fulfillment verified.",
+      })
     );
 
-    // Send Confirmation Email via Resend
     if (email !== "N/A") {
       try {
         const { Resend } = await import("resend");
         const { getPaymentEmailHtml } = await import("@/utils/email-templates");
         const resend = new Resend(process.env.RESEND_API_KEY);
-        
+
         await resend.emails.send({
-          from: 'Chintu Intelligence <welcome@getchintu.com>',
+          from: "Chintu Intelligence <welcome@getchintu.com>",
           to: email,
-          subject: 'CHINTU: PROTOCOL UPGRADE VERIFIED ⚡',
+          subject: "CHINTU: PROTOCOL UPGRADE VERIFIED ⚡",
           html: getPaymentEmailHtml(
             fullName,
             newPlan,
-            profile?.plan || "free",
+            oldPlan,
             totalCredits,
             `₹${amountINR}`,
             eventTime,
-            process.env.NEXT_PUBLIC_APP_URL || 'https://getchintu.com',
-            newExpiry.toLocaleDateString('en-IN')
+            process.env.NEXT_PUBLIC_APP_URL || "https://getchintu.com",
+            newExpiry.toLocaleDateString("en-IN")
           ),
         });
-        console.log(`[Razorpay Webhook] Confirmation email sent to ${email}`);
       } catch (emailErr) {
         console.error("[Razorpay Webhook] Failed to send email:", emailErr);
       }
