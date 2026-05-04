@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+export const dynamic = "force-dynamic";
+
 
 export const metadata: Metadata = {
   title: "Chintu",
@@ -53,7 +55,8 @@ export default async function RootLayout({
         <head>
           <link rel="icon" href="https://www.getchintu.com/icon.png" />
           {/* Suppress sensor-related warnings from third-party scripts (like Razorpay) */}
-          <meta httpEquiv="Permissions-Policy" content="accelerometer=*, camera=(), geolocation=(), gyroscope=*, magnetometer=*, microphone=(), payment=(self), usb=()" />
+          <meta httpEquiv="Permissions-Policy" content="accelerometer=(*), camera=(*), geolocation=(*), gyroscope=(*), magnetometer=(*), microphone=(*), payment=(*), usb=(*)" />
+
         </head>
         <body className="bg-transparent h-screen flex flex-col">
           <GlobalHeader />

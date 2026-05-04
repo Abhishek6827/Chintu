@@ -564,7 +564,7 @@ app.whenReady().then(async () => {
     responseHeaders[exposeKey] = combinedExpose;
     
     // Also inject Permissions-Policy header directly (often more effective than meta tag)
-    responseHeaders['Permissions-Policy'] = 'accelerometer=*, camera=(), geolocation=(), gyroscope=*, magnetometer=*, microphone=(), payment=(self), usb=()';
+    responseHeaders['Permissions-Policy'] = 'accelerometer=*, camera=*, geolocation=*, gyroscope=*, magnetometer=*, microphone=*, payment=*, usb=*';
 
     callback({ responseHeaders });
   });
