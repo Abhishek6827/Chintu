@@ -7,11 +7,11 @@ import { createAdminClient } from "@/utils/supabase/server";
 import { Resend } from "resend";
 import { getPaymentEmailHtml } from "@/utils/email-templates";
 
-const PRICE_ID_MAP: Record<string, { plan: string; credits: number; price: string; days: number }> = {
-  "price_1TTF8WLYcsTnVrvkaLcpMyel": { plan: "pro", credits: 200, price: "$9/mo", days: 30 },
-  "price_1TTFChLYcsTnVrvkUllytzc2": { plan: "pro", credits: 2400, price: "$89/yr", days: 365 },
-  "price_1TTFBELYcsTnVrvkKpZSsGRN": { plan: "elite", credits: 1000, price: "$29/mo", days: 30 },
-  "price_1TTFDhLYcsTnVrvkGGjCkxv5": { plan: "elite", credits: 12000, price: "$279/yr", days: 365 },
+const PRICE_ID_MAP: Record<string, { plan: string; credits: number; price: string; days: number; frequency: string }> = {
+  "price_1TTF8WLYcsTnVrvkaLcpMyel": { plan: "pro", credits: 200, price: "$9/mo", days: 30, frequency: "Monthly" },
+  "price_1TTFChLYcsTnVrvkUllytzc2": { plan: "pro", credits: 2400, price: "$89/yr", days: 365, frequency: "Annual" },
+  "price_1TTFBELYcsTnVrvkKpZSsGRN": { plan: "elite", credits: 1000, price: "$29/mo", days: 30, frequency: "Monthly" },
+  "price_1TTFDhLYcsTnVrvkGGjCkxv5": { plan: "elite", credits: 12000, price: "$279/yr", days: 365, frequency: "Annual" },
 };
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -201,25 +201,42 @@ export async function POST(req: Request) {
     return new Date(from.getTime() + addDays * 24 * 60 * 60 * 1000);
   }
 
-  async function fetchFees(paymentIntentId: string | null, currency: string) {
+  async function fetchFees(paymentIntentId: string | null, invoiceId: string | null, currency: string) {
     const symbol = currency?.toUpperCase() === "INR" ? "₹" : "$";
     let gatewayFee = 0;
     let netAmount = 0;
+    let transactionId = paymentIntentId || invoiceId || "N/A";
+
     try {
+      let chargeId: string | null = null;
+
       if (paymentIntentId) {
-        const pi = await stripe.paymentIntents.retrieve(paymentIntentId, {
+        const pi = (await stripe.paymentIntents.retrieve(paymentIntentId, {
           expand: ["latest_charge.balance_transaction"],
-        });
-        const charge = (pi.latest_charge as any);
-        if (charge?.balance_transaction) {
-          gatewayFee = (charge.balance_transaction.fee || 0) / 100;
-          netAmount = (charge.balance_transaction.net || 0) / 100;
+        })) as any;
+        chargeId = (typeof pi.latest_charge === "string" ? pi.latest_charge : pi.latest_charge?.id) || null;
+        if (pi.latest_charge?.balance_transaction) {
+          const bt = pi.latest_charge.balance_transaction;
+          gatewayFee = (bt.fee || 0) / 100;
+          netAmount = (bt.net || 0) / 100;
+        }
+      } else if (invoiceId) {
+        const inv = (await stripe.invoices.retrieve(invoiceId, {
+          expand: ["charge.balance_transaction"],
+        })) as any;
+        chargeId = (typeof inv.charge === "string" ? inv.charge : inv.charge?.id) || null;
+        if (inv.charge?.balance_transaction) {
+          const bt = inv.charge.balance_transaction;
+          gatewayFee = (bt.fee || 0) / 100;
+          netAmount = (bt.net || 0) / 100;
         }
       }
+
+      if (chargeId) transactionId = chargeId;
     } catch (err) {
       console.error("[Webhook] Fee fetch failed:", err);
     }
-    return { gatewayFee, netAmount, symbol };
+    return { gatewayFee, netAmount, symbol, transactionId };
   }
 
   // ════════════════════════════════════════════════════════════
@@ -252,7 +269,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true, error: `Unknown priceId: ${priceId}` });
     }
 
-    const { plan, credits, price, days } = PRICE_ID_MAP[priceId];
+    const { plan, credits, price, days, frequency } = PRICE_ID_MAP[priceId];
 
     const dedupId = (session.payment_intent as string) || session.id;
     if (profile.profile_data?.last_payment_id === dedupId) {
@@ -285,8 +302,9 @@ export async function POST(req: Request) {
       console.error("[Webhook] Payment method fetch failed:", err);
     }
 
-    const { gatewayFee, netAmount, symbol } = await fetchFees(
+    const { gatewayFee, netAmount, symbol, transactionId } = await fetchFees(
       session.payment_intent as string,
+      session.invoice as string,
       session.currency || "usd"
     );
 
@@ -312,6 +330,7 @@ export async function POST(req: Request) {
           last_payment_id: dedupId,
           last_gateway: "stripe",
           last_payment_at: new Date().toISOString(),
+          last_frequency: frequency,
         },
       })
       .eq("id", profile.id);
@@ -330,8 +349,8 @@ export async function POST(req: Request) {
         name: customerName,
         email: customerEmail || "N/A",
         dateTime: eventTime,
-        oldPlan,
-        newPlan: plan,
+        oldPlan: `${oldPlan}${profile.profile_data?.last_frequency ? ` (${profile.profile_data.last_frequency})` : ""}`,
+        newPlan: `${plan} (${frequency})`,
         amount: price,
         quantity: 1,
         paymentMethod: paymentMethodDisplay,
@@ -340,7 +359,7 @@ export async function POST(req: Request) {
         oldCredits,
         newCredits,
         expiryDate: newExpiry.toLocaleDateString("en-IN"),
-        transactionId: session.id,
+        transactionId,
       })
     );
 
@@ -400,24 +419,11 @@ export async function POST(req: Request) {
     const newCredits = oldCredits + addCredits;
     const newExpiry = stackExpiry(profile.subscription_expires_at, addDays);
 
-    let gatewayFee = 0;
-    let netAmount = (invoice.amount_paid || 0) / 100;
-    const symbol = invoice.currency?.toUpperCase() === "INR" ? "₹" : "$";
-
-    try {
-      if (invoice.charge) {
-        const charge = await stripe.charges.retrieve(invoice.charge as string, {
-          expand: ["balance_transaction"],
-        });
-        if (charge.balance_transaction && typeof charge.balance_transaction === "object") {
-          const bt = charge.balance_transaction as any;
-          gatewayFee = (bt.fee || 0) / 100;
-          netAmount = (bt.net || 0) / 100;
-        }
-      }
-    } catch (err) {
-      console.error("[Webhook] Renewal fee fetch failed:", err);
-    }
+    const { gatewayFee, netAmount, symbol, transactionId } = await fetchFees(
+      invoice.payment_intent as string,
+      invoice.id as string,
+      invoice.currency || "usd"
+    );
 
     const customerName = invoice.customer_name || invoice.customer_email || profile.email || "Unknown";
     const eventTime = formatEventTime();
@@ -439,6 +445,7 @@ export async function POST(req: Request) {
           last_payment_id: dedupId,
           last_gateway: "stripe",
           last_payment_at: new Date().toISOString(),
+          last_frequency: planInfo.frequency,
         },
       })
       .eq("id", profile.id);
@@ -454,8 +461,8 @@ export async function POST(req: Request) {
         name: customerName,
         email: profile.email || "N/A",
         dateTime: eventTime,
-        oldPlan: planInfo.plan,
-        newPlan: planInfo.plan,
+        oldPlan: `${planInfo.plan} (${planInfo.frequency})`,
+        newPlan: `${planInfo.plan} (${planInfo.frequency})`,
         amount: `${symbol}${amountPaid}`,
         quantity,
         paymentMethod: "Card (Recurring)",
@@ -464,7 +471,7 @@ export async function POST(req: Request) {
         oldCredits,
         newCredits,
         expiryDate: newExpiry.toLocaleDateString("en-IN"),
-        transactionId: invoice.id,
+        transactionId,
       })
     );
 
@@ -535,8 +542,8 @@ export async function POST(req: Request) {
         name: profile.email || "Unknown",
         email: profile.email || "N/A",
         dateTime: formatEventTime(),
-        oldPlan,
-        newPlan: planInfo.plan,
+        oldPlan: `${oldPlan}${profile.profile_data?.last_frequency ? ` (${profile.profile_data.last_frequency})` : ""}`,
+        newPlan: `${planInfo.plan} (${planInfo.frequency})`,
         amount: planInfo.price,
         quantity: 1,
         paymentMethod: "—",

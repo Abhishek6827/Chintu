@@ -109,11 +109,11 @@ export async function POST(req: Request) {
     const email = payment.email || notes.email || profile?.email || "N/A";
     const fullName = notes.fullName || profile?.full_name || email.split("@")[0] || "User";
 
-    const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; days: number }> = {
-      "pro_monthly": { plan: "pro", credits: 200, days: 30 },
-      "pro_annual": { plan: "pro", credits: 2400, days: 365 },
-      "elite_monthly": { plan: "elite", credits: 1000, days: 30 },
-      "elite_annual": { plan: "elite", credits: 12000, days: 365 },
+    const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; days: number; frequency: string }> = {
+      "pro_monthly": { plan: "pro", credits: 200, days: 30, frequency: "Monthly" },
+      "pro_annual": { plan: "pro", credits: 2400, days: 365, frequency: "Annual" },
+      "elite_monthly": { plan: "elite", credits: 1000, days: 30, frequency: "Monthly" },
+      "elite_annual": { plan: "elite", credits: 12000, days: 365, frequency: "Annual" },
     };
 
     const planKey = `${notes.planId}_${notes.billingCycle || "monthly"}`;
@@ -208,6 +208,7 @@ export async function POST(req: Request) {
         last_gateway: "razorpay",
         last_payment_at: new Date().toISOString(),
         gateway_fee: totalFees,
+        last_frequency: planInfo.frequency,
       },
     }).eq("id", targetUserId);
 
@@ -220,8 +221,8 @@ export async function POST(req: Request) {
         name: fullName,
         email,
         dateTime: eventTime,
-        oldPlan,
-        newPlan,
+        oldPlan: `${oldPlan}${targetProfile?.profile_data?.last_frequency ? ` (${targetProfile.profile_data.last_frequency})` : ""}`,
+        newPlan: `${newPlan} (${planInfo.frequency})`,
         amount: `₹${amountINR.toLocaleString("en-IN")}`,
         quantity,
         paymentMethod: paymentMethodDisplay,

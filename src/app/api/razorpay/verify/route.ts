@@ -24,11 +24,11 @@ const sendTelegramAlert = async (message: string) => {
 
 export const dynamic = 'force-dynamic';
 
-const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; price: string; days: number }> = {
-  "pro_monthly": { plan: "pro", credits: 200, price: "₹799/mo", days: 30 },
-  "pro_annual": { plan: "pro", credits: 2400, price: "₹7990/yr", days: 365 },
-  "elite_monthly": { plan: "elite", credits: 1000, price: "₹2499/mo", days: 30 },
-  "elite_annual": { plan: "elite", credits: 12000, price: "₹24990/yr", days: 365 },
+const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; price: string; days: number; frequency: string }> = {
+  "pro_monthly": { plan: "pro", credits: 200, price: "₹799/mo", days: 30, frequency: "Monthly" },
+  "pro_annual": { plan: "pro", credits: 2400, price: "₹7990/yr", days: 365, frequency: "Annual" },
+  "elite_monthly": { plan: "elite", credits: 1000, price: "₹2499/mo", days: 30, frequency: "Monthly" },
+  "elite_annual": { plan: "elite", credits: 12000, price: "₹24990/yr", days: 365, frequency: "Annual" },
 };
 
 export async function POST(req: NextRequest) {
@@ -176,7 +176,8 @@ export async function POST(req: NextRequest) {
           last_payment_id: razorpay_payment_id,
           last_gateway: "razorpay",
           last_payment_at: new Date().toISOString(),
-          gateway_fee: totalFees
+          gateway_fee: totalFees,
+          last_frequency: planInfo.frequency,
         }
       })
       .eq("id", targetUserId);
@@ -205,8 +206,8 @@ export async function POST(req: NextRequest) {
 🏦 <b>Net Settlement:</b> ₹${netAmount.toFixed(2)}
 
 --------------------------
-💎 <b>Old Plan:</b> ${profile?.plan?.toUpperCase() || "FREE"}
-💎 <b>New Plan:</b> ${planInfo.plan.toUpperCase()}
+💎 <b>Old Plan:</b> ${profile?.plan?.toUpperCase() || "FREE"}${profile?.profile_data?.last_frequency ? ` (${profile.profile_data.last_frequency})` : ""}
+💎 <b>New Plan:</b> ${planInfo.plan.toUpperCase()} (${planInfo.frequency})
 ⚡ <b>Old Credits:</b> ${existingCredits}
 ⚡ <b>New Credits:</b> ${totalCredits}
 📅 <b>Expiry:</b> <code>${newExpiry.toLocaleDateString('en-IN')}</code>
