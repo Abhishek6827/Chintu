@@ -186,9 +186,19 @@ export default function LandingPage() {
           </p>
           <div className="reveal flex flex-col sm:flex-row gap-6 transition-all duration-1000 delay-500">
             {isSignedIn ? (
-              <Link href="/setup" className="relative group overflow-hidden px-16 py-7 bg-indigo-600 text-white font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-4">
+              <button 
+                onClick={() => {
+                  // Try to open the app via deep link
+                  window.location.href = "chintu://open";
+                  // Then redirect to setup after a short delay to allow the protocol handler to trigger
+                  setTimeout(() => {
+                    router.push("/setup");
+                  }, 500);
+                }}
+                className="relative group overflow-hidden px-16 py-7 bg-indigo-600 text-white font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-4"
+              >
                 Access Dashboard <Zap className="w-5 h-5 fill-current" />
-              </Link>
+              </button>
             ) : (
               <Link href="/sign-up" className="relative group overflow-hidden px-16 py-7 bg-indigo-600 text-white font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-4">
                 Join the Revolution <ArrowRight className="w-5 h-5" />
