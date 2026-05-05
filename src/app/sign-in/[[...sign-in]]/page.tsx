@@ -1,3 +1,4 @@
+"use client";
 import { SignIn, useAuth, useSignIn } from "@clerk/nextjs";
 import Image from "next/image";
 import { useEffect, useState } from "react";

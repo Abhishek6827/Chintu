@@ -513,13 +513,7 @@ Rules:
       throw lastError;
     }
 
-    // ─── Deduct Credit (1 credit for voice/text) ──────────────
-    if (profile) {
-      await supabaseAdmin
-        .from("profiles")
-        .update({ credits: currentCredits - 1 })
-        .eq("id", userId);
-    }
+
 
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({

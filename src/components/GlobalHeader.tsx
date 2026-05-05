@@ -66,9 +66,15 @@ export default function GlobalHeader() {
 
     fetchProfile();
     
+    // Listen for manual refresh requests (e.g. after successful payment)
+    window.addEventListener('chintu-profile-refresh', fetchProfile);
+    
     // Polling for credits/profile updates if needed
     const interval = setInterval(fetchProfile, 10000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('chintu-profile-refresh', fetchProfile);
+    };
   }, [isLoaded, isSignedIn, user?.id]);
   
   // Close modals when signed out

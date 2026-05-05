@@ -300,6 +300,9 @@ export default function PricingPage() {
                 { label: "Status", value: "Success (Details Pending)" }
               ]);
             }
+            // Refresh credits in header
+            window.dispatchEvent(new CustomEvent("chintu-profile-refresh"));
+            
             setShowSuccess(true);
             
             // Start countdown to redirect
