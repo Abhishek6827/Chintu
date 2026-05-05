@@ -16,6 +16,7 @@ import ContactForm from '@/components/ContactForm';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { MarqueeReviews } from '@/components/MarqueeReviews';
 import { TextReveal } from '@/components/magicui/text-reveal';
+import { Meteors } from '@/components/magicui/meteors';
 
 export default function LandingPage() {
   const { isSignedIn, isLoaded } = useUser();
@@ -37,7 +38,7 @@ export default function LandingPage() {
             const { profile } = await res.json();
             if (profile) {
               setUserCredits(profile.credits);
-              setUserPlan(profile.plan || "free");
+              setUserPlan((profile.plan || "free").toLowerCase());
             }
           }
         } catch (err) {
@@ -92,6 +93,7 @@ export default function LandingPage() {
 
       {/* Background Elements */}
       <div className="fixed inset-0 pointer-events-none z-0">
+        {!isElectron && userPlan !== "free" && userPlan !== "" && <Meteors number={30} />}
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-200/20 blur-[120px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-200/20 blur-[120px] rounded-full animate-pulse delay-700" />
       </div>

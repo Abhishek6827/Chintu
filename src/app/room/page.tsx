@@ -12,7 +12,6 @@ import { useUser } from "@clerk/nextjs";
 import AnswerDisplay from "@/components/AnswerDisplay";
 import ProfileModal, { formatProfileContext } from "@/components/ProfileModal";
 import CustomDropdown from "@/components/CustomDropdown";
-import { Meteors } from "@/components/magicui/meteors";
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
 import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
@@ -1393,7 +1392,6 @@ export default function RoomPage() {
     <div className="app-container" style={{ '--app-opacity': windowOpacity } as React.CSSProperties}>
       {/* Neural Mesh Background */}
       <div className="neural-mesh">
-        {userPlan !== "free" && <Meteors number={30} />}
         <div className="mesh-orb w-[400px] h-[400px] bg-indigo-600/30 -top-20 -left-20 animate-pulse" />
         <div className="mesh-orb w-[300px] h-[300px] bg-purple-600/20 bottom-10 right-10 animate-pulse" style={{ animationDelay: '2s' }} />
         <div className="mesh-orb w-[250px] h-[250px] bg-blue-600/20 top-1/2 left-1/3" style={{ animationDelay: '5s' }} />

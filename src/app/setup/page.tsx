@@ -45,7 +45,7 @@ export default function SetupPage() {
         if (res.ok) {
           const { profile: profileRow } = await res.json();
           if (profileRow) {
-            setUserPlan(profileRow.plan || "free");
+            setUserPlan((profileRow.plan || "free").toLowerCase());
             // Logic based on new requirements:
             // If Profile + JD exist -> go to room
             // If Profile exists but JD missing -> show JD only
@@ -102,8 +102,8 @@ export default function SetupPage() {
 
 
 
-  // If not mounted or Clerk not loaded yet, show premium loading
-  if (!mounted || !isLoaded) {
+  // If not mounted or Clerk not loaded yet or profile still loading, show premium loading
+  if (!mounted || !isLoaded || isLoadingProfile) {
     return <NeuralLoading text="Establishing Neural Link" subtext="Chintu AI Interface" />;
   }
 
@@ -229,8 +229,8 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] overflow-x-hidden overflow-y-auto">
-      {userPlan !== "free" && <Meteors number={30} />}
+    <div className="flex flex-col min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] overflow-x-hidden overflow-y-auto relative">
+      {!isElectron && userPlan !== "free" && <Meteors number={30} />}
 
 
 
@@ -402,8 +402,8 @@ export default function SetupPage() {
           </div>
         </div>
 
-        {/* Strategic Spread */}
-        {mounted && (
+        {/* Strategic Spread - Only show on Web landing, hide in EXE app */}
+        {mounted && !isElectron && (
           <div className="mt-16 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
              <div className="text-center mb-12">
                <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-2">Protocol Resources</h2>
