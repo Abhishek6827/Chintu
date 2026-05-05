@@ -91,10 +91,19 @@ export default function ProfileModal({
             
             setSavedJd(activeJd);
             setJdText(activeJd);
-            if (data.profile_data && typeof data.profile_data === 'object' && Object.keys(data.profile_data).length > 0) {
+            
+            // Only set the structured profile if it actually contains profile content (not just metadata like saved_jd)
+            const hasStructuredData = data.profile_data && 
+              (data.profile_data.name || data.profile_data.experience || data.profile_data.skills || data.profile_data.summary);
+
+            if (hasStructuredData) {
               setProfile(data.profile_data);
             } else {
               setProfile(null);
+              // Fallback: If we have raw text but no structured data, pre-fill the raw text area
+              if (data.raw_profile) {
+                setRawText(data.raw_profile);
+              }
             }
           }
         }

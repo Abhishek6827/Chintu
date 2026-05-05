@@ -386,7 +386,7 @@ export default function PricingPage() {
 
 
   return (
-    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] flex flex-col">
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] flex flex-col relative">
       <AnimatePresence>
         {showSuccess && (
           <motion.div 

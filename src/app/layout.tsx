@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"] });
 export const dynamic = "force-dynamic";
 
 
@@ -55,10 +58,10 @@ export default async function RootLayout({
         <head>
           <link rel="icon" href="https://www.getchintu.com/icon.png" />
           {/* Suppress sensor-related warnings from third-party scripts (like Razorpay) */}
-          <meta httpEquiv="Permissions-Policy" content="accelerometer=(*), camera=(*), geolocation=(*), gyroscope=(*), magnetometer=(*), microphone=(*), payment=(*), usb=(*)" />
+          <meta httpEquiv="Permissions-Policy" content="accelerometer=*, camera=*, geolocation=*, gyroscope=*, magnetometer=*, microphone=*, payment=*, usb=*" />
 
         </head>
-        <body className="bg-transparent h-screen flex flex-col">
+        <body className={`${inter.className} bg-transparent h-screen flex flex-col relative`}>
           <GlobalHeader />
           <main id="main-content" className="flex-1 min-h-0 relative overflow-y-auto overflow-x-hidden">
             {children}

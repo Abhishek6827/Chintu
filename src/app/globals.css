@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 
 @tailwind base;
 @tailwind components;
@@ -61,14 +61,12 @@ html {
 
 html, body, #__next, [data-reactroot] {
   overflow-x: hidden;
-  overflow-y: auto;
   background: #f5f7fa !important;
   margin: 0;
   padding: 0;
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   color: var(--text-main);
   color-scheme: light;
