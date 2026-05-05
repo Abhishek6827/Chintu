@@ -218,6 +218,7 @@ export async function POST(req: Request) {
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    console.log(`[Webhook] 📥 Received Stripe Event: ${event.type} (${event.id})`);
   } catch (err: any) {
     console.error(`[Webhook] Signature verification failed: ${err.message}`);
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
@@ -397,6 +398,8 @@ export async function POST(req: Request) {
       console.error("[Webhook] Failed to fetch line items:", err);
     }
 
+    console.log(`[Webhook] Checkout | PriceID: ${priceId} | Quantity: ${quantity}`);
+
     if (!priceId || !PRICE_ID_MAP[priceId]) {
       console.error(`[Webhook] ❌ Unknown Price ID: ${priceId}`);
       return NextResponse.json({ received: true, error: `Unknown priceId: ${priceId}` });
@@ -561,7 +564,7 @@ export async function POST(req: Request) {
 
     // Skip — initial subscription creation is handled by checkout.session.completed
     if (invoice.billing_reason === "subscription_create") {
-      console.log(`[Webhook] ⏭️ Skipping invoice for initial subscription creation`);
+      console.log(`[Webhook] ⏭️ Skipping invoice for subscription_create (billing_reason)`);
       return NextResponse.json({ received: true });
     }
 
