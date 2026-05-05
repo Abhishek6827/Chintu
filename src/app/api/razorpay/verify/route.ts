@@ -26,9 +26,9 @@ export const dynamic = 'force-dynamic';
 
 const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; price: string; days: number; frequency: string, basePriceINR: number }> = {
   "pro_monthly": { plan: "pro", credits: 200, price: "₹765/mo", days: 30, frequency: "Monthly", basePriceINR: 765 },
-  "pro_annual": { plan: "pro", credits: 2400, price: "₹7417/yr", days: 365, frequency: "Annual", basePriceINR: 7417 },
+  "pro_annual": { plan: "pro", credits: 2400, price: "₹7565/yr", days: 365, frequency: "Annual", basePriceINR: 7565 },
   "elite_monthly": { plan: "elite", credits: 1000, price: "₹2465/mo", days: 30, frequency: "Monthly", basePriceINR: 2465 },
-  "elite_annual": { plan: "elite", credits: 12000, price: "₹23250/yr", days: 365, frequency: "Annual", basePriceINR: 23250 },
+  "elite_annual": { plan: "elite", credits: 12000, price: "₹23715/yr", days: 365, frequency: "Annual", basePriceINR: 23715 },
 };
 
 export async function POST(req: NextRequest) {
@@ -217,11 +217,11 @@ export async function POST(req: NextRequest) {
 👤 <b>Name:</b> ${customerName}
 📧 <b>Email:</b> <code>${userEmail || 'N/A'}</code>
 📅 <b>Date:</b> <code>${eventTime}</code>
-💰 <b>Total Amount:</b> <b>₹${displayTotal.toLocaleString()}</b> (Qty: ${quantity})
+💰 <b>Total Amount:</b> <b>₹${displayTotal.toLocaleString()}</b> (Qty: ${quantity}${quantity > 1 ? ` - ${quantity}x ₹${planInfo.basePriceINR.toFixed(2)} + 2%` : ''})
 💳 <b>Method:</b> ${paymentTypeDisplay}
 
 💎 <b>Plan Price:</b> <b>₹${displayPlanPrice.toFixed(2)}</b>
-💸 <b>Gateway Fees:</b> <b>₹${displayFee.toFixed(2)}</b>
+💸 <b>Gateway Fees:</b> <b>₹${displayFee.toFixed(2)} (2%)</b>
 
 --------------------------
 💎 <b>Old Plan:</b> ${profile?.plan?.toUpperCase() || "FREE"}${profile?.profile_data?.last_frequency ? ` (${profile.profile_data.last_frequency})` : ""}

@@ -541,20 +541,33 @@ export default function PricingPage() {
                 <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest mt-1">{totalCredits} Credits/mo</p>
                 
                 <div className="mt-4 flex flex-col gap-1">
-                  <div className="flex items-baseline gap-2">
-                    {oldPriceTotal && oldPriceTotal > totalPrice && (
+                  {/* Row 1: Old Prices (Strike-through) */}
+                  {oldPriceTotal && oldPriceTotal > totalPrice && (
+                    <div className="flex items-baseline gap-2 opacity-60">
                       <span className="text-[var(--text-dim)] text-sm line-through decoration-red-500/50 decoration-2 tracking-tighter">
                         ${oldPriceTotal.toLocaleString()}
                       </span>
-                    )}
+                      <span className="text-[var(--text-dim)] text-[10px] line-through decoration-red-500/50 uppercase tracking-tight">
+                        ₹{(oldPriceTotal * USD_TO_INR).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Row 2: Current Prices (Main) */}
+                  <div className="flex items-baseline gap-2">
                     <span className="text-4xl font-black text-[var(--text-main)] tracking-tighter">
                       ${totalPrice.toLocaleString()}
                     </span>
                     <span className="text-[var(--text-dim)] text-[9px] font-black uppercase">{isMonthly ? "/month" : "/year"}</span>
                   </div>
+
+                  {/* Row 3: Current Approx INR */}
                   <div className="flex items-center gap-1.5 mt-0.5 mb-2">
-                    <span className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-tight">≈ ₹{(totalPrice * USD_TO_INR).toLocaleString()} INR</span>
+                    <span className="text-[10px] font-bold text-[var(--text-main)] uppercase tracking-tight">
+                      ≈ ₹{(totalPrice * USD_TO_INR).toLocaleString()} INR
+                    </span>
                   </div>
+
                   <div className="inline-flex items-center gap-1.5 bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-md w-fit border border-indigo-500/20">
                     <span className="text-[7px] font-black uppercase tracking-widest">+ Gateway Charges at Checkout</span>
                   </div>

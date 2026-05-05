@@ -115,9 +115,9 @@ export async function POST(req: Request) {
 
     const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; days: number; frequency: string; unitTotalINR: number; basePriceINR: number }> = {
       "pro_monthly": { plan: "pro", credits: 200, days: 30, frequency: "Monthly", unitTotalINR: 780.3, basePriceINR: 765 },
-      "pro_annual": { plan: "pro", credits: 2400, days: 365, frequency: "Annual", unitTotalINR: 7565, basePriceINR: 7417 },
+      "pro_annual": { plan: "pro", credits: 2400, days: 365, frequency: "Annual", unitTotalINR: 7716.3, basePriceINR: 7565 },
       "elite_monthly": { plan: "elite", credits: 1000, days: 30, frequency: "Monthly", unitTotalINR: 2514.3, basePriceINR: 2465 },
-      "elite_annual": { plan: "elite", credits: 12000, days: 365, frequency: "Annual", unitTotalINR: 23715, basePriceINR: 23250 },
+      "elite_annual": { plan: "elite", credits: 12000, days: 365, frequency: "Annual", unitTotalINR: 24189.3, basePriceINR: 23715 },
     };
 
 
@@ -184,7 +184,7 @@ export async function POST(req: Request) {
     const buildAmountLabel = (quantity: number, actualAmountINR: number, basePriceINR: number) => {
       const { gatewayFee, totalPaid, planPrice } = calculateDisplayFees(actualAmountINR, basePriceINR);
       const amountLabel = quantity > 1
-        ? `₹${totalPaid} (${quantity}x ₹${(actualAmountINR / quantity).toFixed(2)})`
+        ? `₹${totalPaid} (${quantity}x ₹${basePriceINR.toFixed(2)} + 2%)`
         : `₹${totalPaid}`;
       return { amountLabel, totalDisplay: totalPaid, gatewayFee, planPrice: `₹${planPrice}` };
     };
@@ -251,7 +251,7 @@ export async function POST(req: Request) {
         planPrice: planPrice,
         quantity,
         paymentMethod: paymentMethodDisplay,
-        gatewayFees: `₹${displayGatewayFee}`,
+        gatewayFees: `₹${displayGatewayFee} (2%)`,
         oldCredits,
         newCredits: totalCredits,
         addedCredits: purchasedCredits,
