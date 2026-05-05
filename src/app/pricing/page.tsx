@@ -71,7 +71,7 @@ const PLANS = [
     ],
     cta: "Upgrade to Pro",
     stripePriceIdMonthly: "price_1TTF8WLYcsTnVrvkaLcpMyel",
-    stripePriceIdAnnual: "price_1TTFChLYcsTnVrvkUllytzc2",
+    stripePriceIdAnnual: "price_1TTcEhLYcsTnVrvkvOjR8hMc",
   },
   {
     id: "elite",
@@ -96,7 +96,7 @@ const PLANS = [
     ],
     cta: "Go Elite",
     stripePriceIdMonthly: "price_1TTFBELYcsTnVrvkKpZSsGRN",
-    stripePriceIdAnnual: "price_1TTFDhLYcsTnVrvkGGjCkxv5",
+    stripePriceIdAnnual: "price_1TTcI2LYcsTnVrvk5Y3jkmp0",
   },
 ];
 
