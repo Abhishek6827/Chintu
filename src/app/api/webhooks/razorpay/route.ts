@@ -113,11 +113,11 @@ export async function POST(req: Request) {
     const email = payment.email || notes.email || profile?.email || "N/A";
     const fullName = notes.fullName || profile?.full_name || email.split("@")[0] || "User";
 
-    const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; days: number; frequency: string; unitTotalINR: number }> = {
-      "pro_monthly": { plan: "pro", credits: 200, days: 30, frequency: "Monthly", unitTotalINR: 780.3 },
-      "pro_annual": { plan: "pro", credits: 2400, days: 365, frequency: "Annual", unitTotalINR: 7565 },
-      "elite_monthly": { plan: "elite", credits: 1000, days: 30, frequency: "Monthly", unitTotalINR: 2514.3 },
-      "elite_annual": { plan: "elite", credits: 12000, days: 365, frequency: "Annual", unitTotalINR: 23715 },
+    const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; days: number; frequency: string; unitTotalINR: number; basePriceINR: number }> = {
+      "pro_monthly": { plan: "pro", credits: 200, days: 30, frequency: "Monthly", unitTotalINR: 780.3, basePriceINR: 765 },
+      "pro_annual": { plan: "pro", credits: 2400, days: 365, frequency: "Annual", unitTotalINR: 7565, basePriceINR: 7417 },
+      "elite_monthly": { plan: "elite", credits: 1000, days: 30, frequency: "Monthly", unitTotalINR: 2514.3, basePriceINR: 2465 },
+      "elite_annual": { plan: "elite", credits: 12000, days: 365, frequency: "Annual", unitTotalINR: 23715, basePriceINR: 23250 },
     };
 
 
@@ -171,9 +171,8 @@ export async function POST(req: Request) {
 
     const amountINR = Number(payment.amount) / 100;
 
-    const calculateDisplayFees = (displayTotal: number) => {
-      const gatewayFeeRaw = displayTotal * (2 / 102);
-      const planPrice = Math.round(displayTotal - gatewayFeeRaw);
+    const calculateDisplayFees = (displayTotal: number, basePriceINR: number) => {
+      const planPrice = basePriceINR * quantity;
       const actualGatewayFee = displayTotal - planPrice;
       return {
         gatewayFee: actualGatewayFee.toFixed(2),
@@ -182,8 +181,8 @@ export async function POST(req: Request) {
       };
     };
 
-    const buildAmountLabel = (quantity: number, actualAmountINR: number) => {
-      const { gatewayFee, totalPaid, planPrice } = calculateDisplayFees(actualAmountINR);
+    const buildAmountLabel = (quantity: number, actualAmountINR: number, basePriceINR: number) => {
+      const { gatewayFee, totalPaid, planPrice } = calculateDisplayFees(actualAmountINR, basePriceINR);
       const amountLabel = quantity > 1
         ? `₹${totalPaid} (${quantity}x ₹${(actualAmountINR / quantity).toFixed(2)})`
         : `₹${totalPaid}`;
@@ -191,7 +190,7 @@ export async function POST(req: Request) {
     };
 
 
-    const { amountLabel, gatewayFee: displayGatewayFee, planPrice } = buildAmountLabel(quantity, amountINR);
+    const { amountLabel, gatewayFee: displayGatewayFee, planPrice } = buildAmountLabel(quantity, amountINR, planInfo.basePriceINR);
 
 
 

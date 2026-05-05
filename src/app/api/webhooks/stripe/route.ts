@@ -18,23 +18,24 @@ const PRICE_ID_MAP: Record<
     days: number;
     frequency: string;
     unitTotal: number; // per-unit catalog price shown on pricing page (2% already included)
+    basePrice: number; // per-unit base price for Telegram breakdown
   }
 > = {
   "price_1TTF8WLYcsTnVrvkaLcpMyel": {
-    plan: "pro", credits: 200, price: "$9.18/mo", days: 30,
-    frequency: "Monthly", unitTotal: 9.18,
+    plan: "pro", credits: 200, price: "$9/mo", days: 30,
+    frequency: "Monthly", unitTotal: 9.00, basePrice: 9.00,
   },
   "price_1TTFChLYcsTnVrvkUllytzc2": {
     plan: "pro", credits: 2400, price: "$89/yr", days: 365,
-    frequency: "Annual", unitTotal: 89.00,
+    frequency: "Annual", unitTotal: 89.00, basePrice: 89.00,
   },
   "price_1TTFBELYcsTnVrvkKpZSsGRN": {
-    plan: "elite", credits: 1000, price: "$29.58/mo", days: 30,
-    frequency: "Monthly", unitTotal: 29.58,
+    plan: "elite", credits: 1000, price: "$29/mo", days: 30,
+    frequency: "Monthly", unitTotal: 29.00, basePrice: 29.00,
   },
   "price_1TTFDhLYcsTnVrvkGGjCkxv5": {
     plan: "elite", credits: 12000, price: "$279/yr", days: 365,
-    frequency: "Annual", unitTotal: 279.00,
+    frequency: "Annual", unitTotal: 279.00, basePrice: 279.00,
   },
 };
 
@@ -97,13 +98,12 @@ function generateDisplayId(): string {
  *   10x Pro → $91.80 × 0.02/1.02 = $1.80  ✓
  *   1x Elite → $29.58 × 0.02/1.02 = $0.58 ✓
  */
-function calculateDisplayFees(displayTotal: number): {
+function calculateDisplayFees(displayTotal: number, basePrice: number, quantity: number): {
   gatewayFee: string;
   planPrice: string;
   totalPaid: string;
 } {
-  const gatewayFeeRaw = displayTotal * (2 / 102);
-  const planPrice = Math.round(displayTotal - gatewayFeeRaw);
+  const planPrice = basePrice * quantity;
   const actualGatewayFee = displayTotal - planPrice;
   return {
     gatewayFee: actualGatewayFee.toFixed(2),
@@ -117,18 +117,17 @@ function calculateDisplayFees(displayTotal: number): {
  * Build a human-readable amount label for Telegram.
  * For qty > 1: "$91.80 (10x $9.18)" so it's always transparent.
  */
-function buildAmountLabel(symbol: string, quantity: number, unitTotal: number, frequency?: string): {
+function buildAmountLabel(symbol: string, quantity: number, actualTotalPaid: number, basePrice: number, frequency?: string): {
   amountLabel: string;
   totalDisplay: string;
   gatewayFee: string;
   planPrice: string;
 } {
-  const total = unitTotal * quantity;
-  const { gatewayFee, totalPaid, planPrice } = calculateDisplayFees(total);
+  const { gatewayFee, totalPaid, planPrice } = calculateDisplayFees(actualTotalPaid, basePrice, quantity);
   const suffix = frequency ? (frequency.toLowerCase() === "annual" ? "/yr" : "/mo") : "";
 
   const amountLabel = quantity > 1
-    ? `${symbol}${totalPaid}${suffix} (${quantity}x ${symbol}${unitTotal.toFixed(2)}${suffix})`
+    ? `${symbol}${totalPaid}${suffix} (${quantity}x ${symbol}${basePrice.toFixed(2)}${suffix})`
     : `${symbol}${totalPaid}${suffix}`;
 
   return { amountLabel, totalDisplay: totalPaid, gatewayFee, planPrice: `${symbol}${planPrice}${suffix}` };
@@ -403,7 +402,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true, error: `Unknown priceId: ${priceId}` });
     }
 
-    const { plan, credits, price, days, frequency, unitTotal } = PRICE_ID_MAP[priceId];
+    const { plan, credits, price, days, frequency, unitTotal, basePrice } = PRICE_ID_MAP[priceId];
 
     // Dedup guard
     const dedupId = (session.payment_intent as string) || session.id;
@@ -452,7 +451,8 @@ export async function POST(req: Request) {
     const { amountLabel, gatewayFee: displayGatewayFee, planPrice } = buildAmountLabel(
       symbol,
       quantity,
-      unitTotal,
+      actualAmountPaid,
+      basePrice,
       frequency
     );
 
@@ -604,10 +604,12 @@ export async function POST(req: Request) {
     // NOT invoice.amount_paid which is a Stripe proration (partial charge for mid-cycle changes).
     // This ensures Telegram shows "$9.18" not "$14.47".
     const symbol = invoice.currency?.toUpperCase() === "INR" ? "₹" : "$";
+    const expectedTotal = planInfo.basePrice * quantity * 1.02;
     const { amountLabel, gatewayFee: displayGatewayFee, planPrice } = buildAmountLabel(
       symbol,
       quantity,
-      planInfo.unitTotal,
+      expectedTotal,
+      planInfo.basePrice,
       planInfo.frequency
     );
 
@@ -743,10 +745,12 @@ export async function POST(req: Request) {
       .eq("id", profile.id);
 
     const symbol = subscription.currency?.toUpperCase() === "inr" ? "₹" : "$";
+    const expectedTotal = planInfo.basePrice * 1 * 1.02;
     const { amountLabel, gatewayFee: displayGatewayFee, planPrice } = buildAmountLabel(
       symbol,
       1,
-      planInfo.unitTotal,
+      expectedTotal,
+      planInfo.basePrice,
       planInfo.frequency
     );
 

@@ -24,11 +24,11 @@ const sendTelegramAlert = async (message: string) => {
 
 export const dynamic = 'force-dynamic';
 
-const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; price: string; days: number; frequency: string }> = {
-  "pro_monthly": { plan: "pro", credits: 200, price: "₹799/mo", days: 30, frequency: "Monthly" },
-  "pro_annual": { plan: "pro", credits: 2400, price: "₹7990/yr", days: 365, frequency: "Annual" },
-  "elite_monthly": { plan: "elite", credits: 1000, price: "₹2499/mo", days: 30, frequency: "Monthly" },
-  "elite_annual": { plan: "elite", credits: 12000, price: "₹24990/yr", days: 365, frequency: "Annual" },
+const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; price: string; days: number; frequency: string, basePriceINR: number }> = {
+  "pro_monthly": { plan: "pro", credits: 200, price: "₹765/mo", days: 30, frequency: "Monthly", basePriceINR: 765 },
+  "pro_annual": { plan: "pro", credits: 2400, price: "₹7417/yr", days: 365, frequency: "Annual", basePriceINR: 7417 },
+  "elite_monthly": { plan: "elite", credits: 1000, price: "₹2465/mo", days: 30, frequency: "Monthly", basePriceINR: 2465 },
+  "elite_annual": { plan: "elite", credits: 12000, price: "₹23250/yr", days: 365, frequency: "Annual", basePriceINR: 23250 },
 };
 
 export async function POST(req: NextRequest) {
@@ -208,8 +208,7 @@ export async function POST(req: NextRequest) {
     // Send Telegram Alert
     const statusLabel = isDowngrade ? "DOWNGRADE 🔻" : "💰 Plan Purchased";
     const displayTotal = Number(payment.amount) / 100;
-    const displayFeeRaw = displayTotal * (2 / 102);
-    const displayPlanPrice = Math.round(displayTotal - displayFeeRaw);
+    const displayPlanPrice = planInfo.basePriceINR * quantity;
     const displayFee = displayTotal - displayPlanPrice;
 
     const telegramMsg = `

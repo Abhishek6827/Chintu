@@ -30,24 +30,34 @@ export async function POST(req: NextRequest) {
             .eq("id", userId)
             .maybeSingle();
 
+        // Calculate amount including 2% fee
+        const STRIPE_BASE_PRICES: Record<string, number> = {
+            "price_1TTF8WLYcsTnVrvkaLcpMyel": 9.00,
+            "price_1TTFChLYcsTnVrvkUllytzc2": 89.00,
+            "price_1TTFBELYcsTnVrvkKpZSsGRN": 29.00,
+            "price_1TTFDhLYcsTnVrvkGGjCkxv5": 279.00,
+        };
+
+        const basePrice = STRIPE_BASE_PRICES[priceId] || 0;
+        const amountWithFee = Math.round(basePrice * 1.02 * 100); // in cents
+
         const session = await stripe.checkout.sessions.create({
             mode: "subscription",
             payment_method_types: ["card"],
-
-
-            // If customer exists, reuse it; otherwise use customer_email
             ...(profile?.stripe_customer_id ? { customer: profile.stripe_customer_id } : { customer_email: email }),
-            line_items: [{ price: priceId, quantity }],
+            line_items: [{
+                price_data: {
+                    currency: 'usd',
+                    product: priceId.includes('pro') ? 'prod_RC1m0ZLYcsTnVrvk' : 'prod_RC1n0ZLYcsTnVrvk',
+                    unit_amount: amountWithFee,
+                    recurring: { interval: priceId.includes('monthly') ? 'month' : 'year' },
+                },
+                quantity: quantity
+            }],
             success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://getchintu.com"}/room?payment=success`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://getchintu.com"}/pricing?payment=cancelled`,
-            metadata: {
-                userId,
-            },
-            subscription_data: {
-                metadata: {
-                    userId,
-                },
-            },
+            metadata: { userId },
+            subscription_data: { metadata: { userId } },
         });
 
 
