@@ -17,6 +17,7 @@ import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { MarqueeReviews } from '@/components/MarqueeReviews';
 import { TextReveal } from '@/components/magicui/text-reveal';
 import { Meteors } from '@/components/magicui/meteors';
+import CardSpread from '@/components/animata/card/card-spread';
 
 export default function LandingPage() {
   const { isSignedIn, isLoaded } = useUser();
@@ -370,6 +371,21 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+        
+        {/* Strategic Spread - Only show on Web landing, hide in EXE app */}
+        {!isElectron && (
+          <section className="py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+            <div className="max-w-7xl mx-auto">
+              <div className="reveal text-center mb-16 transition-all duration-1000">
+                <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-2">Protocol Resources</h2>
+                <p className="text-3xl font-black text-[var(--text-main)] uppercase tracking-tight">Master the Interview Logic</p>
+              </div>
+              <div className="reveal transition-all duration-1000 delay-300">
+                <CardSpread />
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Contact Section */}
         <section className="py-40 px-6 max-w-7xl mx-auto w-full">

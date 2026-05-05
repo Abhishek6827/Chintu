@@ -26,7 +26,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { userId } = await auth();
+  let userId = null;
+  try {
+    const authData = await auth();
+    userId = authData.userId;
+  } catch {
+    // This happens during 404s for static assets where middleware is skipped
+    console.warn("Layout: Auth context not available for this request");
+  }
   let themeClass = ""; // Default light
   
   if (userId) {
@@ -54,7 +61,7 @@ export default async function RootLayout({
 
   return (
     <ClerkProvider>
-      <html lang="en" className={themeClass}>
+      <html lang="en" className={`${themeClass} relative`}>
         <head>
           <link rel="icon" href="https://www.getchintu.com/icon.png" />
           {/* Suppress sensor-related warnings from third-party scripts (like Razorpay) */}
