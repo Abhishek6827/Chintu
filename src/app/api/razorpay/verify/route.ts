@@ -161,8 +161,28 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     if (alreadyProcessed) {
-      console.log(`[/api/razorpay/verify] Payment ${razorpay_payment_id} already processed. Skipping duplicate fulfillment.`);
-      return NextResponse.json({ success: true, alreadyProcessed: true });
+      console.log(`[/api/razorpay/verify] Payment ${razorpay_payment_id} already processed. Returning cached receipt.`);
+      // Still return the receipt info even if already processed
+      const displayTotal = Number(payment.amount) / 100;
+      const displayPlanPrice = planInfo.basePriceINR * quantity;
+      const displayFee = displayTotal - displayPlanPrice;
+      
+      return NextResponse.json({ 
+        success: true, 
+        alreadyProcessed: true,
+        receipt: {
+          transactionId: razorpay_payment_id,
+          totalAmount: displayTotal.toFixed(2),
+          currency: "INR",
+          plan: `${planInfo.plan.toUpperCase()} (${planInfo.frequency})`,
+          quantity,
+          planPrice: displayPlanPrice.toFixed(2),
+          gatewayFees: displayFee.toFixed(2),
+          newCredits: totalCredits,
+          expiryDate: newExpiry.toLocaleDateString('en-IN'),
+          status: "SUCCESSFUL"
+        }
+      });
     }
 
     // Gateway Fees calculation (Razorpay subunits)
