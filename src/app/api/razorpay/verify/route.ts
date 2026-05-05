@@ -169,8 +169,6 @@ export async function POST(req: NextRequest) {
     const gatewayFee = (Number(payment.fee) || 0) / 100;
     const gatewayTax = (Number(payment.tax) || 0) / 100;
     const totalFees = gatewayFee + gatewayTax;
-    const netAmount = (Number(payment.amount) / 100) - totalFees;
-
     // Update Profile (from upsert to update for safety)
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
@@ -208,7 +206,11 @@ export async function POST(req: NextRequest) {
     const customerName = profile?.full_name || userName || userEmail || "User";
 
     // Send Telegram Alert
-    const statusLabel = isDowngrade ? "DOWNGRADE 🔻" : (profile?.plan === 'free' ? "NEW SUBSCRIPTION 💰" : "UPGRADE ⚡");
+    const statusLabel = isDowngrade ? "DOWNGRADE 🔻" : "💰 Plan Purchased";
+    const displayTotal = Number(payment.amount) / 100;
+    const displayFee = displayTotal * (2 / 102);
+    const displayPlanPrice = displayTotal - displayFee;
+
     const telegramMsg = `
 <b>${statusLabel} | RAZORPAY</b>
 
@@ -216,9 +218,10 @@ export async function POST(req: NextRequest) {
 📧 <b>Email:</b> <code>${userEmail || 'N/A'}</code>
 📅 <b>Date:</b> <code>${eventTime}</code>
 💳 <b>Method:</b> ${paymentTypeDisplay}
-💰 <b>Amount:</b> ₹${(Number(payment.amount) / 100).toLocaleString()}
-💸 <b>Gateway Fees:</b> ₹${totalFees.toFixed(2)} (Incl. Tax)
-🏦 <b>Net Settlement:</b> ₹${netAmount.toFixed(2)}
+
+💰 <b>Amount Paid:</b> <b>₹${displayTotal.toLocaleString()}</b> (Qty: ${quantity})
+💎 <b>Plan Price:</b> <b>₹${displayPlanPrice.toFixed(2)}</b>
+💸 <b>Gateway Fees (2%):</b> <b>₹${displayFee.toFixed(2)}</b>
 
 --------------------------
 💎 <b>Old Plan:</b> ${profile?.plan?.toUpperCase() || "FREE"}${profile?.profile_data?.last_frequency ? ` (${profile.profile_data.last_frequency})` : ""}

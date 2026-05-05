@@ -200,7 +200,7 @@ export const getPaymentEmailHtml = (
           <tr>
             <td style="padding: 30px; background-color: #fcfcfd; border-top: 1px solid #f1f3f5; text-align: center;">
               <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: 500; color: #6b7280;">
-                Billing questions? Contact our support team at <a href="mailto:contact@getchintu.com" style="color: #6366f1; text-decoration: none;">contact@getchintu.com</a>
+                Billing questions? Contact our support team at <a href="mailto:billing@getchintu.com" style="color: #6366f1; text-decoration: none;">contact@getchintu.com</a>
               </p>
               <p style="margin: 0 0 15px 0; font-size: 11px; color: #9ca3af; line-height: 1.5;">
                 You are receiving this receipt because of a recent transaction on your Chintu Intelligence account.<br>

@@ -14,12 +14,14 @@ function buildTelegramMessage({
   oldPlan,
   newPlan,
   amount,
+  planPrice,
   quantity = 1,
   paymentMethod,
+  gatewayFees,
   oldCredits,
   newCredits,
-
-
+  addedCredits,
+  addedDays,
   expiryDate,
   transactionId,
   status = "SUCCESSFUL",
@@ -32,29 +34,31 @@ function buildTelegramMessage({
   oldPlan: string;
   newPlan: string;
   amount: string;
+  planPrice: string;
   quantity?: number;
   paymentMethod: string;
+  gatewayFees: string;
   oldCredits: number;
   newCredits: number;
-
-
+  addedCredits: number;
+  addedDays: number;
   expiryDate: string;
   transactionId: string;
   status?: string;
   extraNote?: string;
 }): string {
   return (
-    `<b>${header}</b>\n` +
+    `<b>${header}</b>\n\n` +
     `👤 <b>Name:</b> ${name}\n` +
     `📧 <b>Email:</b> <code>${email}</code>\n` +
     `📅 <b>Date & Time:</b> <code>${dateTime}</code>\n` +
     `📊 <b>Plan:</b> <b>${oldPlan.toUpperCase()} → ${newPlan.toUpperCase()}</b>\n` +
-    `💰 <b>Amount:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
-    `💳 <b>Payment Method:</b> ${paymentMethod}\n` +
-    `⚡ <b>Credits:</b> ${oldCredits} → <b>${newCredits}</b>\n` +
-
-
-    `📆 <b>Expiry Date:</b> <b>${expiryDate}</b>\n` +
+    `💰 <b>Amount Paid:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
+    `💳 <b>Payment Method:</b> ${paymentMethod}\n\n` +
+    `💎 <b>Plan Price:</b> <b>${planPrice}</b>\n` +
+    `💸 <b>Gateway Fees (2%):</b> <b>${gatewayFees}</b>\n\n` +
+    `⚡ <b>Credits:</b> ${oldCredits} → <b>${newCredits}</b> <i>(+${addedCredits})</i>\n` +
+    `📆 <b>+Days Added:</b> <b>${addedDays} days</b> | Expires: <b>${expiryDate}</b>\n` +
     `🆔 <b>Transaction ID:</b> <code>${transactionId}</code>\n` +
     `✅ <b>Status:</b> ${status}` +
     (extraNote ? `\n\n<i>${extraNote}</i>` : "")
@@ -109,12 +113,13 @@ export async function POST(req: Request) {
     const email = payment.email || notes.email || profile?.email || "N/A";
     const fullName = notes.fullName || profile?.full_name || email.split("@")[0] || "User";
 
-    const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; days: number; frequency: string }> = {
-      "pro_monthly": { plan: "pro", credits: 200, days: 30, frequency: "Monthly" },
-      "pro_annual": { plan: "pro", credits: 2400, days: 365, frequency: "Annual" },
-      "elite_monthly": { plan: "elite", credits: 1000, days: 30, frequency: "Monthly" },
-      "elite_annual": { plan: "elite", credits: 12000, days: 365, frequency: "Annual" },
+    const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; days: number; frequency: string; unitTotalINR: number }> = {
+      "pro_monthly": { plan: "pro", credits: 200, days: 30, frequency: "Monthly", unitTotalINR: 780 },
+      "pro_annual": { plan: "pro", credits: 2400, days: 365, frequency: "Annual", unitTotalINR: 7565 },
+      "elite_monthly": { plan: "elite", credits: 1000, days: 30, frequency: "Monthly", unitTotalINR: 2514 },
+      "elite_annual": { plan: "elite", credits: 12000, days: 365, frequency: "Annual", unitTotalINR: 23715 },
     };
+
 
     const planKey = `${notes.planId}_${notes.billingCycle || "monthly"}`;
     const planInfo = RAZORPAY_PLANS[planKey] || RAZORPAY_PLANS["pro_monthly"];
@@ -165,8 +170,28 @@ export async function POST(req: Request) {
     }
 
     const amountINR = Number(payment.amount) / 100;
-    // ✅ FIX: Use 2% business model fee for display
-    const totalFees = amountINR * 0.02;
+
+    const calculateDisplayFees = (displayTotal: number) => {
+      const gatewayFee = displayTotal * (2 / 102);
+      const planPrice = displayTotal - gatewayFee;
+      return {
+        gatewayFee: gatewayFee.toFixed(2),
+        planPrice: planPrice.toFixed(2),
+        totalPaid: displayTotal.toFixed(2),
+      };
+    };
+
+    const buildAmountLabel = (quantity: number, unitTotalINR: number) => {
+      const total = unitTotalINR * quantity;
+      const { gatewayFee, totalPaid, planPrice } = calculateDisplayFees(total);
+      const amountLabel = quantity > 1
+        ? `₹${totalPaid} (${quantity}x ₹${unitTotalINR.toFixed(2)})`
+        : `₹${totalPaid}`;
+      return { amountLabel, totalDisplay: totalPaid, gatewayFee, planPrice: `₹${planPrice}` };
+    };
+
+
+    const { amountLabel, gatewayFee: displayGatewayFee, planPrice } = buildAmountLabel(quantity, planInfo.unitTotalINR);
 
 
 
@@ -207,7 +232,7 @@ export async function POST(req: Request) {
         last_payment_id: payment.id,
         last_gateway: "razorpay",
         last_payment_at: new Date().toISOString(),
-        gateway_fee: totalFees,
+        gateway_fee: displayGatewayFee,
         last_frequency: planInfo.frequency,
       },
     }).eq("id", targetUserId);
@@ -223,12 +248,21 @@ export async function POST(req: Request) {
         dateTime: eventTime,
         oldPlan: `${oldPlan}${targetProfile?.profile_data?.last_frequency ? ` (${targetProfile.profile_data.last_frequency})` : ""}`,
         newPlan: `${newPlan} (${planInfo.frequency})`,
-        amount: `₹${amountINR.toLocaleString("en-IN")}`,
-
+        amount: amountLabel,
+        planPrice: planPrice,
         quantity,
         paymentMethod: paymentMethodDisplay,
+        gatewayFees: `₹${displayGatewayFee}`,
         oldCredits,
         newCredits: totalCredits,
+        addedCredits: purchasedCredits,
+        addedDays: purchasedDays,
+
+
+
+
+
+
 
 
 
