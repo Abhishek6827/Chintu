@@ -124,8 +124,26 @@ export default function GlobalHeader() {
     }
   };
 
-  const handleUpgrade = () => {
-    const pricingUrl = "https://www.getchintu.com/pricing";
+  const handleUpgrade = async () => {
+    let pricingUrl = "https://www.getchintu.com/pricing";
+    
+    // Try to get a seamless auth token if in Electron
+    if (isElectron && isSignedIn) {
+      try {
+        const res = await fetch("/api/auth/seamless");
+        if (res.ok) {
+          const { token } = await res.json();
+          if (token) {
+            // Redirect directly to sign-in with the ticket at the top level
+            // This ensures Clerk's SignIn component can consume it immediately
+            pricingUrl = `https://www.getchintu.com/sign-in?__clerk_ticket=${token}&redirect_url=/pricing`;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to get seamless auth token:", err);
+      }
+    }
+
     if (isElectron) {
       (window as any).electronAPI.openExternal(pricingUrl);
     } else {

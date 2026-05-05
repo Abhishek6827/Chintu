@@ -1,20 +1,53 @@
-"use client";
-import { SignIn, useAuth } from "@clerk/nextjs";
+import { SignIn, useAuth, useSignIn } from "@clerk/nextjs";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Page() {
   const { isLoaded, isSignedIn } = useAuth();
+  const { signIn, setActive, isLoaded: signInLoaded } = useSignIn();
   const router = useRouter();
   const [redirecting, setRedirecting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // 1. Handle normal signed-in redirect
     if (isLoaded && isSignedIn) {
       setRedirecting(true);
-      router.push("/setup");
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get("redirect_url") || "/setup";
+      router.push(redirectUrl);
     }
   }, [isLoaded, isSignedIn, router]);
+
+  useEffect(() => {
+    // 2. Handle seamless auth ticket
+    const urlParams = new URLSearchParams(window.location.search);
+    const ticket = urlParams.get("__clerk_ticket");
+    const redirectUrl = urlParams.get("redirect_url") || "/pricing";
+
+    if (signInLoaded && ticket && !isSignedIn) {
+      const consumeTicket = async () => {
+        try {
+          setRedirecting(true);
+          const result = await signIn.create({
+            strategy: "ticket",
+            ticket: ticket,
+          });
+
+          if (result.status === "complete") {
+            await setActive({ session: result.createdSessionId });
+            router.push(redirectUrl);
+          }
+        } catch (err: any) {
+          console.error("Failed to consume seamless auth ticket:", err);
+          setError("Session sync failed. Please log in manually.");
+          setRedirecting(false);
+        }
+      };
+      consumeTicket();
+    }
+  }, [signInLoaded, isSignedIn, signIn, setActive, router]);
 
   return (
     <div className="h-full bg-[#f8f9fa] flex flex-col relative overflow-hidden">
@@ -44,6 +77,12 @@ export default function Page() {
               </p>
             </div>
           </div>
+          
+          {error && (
+            <div className="w-full mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-center animate-in fade-in slide-in-from-top-2">
+              <p className="text-xs font-bold text-red-500">{error}</p>
+            </div>
+          )}
 
           <div className="w-full mb-8 relative z-0">
             <SignIn 

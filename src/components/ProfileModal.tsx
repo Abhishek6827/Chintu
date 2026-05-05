@@ -59,7 +59,7 @@ export default function ProfileModal({
   onSuccess?: () => void,
   isBackgroundRefining?: boolean
 }) {
-  const { user } = useUser();
+  const { user, isSignedIn } = useUser();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [userPlan, setUserPlan] = useState("free");
   const [savedJd, setSavedJd] = useState("");
@@ -509,10 +509,25 @@ export default function ProfileModal({
               <div className="mt-4 bg-indigo-600/10 border border-indigo-600/20 rounded-2xl p-4 text-center">
                 <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 leading-relaxed">Unlock editing & more features</p>
                 <button 
-                  onClick={() => {
+                  onClick={async () => {
                     const pricingUrl = "https://www.getchintu.com/pricing";
-                    if (isElectron) (window as any).electronAPI.openExternal(pricingUrl);
-                    else window.open(pricingUrl, "_blank");
+                    if (isElectron && isSignedIn) {
+                      try {
+                        const res = await fetch("/api/auth/seamless");
+                        if (res.ok) {
+                          const { token } = await res.json();
+                          if (token) {
+                            (window as any).electronAPI.openExternal(`https://www.getchintu.com/sign-in?__clerk_ticket=${token}&redirect_url=/pricing`);
+                            return;
+                          }
+                        }
+                      } catch (err) {
+                        console.error("Seamless auth failed:", err);
+                      }
+                      (window as any).electronAPI.openExternal(pricingUrl);
+                    } else {
+                      window.open(pricingUrl, "_blank");
+                    }
                   }}
                   className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-indigo-600/20"
                 >
