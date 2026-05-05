@@ -78,6 +78,9 @@ export default function GlobalHeader() {
       setShowOnboarding(false);
       // Clear session storage on logout to ensure JD is requested again next time
       sessionStorage.removeItem("jobDescription");
+      if (isElectron && (window as any).electronAPI?.clearAuthSession) {
+        (window as any).electronAPI.clearAuthSession();
+      }
     }
   }, [isLoaded, isSignedIn]);
 
@@ -164,8 +167,8 @@ export default function GlobalHeader() {
 
   return (
     <>
-      <div className="drag-region flex items-center justify-between px-3 h-12 shrink-0 relative z-[100] w-full bg-[var(--bg-app)] border-b border-[var(--glass-border)] shadow-sm overflow-hidden">
-        <div className="flex items-center gap-3 no-drag">
+      <div className="drag-region flex items-center justify-between px-2 min-[400px]:px-3 h-12 shrink-0 relative z-[100] w-full bg-[var(--bg-app)] border-b border-[var(--glass-border)] shadow-sm overflow-hidden">
+        <div className="flex items-center gap-1.5 min-[400px]:gap-3 no-drag">
 
           <div 
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
@@ -189,41 +192,39 @@ export default function GlobalHeader() {
                 unoptimized 
               />
             </div>
-            <span className="text-sm font-black tracking-tighter uppercase text-[var(--text-main)]">
+            <span className="text-sm font-black tracking-tighter uppercase text-[var(--text-main)] ml-2 hidden min-[400px]:inline">
               Chintu <span className="text-indigo-500">AI</span>
             </span>
           </div>
           
           {isSignedIn && userCredits !== null && (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
-                <div className="flex flex-col items-end leading-none">
-                  <span className="text-[6px] font-black text-indigo-400 uppercase tracking-widest mb-0.5">Energy Sync</span>
-                  <div className="flex items-center gap-1">
-                    <Zap className="w-2 h-2 text-indigo-500 fill-indigo-500" />
-                    <span className="text-[10px] font-black text-[var(--text-main)]">{userCredits}</span>
-                  </div>
+            <div className="flex items-center gap-1 min-[400px]:gap-3">
+              <div className="flex items-center gap-1.5 px-2 min-[400px]:px-3 py-1.5 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
+                <div className="flex items-center gap-1">
+                  <Zap className="w-2 h-2 text-indigo-500 fill-indigo-500 hidden min-[450px]:inline" />
+                  <span className="text-[11px] font-black text-[var(--text-main)]">{userCredits}</span>
                 </div>
-                <div className="h-4 w-[1px] bg-[var(--glass-border)] mx-0.5" />
-                <span className="text-[8px] font-black uppercase tracking-widest text-indigo-500">{userPlan}</span>
+                <div className="hidden min-[400px]:block h-4 w-[1px] bg-[var(--glass-border)] mx-0.5" />
+                <span className="text-[8px] font-black uppercase tracking-widest text-indigo-500 hidden min-[450px]:inline">{userPlan}</span>
               </div>
               {userPlan === 'free' && (
                 <button 
                   onClick={handleUpgrade}
-                  className="px-4 py-1.5 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
+                  className="px-2 min-[450px]:px-4 py-1.5 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center justify-center"
                 >
-                  Upgrade
+                  <Zap className="w-3 h-3 min-[450px]:mr-1.5 fill-current" />
+                  <span className="hidden min-[450px]:inline">Upgrade</span>
                 </button>
               )}
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-3 no-drag">
+        <div className="flex items-center gap-1.5 min-[450px]:gap-3 no-drag">
           {isScreenRecording && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20 mr-1 animate-pulse">
+            <div className="flex items-center gap-1 min-[450px]:gap-1.5 px-1.5 min-[450px]:px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20 min-[400px]:mr-1 animate-pulse">
               <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />
-              <span className="text-[8px] text-red-500 font-black uppercase tracking-[0.2em]">REC</span>
+              <span className="hidden min-[450px]:inline text-[8px] text-red-500 font-black uppercase tracking-[0.2em]">REC</span>
             </div>
           )}
           {mounted && isElectron && (

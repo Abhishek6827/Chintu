@@ -38,5 +38,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   checkForUpdates: () => ipcRenderer.send("check-for-updates"),
   log: (msg, level = "info") => ipcRenderer.send("renderer-log", { msg, level }),
   openExternal: (url) => ipcRenderer.send("open-external", url),
+  clearAuthSession: () => ipcRenderer.invoke("clear-auth-session"),
+  onDeepLink: (callback) => {
+    const handler = (_event, url) => callback(url);
+    ipcRenderer.on("deep-link-received", handler);
+    return () => ipcRenderer.removeListener("deep-link-received", handler);
+  },
 });
 

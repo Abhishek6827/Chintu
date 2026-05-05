@@ -28,6 +28,10 @@ if (!gotTheLock) {
     const url = commandLine.pop();
     if (url && url.startsWith("chintu://")) {
       console.log("[Main] Deep link received (second-instance):", url);
+      // Pass the deep link URL to the renderer to handle tokens
+      if (mainWindow) {
+        mainWindow.webContents.send("deep-link-received", url);
+      }
     }
   });
 }
@@ -282,12 +286,17 @@ function createWindow() {
   });
 
   // ─── Load the app ───────────────────────────────────────
-  if (isDev) {
-    mainWindow.loadURL("http://localhost:3000/setup");
-  } else {
     // In production, we load the remote Vercel URL for SaaS functionality
-    mainWindow.loadURL(`${VERCEL_URL}/setup`);
-  }
+    const startUrl = isDev ? "http://localhost:3000/setup" : `${VERCEL_URL}/setup`;
+    
+    // Check if app was started with a token in the command line (Windows deep link)
+    const deepLinkUrl = process.argv.find(arg => arg.startsWith("chintu://"));
+    if (deepLinkUrl) {
+      console.log("[Main] App started with deep link:", deepLinkUrl);
+      mainWindow.loadURL(`${startUrl}${deepLinkUrl.includes('?') ? '&' : '?'}_from_deep_link=${encodeURIComponent(deepLinkUrl)}`);
+    } else {
+      mainWindow.loadURL(startUrl);
+    }
 
   // Set window position (bottom-right corner)
   const { screen } = require("electron");
@@ -518,6 +527,20 @@ ipcMain.on("set-opacity", (event, opacity) => {
 
 ipcMain.handle("get-opacity", () => userOpacity);
 ipcMain.handle("get-app-version", () => app.getVersion());
+
+ipcMain.handle("clear-auth-session", async () => {
+  console.log("[Main] Aggressively clearing auth session data...");
+  try {
+    // Clear cookies for Clerk and our domains
+    await session.defaultSession.clearStorageData({
+      storages: ['cookies', 'localstorage', 'indexdb', 'cache']
+    });
+    return true;
+  } catch (err) {
+    console.error("[Main] Error clearing session:", err);
+    return false;
+  }
+});
 
 // ─── Restart for update ───────────────────────────────────
 ipcMain.on("restart-for-update", () => {

@@ -375,11 +375,6 @@ export default function PricingPage() {
 
   const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
-  const handleMinimize = () => {
-    if (isElectron && (window as any).electronAPI?.minimize) {
-      (window as any).electronAPI.minimize();
-    }
-  };
   const { currentTheme, toggleTheme } = useThemeToggle();
 
   if (!isLoaded) return <div className="h-screen bg-[var(--bg-app)] flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
@@ -500,7 +495,7 @@ export default function PricingPage() {
           </button>
         </div>
         
-        <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
+        <div className="hidden min-[500px]:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
           <div className="flex items-center justify-center w-7 h-7 bg-indigo-500/10 rounded-lg border border-indigo-500/20 shadow-sm overflow-hidden p-1">
             <Image 
               src="https://www.getchintu.com/icon.png" 
@@ -515,15 +510,12 @@ export default function PricingPage() {
         </div>
 
         <div className="flex items-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
-          <AnimatedThemeToggler 
-            theme={currentTheme} 
-            onToggle={toggleTheme} 
-            className="bg-[var(--panel-bg)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)] shadow-sm"
-          />
-          {isElectron && (
-            <button onClick={handleMinimize} className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--panel-bg)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] border border-[var(--glass-border)] transition-all active:scale-90">
-              <Minus className="w-3.5 h-3.5" />
-            </button>
+          {!isElectron && (
+            <AnimatedThemeToggler 
+              theme={currentTheme} 
+              onToggle={toggleTheme} 
+              className="bg-[var(--panel-bg)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)] shadow-sm"
+            />
           )}
         </div>
       </div>

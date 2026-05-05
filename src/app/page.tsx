@@ -20,7 +20,7 @@ import { Meteors } from '@/components/magicui/meteors';
 import CardSpread from '@/components/animata/card/card-spread';
 
 export default function LandingPage() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
   const [userCredits, setUserCredits] = React.useState<number | null>(null);
@@ -187,10 +187,22 @@ export default function LandingPage() {
           <div className="reveal flex flex-col sm:flex-row gap-6 transition-all duration-1000 delay-500">
             {isSignedIn ? (
               <button 
-                onClick={() => {
+                onClick={async () => {
+                  // Attempt to get a sync token if available, or just open
+                  let deepLink = "chintu://open";
+                  try {
+                    // Try to get a session sync token from Clerk
+                    // This is a simplified version; Clerk's internal sync works better if configured
+                    // but for now we'll just signal we're coming from web
+                    deepLink += `?source=web&u=${encodeURIComponent(user?.id || "")}`;
+                  } catch {
+                    // Ignore token errors and proceed with normal launch
+                  }
+
                   // Try to open the app via deep link
-                  window.location.href = "chintu://open";
-                  // Then redirect to setup after a short delay to allow the protocol handler to trigger
+                  window.location.href = deepLink;
+                  
+                  // Then redirect to setup after a short delay
                   setTimeout(() => {
                     router.push("/setup");
                   }, 500);
