@@ -25,6 +25,11 @@ interface ConfirmationMessageProps {
   icon?: React.ReactNode;
 
   /**
+   * Optional receipt-style details to show below the main message.
+   */
+  details?: React.ReactNode;
+
+  /**
    * Class name for the background element.
    */
   backgroundClassName?: string;
@@ -40,6 +45,7 @@ export default function ConfirmationMessage({
   labelName = "Animata",
   labelMessage,
   icon,
+  details,
   backgroundClassName,
   containerClassName,
 }: ConfirmationMessageProps) {
@@ -108,6 +114,17 @@ export default function ConfirmationMessage({
             </div>
           </div>
         </motion.div>
+
+        {details && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.5, duration: 0.5 }}
+            className="w-full"
+          >
+            {details}
+          </motion.div>
+        )}
       </div>
     </div>
   );
