@@ -38,6 +38,7 @@
 /* Global fluid scaling */
 html {
   font-size: clamp(14px, 1.2vw, 18px);
+  scroll-behavior: smooth;
 }
 
 * {
@@ -46,7 +47,6 @@ html {
   box-sizing: border-box;
   cursor: default !important;
   user-select: none;
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 *:hover {
@@ -70,6 +70,7 @@ body {
   -webkit-font-smoothing: antialiased;
   color: var(--text-main);
   color-scheme: light;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Premium Scrollbar */

@@ -305,11 +305,11 @@ export function TestimonialsSection() {
   ].slice(0, 15);
   
   return (
-    <section className="py-32 px-6 overflow-hidden bg-white/50">
+    <section className="py-32 px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <div className="reveal text-center mb-16">
           <h2 className="text-xs font-black text-indigo-600 uppercase tracking-[0.5em] mb-4">Success Stories</h2>
-          <p className="text-4xl sm:text-5xl font-black tracking-tight text-gray-900 uppercase leading-[0.9]">
+          <p className="text-4xl sm:text-5xl font-black tracking-tight text-[var(--text-main)] uppercase leading-[0.9]">
             Trusted by Elites <br />
             <span className="text-indigo-600">at Top Tier Tech.</span>
           </p>

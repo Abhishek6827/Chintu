@@ -83,11 +83,8 @@ const ReviewCard = ({
   return (
     <figure
       className={cn(
-        "relative w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
-        // light styles
-        "border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05]",
-        // dark styles
-        "dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]",
+        "relative w-64 cursor-pointer overflow-hidden rounded-xl border p-4 transition-all duration-300",
+        "border-[var(--glass-border)] bg-[var(--panel-bg)] hover:bg-[var(--glass-bg)]"
       )}
     >
       <div className="flex flex-row items-center gap-2">
@@ -100,23 +97,23 @@ const ReviewCard = ({
           unoptimized 
         />
         <div className="flex flex-col">
-          <figcaption className="text-sm font-bold text-gray-900 dark:text-white">
+          <figcaption className="text-sm font-bold text-[var(--text-main)]">
             {name}
           </figcaption>
-          <p className="text-xs font-medium text-gray-400 dark:text-white/40">{username}</p>
+          <p className="text-xs font-medium text-[var(--text-dim)]">{username}</p>
         </div>
       </div>
-      <blockquote className="mt-2 text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic">&quot;{body}&quot;</blockquote>
+      <blockquote className="mt-2 text-sm text-[var(--text-dim)] leading-relaxed italic">&quot;{body}&quot;</blockquote>
     </figure>
   );
 };
 
 export function MarqueeReviews() {
   return (
-    <section className="py-24 relative flex w-full flex-col items-center justify-center overflow-hidden bg-white/30 border-t border-gray-100">
+    <section className="py-24 relative flex w-full flex-col items-center justify-center overflow-hidden border-t border-[var(--glass-border)]">
       <div className="reveal text-center mb-16 px-6">
         <h2 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.5em] mb-4">Wall of Dominance</h2>
-        <p className="text-3xl font-black tracking-tight text-gray-900 uppercase">Real Feedback. <span className="text-indigo-600">Real Offers.</span></p>
+        <p className="text-3xl font-black tracking-tight text-[var(--text-main)] uppercase">Real Feedback. <span className="text-indigo-600">Real Offers.</span></p>
         
         <div className="mt-8 flex flex-col items-center gap-4">
           <AvatarCircles 
@@ -148,7 +145,7 @@ export function MarqueeReviews() {
               },
             ]} 
           />
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Trusted by 99+ Elite Developers</p>
+          <p className="text-xs font-bold text-[var(--text-dim)] uppercase tracking-widest">Trusted by 99+ Elite Developers</p>
         </div>
       </div>
 
@@ -163,8 +160,8 @@ export function MarqueeReviews() {
         ))}
       </Marquee>
       
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-white dark:from-background"></div>
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-white dark:from-background"></div>
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-[var(--bg-app)] to-transparent"></div>
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-[var(--bg-app)] to-transparent"></div>
     </section>
   );
 }

@@ -13,8 +13,10 @@ export function useThemeToggle() {
     
     if (theme === "dark") {
       document.documentElement.classList.add("dark-mode");
+      document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark-mode");
+      document.documentElement.classList.remove("dark");
     }
   };
 
@@ -31,7 +33,7 @@ export function useThemeToggle() {
     // has already applied the correct class to the HTML tag.
     // We just sync the local state to match the existing class.
     if (typeof document !== "undefined") {
-      const isDark = document.documentElement.classList.contains("dark-mode");
+      const isDark = document.documentElement.classList.contains("dark-mode") || document.documentElement.classList.contains("dark");
       setCurrentTheme(isDark ? "dark" : "light");
     }
     
