@@ -180,7 +180,7 @@ export default function PricingPage() {
       }
       fetchSession();
     }
-  }, [searchParams, isLoaded, user]);
+  }, [searchParams, isLoaded, user, router]);
   
   // Quantity Selector
   const [quantity, setQuantity] = useState<number>(1);
