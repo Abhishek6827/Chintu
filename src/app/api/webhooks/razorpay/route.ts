@@ -53,10 +53,10 @@ function buildTelegramMessage({
     `📧 <b>Email:</b> <code>${email}</code>\n` +
     `📅 <b>Date & Time:</b> <code>${dateTime}</code>\n` +
     `📊 <b>Plan:</b> <b>${oldPlan.toUpperCase()} → ${newPlan.toUpperCase()}</b>\n` +
-    `💰 <b>Amount Paid:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
+    `💰 <b>Total Amount:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
     `💳 <b>Payment Method:</b> ${paymentMethod}\n\n` +
     `💎 <b>Plan Price:</b> <b>${planPrice}</b>\n` +
-    `💸 <b>Gateway Fees (2%):</b> <b>${gatewayFees}</b>\n\n` +
+    `💸 <b>Gateway Fees:</b> <b>${gatewayFees}</b>\n\n` +
     `⚡ <b>Credits:</b> ${oldCredits} → <b>${newCredits}</b> <i>(+${addedCredits})</i>\n` +
     `📆 <b>+Days Added:</b> <b>${addedDays} days</b> | Expires: <b>${expiryDate}</b>\n` +
     `🆔 <b>Transaction ID:</b> <code>${transactionId}</code>\n` +
@@ -114,9 +114,9 @@ export async function POST(req: Request) {
     const fullName = notes.fullName || profile?.full_name || email.split("@")[0] || "User";
 
     const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; days: number; frequency: string; unitTotalINR: number }> = {
-      "pro_monthly": { plan: "pro", credits: 200, days: 30, frequency: "Monthly", unitTotalINR: 780 },
+      "pro_monthly": { plan: "pro", credits: 200, days: 30, frequency: "Monthly", unitTotalINR: 780.3 },
       "pro_annual": { plan: "pro", credits: 2400, days: 365, frequency: "Annual", unitTotalINR: 7565 },
-      "elite_monthly": { plan: "elite", credits: 1000, days: 30, frequency: "Monthly", unitTotalINR: 2514 },
+      "elite_monthly": { plan: "elite", credits: 1000, days: 30, frequency: "Monthly", unitTotalINR: 2514.3 },
       "elite_annual": { plan: "elite", credits: 12000, days: 365, frequency: "Annual", unitTotalINR: 23715 },
     };
 
@@ -172,26 +172,26 @@ export async function POST(req: Request) {
     const amountINR = Number(payment.amount) / 100;
 
     const calculateDisplayFees = (displayTotal: number) => {
-      const gatewayFee = displayTotal * (2 / 102);
-      const planPrice = displayTotal - gatewayFee;
+      const gatewayFeeRaw = displayTotal * (2 / 102);
+      const planPrice = Math.round(displayTotal - gatewayFeeRaw);
+      const actualGatewayFee = displayTotal - planPrice;
       return {
-        gatewayFee: gatewayFee.toFixed(2),
+        gatewayFee: actualGatewayFee.toFixed(2),
         planPrice: planPrice.toFixed(2),
         totalPaid: displayTotal.toFixed(2),
       };
     };
 
-    const buildAmountLabel = (quantity: number, unitTotalINR: number) => {
-      const total = unitTotalINR * quantity;
-      const { gatewayFee, totalPaid, planPrice } = calculateDisplayFees(total);
+    const buildAmountLabel = (quantity: number, actualAmountINR: number) => {
+      const { gatewayFee, totalPaid, planPrice } = calculateDisplayFees(actualAmountINR);
       const amountLabel = quantity > 1
-        ? `₹${totalPaid} (${quantity}x ₹${unitTotalINR.toFixed(2)})`
+        ? `₹${totalPaid} (${quantity}x ₹${(actualAmountINR / quantity).toFixed(2)})`
         : `₹${totalPaid}`;
       return { amountLabel, totalDisplay: totalPaid, gatewayFee, planPrice: `₹${planPrice}` };
     };
 
 
-    const { amountLabel, gatewayFee: displayGatewayFee, planPrice } = buildAmountLabel(quantity, planInfo.unitTotalINR);
+    const { amountLabel, gatewayFee: displayGatewayFee, planPrice } = buildAmountLabel(quantity, amountINR);
 
 
 

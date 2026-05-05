@@ -102,10 +102,11 @@ function calculateDisplayFees(displayTotal: number): {
   planPrice: string;
   totalPaid: string;
 } {
-  const gatewayFee = displayTotal * (2 / 102);
-  const planPrice = displayTotal - gatewayFee;
+  const gatewayFeeRaw = displayTotal * (2 / 102);
+  const planPrice = Math.round(displayTotal - gatewayFeeRaw);
+  const actualGatewayFee = displayTotal - planPrice;
   return {
-    gatewayFee: gatewayFee.toFixed(2),
+    gatewayFee: actualGatewayFee.toFixed(2),
     planPrice: planPrice.toFixed(2),
     totalPaid: displayTotal.toFixed(2),
   };
@@ -182,10 +183,10 @@ function buildTelegramMessage({
     `📧 <b>Email:</b> <code>${email}</code>\n` +
     `📅 <b>Date & Time:</b> <code>${dateTime}</code>\n` +
     `📊 <b>Plan:</b> <b>${oldPlan.toUpperCase()} → ${newPlan.toUpperCase()}</b>\n` +
-    `💰 <b>Amount Paid:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
+    `💰 <b>Total Amount:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
     `💳 <b>Payment Method:</b> ${paymentMethod}\n\n` +
     `💎 <b>Plan Price:</b> <b>${planPrice}</b>\n` +
-    `💸 <b>Gateway Fees (2%):</b> <b>${gatewayFees}</b>\n\n` +
+    `💸 <b>Gateway Fees:</b> <b>${gatewayFees}</b>\n\n` +
     `⚡ <b>Credits:</b> ${oldCredits} → <b>${newCredits}</b> <i>(+${addedCredits})</i>\n` +
     `📆 <b>+Days Added:</b> <b>${addedDays} days</b> | Expires: <b>${expiryDate}</b>\n` +
     `🆔 <b>Transaction ID:</b> <code>${transactionId}</code>\n` +

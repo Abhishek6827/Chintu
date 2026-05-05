@@ -52,9 +52,9 @@ const PLANS = [
     id: "pro",
     name: "Professional",
     description: "Best for active interviewees",
-    monthlyPrice: 9.18, // $9 + 2% gateway charge
+    monthlyPrice: 9, 
     oldPrice: 29, 
-    annualPrice: 89.99,
+    annualPrice: 89,
     period: "/month",
     credits: 200,
     badge: "⚡",
@@ -77,9 +77,9 @@ const PLANS = [
     id: "elite",
     name: "Elite",
     description: "Unrestricted career growth",
-    monthlyPrice: 29.58, // $29 + 2% gateway charge
+    monthlyPrice: 29, 
     oldPrice: 79, 
-    annualPrice: 279.99,
+    annualPrice: 279,
     period: "/month",
     credits: 1000,
     badge: "👑",
@@ -208,9 +208,9 @@ export default function PricingPage() {
         return;
       }
 
-      // Calculate price in INR (Razorpay takes subunits like paise)
+      // Calculate price in INR (Base * Qty * 85 * 100 for paise * 1.02 for gateway)
       const basePrice = billingCycle === "monthly" ? plan.monthlyPrice : plan.annualPrice;
-      const totalAmount = Math.round(basePrice * quantity * USD_TO_INR * 100); 
+      const totalAmount = Math.round(basePrice * quantity * USD_TO_INR * 100 * 1.02); 
 
       // 1. Create Order
       const orderRes = await fetch("/api/razorpay/order", {
@@ -556,7 +556,7 @@ export default function PricingPage() {
                     <span className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-tight">≈ ₹{(totalPrice * USD_TO_INR).toLocaleString()} INR</span>
                   </div>
                   <div className="inline-flex items-center gap-1.5 bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-md w-fit border border-indigo-500/20">
-                    <span className="text-[7px] font-black uppercase tracking-widest">Incl. 2% Gateway Fee</span>
+                    <span className="text-[7px] font-black uppercase tracking-widest">+ Gateway Charges at Checkout</span>
                   </div>
                 </div>
                 {billingCycle === "annual" && plan.annualPrice > 0 && (
@@ -706,12 +706,16 @@ export default function PricingPage() {
                     <span className="text-[var(--text-main)]">${((billingCycle === 'monthly' ? selectedPlanForPayment?.monthlyPrice : selectedPlanForPayment?.annualPrice) * quantity).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-[11px] font-bold text-[var(--text-dim)] uppercase">
+                    <span>Gateway Processing (2%)</span>
+                    <span className="text-[var(--text-main)]">${(((billingCycle === 'monthly' ? selectedPlanForPayment?.monthlyPrice : selectedPlanForPayment?.annualPrice) * quantity) * 0.02).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-[11px] font-bold text-[var(--text-dim)] uppercase">
                     <span>Allocated Strategic Credits</span>
                     <span className="text-emerald-400">+{selectedPlanForPayment?.credits * quantity} UNITS</span>
                   </div>
                   <div className="flex justify-between text-sm font-black text-[var(--text-main)] uppercase pt-4 border-t border-[var(--glass-border)]">
                     <span>Total due today</span>
-                    <span className="text-indigo-500 tracking-tighter text-xl">${((billingCycle === 'monthly' ? selectedPlanForPayment?.monthlyPrice : selectedPlanForPayment?.annualPrice) * quantity).toFixed(2)}</span>
+                    <span className="text-indigo-500 tracking-tighter text-xl">${(((billingCycle === 'monthly' ? selectedPlanForPayment?.monthlyPrice : selectedPlanForPayment?.annualPrice) * quantity) * 1.02).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
