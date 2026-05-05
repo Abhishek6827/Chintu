@@ -261,14 +261,17 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ 
       success: true,
-      profile_data: {
-        payment_amount: `₹${(Number(payment.amount) / 100).toLocaleString()}`,
-        payment_type: paymentTypeDisplay,
-        last_payment_id: razorpay_payment_id,
-        last_gateway: "razorpay",
-        last_payment_at: new Date().toISOString(),
-        gateway_fee: totalFees,
-        last_frequency: planInfo.frequency,
+      receipt: {
+        transactionId: razorpay_payment_id,
+        totalAmount: displayTotal.toFixed(2),
+        currency: "INR",
+        plan: `${planInfo.plan.toUpperCase()} (${planInfo.frequency})`,
+        quantity,
+        planPrice: displayPlanPrice.toFixed(2),
+        gatewayFees: displayFee.toFixed(2),
+        newCredits: totalCredits,
+        expiryDate: newExpiry.toLocaleDateString('en-IN'),
+        status: "SUCCESSFUL"
       }
     });
   } catch (error: any) {

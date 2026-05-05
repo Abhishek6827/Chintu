@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
             payment_method_types: ["card"],
             ...(profile?.stripe_customer_id ? { customer: profile.stripe_customer_id } : { customer_email: email }),
             line_items: [{ price: priceId, quantity }],
-            success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://getchintu.com"}/pricing?payment=success`,
+            success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://getchintu.com"}/pricing?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://getchintu.com"}/pricing?payment=cancelled`,
             metadata: { userId },
             subscription_data: { metadata: { userId } },

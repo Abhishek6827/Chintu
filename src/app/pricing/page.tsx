@@ -111,7 +111,7 @@ export default function PricingPage() {
   const [countdown, setCountdown] = useState(5);
   const [selectedPlanForPayment, setSelectedPlanForPayment] = useState<any>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [receiptData, setReceiptData] = useState<any>(null);
+  const [receiptDetails, setReceiptDetails] = useState<any[]>([]);
   const searchParams = useSearchParams();
 
 
@@ -124,40 +124,62 @@ export default function PricingPage() {
         if (res.ok) {
           const data = await res.json();
           setCurrentPlan(data.profile?.plan || "free");
-          
-          // If we have a success parameter, trigger the animation using real data
-          if (searchParams.get("payment") === "success") {
-            const profile = data.profile;
-            const planDetails = PLANS.find(p => p.id === profile.plan);
-            if (planDetails) {
-              setSuccessPlan(planDetails);
-              setReceiptData(profile.profile_data);
-              setShowSuccess(true);
-              
-              // Switch to dark theme on success
-              window.dispatchEvent(new CustomEvent("chintu-theme-sync", { detail: { theme: "dark" } }));
-
-              // Start redirect countdown
-              let timer = 10;
-              setCountdown(timer);
-              const interval = setInterval(() => {
-                timer -= 1;
-                setCountdown(timer);
-                if (timer <= 0) {
-                  clearInterval(interval);
-                  const jd = sessionStorage.getItem("jobDescription");
-                  router.push(jd ? "/room" : "/setup");
-                }
-              }, 1000);
-            }
-          }
         }
       } catch (err) {
         console.error("Failed to fetch plan:", err);
       }
     }
     fetchPlan();
-  }, [user, searchParams]);
+  }, [user]);
+
+  // Handle Stripe Success
+  useEffect(() => {
+    const sessionId = searchParams.get("session_id");
+    if (sessionId && isLoaded && user) {
+      const fetchSession = async () => {
+        setLoading("stripe");
+        try {
+          const res = await fetch(`/api/checkout/session?session_id=${sessionId}`);
+          if (res.ok) {
+            const data = await res.json();
+            
+            // Auto-switch to Dark Mode
+            window.dispatchEvent(new CustomEvent("chintu-theme-sync", { detail: { theme: "dark" } }));
+            
+            const matchedPlan = PLANS.find(p => p.name.toLowerCase().includes(data.plan.toLowerCase()));
+            setSuccessPlan(matchedPlan || PLANS[1]);
+            setReceiptDetails([
+              { label: "Transaction ID", value: data.transactionId },
+              { label: "Total Amount", value: `${data.totalAmount} ${data.currency}` },
+              { label: "Plan Price", value: `${data.planPrice} ${data.currency}` },
+              { label: "Gateway Fees", value: `${data.gatewayFees} ${data.currency} (2%)` },
+              { label: "Total Credits", value: data.newCredits },
+              { label: "Expiry Date", value: data.expiryDate },
+            ]);
+            setShowSuccess(true);
+            
+            // Start countdown to redirect
+            let timer = 10; // Give them time to read the receipt
+            setCountdown(timer);
+            const interval = setInterval(() => {
+              timer -= 1;
+              setCountdown(timer);
+              if (timer <= 0) {
+                clearInterval(interval);
+                const jd = sessionStorage.getItem("jobDescription");
+                router.push(jd ? "/room" : "/setup");
+              }
+            }, 1000);
+          }
+        } catch (err) {
+          console.error("Failed to fetch session:", err);
+        } finally {
+          setLoading(null);
+        }
+      }
+      fetchSession();
+    }
+  }, [searchParams, isLoaded, user]);
   
   // Quantity Selector
   const [quantity, setQuantity] = useState<number>(1);
@@ -294,11 +316,26 @@ export default function PricingPage() {
             window.dispatchEvent(new CustomEvent("chintu-theme-sync", { detail: { theme: "dark" } }));
             
             setSuccessPlan(plan);
-            setReceiptData(result.profile_data);
+            if (result.receipt) {
+              setReceiptDetails([
+                { label: "Transaction ID", value: result.receipt.transactionId },
+                { label: "Total Amount", value: `₹${result.receipt.totalAmount}` },
+                { label: "Plan Price", value: `₹${result.receipt.planPrice}` },
+                { label: "Gateway Fees", value: `₹${result.receipt.gatewayFees} (2%)` },
+                { label: "Total Credits", value: result.receipt.newCredits },
+                { label: "Expiry Date", value: result.receipt.expiryDate },
+              ]);
+            } else {
+              setReceiptDetails([
+                { label: "Transaction ID", value: response.razorpay_payment_id },
+                { label: "Status", value: "Success (Details Pending)" }
+              ]);
+            }
             setShowSuccess(true);
             
             // Start countdown to redirect
-            let timer = 5;
+            let timer = 10;
+            setCountdown(timer);
             const interval = setInterval(() => {
               timer -= 1;
               setCountdown(timer);
@@ -388,25 +425,7 @@ export default function PricingPage() {
                 labelMessage={`Welcome to the ${successPlan?.name} tier. Your account has been initialized with ${successPlan?.credits * (quantity || 1)} credits. All premium strategic modules are now unlocked.`}
                 icon={successPlan?.id === 'elite' ? <Crown className="w-8 h-8 text-white" /> : <Trophy className="w-8 h-8 text-white" />}
                 containerClassName="mb-8"
-                details={receiptData && (
-                  <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm text-left">
-                    <div className="grid grid-cols-2 gap-y-2">
-                      <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Amount Paid</span>
-                      <span className="text-[10px] font-black text-emerald-400 text-right">{receiptData.payment_amount}</span>
-                      
-                      <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Gateway</span>
-                      <span className="text-[10px] font-black text-white/90 uppercase text-right">{receiptData.last_gateway}</span>
-
-                      <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Method</span>
-                      <span className="text-[10px] font-black text-white/90 text-right">{receiptData.payment_type || "Card"}</span>
-
-                      <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Reference</span>
-                      <span className="text-[10px] font-mono text-white/60 text-right truncate ml-4" title={receiptData.last_payment_id}>
-                        {receiptData.last_payment_id}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                details={receiptDetails}
               />
 
               <motion.div 

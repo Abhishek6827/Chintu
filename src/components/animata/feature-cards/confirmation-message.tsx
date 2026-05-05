@@ -25,11 +25,6 @@ interface ConfirmationMessageProps {
   icon?: React.ReactNode;
 
   /**
-   * Optional receipt-style details to show below the main message.
-   */
-  details?: React.ReactNode;
-
-  /**
    * Class name for the background element.
    */
   backgroundClassName?: string;
@@ -38,6 +33,11 @@ interface ConfirmationMessageProps {
    * Class name for the container element.
    */
   containerClassName?: string;
+  
+  /**
+   * Receipt/Payment details to show.
+   */
+  details?: { label: string; value: string | number }[];
 }
 
 export default function ConfirmationMessage({
@@ -45,9 +45,9 @@ export default function ConfirmationMessage({
   labelName = "Animata",
   labelMessage,
   icon,
-  details,
   backgroundClassName,
   containerClassName,
+  details,
 }: ConfirmationMessageProps) {
   return (
     <div
@@ -64,7 +64,7 @@ export default function ConfirmationMessage({
       />
 
       {/* Parent Container for message */}
-      <div className="flex h-64 max-w-lg flex-col items-center justify-center">
+      <div className="flex h-auto min-h-[16rem] w-full max-w-lg flex-col items-center justify-start pt-8">
         <div className="flex h-16 items-center justify-center overflow-hidden rounded-full bg-emerald-600 shadow-xl shadow-emerald-500/20">
           {/* Icon Area */}
           <div className="z-10 flex h-16 w-16 flex-col content-center items-center justify-center rounded-full bg-emerald-600 text-2xl text-white">
@@ -91,7 +91,7 @@ export default function ConfirmationMessage({
 
         {/* Container to control height animation */}
         <motion.div
-          className="relative flex h-fit w-full max-w-md overflow-hidden"
+          className="relative flex h-fit w-full max-w-md"
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 1.2, duration: 0.5 }}
@@ -111,20 +111,25 @@ export default function ConfirmationMessage({
               >
                 {labelMessage.length > 200 ? `${labelMessage.slice(0, 199)}...` : labelMessage}
               </motion.p>
+
+              {details && details.length > 0 && (
+                <motion.div 
+                  className="mt-4 pt-4 border-t border-white/10 space-y-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 2.4 }}
+                >
+                  {details.map((detail, index) => (
+                    <div key={index} className="flex justify-between items-center gap-4">
+                      <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{detail.label}</span>
+                      <span className="text-[10px] font-black text-white uppercase tracking-tighter truncate max-w-[150px]">{detail.value}</span>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
             </div>
           </div>
         </motion.div>
-
-        {details && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.5, duration: 0.5 }}
-            className="w-full"
-          >
-            {details}
-          </motion.div>
-        )}
       </div>
     </div>
   );
