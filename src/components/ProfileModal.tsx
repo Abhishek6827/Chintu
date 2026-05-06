@@ -236,7 +236,7 @@ export default function ProfileModal({
   );
 
   return (
-    <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-2 sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 settings-overlay z-[9999] flex items-center justify-center p-2 sm:p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
       <div className="settings-panel w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 bg-[var(--panel-bg)] backdrop-filter blur(32px) border border-[var(--glass-border)] rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.3)]" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between mb-6">

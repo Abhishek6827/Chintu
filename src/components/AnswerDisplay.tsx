@@ -32,11 +32,11 @@ interface AnswerDisplayProps {
 const parseAnswer = (text: string) => {
   const thinkMatch = text.match(/<think>([\s\S]*?)(?:<\/think>|$)/);
   if (!thinkMatch) return { think: null, main: text, isThinking: false };
-  
+
   const think = thinkMatch[1].trim();
   const main = text.replace(/<think>[\s\S]*?(?:<\/think>|$)/, "").trim();
   const isThinking = text.includes('<think>') && !text.includes('</think>');
-  
+
   return { think, main, isThinking };
 };
 
@@ -45,13 +45,13 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
 
   const getSafeModelName = (modelId: string) => {
     if (!modelId) return "";
-    
+
     const id = modelId.toLowerCase();
-    
+
     // Check if it's a vision-augmented response (Scout)
     const isScout = id.includes("scout") || id.includes("vision-preview");
     let baseModel = id;
-    
+
     if (id.includes("+")) {
       baseModel = id.split("+").pop()?.trim() || "";
     }
@@ -68,11 +68,11 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
 
     // Find the closest match in our safe names
     const safeName = Object.entries(mapping).find(([key]) => baseModel.includes(key))?.[1];
-    
+
     if (isScout) {
       return safeName ? `SCOUT + ${safeName}` : "SCOUT ENGINE";
     }
-    
+
     return safeName || "NEURAL SYNC";
   };
 
@@ -85,32 +85,32 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
   if (answers.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-dim)]">
-        <div 
+        <div
           className="rounded-2xl sm:rounded-[2.5rem] bg-[var(--input-bg)] border border-[var(--glass-border)] flex items-center justify-center transition-all duration-300 shadow-2xl"
-          style={{ 
-            width: 'clamp(40px, 12vh, 120px)', 
+          style={{
+            width: 'clamp(40px, 12vh, 120px)',
             height: 'clamp(40px, 12vh, 120px)',
             marginBottom: 'clamp(8px, 3vh, 32px)'
           }}
         >
-            <Sparkles 
-              style={{ 
-                width: 'clamp(20px, 6vh, 60px)', 
-                height: 'clamp(20px, 6vh, 60px)' 
-              }} 
-              className="opacity-20" 
-            />
+          <Sparkles
+            style={{
+              width: 'clamp(20px, 6vh, 60px)',
+              height: 'clamp(20px, 6vh, 60px)'
+            }}
+            className="opacity-20"
+          />
         </div>
-        <div 
+        <div
           className="font-black uppercase mb-3 text-center px-4"
         >
           {userPlan === null ? (
             <div className="h-[70px] flex items-center justify-center opacity-30">
-               <Sparkles className="w-6 h-6 animate-spin-slow" />
+              <Sparkles className="w-6 h-6 animate-spin-slow" />
             </div>
           ) : userPlan === "elite" ? (
             <div className="w-[90%] max-w-[400px] aspect-[16/6] min-h-[80px] rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl border border-white/20 relative flex items-center justify-center mx-auto bg-black/40 backdrop-blur-md">
-              <VideoText 
+              <VideoText
                 src="https://cdn.magicui.design/ocean-small.webm"
                 className="h-full w-full"
               >
@@ -142,10 +142,10 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
             <span style={{ fontSize: 'clamp(10px, 2.5vh, 20px)', letterSpacing: '0.4em' }} className="text-[var(--text-main)] opacity-40">Chintu is Ready</span>
           )}
         </div>
-        <p 
-          style={{ 
+        <p
+          style={{
             fontSize: 'clamp(7px, 1.5vh, 12px)'
-          }} 
+          }}
           className="font-bold uppercase tracking-widest opacity-40 italic text-center px-4"
         >
           Hold Space to initiate synthesis
@@ -155,11 +155,11 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
   }
 
   return (
-    <div 
+    <div
       className="pb-12"
-      style={{ 
-        gap: 'clamp(20px, 5vh, 40px)', 
-        display: 'flex', 
+      style={{
+        gap: 'clamp(20px, 5vh, 40px)',
+        display: 'flex',
         flexDirection: 'column',
         paddingLeft: 'clamp(8px, 3vw, 24px)',
         paddingRight: 'clamp(8px, 3vw, 24px)'
@@ -167,7 +167,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
     >
       {answers.map((entry, idx) => (
         <div key={entry.id} className="animate-fade-in relative group">
-          
+
           {/* Question bubble - Elegant Minimalist */}
           <div className="flex justify-end items-center gap-2 mb-4 group/q">
             {onUndo && (
@@ -179,10 +179,10 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                 <RotateCcw style={{ width: 'clamp(12px, 1.8vh, 16px)', height: 'clamp(12px, 1.8vh, 16px)' }} />
               </button>
             )}
-            <div 
+            <div
               className="max-w-[85%] bg-[var(--bubble-bg)] border border-[var(--glass-border)] rounded-2xl backdrop-blur-md shadow-xl"
-              style={{ 
-                padding: 'clamp(12px, 2vh, 20px) clamp(16px, 3vw, 24px)' 
+              style={{
+                padding: 'clamp(12px, 2vh, 20px) clamp(16px, 3vw, 24px)'
               }}
             >
               <p style={{ fontSize: `calc(${Math.max(6, fontSize - 1) / 14} * 1rem)` }} className="text-[var(--text-main)] opacity-100 leading-relaxed font-bold">
@@ -194,10 +194,10 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
           {/* Answer Area */}
           <div className="flex justify-start">
             <div className={`w-full max-w-[95%] relative transition-opacity duration-500 ${entry.isStreaming && idx === 0 ? "opacity-100" : "opacity-90"}`}>
-              
+
               {/* Header Info */}
               <div className="flex items-center gap-2 mb-3 ml-2">
-                <div 
+                <div
                   className="rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center"
                   style={{ width: 'clamp(18px, 3vh, 28px)', height: 'clamp(18px, 3vh, 28px)' }}
                 >
@@ -207,14 +207,14 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
               </div>
 
               {/* Main Content Bubble */}
-              <div 
+              <div
                 className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-[2.5rem] backdrop-blur-3xl shadow-2xl shadow-black/10 relative overflow-hidden"
-                style={{ 
-                  padding: 'clamp(16px, 4vh, 32px) clamp(16px, 4vw, 32px)' 
+                style={{
+                  padding: 'clamp(16px, 4vh, 32px) clamp(16px, 4vw, 32px)'
                 }}
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-indigo-500/50 via-purple-500/20 to-transparent" />
-                
+
                 <div className={`markdown-answer ${showReadingGuide && idx === answers.length - 1 ? 'reading-guide-active' : ''}`} style={{ fontSize: `clamp(6px, calc(${fontSize / 14} * 1rem), 20px)` }}>
                   {(() => {
                     if (entry.isStreaming && !entry.answer) {
@@ -230,9 +230,9 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                         {think && (
                           <div className="mb-6 overflow-hidden rounded-3xl border border-[var(--glass-border)] bg-[var(--panel-bg)]">
                             <details className="group" open={isThinking}>
-                              <summary 
+                              <summary
                                 className="cursor-pointer bg-[var(--glass-bg)] text-indigo-300 font-black uppercase tracking-[0.3em] hover:bg-[var(--input-bg)] transition-all flex items-center gap-4 select-none"
-                                style={{ 
+                                style={{
                                   padding: 'clamp(10px, 2vh, 16px) clamp(12px, 2.5vw, 20px)',
                                   fontSize: 'clamp(8px, 1.2vh, 10px)'
                                 }}
@@ -241,9 +241,9 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                                 {isThinking ? "Recursive Reasoning..." : "Thinking Process"}
                                 <ChevronDown style={{ width: 'clamp(12px, 1.8vh, 18px)', height: 'clamp(12px, 1.8vh, 18px)' }} className="ml-auto group-open:rotate-180 transition-transform" />
                               </summary>
-                              <div 
+                              <div
                                 className="text-[var(--text-dim)] whitespace-pre-wrap border-t border-[var(--glass-border)] font-mono leading-relaxed italic opacity-80"
-                                style={{ 
+                                style={{
                                   padding: 'clamp(12px, 3vh, 24px)',
                                   fontSize: 'clamp(10px, 1.4vh, 12px)'
                                 }}
@@ -266,7 +266,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                                 <div className="relative my-8 rounded-3xl overflow-hidden border border-[var(--glass-border)] shadow-2xl bg-[var(--panel-bg)] group/code">
                                   <div className="bg-[var(--glass-bg)] px-6 py-3 border-b border-[var(--glass-border)] flex justify-between items-center">
                                     <span className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">{language}</span>
-                                    <button 
+                                    <button
                                       onClick={() => handleCopy(entry.id + "-code", String(children))}
                                       className="text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors"
                                     >
@@ -350,11 +350,11 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                     );
                   })()}
                 </div>
-                
+
                 {/* Footer Actions */}
-                <div 
+                <div
                   className="flex items-center justify-between gap-4 border-t border-[var(--glass-border)]"
-                  style={{ 
+                  style={{
                     marginTop: 'clamp(16px, 4vh, 32px)',
                     paddingTop: 'clamp(12px, 3vh, 24px)'
                   }}
@@ -378,7 +378,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                     <button
                       onClick={() => handleCopy(entry.id, entry.answer)}
                       className="flex items-center gap-2 font-black tracking-[0.2em] uppercase rounded-2xl transition-all duration-300 border bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)]"
-                      style={{ 
+                      style={{
                         padding: 'clamp(8px, 1.5vh, 12px) clamp(12px, 2vw, 20px)',
                         fontSize: 'clamp(8px, 1.2vh, 10px)'
                       }}

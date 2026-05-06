@@ -257,10 +257,8 @@ export default function GlobalHeader() {
           )}
           
           {isSignedIn && (
-            <div className="flex items-center gap-1.5 ml-1">
-              <div className="w-7 h-7 rounded-full ring-1 ring-white/10 hover:scale-105 transition-transform">
-                <SyncedUserButton />
-              </div>
+            <div className="flex items-center ml-1 no-drag">
+              <SyncedUserButton />
             </div>
           )}
         </div>
