@@ -28,6 +28,7 @@ export default function SetupPage() {
   const [isJdLocked, setIsJdLocked] = useState(false);
   const [saveJd, setSaveJd] = useState(false);
   const [showJdOnly, setShowJdOnly] = useState(false);
+  const [hasSavedJd, setHasSavedJd] = useState(false);
   const [showAppPrompt, setShowAppPrompt] = useState(false);
   
   const router = useRouter();
@@ -47,26 +48,42 @@ export default function SetupPage() {
             setUserPlan((profileRow.plan || "free").toLowerCase());
             // Logic based on new requirements:
             // If Profile + JD exist -> go to room
-            // If Profile exists but JD missing -> show JD only
-            if (profileRow.profile_data && Object.keys(profileRow.profile_data).length > 0) {
+            // Robust check for actual candidate profile data (ignoring virtual fields like saved_jd)
+            const hasStructuredProfile = profileRow.profile_data && 
+              (profileRow.profile_data.name || 
+               profileRow.profile_data.experience || 
+               profileRow.profile_data.skills || 
+               profileRow.profile_data.summary);
+
+            if (hasStructuredProfile) {
               setHasProfile(true);
               if (profileRow.raw_profile) setAboutMe(profileRow.raw_profile);
-              
-              if (profileRow.current_jd) {
-                setJd(profileRow.current_jd);
-                sessionStorage.setItem("jobDescription", profileRow.current_jd);
-                if ((profileRow.plan || "free") === "free") {
-                  setIsJdLocked(true);
-                }
-                // Redirect directly if both exist
-                router.push("/room");
-                return;
-              } else {
-                // Profile exists but no JD saved
-                setShowJdOnly(true);
-              }
             } else {
               setHasProfile(false);
+            }
+
+            // Always load JD if it exists, regardless of profile status
+            if (profileRow.current_jd) {
+              setJd(profileRow.current_jd);
+              setHasSavedJd(true);
+              sessionStorage.setItem("jobDescription", profileRow.current_jd);
+              if ((profileRow.plan || "free") === "free") {
+                setIsJdLocked(true);
+              }
+            } else {
+              setHasSavedJd(false);
+              setShowJdOnly(false); // Reset if missing
+            }
+
+            // Auto-redirect ONLY if BOTH are present
+            if (hasStructuredProfile && profileRow.current_jd) {
+              router.push("/room");
+              return;
+            }
+
+            // If profile exists but no JD, show JD-only welcome
+            if (hasStructuredProfile && !profileRow.current_jd) {
+              setShowJdOnly(true);
             }
           }
         }
@@ -113,7 +130,15 @@ export default function SetupPage() {
   }
 
   const handleStart = async () => {
-    if (!jd.trim()) return;
+    if (!jd.trim()) {
+      setError("Please provide a Job Description to proceed.");
+      return;
+    }
+    
+    if (!hasProfile && !aboutMe.trim()) {
+      setError("Please provide your profile or experience to personalize your session.");
+      return;
+    }
     
     if (!isElectron) {
       // On web, we don't allow entering the room, but we can save the JD for the app
@@ -318,6 +343,23 @@ export default function SetupPage() {
               ) : (
                 <PremiumWelcome plan={userPlan} />
               )
+            )}
+
+            {/* Job Description Status Indicator */}
+            {hasSavedJd && (
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex flex-col gap-3 shadow-sm animate-in zoom-in-95 duration-500">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                      <span className="text-emerald-400 text-lg">✓</span>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-emerald-400/60 uppercase tracking-widest">JD Status</p>
+                      <p className="text-sm font-bold text-emerald-400">Position Synced</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Job Description Section */}
