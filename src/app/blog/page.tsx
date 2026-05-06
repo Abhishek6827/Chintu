@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, ArrowRight, Sparkles, BookOpen } from 'lucide-react';
 import { Meteors } from '@/components/magicui/meteors';
@@ -9,57 +10,73 @@ import GlobalFooter from '@/components/GlobalFooter';
 const blogPosts = [
   {
     id: 1,
+    title: "Introducing Chintu Desktop App",
+    excerpt: "Experience the power of Chintu Intelligence with our native desktop application. Seamless integration, real-time feedback, and stealth mode for ultimate interview preparation.",
+    date: "May 2026",
+    readTime: "3 min read",
+    category: "Product",
+    gradient: "from-indigo-500 to-purple-500",
+    screenshot: "/app-screenshot-1.png"
+  },
+  {
+    id: 2,
     title: "Mastering Technical Interviews with AI",
     excerpt: "Learn how Chintu Intelligence helps you crack FAANG interviews with real-time feedback and strategic insights.",
     date: "May 2024",
     readTime: "5 min read",
     category: "Strategy",
-    gradient: "from-indigo-500 to-purple-500"
+    gradient: "from-indigo-500 to-purple-500",
+    screenshot: "/app-screenshot-2.png"
   },
   {
-    id: 2,
+    id: 3,
     title: "The Future of AI-Powered Interview Prep",
     excerpt: "Explore how artificial intelligence is revolutionizing the way candidates prepare for technical interviews.",
     date: "April 2024",
     readTime: "4 min read",
     category: "Technology",
-    gradient: "from-purple-500 to-pink-500"
+    gradient: "from-purple-500 to-pink-500",
+    screenshot: "/app-screenshot-3.png"
   },
   {
-    id: 3,
+    id: 4,
     title: "Elite vs Premium: Choosing Your Path",
     excerpt: "A comprehensive guide to understanding the differences between Chintu's subscription tiers and which one fits your goals.",
     date: "March 2024",
     readTime: "6 min read",
     category: "Guide",
-    gradient: "from-pink-500 to-orange-500"
+    gradient: "from-pink-500 to-orange-500",
+    screenshot: "/app-screenshot-1.png"
   },
   {
-    id: 4,
+    id: 5,
     title: "Energy Sync: Maximizing Your Credits",
     excerpt: "Tips and tricks to optimize your Energy Sync credits and get the most out of every session.",
     date: "February 2024",
     readTime: "3 min read",
     category: "Tips",
-    gradient: "from-orange-500 to-yellow-500"
+    gradient: "from-orange-500 to-yellow-500",
+    screenshot: "/app-screenshot-2.png"
   },
   {
-    id: 5,
+    id: 6,
     title: "Building Your AI Profile",
     excerpt: "How to customize your AI profile in Chintu to receive personalized interview questions tailored to your experience.",
     date: "January 2024",
     readTime: "5 min read",
     category: "Tutorial",
-    gradient: "from-yellow-500 to-green-500"
+    gradient: "from-yellow-500 to-green-500",
+    screenshot: "/app-screenshot-3.png"
   },
   {
-    id: 6,
+    id: 7,
     title: "Chintu v2.5: What&apos;s New",
     excerpt: "Discover the latest features in Chintu Intelligence v2.5 including Hyper-Intelligence mode and enhanced analytics.",
     date: "December 2023",
     readTime: "7 min read",
     category: "Updates",
-    gradient: "from-green-500 to-teal-500"
+    gradient: "from-green-500 to-teal-500",
+    screenshot: "/app-screenshot-1.png"
   }
 ];
 
@@ -108,7 +125,19 @@ export default function BlogPage() {
                   whileHover={{ y: -8 }}
                   className="group relative bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl sm:rounded-3xl overflow-hidden hover:border-indigo-500/50 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-indigo-500/10"
                 >
-                  <div className={`h-24 sm:h-32 bg-gradient-to-br ${post.gradient} opacity-20 group-hover:opacity-30 transition-opacity`} />
+                  {post.screenshot ? (
+                    <div className="relative h-48 sm:h-56 overflow-hidden">
+                      <Image
+                        src={post.screenshot}
+                        alt={post.title}
+                        fill
+                        className="object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/10 to-transparent opacity-30" />
+                    </div>
+                  ) : (
+                    <div className={`h-24 sm:h-32 bg-gradient-to-br ${post.gradient} opacity-20 group-hover:opacity-30 transition-opacity`} />
+                  )}
                   <div className="p-4 sm:p-6">
                     <div className="flex items-center gap-2 mb-3 sm:mb-4">
                       <span className="px-2 py-0.5 sm:px-3 sm:py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-indigo-400">

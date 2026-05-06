@@ -98,14 +98,14 @@ export default function ConfirmationMessage({
           transition={{ delay: 1.2, duration: 0.5 }}
         >
           {/* Message box */}
-          <div className="my-4 flex h-fit w-full rounded-2xl border border-white/20 bg-white/10 p-6 py-4 shadow-2xl backdrop-blur-md">
+          <div className="my-4 flex h-fit w-full rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-6 py-4 shadow-2xl backdrop-blur-md">
             <div className="mr-4 flex h-12 min-w-12 items-center justify-center rounded-full bg-emerald-600 p-2 overflow-hidden">
               <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={32} height={32} className="w-full h-full object-contain" unoptimized />
             </div>
             <div className="text-left">
-              <p className="text-sm font-black text-emerald-400 uppercase tracking-widest">{labelName}</p>
+              <p className="text-sm font-black text-emerald-500 uppercase tracking-widest">{labelName}</p>
               <motion.p
-                className="max-w-[300px] text-xs font-bold text-white/80 leading-relaxed mt-1"
+                className="max-w-[300px] text-xs font-bold text-[var(--text-main)] opacity-80 leading-relaxed mt-1"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2, duration: 0.9 }}
@@ -115,15 +115,15 @@ export default function ConfirmationMessage({
 
               {details && details.length > 0 && (
                 <motion.div 
-                  className="mt-4 pt-4 border-t border-white/10 space-y-2"
+                  className="mt-4 pt-4 border-t border-[var(--glass-border)] space-y-2"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 2.4 }}
                 >
                   {details.map((detail, index) => (
                     <div key={index} className="flex justify-between items-center gap-4">
-                      <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{detail.label}</span>
-                      <span className="text-[10px] font-black text-white uppercase tracking-tighter truncate max-w-[150px]">{detail.value}</span>
+                      <span className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">{detail.label}</span>
+                      <span className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-tighter truncate max-w-[150px]">{detail.value}</span>
                     </div>
                   ))}
                 </motion.div>

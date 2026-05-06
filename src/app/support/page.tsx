@@ -66,14 +66,14 @@ export default function SupportPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link
             href="/"
-            className="group flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm hover:shadow-md hover:border-indigo-500/30 transition-all active:scale-95"
+            className="group flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm hover:shadow-md hover:border-indigo-500/30 transition-all active:scale-95"
             aria-label="Back to Home"
           >
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--text-dim)] group-hover:text-indigo-500 transition-colors" />
           </Link>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-indigo-500/10 rounded-lg sm:rounded-xl border border-indigo-500/20 flex items-center justify-center p-1.5 sm:p-2 shadow-sm">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center p-1.5 sm:p-2">
               <Image src="https://www.getchintu.com/icon.png" alt="" width={28} height={28} className="w-full h-full object-contain" unoptimized />
             </div>
             <span className="text-base sm:text-lg font-black tracking-tighter uppercase text-[var(--text-main)]">
@@ -94,7 +94,7 @@ export default function SupportPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
           >
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-indigo-500/10 rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-indigo-500/5 shadow-xl border border-indigo-500/20">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-indigo-500/5 shadow-xl border border-indigo-500/20">
                <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-500" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--text-main)] mb-2 uppercase px-2">How can we help?</h1>

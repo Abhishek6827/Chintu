@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { Meteors } from "@/components/magicui/meteors";
 
 interface SubscriptionData {
@@ -118,7 +117,7 @@ export default function SubscriptionPage() {
 
   if (loading || !isLoaded) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-app)] flex items-center justify-center transition-colors duration-300">
         <div className="w-5 h-5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -126,7 +125,7 @@ export default function SubscriptionPage() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center text-white/50 text-sm">
+      <div className="min-h-screen bg-[var(--bg-app)] flex items-center justify-center text-[var(--text-dim)] text-sm transition-colors duration-300">
         No subscription data found.
       </div>
     );
@@ -141,7 +140,7 @@ export default function SubscriptionPage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white relative overflow-hidden" style={{ WebkitAppRegion: "drag" } as any}>
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] relative overflow-hidden transition-colors duration-300" style={{ WebkitAppRegion: "drag" } as any}>
       {/* Background for premium users */}
       {plan !== "free" && (
         <div className="fixed inset-0 pointer-events-none z-0">
@@ -152,241 +151,166 @@ export default function SubscriptionPage() {
       )}
 
       {/* Header */}
-      <div className="grid grid-cols-3 items-center px-4 sm:px-8 py-4 sticky top-0 bg-[#0a0a0f]/90 backdrop-blur-md z-50 border-b border-white/5 shrink-0 select-none" style={{ WebkitAppRegion: "drag" } as any}>
+      <div className="grid grid-cols-3 items-center px-6 py-3 sticky top-0 bg-[var(--bg-app)] backdrop-blur-xl z-50 border-b border-[var(--glass-border)] shrink-0 select-none" style={{ WebkitAppRegion: "drag" } as any}>
         <div className="flex items-center" style={{ WebkitAppRegion: "no-drag" } as any}>
           <button
             onClick={() => router.push("/room")}
-            className="group flex items-center gap-2 text-white/40 hover:text-white/90 transition-all text-[9px] font-black uppercase tracking-[0.2em]"
+            className="group flex items-center gap-2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-all text-[10px] font-bold uppercase tracking-widest"
           >
-            <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
+            Back
           </button>
         </div>
         
-        <div className="flex items-center justify-center gap-2.5 pointer-events-none">
-          <div className="flex items-center justify-center w-7 h-7 bg-indigo-500/10 rounded-lg border border-indigo-500/20 shadow-sm overflow-hidden p-1">
-            <Image 
-              src="https://www.getchintu.com/icon.png" 
-              alt="Chintu" 
-              className="w-full h-full object-contain" 
-              width={28} 
-              height={28} 
-              unoptimized 
-            />
-          </div>
-          <span className="text-sm font-black tracking-tighter uppercase text-white/90">Chintu <span className="text-indigo-500"> Portal</span></span>
+        <div className="flex items-center justify-center gap-2 pointer-events-none">
+          <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={22} height={22} className="opacity-90" unoptimized />
+          <span className="text-[12px] font-bold tracking-tight uppercase text-[var(--text-main)] opacity-70">Chintu <span className="text-indigo-500">Portal</span></span>
         </div>
 
         <div className="flex justify-end items-center" style={{ WebkitAppRegion: "no-drag" } as any}>
-           <div className="w-7 h-7" /> {/* Spacer for symmetry */}
+           <div className="w-7 h-7" />
         </div>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center px-6 pb-16 pt-10" style={{ WebkitAppRegion: "no-drag" } as any}>
-        <div className="w-full max-w-lg space-y-6">
-
-          {/* Title */}
-          <motion.div
-            className="text-center mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
-          >
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <motion.div
-                className="flex items-center justify-center w-12 h-12 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 shadow-lg shadow-indigo-500/10 p-2 relative"
-                whileHover={{ scale: 1.1, rotate: 6 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={48} height={48} className="w-full h-full object-contain" unoptimized />
-              </motion.div>
-              <div className="w-8 h-[2px] bg-white/10 rounded-full" />
-              <motion.div
-                className="flex items-center justify-center w-12 h-12 bg-blue-500/10 rounded-2xl border border-blue-500/20 shadow-lg shadow-blue-500/10 p-2"
-                whileHover={{ scale: 1.1, rotate: -6 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <svg viewBox="0 0 100 100" className="w-8 h-8 text-blue-500" fill="currentColor">
-                  <path d="M72.5,23.5 L58.5,80.5 L36.5,80.5 L46.5,40.5 L27.5,40.5 L31.5,23.5 L72.5,23.5 Z M85.5,23.5 L71.5,80.5 L60.5,80.5 L74.5,23.5 L85.5,23.5 Z" />
-                </svg>
-              </motion.div>
+      <div className="relative z-10 flex flex-col items-center px-6 pt-8 pb-8" style={{ WebkitAppRegion: "no-drag" } as any}>
+        <div className="w-full max-w-4xl">
+          
+          {/* Page Header */}
+          <div className="flex items-end justify-between mb-8 border-b border-[var(--glass-border)] pb-6">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-[var(--text-main)] mb-1">Billing</h1>
+              <p className="text-sm text-[var(--text-dim)] font-medium">Manage your subscription and view transaction history</p>
             </div>
-            <h1 className="text-2xl font-black tracking-tight mb-2">Subscription Portal</h1>
-            <p className="text-white/40 text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Secured by Razorpay
-            </p>
-          </motion.div>
-
-          {/* ─── Plan Card ─────────────────────────────────────── */}
-          <motion.div
-            className={`relative overflow-hidden rounded-3xl border ${planStyle.border} ${planStyle.bg} p-6 shadow-xl ${planStyle.glow}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.6 }}
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-white/[0.02] to-transparent rounded-bl-full" />
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Current Plan</p>
-                <h2 className={`text-2xl font-black uppercase tracking-tight ${planStyle.text}`}>
-                  {plan === "free" ? "Starter" : plan}
-                </h2>
-              </div>
-              <div className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.15em] ${planStyle.bg} ${planStyle.text} border ${planStyle.border}`}>
-                {isExpired ? "Expired" : "Active"}
-              </div>
-            </div>
-
-            {/* Credits */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-white/[0.03] rounded-2xl p-4 border border-white/5">
-                <p className="text-[9px] font-black text-white/25 uppercase tracking-[0.15em] mb-1">Credits</p>
-                <p className="text-2xl font-black text-white/90">{data.credits?.toLocaleString() || 0}</p>
-              </div>
-              <div className="bg-white/[0.03] rounded-2xl p-4 border border-white/5">
-                <p className="text-[9px] font-black text-white/25 uppercase tracking-[0.15em] mb-1">Days Left</p>
-                <p className={`text-2xl font-black ${daysLeft <= 7 ? "text-red-400" : daysLeft <= 30 ? "text-amber-400" : "text-emerald-400"}`}>
-                  {daysLeft}
-                </p>
-              </div>
-            </div>
-
-            {/* Expiry Bar */}
-            {data.subscription_expires_at && (
-              <div>
-                <div className="flex justify-between text-[9px] font-bold text-white/25 mb-1.5">
-                  <span>Subscription Period</span>
-                  <span>Expires {formatDate(data.subscription_expires_at)}</span>
-                </div>
-                <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-1000 ${
-                      daysLeft <= 7 ? "bg-red-500" : daysLeft <= 30 ? "bg-amber-500" : "bg-emerald-500"
-                    }`}
-                    style={{ width: `${expiryPercent}%` }}
-                  />
-                </div>
-              </div>
-            )}
-          </motion.div>
-
-          {/* ─── Payment Details Card ──────────────────────────── */}
-          <motion.div
-            className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-6 shadow-xl relative overflow-hidden"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
-            {/* Background elements */}
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 blur-[40px] rounded-full pointer-events-none" />
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-500/10 blur-[40px] rounded-full pointer-events-none" />
-            
-            <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-5 flex items-center gap-2">
-              <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/5 border border-emerald-500/10">
+              <svg viewBox="0 0 100 100" className="w-3.5 h-3.5 text-blue-500" fill="currentColor">
+                <path d="M72.5,23.5 L58.5,80.5 L36.5,80.5 L46.5,40.5 L27.5,40.5 L31.5,23.5 L72.5,23.5 Z M85.5,23.5 L71.5,80.5 L60.5,80.5 L74.5,23.5 L85.5,23.5 Z" />
               </svg>
-              Transaction Record
-            </h3>
+              <span className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-wider">Secured by Razorpay</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
             
-            <div className="space-y-4 relative z-10">
-              <div className="flex items-center justify-between py-2 border-b border-white/5">
-                <span className="text-xs text-white/40 font-medium tracking-wide">Gateway</span>
-                <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-md">
-                  <div className={`w-1.5 h-1.5 rounded-full ${data.payment_provider === "razorpay" ? "bg-blue-400 animate-pulse" : "bg-indigo-400"}`} />
-                  <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{data.payment_provider || "N/A"}</span>
+            {/* Left Column: Plan Overview */}
+            <div className="md:col-span-5 space-y-6">
+              <section>
+                <h3 className="text-[11px] font-bold text-[var(--text-dim)] uppercase tracking-[0.15em] mb-4">Current Plan</h3>
+                <div className={`relative overflow-hidden rounded-2xl border ${planStyle.border} ${planStyle.bg} p-6 shadow-sm`}>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className={`text-2xl font-bold tracking-tight ${planStyle.text}`}>
+                      {plan === "free" ? "Starter" : plan}
+                    </h2>
+                    <div className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${planStyle.bg} ${planStyle.text} border ${planStyle.border}`}>
+                      {isExpired ? "Expired" : "Active"}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <p className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-wider mb-1">Credits</p>
+                      <p className="text-xl font-bold text-[var(--text-main)] opacity-90">{data.credits?.toLocaleString() || 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-wider mb-1">Days Left</p>
+                      <p className={`text-xl font-bold ${daysLeft <= 7 ? "text-red-400" : daysLeft <= 30 ? "text-amber-400" : "text-emerald-400"}`}>
+                        {daysLeft}
+                      </p>
+                    </div>
+                  </div>
+
+                  {data.subscription_expires_at && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-[10px] font-medium text-[var(--text-dim)] opacity-60">
+                        <span>Period</span>
+                        <span>Expires {formatDate(data.subscription_expires_at)}</span>
+                      </div>
+                      <div className="w-full h-1 bg-[var(--glass-bg)] rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-1000 ${
+                            daysLeft <= 7 ? "bg-red-500/80" : daysLeft <= 30 ? "bg-amber-500/80" : "bg-emerald-500/80"
+                          }`}
+                          style={{ width: `${expiryPercent}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-              
-              <div className="flex items-center justify-between py-2 border-b border-white/5">
-                <span className="text-xs text-white/40 font-medium tracking-wide">Account</span>
-                <span className="text-xs font-bold text-white/90">{data.email || user?.primaryEmailAddress?.emailAddress || "N/A"}</span>
-              </div>
-              
-              <div className="flex items-center justify-between py-2 border-b border-white/5">
-                <span className="text-xs text-white/40 font-medium tracking-wide">Billed To</span>
-                <span className="text-xs font-bold text-white/90">{data.full_name || user?.fullName || "N/A"}</span>
-              </div>
+              </section>
 
-              <div className="flex items-center justify-between py-2 border-b border-white/5 group">
-                <span className="text-xs text-white/40 font-medium tracking-wide flex items-center gap-1.5">
-                  Payment ID
-                </span>
-                <span className="text-[10px] font-mono font-bold text-white/80 bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-lg group-hover:border-white/20 transition-colors">
-                  {data.razorpay_payment_id || "N/A"}
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between py-2 border-b border-white/5">
-                <span className="text-xs text-white/40 font-medium tracking-wide">Amount Paid</span>
-                <span className="text-xs font-bold text-white/90">
-                  {paymentDetails?.amount ? `₹${paymentDetails.amount.toLocaleString()}` : (data.profile_data?.payment_amount || "N/A")}
-                </span>
-              </div>
+              <div className="space-y-3 pt-2">
+                {(plan === "free" || isExpired) && (
+                  <button
+                    onClick={() => router.push("/pricing")}
+                    className="w-full py-3 rounded-xl bg-[var(--text-main)] text-[var(--bg-app)] text-[11px] font-bold uppercase tracking-wider hover:opacity-90 transition-all"
+                  >
+                    {isExpired ? "Renew Subscription" : "Upgrade Plan"}
+                  </button>
+                )}
 
-              <div className="flex items-center justify-between py-2 border-b border-white/5">
-                <span className="text-xs text-white/40 font-medium tracking-wide">Payment Type</span>
-                <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-wider text-[9px]">
-                  {paymentDetails?.method ? paymentDetails.method : (data.profile_data?.payment_type || "N/A")}
-                </span>
-              </div>
+                {plan !== "free" && !isExpired && (
+                  <button
+                    onClick={() => router.push("/pricing")}
+                    className="w-full py-3 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] text-[var(--text-main)] opacity-80 text-[11px] font-bold uppercase tracking-wider hover:opacity-100 transition-all"
+                  >
+                    Change Plan
+                  </button>
+                )}
 
-              <div className="flex items-center justify-between py-2 border-b border-white/5">
-                <span className="text-xs text-white/40 font-medium tracking-wide">Billing Cycle</span>
-                <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 uppercase tracking-wider text-[9px]">
-                  {getBillingCycle(data.updated_at, data.subscription_expires_at)}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between py-2 pt-3">
-                <span className="text-xs text-white/40 font-medium tracking-wide">Timestamp</span>
-                <span className="text-[11px] font-bold text-white/60">{formatDate(data.updated_at)}</span>
+                <button
+                  onClick={() => router.push("/support")}
+                  className="w-full py-3 rounded-xl bg-transparent border border-[var(--glass-border)] text-[var(--text-dim)] text-[11px] font-bold uppercase tracking-wider hover:text-[var(--text-main)] hover:border-[var(--text-dim)] transition-all"
+                >
+                  Contact Support
+                </button>
               </div>
             </div>
-          </motion.div>
 
-          {/* ─── Actions ───────────────────────────────────────── */}
-          <motion.div
-            className="space-y-3"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45, duration: 0.6 }}
-          >
-            {/* Upgrade / Renew */}
-            {(plan === "free" || isExpired) && (
-              <button
-                onClick={() => router.push("/pricing")}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.01] transition-all active:scale-[0.99]"
-              >
-                {isExpired ? "Renew Subscription →" : "Upgrade Plan →"}
-              </button>
-            )}
+            {/* Right Column: Transaction Details */}
+            <div className="md:col-span-7">
+              <section>
+                <h3 className="text-[11px] font-bold text-[var(--text-dim)] uppercase tracking-[0.15em] mb-4">Payment Details</h3>
+                <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] overflow-hidden">
+                  <div className="divide-y divide-[var(--glass-border)]">
+                    {[
+                      { label: "Gateway", value: data.payment_provider || "N/A", isBadge: true, color: "blue" },
+                      { label: "Account", value: data.email || user?.primaryEmailAddress?.emailAddress || "N/A" },
+                      { label: "Billed To", value: data.full_name || user?.fullName || "N/A" },
+                      { label: "Payment ID", value: data.razorpay_payment_id || "N/A", isMono: true },
+                      { label: "Amount Paid", value: paymentDetails?.amount ? `₹${paymentDetails.amount.toLocaleString()}` : (data.profile_data?.payment_amount || "N/A") },
+                      { label: "Method", value: paymentDetails?.method ? paymentDetails.method : (data.profile_data?.payment_type || "N/A"), isBadge: true, color: "emerald" },
+                      { label: "Billing Cycle", value: getBillingCycle(data.updated_at, data.subscription_expires_at), isBadge: true, color: "indigo" },
+                      { label: "Invoice Date", value: formatDate(data.updated_at) }
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between px-6 py-3.5">
+                        <span className="text-[12px] font-medium text-[var(--text-dim)]">{item.label}</span>
+                        {item.isBadge ? (
+                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
+                            item.color === 'blue' ? 'bg-blue-500/5 text-blue-400 border-blue-500/10' : 
+                            item.color === 'emerald' ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/10' : 
+                            'bg-indigo-500/5 text-indigo-400 border-indigo-500/10'
+                          }`}>
+                            {item.value}
+                          </span>
+                        ) : (
+                          <span className={`text-[12px] font-bold text-[var(--text-main)] opacity-80 ${item.isMono ? 'font-mono text-[11px] opacity-60' : ''}`}>
+                            {item.value}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+              
+              <p className="mt-6 text-center md:text-left text-[10px] text-[var(--text-dim)] opacity-50 font-medium leading-relaxed">
+                Need help? <button onClick={() => router.push("/support")} className="text-[var(--text-dim)] hover:text-[var(--text-main)] underline underline-offset-4 transition-colors">Contact our support team</button> for cancellations, refunds, or billing inquiries.
+              </p>
+            </div>
 
-            {plan !== "free" && !isExpired && (
-              <button
-                onClick={() => router.push("/pricing")}
-                className="w-full py-4 rounded-2xl bg-white/[0.03] border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/[0.06] hover:text-white/80 transition-all active:scale-[0.99]"
-              >
-                Change Plan
-              </button>
-            )}
-
-            {/* Contact Support */}
-            <button
-              onClick={() => router.push("/support")}
-              className="w-full py-4 rounded-2xl bg-white/[0.02] border border-white/5 text-white/40 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/[0.05] hover:text-white/60 transition-all active:scale-[0.99]"
-            >
-              Contact Support
-            </button>
-          </motion.div>
-
-          {/* Footer */}
-          <p className="text-center text-[9px] text-white/15 font-medium mt-6">
-            For cancellations or refund requests, please contact our support team.
-          </p>
-
+          </div>
         </div>
       </div>
     </div>

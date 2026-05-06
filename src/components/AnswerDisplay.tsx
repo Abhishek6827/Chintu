@@ -25,6 +25,7 @@ interface AnswerDisplayProps {
   isLightMode?: boolean;
   onUndo?: (id: string, question: string) => void;
   showReadingGuide?: boolean;
+  userPlan?: string;
 }
 
 const parseAnswer = (text: string) => {
@@ -38,7 +39,7 @@ const parseAnswer = (text: string) => {
   return { think, main, isThinking };
 };
 
-export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = false, onUndo, showReadingGuide = false }: AnswerDisplayProps) {
+export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = false, onUndo, showReadingGuide = false, userPlan = "free" }: AnswerDisplayProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const getSafeModelName = (modelId: string) => {
@@ -101,12 +102,19 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
         </div>
         <p 
           style={{ 
-            fontSize: 'clamp(8px, 1.8vh, 14px)',
+            fontSize: 'clamp(10px, 2.5vh, 20px)',
             letterSpacing: '0.4em'
           }} 
-          className="font-black uppercase mb-1 sm:mb-2 text-[var(--text-main)] text-center px-4"
+          className="font-black uppercase mb-3 text-[var(--text-main)] text-center px-4"
         >
-          Chintu is Ready
+          {userPlan !== "free" ? (
+            <div className="water-text-container">
+              <span className="water-text-base">{userPlan} Plan Active</span>
+              <span className="water-text-wave">{userPlan} Plan Active</span>
+            </div>
+          ) : (
+            "Chintu is Ready"
+          )}
         </p>
         <p 
           style={{ 

@@ -3,15 +3,16 @@
 import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useUser, UserButton } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from 'next/navigation';
-import { 
-  ArrowRight, Check, Star, Sparkles, Zap, Shield, PlayCircle, Globe, Search, Code, Target, BookOpen, Layers, MousePointer2, Cpu, MessageSquare 
+import {
+  ArrowRight, Check, Star, Sparkles, Zap, Shield, PlayCircle, Globe, Search, Code, Target, BookOpen, Layers, MousePointer2, Cpu, MessageSquare
 } from "lucide-react";
 
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
 import GlobalFooter from '@/components/GlobalFooter';
+import SyncedUserButton from '@/components/SyncedUserButton';
 import ContactForm from '@/components/ContactForm';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { MarqueeReviews } from '@/components/MarqueeReviews';
@@ -104,7 +105,7 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-[100] bg-[var(--bg-app)]/70 backdrop-blur-2xl border-b border-[var(--glass-border)] px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 no-drag" style={{ WebkitAppRegion: 'no-drag' } as any}>
-            <div className="flex items-center justify-center w-8 h-8 bg-indigo-500/10 rounded-xl border border-indigo-500/20 shadow-md overflow-hidden p-1.5 hover:scale-110 transition-transform">
+            <div className="flex items-center justify-center w-8 h-8 hover:scale-110 transition-transform">
               <Image src="https://www.getchintu.com/icon.png" alt="Chintu" className="w-full h-full object-contain" width={32} height={32} unoptimized />
             </div>
             <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)]">
@@ -141,7 +142,7 @@ export default function LandingPage() {
               <div className="flex items-center gap-4">
                 {userPlan !== 'free' && userPlan !== '' && (
                   <>
-                    <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
+                    <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
                       <AnimatedThemeToggler
                         theme={currentTheme}
                         onToggle={toggleTheme}
@@ -187,7 +188,7 @@ export default function LandingPage() {
                   </Link>
                 )}
                 <div className="scale-105 hover:scale-110 transition-transform">
-                  <UserButton />
+                  <SyncedUserButton />
                 </div>
               </div>
             )}
@@ -213,7 +214,7 @@ export default function LandingPage() {
           </p>
           <div className="reveal flex flex-col sm:flex-row gap-6 transition-all duration-1000 delay-500">
             {isSignedIn ? (
-              <button 
+              <button
                 onClick={async () => {
                   let deepLink = "chintu://open";
                   try {
@@ -276,7 +277,7 @@ export default function LandingPage() {
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.05),transparent)] animate-pulse" />
                 <div className="relative z-10 space-y-6">
                   <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-indigo-500/30 transition-all group">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+                    <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
                       <Globe className="w-5 h-5" />
                     </div>
                     <div>
@@ -285,7 +286,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-emerald-500/30 transition-all group">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
                       <Check className="w-5 h-5" />
                     </div>
                     <div>
@@ -294,7 +295,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-amber-500/30 transition-all group">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                    <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
                       <PlayCircle className="w-5 h-5" />
                     </div>
                     <div>
@@ -356,7 +357,7 @@ export default function LandingPage() {
               <ul className="space-y-5">
                 {['Instant OCR Processing', 'Multi-Step Logical Proofs', 'Source Verification', 'Context-Aware Hints'].map((li, i) => (
                   <li key={i} className="flex items-center gap-4 text-[11px] font-black uppercase tracking-widest text-[var(--text-dim)]">
-                    <div className="w-6 h-6 rounded-lg bg-purple-600 text-white flex items-center justify-center text-[10px]">✓</div>
+                    <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px]">✓</div>
                     {li}
                   </li>
                 ))}
@@ -389,21 +390,21 @@ export default function LandingPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               <motion.div whileHover={{ scale: 1.03, y: -6 }} className="reveal bg-[var(--panel-bg)] p-12 rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 group">
-                <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-emerald-500/5">
+                <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-emerald-500/5">
                   <Shield className="w-8 h-8" />
                 </div>
                 <h3 className="font-black uppercase tracking-[0.2em] text-[13px] mb-6 text-[var(--text-main)]">Ghost Protocol</h3>
                 <p className="text-[13px] text-[var(--text-dim)] font-bold uppercase tracking-wide leading-relaxed">Advanced hardware-level abstraction that keeps your AI companion invisible to all proctoring and monitoring systems.</p>
               </motion.div>
               <motion.div whileHover={{ scale: 1.03, y: -6 }} className="reveal bg-[var(--panel-bg)] p-12 rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 delay-200 group">
-                <div className="w-16 h-16 bg-indigo-500/10 text-indigo-500 rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-indigo-500/5">
+                <div className="w-16 h-16 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-indigo-500/5">
                   <Cpu className="w-8 h-8" />
                 </div>
                 <h3 className="font-black uppercase tracking-[0.2em] text-[13px] mb-6 text-[var(--text-main)]">Quantum Synthesis</h3>
                 <p className="text-[13px] text-[var(--text-dim)] font-bold uppercase tracking-wide leading-relaxed">Proprietary LLM orchestration that combines multiple specialized models for zero-error technical and logical accuracy.</p>
               </motion.div>
               <motion.div whileHover={{ scale: 1.03, y: -6 }} className="reveal bg-[var(--panel-bg)] p-12 rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 delay-400 group">
-                <div className="w-16 h-16 bg-purple-500/10 text-purple-500 rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-purple-500/5">
+                <div className="w-16 h-16 bg-purple-500/10 text-purple-500 rounded-full flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-purple-500/5">
                   <Sparkles className="w-8 h-8" />
                 </div>
                 <h3 className="font-black uppercase tracking-[0.2em] text-[13px] mb-6 text-[var(--text-main)]">Stealth Overlay</h3>
@@ -412,7 +413,7 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-        
+
         {/* Strategic Spread - Only show on Web landing, hide in EXE app */}
         {!isElectron && (
           <section className="py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden">
@@ -444,14 +445,14 @@ export default function LandingPage() {
               </p>
               <div className="space-y-8">
                 <div className="flex items-center gap-5">
-                  <div className="w-12 h-12 rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] flex items-center justify-center shadow-xl shadow-indigo-500/5 text-xl">📧</div>
+                  <div className="w-12 h-12 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] flex items-center justify-center shadow-xl shadow-indigo-500/5 text-xl">📧</div>
                   <div className="flex flex-col">
                     <span className="text-[9px] font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Secure Comms</span>
                     <span className="text-[13px] font-black uppercase tracking-[0.1em] text-[var(--text-main)]">contact@getchintu.com</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-5">
-                  <div className="w-12 h-12 rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] flex items-center justify-center shadow-xl shadow-indigo-500/5 text-xl">🌐</div>
+                  <div className="w-12 h-12 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] flex items-center justify-center shadow-xl shadow-indigo-500/5 text-xl">🌐</div>
                   <div className="flex flex-col">
                     <span className="text-[9px] font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Status</span>
                     <span className="text-[13px] font-black uppercase tracking-[0.1em] text-emerald-500">Global Infrastructure Active</span>
@@ -490,32 +491,31 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex items-center gap-8">
-  <a href="#" className="flex items-center gap-2 group">
-    <Globe className="w-4 h-4 text-gray-400 group-hover:text-[#1DA1F2] transition-colors" />
-    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">
-      Follow
-    </span>
-  </a>
+            <a href="#" className="flex items-center gap-2 group">
+              <Globe className="w-4 h-4 text-gray-400 group-hover:text-[#1DA1F2] transition-colors" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">
+                Follow
+              </span>
+            </a>
 
-  <a href="#" className="flex items-center gap-2 group">
-    <Code className="w-4 h-4 text-gray-400 group-hover:text-[#333] transition-colors" />
-    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">
-      Repo
-    </span>
-  </a>
+            <a href="#" className="flex items-center gap-2 group">
+              <Code className="w-4 h-4 text-gray-400 group-hover:text-[#333] transition-colors" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">
+                Repo
+              </span>
+            </a>
 
-  <a href="#" className="flex items-center gap-2 group">
-    <Star className="w-4 h-4 text-gray-400 group-hover:text-[#0077B5] transition-colors" />
-    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">
-      Connect
-    </span>
-  </a>
-</div>
+            <a href="#" className="flex items-center gap-2 group">
+              <Star className="w-4 h-4 text-gray-400 group-hover:text-[#0077B5] transition-colors" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">
+                Connect
+              </span>
+            </a>
+          </div>
         </div>
       </div>
 
       <GlobalFooter />
-
     </div>
   );
 }

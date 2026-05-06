@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { UserButton, useUser } from "@clerk/nextjs";
-import { Minus, Zap, Sparkles, CreditCard } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import { Minus, Zap } from "lucide-react";
 
 
 
 import OnboardingModal from "@/components/OnboardingModal";
-import ProfileModal from "@/components/ProfileModal";
+import SyncedUserButton from "@/components/SyncedUserButton";
 
 export default function GlobalHeader() {
   const { user, isLoaded, isSignedIn } = useUser();
@@ -18,7 +18,6 @@ export default function GlobalHeader() {
   const [userPlan, setUserPlan] = useState<string>("free");
   const [isScreenRecording, setIsScreenRecording] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
   const [mounted, setMounted] = useState(false);
   const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
@@ -80,7 +79,6 @@ export default function GlobalHeader() {
   // Close modals when signed out
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      setShowProfileModal(false);
       setShowOnboarding(false);
       // Clear session storage on logout to ensure JD is requested again next time
       sessionStorage.removeItem("jobDescription");
@@ -157,30 +155,6 @@ export default function GlobalHeader() {
     }
   };
 
-  const handleManageSubscription = async () => {
-    try {
-      const res = await fetch("/api/manage-subscription");
-      const data = await res.json();
-      
-      if (data.url) {
-        if (data.provider === "razorpay") {
-          // Internal page — navigate within app
-          router.push("/subscription");
-        } else if (isElectron) {
-          // Stripe portal — open externally in Electron
-          (window as any).electronAPI.openExternal(data.url);
-        } else {
-          window.location.href = data.url;
-        }
-      } else {
-        alert(data.error || "Failed to load subscription portal.");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error loading subscription portal.");
-    }
-  };
-
   // Hide GlobalHeader on web platform - it's specifically for the EXE app frame
   // Use 'mounted' to prevent hydration errors
   if (!mounted || !isElectron) {
@@ -206,7 +180,7 @@ export default function GlobalHeader() {
               }
             }}
           >
-            <div className="flex items-center justify-center w-8 h-8 bg-indigo-500/10 rounded-xl border border-indigo-500/20 shadow-md overflow-hidden p-1.5 hover:scale-110 transition-transform">
+            <div className="flex items-center justify-center w-8 h-8 hover:scale-110 transition-transform">
               <Image 
                 src="https://www.getchintu.com/icon.png" 
                 alt="Chintu" 
@@ -223,13 +197,11 @@ export default function GlobalHeader() {
           
           {isSignedIn && userCredits !== null && (
             <div className="flex items-center gap-1 min-[400px]:gap-3">
-              <div className="flex items-center gap-1.5 px-2 min-[400px]:px-3 py-1.5 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
                 <div className="flex items-center gap-1">
                   <Zap className="w-2 h-2 text-indigo-500 fill-indigo-500 hidden min-[450px]:inline" />
-                  <span className="text-[11px] font-black text-[var(--text-main)]">{userCredits}</span>
+                  <span className="text-[10px] font-black text-[var(--text-main)]">{userCredits}</span>
                 </div>
-                <div className="hidden min-[400px]:block h-4 w-[1px] bg-[var(--glass-border)] mx-0.5" />
-                <span className="text-[8px] font-black uppercase tracking-widest text-indigo-500 hidden min-[450px]:inline">{userPlan}</span>
               </div>
               {userPlan === 'free' && (
                 <button 
@@ -256,7 +228,7 @@ export default function GlobalHeader() {
               <button
                 onClick={handleGhostToggle}
                 className={`
-                  w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90
+                  w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90
                   ${isStealthMode
                     ? "bg-orange-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.4)]"
                     : "bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)]"
@@ -277,7 +249,7 @@ export default function GlobalHeader() {
               </button>
               <button 
                 onClick={handleMinimize} 
-                className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
@@ -286,40 +258,21 @@ export default function GlobalHeader() {
           
           {isSignedIn && (
             <div className="flex items-center gap-1.5 ml-1">
-              <div className="w-7 h-7 rounded-lg overflow-hidden ring-1 ring-white/10 hover:scale-105 transition-transform">
-                <UserButton>
-                  <UserButton.MenuItems>
-                    <UserButton.Action 
-                      label="Manage Subscription" 
-                      labelIcon={<CreditCard className="w-4 h-4" />} 
-                      onClick={handleManageSubscription} 
-                    />
-                    <UserButton.Action 
-                      label="My AI Profile" 
-                      labelIcon={<Sparkles className="w-4 h-4" />} 
-                      onClick={() => setShowProfileModal(true)} 
-                    />
-                    <UserButton.Action 
-                      label="Support" 
-                      labelIcon={<Zap className="w-4 h-4" />} 
-                      onClick={handleUpgrade} 
-                    />
-                  </UserButton.MenuItems>
-                </UserButton>
+              <div className="w-7 h-7 rounded-full ring-1 ring-white/10 hover:scale-105 transition-transform">
+                <SyncedUserButton />
               </div>
             </div>
           )}
         </div>
       </div>
       {showOnboarding && <OnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} />}
-      {showProfileModal && <ProfileModal onClose={() => setShowProfileModal(false)} />}
 
       {/* Unhide Prompt (Shocking/Animated) */}
       {showUnhidePrompt && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6 backdrop-blur-sm bg-black/60 animate-in fade-in duration-300">
           <div className="unhide-prompt-card w-full max-w-xs bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 p-[2px] rounded-3xl shadow-[0_0_50px_rgba(249,115,22,0.4)] animate-in zoom-in-95 duration-300">
             <div className="bg-gray-900 rounded-[22px] p-6 text-center">
-              <div className="w-16 h-16 bg-orange-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-bounce">
+              <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
                 <svg className="w-10 h-10 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>

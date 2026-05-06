@@ -1651,6 +1651,7 @@ export default function RoomPage() {
           isLightMode={isLightMode} 
           onUndo={handleUndo} 
           showReadingGuide={showReadingGuide}
+          userPlan={userPlan}
         />
         <div ref={chatEndRef} />
       </div>

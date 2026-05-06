@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser, UserButton } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -13,6 +13,7 @@ import { VideoText } from "@/components/magicui/video-text";
 import ConfirmationMessage from "@/components/animata/feature-cards/confirmation-message";
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
+import SyncedUserButton from "@/components/SyncedUserButton";
 // import { StripeCheckoutButton } from "@/components/StripeCheckoutButton";
 
 
@@ -468,7 +469,7 @@ export default function PricingPage() {
         </div>
         
         <div className="hidden min-[500px]:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-          <div className="flex items-center justify-center w-7 h-7 bg-indigo-500/10 rounded-lg border border-indigo-500/20 shadow-sm overflow-hidden p-1">
+          <div className="flex items-center justify-center w-7 h-7 overflow-hidden">
             <Image 
               src="https://www.getchintu.com/icon.png" 
               alt="Chintu" 
@@ -511,9 +512,9 @@ export default function PricingPage() {
                Select Multiplier (Quantity)
              </label>
              <div className="flex items-center justify-between">
-                <button onClick={() => setQuantity(q => Math.max(minQty, q - 1))} disabled={quantity <= minQty} className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--glass-bg)] text-[var(--text-dim)] hover:text-[var(--text-main)] disabled:opacity-50 transition-colors"><Minus className="w-3 h-3" /></button>
+                <button onClick={() => setQuantity(q => Math.max(minQty, q - 1))} disabled={quantity <= minQty} className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--glass-bg)] text-[var(--text-dim)] hover:text-[var(--text-main)] disabled:opacity-50 transition-colors"><Minus className="w-3 h-3" /></button>
                 <span className="text-lg font-black text-[var(--text-main)]">{quantity}x</span>
-                <button onClick={() => setQuantity(q => Math.min(maxQty, q + 1))} disabled={quantity >= maxQty} className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--glass-bg)] text-[var(--text-dim)] hover:text-[var(--text-main)] disabled:opacity-50 transition-colors"><Plus className="w-3 h-3" /></button>
+                <button onClick={() => setQuantity(q => Math.min(maxQty, q + 1))} disabled={quantity >= maxQty} className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--glass-bg)] text-[var(--text-dim)] hover:text-[var(--text-main)] disabled:opacity-50 transition-colors"><Plus className="w-3 h-3" /></button>
              </div>
              <p className="text-[8px] font-bold text-[var(--text-dim)] uppercase mt-2">Credits & Price will be multiplied by {quantity}</p>
           </div>
@@ -664,8 +665,8 @@ export default function PricingPage() {
             </div>
             <div className="flex flex-col items-center sm:items-end">
               <h4 className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-[0.2em] mb-4">Account</h4>
-              <div className="p-1 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm hover:shadow-md transition-all">
-                <UserButton />
+              <div className="p-1 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm hover:shadow-md transition-all">
+                <SyncedUserButton />
               </div>
               <p className="text-[8px] text-[var(--text-dim)] font-black uppercase mt-2 tracking-widest">Active Profile</p>
             </div>
@@ -710,7 +711,7 @@ export default function PricingPage() {
                 </button>
 
                 <div className="flex items-center gap-2 mb-5 relative z-10">
-                  <div className="w-8 h-8 bg-indigo-500/10 rounded-lg flex items-center justify-center border border-indigo-500/20">
+                  <div className="w-8 h-8 flex items-center justify-center">
                     <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={20} height={20} unoptimized />
                   </div>
                   <span className="text-xs font-black tracking-tighter uppercase text-[var(--text-main)]">Chintu <span className="text-indigo-500">SaaS</span></span>
