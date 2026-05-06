@@ -10,21 +10,20 @@ export async function POST(request: NextRequest) {
     const { action } = await request.json();
 
     const projectRoot = process.cwd();
-    const gsdScript = join(projectRoot, '.gsd', 'cli', 'gsd-cli.ts');
 
     let command = '';
     switch (action) {
       case 'start':
-        command = `npx tsx ${gsdScript} auto`;
+        command = `npm run gsd:auto`;
         break;
       case 'stop':
-        command = `npx tsx ${gsdScript} stop`;
+        command = `npm run gsd:stop`;
         break;
       case 'status':
-        command = `npx tsx ${gsdScript} status --json`;
+        command = `npm run gsd:status`;
         break;
       case 'doctor':
-        command = `npx tsx ${gsdScript} doctor`;
+        command = `npm run gsd:doctor`;
         break;
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });

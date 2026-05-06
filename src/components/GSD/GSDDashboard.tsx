@@ -115,58 +115,78 @@ const GSDDashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Handle button clicks with CLI integration
-  const handleAction = async (action: 'start' | 'stop' | 'status' | 'doctor') => {
-    try {
-      // Show loading state
-      const button = event?.target as HTMLButtonElement;
-      if (button) {
-        button.disabled = true;
-        button.textContent = 'Executing...';
+  // Handle button clicks with direct CLI command display
+  const handleAction = (action: 'start' | 'stop' | 'status' | 'doctor') => {
+    const commands = {
+      start: 'npm run gsd:auto',
+      stop: 'npm run gsd:stop', 
+      status: 'npm run gsd:status',
+      doctor: 'npm run gsd:doctor'
+    };
+    
+    const descriptions = {
+      start: 'Start GSD Auto Mode - This will begin autonomous development execution',
+      stop: 'Stop GSD Auto Mode - This will halt the current execution',
+      status: 'Check GSD Status - This will show current system status',
+      doctor: 'Run Health Check - This will diagnose any issues'
+    };
+    
+    // Create a nice modal/popup with the command
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    `;
+    
+    modal.innerHTML = `
+      <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 20px;">GSD Command: ${action.charAt(0).toUpperCase() + action.slice(1)}</h3>
+        <p style="margin: 0 0 20px 0; color: #6b7280; line-height: 1.5;">${descriptions[action]}</p>
+        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
+          <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Command to run in terminal:</div>
+          <code style="background: #1f2937; color: #10b981; padding: 10px; border-radius: 4px; display: block; font-family: 'Courier New', monospace; font-size: 14px;">${commands[action]}</code>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button id="copyCmd" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 500;">Copy Command</button>
+          <button id="closeModal" style="flex: 1; background: #e5e7eb; color: #374151; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 500;">Close</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add event listeners
+    document.getElementById('copyCmd')?.addEventListener('click', () => {
+      navigator.clipboard.writeText(commands[action]);
+      const btn = document.getElementById('copyCmd');
+      if (btn) {
+        btn.textContent = 'Copied!';
+        btn.style.background = '#10b981';
+        setTimeout(() => {
+          btn.textContent = 'Copy Command';
+          btn.style.background = '#3b82f6';
+        }, 2000);
       }
-
-      // Execute CLI command via fetch to a simple endpoint
-      const response = await fetch('/api/gsd', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action }),
-      }).catch(() => {
-        // If API fails, show user the CLI command to run manually
-        const commands = {
-          start: 'npm run gsd:auto',
-          stop: 'npm run gsd:stop', 
-          status: 'npm run gsd:status',
-          doctor: 'npm run gsd:doctor'
-        };
-        
-        alert(`API not ready. Please run this command manually:\n\n${commands[action]}\n\nThen refresh the page to see updates.`);
-        
-        if (button) {
-          button.disabled = false;
-          button.textContent = action === 'start' ? 'Start' : action === 'stop' ? 'Stop' : action === 'status' ? 'Status' : 'Doctor';
-        }
-        return;
-      });
-
-      if (response) {
-        const result = await response.json();
-        
-        if (result.success) {
-          alert(`Success: ${result.message}`);
-          // Refresh status after action
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        } else {
-          alert(`Error: ${result.error}`);
-        }
+    });
+    
+    document.getElementById('closeModal')?.addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+    
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        document.body.removeChild(modal);
       }
-    } catch (err) {
-      alert('Failed to execute action. Please try running the command manually in terminal.');
-      console.error(err);
-    }
+    });
   };
 
   const getStatusIcon = (status: string) => {
