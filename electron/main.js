@@ -3,6 +3,9 @@ const log = require("electron-log");
 const path = require("path");
 const fs = require("fs");
 
+// Fix for Windows cache access denied errors (0x5)
+app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+
 // Configure logging first
 log.transports.file.level = "info";
 log.transports.console.level = "info";
