@@ -786,6 +786,21 @@ input[type="range"]::-moz-range-thumb {
   z-index: 1;
 }
 
+/* White variant for Elite */
+.water-text-white .water-text-fill {
+  color: #ffffff !important; /* Bright white wave */
+  opacity: 0.9 !important;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+}
+.water-text-white .water-text-fill-secondary {
+  color: #a5f3fc !important; /* Light cyan second wave for depth */
+  opacity: 0.5 !important;
+}
+.water-text-white .water-text-bg {
+  color: #ffffff !important;
+  opacity: 1 !important; /* SOLID WHITE BASE */
+}
+
 @keyframes water-fill-move {
   0%, 100% {
     clip-path: polygon(

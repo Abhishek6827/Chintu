@@ -98,7 +98,7 @@ export default function RoomPage() {
   const [spaceMode, setSpaceMode] = useState<"hold" | "toggle">("hold");
   const [selectedModel, setSelectedModel] = useState<ModelKey>("llama-3.3-70b");
   const selectedModelRef = useRef<ModelKey>("llama-3.3-70b");
-  const [userPlan, setUserPlan] = useState<string>("free");
+  const [userPlan, setUserPlan] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const { currentTheme, toggleTheme } = useThemeToggle();
   const isLightMode = currentTheme === "light";

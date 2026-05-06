@@ -26,7 +26,7 @@ interface AnswerDisplayProps {
   isLightMode?: boolean;
   onUndo?: (id: string, question: string) => void;
   showReadingGuide?: boolean;
-  userPlan?: string;
+  userPlan?: string | null;
 }
 
 const parseAnswer = (text: string) => {
@@ -40,7 +40,7 @@ const parseAnswer = (text: string) => {
   return { think, main, isThinking };
 };
 
-export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = false, onUndo, showReadingGuide = false, userPlan = "free" }: AnswerDisplayProps) {
+export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = false, onUndo, showReadingGuide = false, userPlan = null }: AnswerDisplayProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const getSafeModelName = (modelId: string) => {
@@ -104,17 +104,35 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
         <div 
           className="font-black uppercase mb-3 text-center px-4"
         >
-          {userPlan === "elite" ? (
-            <div className="w-[380px] h-[120px] rounded-[2rem] overflow-hidden shadow-2xl border border-indigo-500/30 relative flex items-center justify-center">
+          {userPlan === null ? (
+            <div className="h-[70px] flex items-center justify-center opacity-30">
+               <Sparkles className="w-6 h-6 animate-spin-slow" />
+            </div>
+          ) : userPlan === "elite" ? (
+            <div 
+              className="w-[90%] max-w-[400px] aspect-[16/6] min-h-[80px] rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl border border-white/20 relative flex items-center justify-center mx-auto backdrop-blur-md transition-all duration-300"
+              style={{ 
+                backgroundColor: 'rgba(0, 0, 0, calc(0.4 * var(--app-opacity, 1)))',
+                opacity: 'var(--app-opacity, 1)'
+              }}
+            >
               <VideoText 
                 src="https://cdn.magicui.design/ocean-small.webm"
                 className="h-full w-full"
+                videoClassName="opacity-[calc(0.5*var(--app-opacity,1))]"
               >
-                <div className="water-text-wrapper" style={{ scale: '1.4', letterSpacing: '0.2em' }}>
-                  <div className="water-text-content">
-                    <span className="water-text-bg">ELITE PROTOCOL ACTIVE</span>
-                    <span className="water-text-fill">ELITE PROTOCOL ACTIVE</span>
-                    <span className="water-text-fill-secondary">ELITE PROTOCOL ACTIVE</span>
+                <div className="water-text-wrapper water-text-white" style={{ fontSize: 'clamp(12px, 4vw, 24px)', letterSpacing: '0.2em' }}>
+                  <div className="water-text-content flex flex-col items-center leading-none gap-1 sm:gap-2">
+                    <div className="relative">
+                      <span className="water-text-bg">ELITE PROTOCOL</span>
+                      <span className="water-text-fill">ELITE PROTOCOL</span>
+                      <span className="water-text-fill-secondary">ELITE PROTOCOL</span>
+                    </div>
+                    <div className="relative">
+                      <span className="water-text-bg">ACTIVE</span>
+                      <span className="water-text-fill">ACTIVE</span>
+                      <span className="water-text-fill-secondary">ACTIVE</span>
+                    </div>
                   </div>
                 </div>
               </VideoText>
