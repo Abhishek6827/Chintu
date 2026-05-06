@@ -247,7 +247,8 @@ textarea {
     padding-bottom: 0 !important;
   }
   .markdown-answer {
-    font-size: 11px !important;
+        /* font-size: auto; */
+
   }
   textarea {
     padding-top: 4px !important;

@@ -185,7 +185,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                 padding: 'clamp(12px, 2vh, 20px) clamp(16px, 3vw, 24px)' 
               }}
             >
-              <p style={{ fontSize: `calc(${Math.max(10, fontSize - 1) / 14} * 1rem)` }} className="text-[var(--text-main)] opacity-100 leading-relaxed font-bold">
+              <p style={{ fontSize: `calc(${Math.max(6, fontSize - 1) / 14} * 1rem)` }} className="text-[var(--text-main)] opacity-100 leading-relaxed font-bold">
                 {entry.question}
               </p>
             </div>
@@ -215,7 +215,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-indigo-500/50 via-purple-500/20 to-transparent" />
                 
-                <div className={`markdown-answer ${showReadingGuide && idx === answers.length - 1 ? 'reading-guide-active' : ''}`} style={{ fontSize: `clamp(9px, calc(${fontSize / 14} * 1rem), 20px)` }}>
+                <div className={`markdown-answer ${showReadingGuide && idx === answers.length - 1 ? 'reading-guide-active' : ''}`} style={{ fontSize: `clamp(6px, calc(${fontSize / 14} * 1rem), 20px)` }}>
                   {(() => {
                     if (entry.isStreaming && !entry.answer) {
                       return (
@@ -281,8 +281,15 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                                       margin: 0,
                                       background: "transparent",
                                       padding: "clamp(12px, 3vh, 24px)",
-                                      fontSize: `clamp(9px, calc(${Math.max(10, fontSize - 2) / 14} * 1rem), 16px)`,
+                                      fontSize: `calc(${Math.max(6, fontSize - 2) / 14} * 1rem)`,
                                       lineHeight: "1.5"
+                                    }}
+                                    codeTagProps={{
+                                      style: {
+                                        fontSize: "inherit",
+                                        lineHeight: "inherit",
+                                        fontFamily: "inherit"
+                                      }
                                     }}
                                     {...rest}
                                   >
@@ -292,7 +299,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                               ) : (
                                 <code
                                   className={`${className || ""} ${isLightMode ? "text-indigo-700 bg-indigo-50" : "text-indigo-300 bg-[var(--glass-bg)]"} px-2 py-0.5 rounded-md font-mono border border-[var(--glass-border)]`}
-                                  style={{ fontSize: `calc(${Math.max(10, fontSize - 1) / 14} * 1rem)` }}
+                                  style={{ fontSize: `calc(${Math.max(6, fontSize - 1) / 14} * 1rem)` }}
                                   {...rest}
                                 >
                                   {children}

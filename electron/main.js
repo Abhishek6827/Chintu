@@ -370,6 +370,16 @@ function createWindow() {
   mainWindow.webContents.on('will-navigate', (event, url) => {
     const external = shouldOpenExternal(url);
     console.log(`[Nav] will-navigate → ${url} | external: ${external}`);
+
+    // Force Google Account Selection screen if we're going to Google Auth
+    if (url.includes("accounts.google.com/o/oauth2/auth") && !url.includes("prompt=")) {
+      event.preventDefault();
+      const u = new URL(url);
+      u.searchParams.set("prompt", "select_account");
+      mainWindow.loadURL(u.toString());
+      return;
+    }
+
     if (external) {
       event.preventDefault();
       require('electron').shell.openExternal(url);
@@ -383,17 +393,24 @@ function createWindow() {
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     console.log(`[Nav] setWindowOpenHandler → ${url}`);
     
-    if (isAppUrl(url) || isAuthFlowUrl(url)) {
+    let targetUrl = url;
+    // Force account selection for Google OAuth if it's a new window attempt
+    if (url.includes("accounts.google.com/o/oauth2/auth") && !url.includes("prompt=")) {
+      const u = new URL(url);
+      u.searchParams.set("prompt", "select_account");
+      targetUrl = u.toString();
+    }
+    
+    if (isAppUrl(targetUrl) || isAuthFlowUrl(targetUrl)) {
       // Auth/app popup requested — DON'T create popup!
       // Instead, navigate the main window directly.
-      // This makes the entire OAuth flow happen in-place.
-      console.log(`[Nav] Redirecting main window to: ${url} (no popup)`);
-      mainWindow.loadURL(url);
+      console.log(`[Nav] Redirecting main window to: ${targetUrl} (no popup)`);
+      mainWindow.loadURL(targetUrl);
       return { action: 'deny' };
     }
     
     // Truly external → system browser
-    require('electron').shell.openExternal(url);
+    require('electron').shell.openExternal(targetUrl);
     return { action: 'deny' };
   });
 
@@ -529,15 +546,32 @@ ipcMain.handle("get-opacity", () => userOpacity);
 ipcMain.handle("get-app-version", () => app.getVersion());
 
 ipcMain.handle("clear-auth-session", async () => {
-  console.log("[Main] Aggressively clearing auth session data...");
+  console.log("[Main] Selectively clearing auth session data...");
   try {
-    // Clear cookies for Clerk and our domains
+    const { session } = require('electron');
+    const cookies = await session.defaultSession.cookies.get({});
+    
+    // Only clear cookies related to Clerk and Chintu to allow Google/GitHub account persistence
+    for (const cookie of cookies) {
+      const domain = cookie.domain || "";
+      if (domain.includes("clerk") || domain.includes("getchintu") || domain.includes("localhost")) {
+        const protocol = cookie.secure ? "https://" : "http://";
+        const host = domain.startsWith(".") ? domain.slice(1) : domain;
+        const url = `${protocol}${host}${cookie.path}`;
+        await session.defaultSession.cookies.remove(url, cookie.name);
+      }
+    }
+
+    // Clear local storage and cache for the app only
     await session.defaultSession.clearStorageData({
-      storages: ['cookies', 'localstorage', 'indexdb', 'cache']
+      storages: ['localstorage', 'indexdb', 'cache'],
+      // We don't specify origins here because it's safer to clear these 
+      // but preserve the main session cookies of IDPs
     });
+    
     return true;
   } catch (err) {
-    console.error("[Main] Error clearing session:", err);
+    console.error("[Main] Error selectively clearing session:", err);
     return false;
   }
 });
