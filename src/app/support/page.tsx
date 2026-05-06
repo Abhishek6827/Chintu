@@ -62,45 +62,45 @@ export default function SupportPage() {
       </div>
 
       {/* Header */}
-      <div className="sticky top-0 z-[100] bg-[var(--bg-app)]/80 backdrop-blur-2xl border-b border-[var(--glass-border)] px-6 py-6" style={{ WebkitAppRegion: 'no-drag' } as any}>
+      <div className="sticky top-0 z-[100] bg-[var(--bg-app)]/80 backdrop-blur-2xl border-b border-[var(--glass-border)] px-4 sm:px-6 py-4 sm:py-6" style={{ WebkitAppRegion: 'no-drag' } as any}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link 
-            href="/" 
-            className="group flex items-center justify-center w-10 h-10 rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm hover:shadow-md hover:border-indigo-500/30 transition-all active:scale-95"
+          <Link
+            href="/"
+            className="group flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm hover:shadow-md hover:border-indigo-500/30 transition-all active:scale-95"
             aria-label="Back to Home"
           >
-            <ArrowLeft className="w-5 h-5 text-[var(--text-dim)] group-hover:text-indigo-500 transition-colors" />
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--text-dim)] group-hover:text-indigo-500 transition-colors" />
           </Link>
-          
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-indigo-500/10 rounded-xl border border-indigo-500/20 flex items-center justify-center p-2 shadow-sm">
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-indigo-500/10 rounded-lg sm:rounded-xl border border-indigo-500/20 flex items-center justify-center p-1.5 sm:p-2 shadow-sm">
               <Image src="https://www.getchintu.com/icon.png" alt="" width={28} height={28} className="w-full h-full object-contain" unoptimized />
             </div>
-            <span className="text-lg font-black tracking-tighter uppercase text-[var(--text-main)]">
+            <span className="text-base sm:text-lg font-black tracking-tighter uppercase text-[var(--text-main)]">
               Chintu <span className="text-indigo-500">Support</span>
             </span>
           </div>
-          
-          <div className="w-10" />
+
+          <div className="w-9 sm:w-10" />
         </div>
       </div>
 
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pb-20 pt-12">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 pb-16 sm:pb-20 pt-8 sm:pt-12">
         <div className="w-full max-w-md" style={{ WebkitAppRegion: 'no-drag' } as any}>
           {/* Title Area */}
           <motion.div
-            className="text-center mb-12"
+            className="text-center mb-8 sm:mb-12"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
           >
-            <div className="w-16 h-16 bg-indigo-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-indigo-500/5 shadow-xl border border-indigo-500/20">
-               <MessageCircle className="w-8 h-8 text-indigo-500" />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-indigo-500/10 rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-indigo-500/5 shadow-xl border border-indigo-500/20">
+               <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-500" />
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-[var(--text-main)] mb-2 uppercase">How can we help?</h1>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--text-main)] mb-2 uppercase px-2">How can we help?</h1>
             <div className="flex items-center justify-center gap-2 text-[var(--text-dim)]">
-               <Clock className="w-3.5 h-3.5" />
-               <p className="text-[10px] font-black uppercase tracking-widest">Active Response Grid: Under 24h</p>
+               <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+               <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Active Response Grid: Under 24h</p>
             </div>
           </motion.div>
 
@@ -114,13 +114,13 @@ export default function SupportPage() {
                 successMessage="Transmission Received"
                 labelName="Chintu Support"
                 labelMessage="Your inquiry has been deployed to our elite support team. Stand by for a response within 24 hours."
-                icon={<CheckCircle2 className="w-8 h-8 text-white" />}
-                containerClassName="mb-6"
+                icon={<CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 text-white" />}
+                containerClassName="mb-4 sm:mb-6"
               />
               <div className="text-center">
                 <button
                   onClick={() => setSent(false)}
-                  className="px-8 py-3.5 bg-[var(--panel-bg)] text-indigo-500 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border border-[var(--glass-border)] hover:border-indigo-500/50 transition-all active:scale-95"
+                  className="px-6 sm:px-8 py-3 sm:py-3.5 bg-[var(--panel-bg)] text-indigo-500 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] rounded-xl sm:rounded-2xl border border-[var(--glass-border)] hover:border-indigo-500/50 transition-all active:scale-95"
                 >
                   Send New Message
                 </button>
@@ -128,31 +128,31 @@ export default function SupportPage() {
             </motion.div>
           ) : (
             <motion.div
-              className="space-y-6"
+              className="space-y-4 sm:space-y-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
             >
               {/* Subject */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em] ml-1">Strategy Focus</label>
+                <label className="text-[9px] sm:text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.2em] sm:tracking-[0.3em] ml-1">Strategy Focus</label>
                 <input
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="e.g. Billing, Technical, Feedback..."
-                  className="w-full bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all placeholder:text-[var(--text-dim)] shadow-sm font-medium text-[var(--text-main)]"
+                  className="w-full bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-xl sm:rounded-2xl px-4 py-3 sm:px-5 sm:py-4 text-xs sm:text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all placeholder:text-[var(--text-dim)] shadow-sm font-medium text-[var(--text-main)]"
                 />
               </div>
 
               {/* Message */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em] ml-1">Detail Report</label>
+                <label className="text-[9px] sm:text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.2em] sm:tracking-[0.3em] ml-1">Detail Report</label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Describe your issue or question in detail..."
-                  className="w-full h-48 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-3xl p-5 text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none placeholder:text-[var(--text-dim)] shadow-sm font-medium leading-relaxed text-[var(--text-main)]"
+                  className="w-full h-36 sm:h-48 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-xs sm:text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none placeholder:text-[var(--text-dim)] shadow-sm font-medium leading-relaxed text-[var(--text-main)]"
                 />
               </div>
 
@@ -160,7 +160,7 @@ export default function SupportPage() {
               <button
                 onClick={handleSubmit}
                 disabled={!message.trim() || sending}
-                className={`w-full py-5 rounded-[2rem] text-[12px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 ${
+                className={`w-full py-4 sm:py-5 rounded-[1.5rem] sm:rounded-[2rem] text-[11px] sm:text-[12px] font-black uppercase tracking-[0.25em] sm:tracking-[0.3em] transition-all flex items-center justify-center gap-2 sm:gap-3 ${
                   message.trim() && !sending
                     ? "bg-indigo-600 text-white shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95"
                     : "bg-[var(--panel-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] cursor-not-allowed"
@@ -168,15 +168,15 @@ export default function SupportPage() {
               >
                 {sending ? "Processing..." : (
                   <>
-                    Deploy Message <Send className="w-4 h-4" />
+                    Deploy Message <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </>
                 )}
               </button>
 
               {/* User info footer */}
-              <div className="flex items-center justify-center gap-2 mt-6">
+              <div className="flex items-center justify-center gap-2 mt-4 sm:mt-6">
                  <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
-                 <p className="text-[9px] text-[var(--text-dim)] font-black uppercase tracking-[0.2em]">
+                 <p className="text-[8px] sm:text-[9px] text-[var(--text-dim)] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em]">
                    Identity: {user?.primaryEmailAddress?.emailAddress || "Unknown Unit"}
                  </p>
               </div>

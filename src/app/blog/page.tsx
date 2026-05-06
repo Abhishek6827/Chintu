@@ -75,30 +75,30 @@ export default function BlogPage() {
 
       <main className="relative z-10 flex-1">
         {/* Header */}
-        <section className="py-24 px-6 text-center">
+        <section className="py-16 sm:py-24 px-4 sm:px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="max-w-4xl mx-auto"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6">
-              <BookOpen className="w-4 h-4 text-indigo-400" />
-              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Knowledge Base</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-4 sm:mb-6">
+              <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-400" />
+              <span className="text-[8px] sm:text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] sm:tracking-[0.3em]">Knowledge Base</span>
             </div>
-            <h1 className="text-5xl sm:text-6xl font-black tracking-tighter uppercase leading-[0.9] mb-6">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase leading-[0.9] mb-4 sm:mb-6 px-2">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Chintu</span> Blog
             </h1>
-            <p className="text-lg sm:text-xl text-[var(--text-dim)] font-bold uppercase tracking-widest max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-[var(--text-dim)] font-bold uppercase tracking-wider sm:tracking-widest max-w-2xl mx-auto px-4">
               Insights, strategies, and updates to elevate your interview game
             </p>
           </motion.div>
         </section>
 
         {/* Blog Grid */}
-        <section className="px-6 pb-24">
+        <section className="px-4 sm:px-6 pb-16 sm:pb-24">
           <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {blogPosts.map((post, index) => (
                 <motion.article
                   key={post.id}
@@ -106,34 +106,34 @@ export default function BlogPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   whileHover={{ y: -8 }}
-                  className="group relative bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-3xl overflow-hidden hover:border-indigo-500/50 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-indigo-500/10"
+                  className="group relative bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl sm:rounded-3xl overflow-hidden hover:border-indigo-500/50 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-indigo-500/10"
                 >
-                  <div className={`h-32 bg-gradient-to-br ${post.gradient} opacity-20 group-hover:opacity-30 transition-opacity`} />
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[8px] font-black uppercase tracking-widest text-indigo-400">
+                  <div className={`h-24 sm:h-32 bg-gradient-to-br ${post.gradient} opacity-20 group-hover:opacity-30 transition-opacity`} />
+                  <div className="p-4 sm:p-6">
+                    <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                      <span className="px-2 py-0.5 sm:px-3 sm:py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-indigo-400">
                         {post.category}
                       </span>
                     </div>
-                    <h3 className="text-xl font-black uppercase tracking-tight mb-3 text-[var(--text-main)] group-hover:text-indigo-500 transition-colors">
+                    <h3 className="text-base sm:text-lg lg:text-xl font-black uppercase tracking-tight mb-2 sm:mb-3 text-[var(--text-main)] group-hover:text-indigo-500 transition-colors line-clamp-2">
                       {post.title}
                     </h3>
-                    <p className="text-sm text-[var(--text-dim)] font-bold leading-relaxed mb-6">
+                    <p className="text-xs sm:text-sm text-[var(--text-dim)] font-bold leading-relaxed mb-4 sm:mb-6 line-clamp-3">
                       {post.excerpt}
                     </p>
-                    <div className="flex items-center justify-between pt-4 border-t border-[var(--glass-border)]">
-                      <div className="flex items-center gap-4 text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-3 sm:pt-4 border-t border-[var(--glass-border)] gap-2 sm:gap-0">
+                      <div className="flex items-center gap-3 sm:gap-4 text-[9px] sm:text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest">
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
+                          <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                           {post.date}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
+                          <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                           {post.readTime}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-indigo-500 text-[10px] font-black uppercase tracking-widest group-hover:gap-3 transition-all">
-                        Read <ArrowRight className="w-3 h-3" />
+                      <div className="flex items-center gap-2 text-indigo-500 text-[9px] sm:text-[10px] font-black uppercase tracking-widest group-hover:gap-3 transition-all self-start sm:self-auto">
+                        Read <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                       </div>
                     </div>
                   </div>
@@ -144,26 +144,26 @@ export default function BlogPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-24 px-6">
+        <section className="py-16 sm:py-24 px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="max-w-4xl mx-auto text-center bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-[3rem] p-12 sm:p-16"
+            className="max-w-4xl mx-auto text-center bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-2xl sm:rounded-[3rem] p-6 sm:p-8 md:p-12 lg:p-16"
           >
-            <Sparkles className="w-12 h-12 text-indigo-400 mx-auto mb-6 animate-pulse" />
-            <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter mb-4 text-[var(--text-main)]">
+            <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-indigo-400 mx-auto mb-4 sm:mb-6 animate-pulse" />
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tighter mb-3 sm:mb-4 text-[var(--text-main)] px-2">
               Ready to Elevate Your Interview Strategy?
             </h2>
-            <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest mb-8 max-w-xl mx-auto">
+            <p className="text-xs sm:text-sm md:text-base text-[var(--text-dim)] font-bold uppercase tracking-wider sm:tracking-widest mb-6 sm:mb-8 max-w-xl mx-auto px-4">
               Join thousands of candidates who&apos;ve mastered technical interviews with Chintu Intelligence
             </p>
             <Link
               href="/sign-up"
-              className="inline-flex items-center gap-3 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.2em] px-10 py-5 rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-105 active:scale-95 transition-all"
+              className="inline-flex items-center gap-2 sm:gap-3 bg-indigo-600 text-white text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-105 active:scale-95 transition-all"
             >
-              Get Started Free <ArrowRight className="w-4 h-4" />
+              Get Started Free <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
             </Link>
           </motion.div>
         </section>

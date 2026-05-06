@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface ConfirmationMessageProps {
   /**
@@ -75,7 +76,7 @@ export default function ConfirmationMessage({
           <motion.div
             className="z-0 flex h-16 overflow-hidden rounded-full bg-emerald-600"
             initial={{ width: "0rem" }}
-            animate={{ width: "12rem" }}
+            animate={{ width: "16rem" }}
             transition={{ delay: 0.5, duration: 0.8 }}
           >
             <motion.div
@@ -98,8 +99,8 @@ export default function ConfirmationMessage({
         >
           {/* Message box */}
           <div className="my-4 flex h-fit w-full rounded-2xl border border-white/20 bg-white/10 p-6 py-4 shadow-2xl backdrop-blur-md">
-            <div className="mr-4 flex h-12 min-w-12 items-center justify-center rounded-full bg-emerald-600 text-white font-black">
-              {labelName[0]}
+            <div className="mr-4 flex h-12 min-w-12 items-center justify-center rounded-full bg-emerald-600 p-2 overflow-hidden">
+              <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={32} height={32} className="w-full h-full object-contain" unoptimized />
             </div>
             <div className="text-left">
               <p className="text-sm font-black text-emerald-400 uppercase tracking-widest">{labelName}</p>
