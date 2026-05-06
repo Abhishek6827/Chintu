@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import Groq from "groq-sdk";
 import OpenAI from "openai";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/utils/supabase/server";
 
 export async function POST(req: NextRequest) {
@@ -175,8 +175,22 @@ Rules:
         const { userId } = await auth();
         if (userId) {
           const supabase = createAdminClient();
-          // Fetch existing profile_data first to preserve preferences/settings
-          const { data: existing } = await supabase.from("profiles").select("profile_data").eq("id", userId).maybeSingle();
+          // Fetch existing profile_data first to preserve preferences/settings (Email Fallback)
+          const userObj = await clerkClient().users.getUser(userId);
+          const email = userObj.emailAddresses[0]?.emailAddress;
+
+          let { data: existing } = await supabase.from("profiles")
+            .select("profile_data")
+            .eq("email", email)
+            .maybeSingle();
+
+          if (!existing) {
+            const { data: idData } = await supabase.from("profiles")
+              .select("profile_data")
+              .eq("id", userId)
+              .maybeSingle();
+            existing = idData;
+          }
           
           const mergedData = { 
             ...(existing?.profile_data || {}), 

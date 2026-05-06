@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import Groq from "groq-sdk";
 import OpenAI from "openai";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/utils/supabase/server";
 
 // ─── Response length presets ────────────────────────────────
@@ -225,11 +225,25 @@ export async function POST(req: NextRequest) {
   try {
     // ─── Credit Check (graceful) ──────────────────────────────
     let currentCredits = 999;
-    const { data: profile, error: profileError } = await supabaseAdmin
+    // ─── Profile lookup with Email Fallback ───────────────────
+    const userObj = await clerkClient().users.getUser(userId);
+    const email = userObj.emailAddresses[0]?.emailAddress;
+
+    let { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("credits, plan")
-      .eq("id", userId)
+      .select("id, credits, plan")
+      .eq("email", email)
       .maybeSingle();
+
+    if (!profile) {
+      const { data: idData, error: idError } = await supabaseAdmin
+        .from("profiles")
+        .select("id, credits, plan")
+        .eq("id", userId)
+        .maybeSingle();
+      profile = idData;
+      if (idError) profileError = idError;
+    }
 
     if (profileError) {
       console.error("[/api/answer] Profile fetch error:", profileError);
@@ -282,10 +296,11 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Deduct 1 Credit Upfront ─────────────────────────────
+    const targetProfileId = profile?.id || userId;
     const { error: deductError } = await supabaseAdmin
       .from("profiles")
       .update({ credits: currentCredits - 1 })
-      .eq("id", userId);
+      .eq("id", targetProfileId);
 
     if (deductError) {
       console.error("[/api/answer] Credit deduction failed:", deductError.message);

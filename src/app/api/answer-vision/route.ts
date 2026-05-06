@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import OpenAI from "openai";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/utils/supabase/server";
 
 // ─── Increase body size limit for large screenshot payloads ─
@@ -237,11 +237,25 @@ export async function POST(req: NextRequest) {
   try {
     // ─── Credit Check (graceful — don't block if profile missing) ──
     let currentCredits = 999; // default: allow if no profile found
-    const { data: profile, error: profileError } = await supabaseAdmin
+    // ─── Profile lookup with Email Fallback ───────────────────
+    const userObj = await clerkClient().users.getUser(userId);
+    const email = userObj.emailAddresses[0]?.emailAddress;
+
+    let { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("credits, plan")
-      .eq("id", userId)
-      .maybeSingle(); // ← maybeSingle instead of single — no error if 0 rows
+      .select("id, credits, plan")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (!profile) {
+      const { data: idData, error: idError } = await supabaseAdmin
+        .from("profiles")
+        .select("id, credits, plan")
+        .eq("id", userId)
+        .maybeSingle();
+      profile = idData;
+      if (idError) profileError = idError;
+    }
 
     if (profileError) {
       console.error("[/api/answer-vision] Profile fetch error:", profileError);
@@ -653,7 +667,7 @@ Rules:
       await supabaseAdmin
         .from("profiles")
         .update({ credits: currentCredits - 2 })
-        .eq("id", userId);
+        .eq("id", profile.id);
     }
 
     // ─── Stream with <think> tag filter ───────────────────────
