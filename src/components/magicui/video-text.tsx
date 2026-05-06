@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 interface VideoTextProps {
   src: string;
-  children: string;
+  children: React.ReactNode;
   className?: string;
   videoClassName?: string;
 }

@@ -7,6 +7,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Copy, Check, Info, ChevronDown, Sparkles, Cpu, Clock, RotateCcw } from "lucide-react";
 import AIProcessing from "./AIProcessing";
+import { VideoText } from "./magicui/video-text";
 
 interface AnswerEntry {
   id: string;
@@ -100,22 +101,36 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
               className="opacity-20" 
             />
         </div>
-        <p 
-          style={{ 
-            fontSize: 'clamp(10px, 2.5vh, 20px)',
-            letterSpacing: '0.4em'
-          }} 
-          className="font-black uppercase mb-3 text-[var(--text-main)] text-center px-4"
+        <div 
+          className="font-black uppercase mb-3 text-center px-4"
         >
-          {userPlan !== "free" ? (
-            <div className="water-text-container">
-              <span className="water-text-base">{userPlan} Plan Active</span>
-              <span className="water-text-wave">{userPlan} Plan Active</span>
+          {userPlan === "elite" ? (
+            <div className="w-[380px] h-[120px] rounded-[2rem] overflow-hidden shadow-2xl border border-indigo-500/30 relative flex items-center justify-center">
+              <VideoText 
+                src="https://cdn.magicui.design/ocean-small.webm"
+                className="h-full w-full"
+              >
+                <div className="water-text-wrapper" style={{ scale: '1.4', letterSpacing: '0.2em' }}>
+                  <div className="water-text-content">
+                    <span className="water-text-bg">ELITE PROTOCOL ACTIVE</span>
+                    <span className="water-text-fill">ELITE PROTOCOL ACTIVE</span>
+                    <span className="water-text-fill-secondary">ELITE PROTOCOL ACTIVE</span>
+                  </div>
+                </div>
+              </VideoText>
+            </div>
+          ) : userPlan !== "free" ? (
+            <div className="water-text-wrapper" style={{ fontSize: 'clamp(10px, 2.2vh, 18px)', letterSpacing: '0.4em' }}>
+              <div className="water-text-content">
+                <span className="water-text-bg">{userPlan} Plan Active</span>
+                <span className="water-text-fill">{userPlan} Plan Active</span>
+                <span className="water-text-fill-secondary">{userPlan} Plan Active</span>
+              </div>
             </div>
           ) : (
-            "Chintu is Ready"
+            <span style={{ fontSize: 'clamp(10px, 2.5vh, 20px)', letterSpacing: '0.4em' }} className="text-[var(--text-main)] opacity-40">Chintu is Ready</span>
           )}
-        </p>
+        </div>
         <p 
           style={{ 
             fontSize: 'clamp(7px, 1.5vh, 12px)'

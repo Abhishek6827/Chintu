@@ -736,8 +736,57 @@ input[type="range"]::-moz-range-thumb {
   animation: fade-in 1s ease-out forwards;
 }
 
-/* ─── Water Text Animation ────────────────────────── */
-@keyframes water-wave {
+/* ─── Premium Water Text Animation ────────────────── */
+.water-text-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.water-text-content {
+  position: relative;
+  font-weight: 900;
+  text-transform: uppercase;
+  user-select: none;
+  line-height: 1;
+}
+
+.water-text-bg {
+  color: var(--text-main);
+  opacity: 0.1;
+}
+
+.water-text-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: #4f46e5;
+  animation: water-fill-move 4s ease-in-out infinite;
+  z-index: 2;
+}
+
+.dark-mode .water-text-fill {
+  color: #818cf8;
+}
+
+.water-text-fill-secondary {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: #6366f1;
+  opacity: 0.5;
+  animation: water-fill-move 4s ease-in-out infinite;
+  animation-delay: -2s;
+  z-index: 1;
+}
+
+@keyframes water-fill-move {
   0%, 100% {
     clip-path: polygon(
       0% 45%,
@@ -764,31 +813,4 @@ input[type="range"]::-moz-range-thumb {
       0% 100%
     );
   }
-}
-
-.water-text-container {
-  position: relative;
-  display: inline-block;
-  line-height: 1;
-}
-
-.water-text-base {
-  color: var(--text-main);
-  opacity: 0.1;
-  user-select: none;
-}
-
-.water-text-wave {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  color: #4f46e5;
-  animation: water-wave 4s ease-in-out infinite;
-  user-select: none;
-}
-
-.dark-mode .water-text-wave {
-  color: #818cf8;
 }

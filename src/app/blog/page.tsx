@@ -16,7 +16,7 @@ const blogPosts = [
     readTime: "3 min read",
     category: "Product",
     gradient: "from-indigo-500 to-purple-500",
-    screenshot: "/app-screenshot-1.png"
+    screenshot: "/blog_desktop_app.png"
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ const blogPosts = [
     readTime: "5 min read",
     category: "Strategy",
     gradient: "from-indigo-500 to-purple-500",
-    screenshot: "/app-screenshot-2.png"
+    screenshot: "/blog_mastering_interviews.png"
   },
   {
     id: 3,
@@ -36,7 +36,7 @@ const blogPosts = [
     readTime: "4 min read",
     category: "Technology",
     gradient: "from-purple-500 to-pink-500",
-    screenshot: "/app-screenshot-3.png"
+    screenshot: "/blog_future_ai_prep.png"
   },
   {
     id: 4,
@@ -46,7 +46,7 @@ const blogPosts = [
     readTime: "6 min read",
     category: "Guide",
     gradient: "from-pink-500 to-orange-500",
-    screenshot: "/app-screenshot-1.png"
+    screenshot: "/blog_elite_vs_premium_plan.png"
   },
   {
     id: 5,
@@ -56,7 +56,7 @@ const blogPosts = [
     readTime: "3 min read",
     category: "Tips",
     gradient: "from-orange-500 to-yellow-500",
-    screenshot: "/app-screenshot-2.png"
+    screenshot: "/blog_energy_sync_credits_tips.png"
   },
   {
     id: 6,
@@ -66,17 +66,17 @@ const blogPosts = [
     readTime: "5 min read",
     category: "Tutorial",
     gradient: "from-yellow-500 to-green-500",
-    screenshot: "/app-screenshot-3.png"
+    screenshot: "/blog_building_ai_profile_tutorial.png"
   },
   {
     id: 7,
-    title: "Chintu v2.5: What&apos;s New",
+    title: "Chintu v2.5: What's New",
     excerpt: "Discover the latest features in Chintu Intelligence v2.5 including Hyper-Intelligence mode and enhanced analytics.",
     date: "December 2023",
     readTime: "7 min read",
     category: "Updates",
     gradient: "from-green-500 to-teal-500",
-    screenshot: "/app-screenshot-1.png"
+    screenshot: "/blog_chintu_v2_5_updates.png"
   }
 ];
 
