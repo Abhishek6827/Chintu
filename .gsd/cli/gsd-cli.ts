@@ -133,11 +133,14 @@ program
       const settings = db.getAllSettings();
 
       if (options.json) {
-        console.log(JSON.stringify({
+        const output = {
           milestone,
           health,
-          settings
-        }, null, 2));
+          settings,
+          isRunning: false,
+          currentSession: undefined
+        };
+        console.log(JSON.stringify(output, null, 2));
         return;
       }
 

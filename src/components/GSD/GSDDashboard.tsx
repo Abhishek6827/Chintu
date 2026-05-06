@@ -67,68 +67,21 @@ const GSDDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Mock data for demonstration - in real implementation, this would come from GSD API
+  // Mock data with real CLI integration for buttons
   useEffect(() => {
     const loadStatus = async () => {
       try {
         setIsLoading(true);
         
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        // Mock data for now - API routes not compiling
         const mockStatus: GSDStatus = {
           milestone: {
-            id: 'M1234567890',
-            title: 'GSD Auto Mode Integration',
-            description: 'Integrate autonomous development execution engine into Chintu project',
+            id: 'M1778088173563',
+            title: 'https://www.parakeet-ai.com/  https://www.chiku-ai.in/',
+            description: 'visit these both websites or jitni jaada or necessary details la paao apni website attractive bnaane ke liye jaao laao and properly style kro koshish kro scroll krne waale transitions or motions USE kro jaada se jaada koi help chaahiye ho mere side se to bataana',
             status: 'active',
             created_at: new Date().toISOString(),
-            slices: [
-              {
-                id: 'slice_1',
-                title: 'Database Setup',
-                description: 'Set up SQLite database and schema',
-                status: 'completed',
-                priority: 10,
-                tasks: [
-                  { id: 'task_1', title: 'Create schema', status: 'completed', priority: 10 },
-                  { id: 'task_2', title: 'Initialize database', status: 'completed', priority: 9 }
-                ]
-              },
-              {
-                id: 'slice_2',
-                title: 'Core Engine',
-                description: 'Implement GSD Auto Mode engine',
-                status: 'completed',
-                priority: 10,
-                tasks: [
-                  { id: 'task_3', title: 'State machine', status: 'completed', priority: 10 },
-                  { id: 'task_4', title: 'Phase management', status: 'completed', priority: 9 }
-                ]
-              },
-              {
-                id: 'slice_3',
-                title: 'CLI Interface',
-                description: 'Create command-line interface',
-                status: 'completed',
-                priority: 8,
-                tasks: [
-                  { id: 'task_5', title: 'Command parser', status: 'completed', priority: 8 },
-                  { id: 'task_6', title: 'Status display', status: 'completed', priority: 7 }
-                ]
-              },
-              {
-                id: 'slice_4',
-                title: 'Dashboard Integration',
-                description: 'Integrate with Chintu UI',
-                status: 'in_progress',
-                priority: 7,
-                tasks: [
-                  { id: 'task_7', title: 'React components', status: 'in_progress', priority: 7 },
-                  { id: 'task_8', title: 'Real-time updates', status: 'pending', priority: 6 }
-                ]
-              }
-            ]
+            slices: []
           },
           health: {
             healthy: true,
@@ -161,6 +114,60 @@ const GSDDashboard: React.FC = () => {
     
     return () => clearInterval(interval);
   }, []);
+
+  // Handle button clicks with CLI integration
+  const handleAction = async (action: 'start' | 'stop' | 'status' | 'doctor') => {
+    try {
+      // Show loading state
+      const button = event?.target as HTMLButtonElement;
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Executing...';
+      }
+
+      // Execute CLI command via fetch to a simple endpoint
+      const response = await fetch('/api/gsd', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action }),
+      }).catch(() => {
+        // If API fails, show user the CLI command to run manually
+        const commands = {
+          start: 'npm run gsd:auto',
+          stop: 'npm run gsd:stop', 
+          status: 'npm run gsd:status',
+          doctor: 'npm run gsd:doctor'
+        };
+        
+        alert(`API not ready. Please run this command manually:\n\n${commands[action]}\n\nThen refresh the page to see updates.`);
+        
+        if (button) {
+          button.disabled = false;
+          button.textContent = action === 'start' ? 'Start' : action === 'stop' ? 'Stop' : action === 'status' ? 'Status' : 'Doctor';
+        }
+        return;
+      });
+
+      if (response) {
+        const result = await response.json();
+        
+        if (result.success) {
+          alert(`Success: ${result.message}`);
+          // Refresh status after action
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else {
+          alert(`Error: ${result.error}`);
+        }
+      }
+    } catch (err) {
+      alert('Failed to execute action. Please try running the command manually in terminal.');
+      console.error(err);
+    }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -223,6 +230,7 @@ const GSDDashboard: React.FC = () => {
         </div>
         <div className="flex items-center space-x-2">
           <button
+            onClick={() => handleAction(status.isRunning ? 'stop' : 'start')}
             className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
               status.isRunning 
                 ? 'bg-red-100 text-red-700 hover:bg-red-200' 
@@ -241,7 +249,10 @@ const GSDDashboard: React.FC = () => {
               </>
             )}
           </button>
-          <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center space-x-2">
+          <button 
+            onClick={() => handleAction('stop')}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center space-x-2"
+          >
             <Square className="w-4 h-4" />
             <span>Stop</span>
           </button>
@@ -401,13 +412,22 @@ const GSDDashboard: React.FC = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <button className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium">
+          <button 
+            onClick={() => handleAction('status')}
+            className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
+          >
             View Detailed Status
           </button>
-          <button className="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium">
+          <button 
+            onClick={() => handleAction('doctor')}
+            className="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium"
+          >
             Generate Report
           </button>
-          <button className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium">
+          <button 
+            onClick={() => window.open('https://localhost:3000', '_blank')}
+            className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
+          >
             Open Terminal
           </button>
         </div>
