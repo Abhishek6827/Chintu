@@ -239,7 +239,7 @@ export default function LandingPage() {
                 <Link href="/sign-in" className="hidden sm:block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-indigo-600 transition-colors px-4">
                   Portal Login
                 </Link>
-                <Link href="/sign-up" className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3.5 rounded-xl shadow-lg shadow-indigo-500/40 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+                <Link href="/sign-up" className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl shadow-lg shadow-indigo-500/40 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
                   Get Started <ArrowRight className="w-3 h-3" />
                 </Link>
               </>
@@ -278,18 +278,22 @@ export default function LandingPage() {
                           router.push("/setup");
                         }, 500);
                       }}
-                      className="relative group overflow-hidden bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-indigo-400 text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3 rounded-xl hover:border-indigo-500 hover:bg-indigo-500/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                      className="relative group overflow-hidden bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-indigo-400 text-[9px] font-black uppercase tracking-[0.2em] px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl hover:border-indigo-500 hover:bg-indigo-500/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                     >
-                      Enter The App <Sparkles className="w-3 h-3 fill-indigo-400" />
+                      <span className="hidden sm:inline">Enter The App</span>
+                      <span className="sm:hidden">Open</span>
+                      <Sparkles className="w-3 h-3 fill-indigo-400" />
                     </button>
                   </>
                 )}
                 {userPlan === 'free' && (
                   <Link
                     href="/pricing"
-                    className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3.5 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                    className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-4 sm:px-8 py-3 sm:py-3.5 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                   >
-                    Upgrade Plan <Zap className="w-3 h-3 fill-current" />
+                    <span className="hidden sm:inline">Upgrade Plan</span>
+                    <span className="sm:hidden">Upgrade</span>
+                    <Zap className="w-3 h-3 fill-current" />
                   </Link>
                 )}
                 <div className="scale-105 hover:scale-110 transition-transform">
@@ -573,12 +577,12 @@ export default function LandingPage() {
                 ))}
               </div>
 
-              {/* Floating Stat Cards (positioned within right column) */}
+              {/* Floating Stat Cards (positioned within right column, lg+ only) */}
               <motion.div
                 initial={{ opacity: 0, x: -20, y: 20 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={{ delay: 1, duration: 0.7 }}
-                className="hidden md:flex absolute -left-6 top-1/4 items-center gap-2.5 px-3 py-2 bg-[var(--panel-bg)]/95 backdrop-blur-xl border border-[var(--glass-border)] rounded-xl shadow-2xl"
+                className="hidden xl:flex absolute -left-6 top-1/4 items-center gap-2.5 px-3 py-2 bg-[var(--panel-bg)]/95 backdrop-blur-xl border border-[var(--glass-border)] rounded-xl shadow-2xl"
               >
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-md shadow-emerald-500/30">
                   <Check className="w-4 h-4 text-white" />
@@ -593,7 +597,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, x: 20, y: -20 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={{ delay: 1.2, duration: 0.7 }}
-                className="hidden md:flex absolute -right-6 top-1/2 items-center gap-2.5 px-3 py-2 bg-[var(--panel-bg)]/95 backdrop-blur-xl border border-[var(--glass-border)] rounded-xl shadow-2xl"
+                className="hidden xl:flex absolute -right-6 top-1/2 items-center gap-2.5 px-3 py-2 bg-[var(--panel-bg)]/95 backdrop-blur-xl border border-[var(--glass-border)] rounded-xl shadow-2xl"
               >
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-md shadow-indigo-500/30">
                   <Zap className="w-4 h-4 text-white fill-white" />
@@ -683,32 +687,32 @@ export default function LandingPage() {
               </div>
               <div className="flex-1 bg-[var(--panel-bg)] rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 border border-[var(--glass-border)] relative overflow-hidden w-full">
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.05),transparent)] animate-pulse" />
-                <div className="relative z-10 space-y-6">
-                  <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-indigo-500/30 transition-all group">
-                    <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-                      <Globe className="w-5 h-5" />
+                <div className="relative z-10 space-y-3 sm:space-y-6">
+                  <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-[var(--bg-app)] rounded-xl sm:rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-indigo-500/30 transition-all group">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 flex-shrink-0">
+                      <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Global Sync</p>
-                      <p className="text-xs font-bold text-[var(--text-dim)]">Connected to Tactical Grid</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-emerald-500/30 transition-all group">
-                    <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-                      <Check className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Verified Intel</p>
-                      <p className="text-xs font-bold text-[var(--text-dim)]">99.9% Accuracy Rating</p>
+                    <div className="min-w-0">
+                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-indigo-400">Global Sync</p>
+                      <p className="text-[10px] sm:text-xs font-bold text-[var(--text-dim)] truncate">Connected to Tactical Grid</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 p-4 bg-[var(--bg-app)] rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-amber-500/30 transition-all group">
-                    <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
-                      <PlayCircle className="w-5 h-5" />
+                  <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-[var(--bg-app)] rounded-xl sm:rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-emerald-500/30 transition-all group">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 flex-shrink-0">
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">Auto Pilot</p>
-                      <p className="text-xs font-bold text-[var(--text-dim)]">Autonomous Reasoning</p>
+                    <div className="min-w-0">
+                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-emerald-400">Verified Intel</p>
+                      <p className="text-[10px] sm:text-xs font-bold text-[var(--text-dim)] truncate">99.9% Accuracy Rating</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-[var(--bg-app)] rounded-xl sm:rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-amber-500/30 transition-all group">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20 flex-shrink-0">
+                      <PlayCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-amber-400">Auto Pilot</p>
+                      <p className="text-[10px] sm:text-xs font-bold text-[var(--text-dim)] truncate">Autonomous Reasoning</p>
                     </div>
                   </div>
                 </div>
