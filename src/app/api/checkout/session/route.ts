@@ -21,12 +21,12 @@ export async function GET(req: NextRequest) {
             expand: ["line_items", "subscription", "payment_intent"],
         });
 
-        const userId = session.metadata?.userId;
+        const email = session.customer_details?.email;
         const supabase = createAdminClient();
         
         let profile = null;
-        if (userId) {
-            const { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+        if (email) {
+            const { data } = await supabase.from("profiles").select("*").eq("email", email).maybeSingle();
             profile = data;
         }
 

@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/utils/supabase/server";
@@ -11,11 +11,14 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const userObj = await clerkClient().users.getUser(userId);
+  const email = userObj.emailAddresses[0]?.emailAddress;
+
   const supabaseAdmin = createAdminClient();
   const { data: profile } = await supabaseAdmin
     .from("profiles")
     .select("payment_provider, stripe_customer_id")
-    .eq("id", userId)
+    .eq("email", email)
     .maybeSingle();
 
   if (!profile) {

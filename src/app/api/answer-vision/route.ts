@@ -243,19 +243,9 @@ export async function POST(req: NextRequest) {
 
     let { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("id, credits, plan")
+      .select("credits, plan")
       .eq("email", email)
       .maybeSingle();
-
-    if (!profile) {
-      const { data: idData, error: idError } = await supabaseAdmin
-        .from("profiles")
-        .select("id, credits, plan")
-        .eq("id", userId)
-        .maybeSingle();
-      profile = idData;
-      if (idError) profileError = idError;
-    }
 
     if (profileError) {
       console.error("[/api/answer-vision] Profile fetch error:", profileError);
@@ -667,7 +657,7 @@ Rules:
       await supabaseAdmin
         .from("profiles")
         .update({ credits: currentCredits - 2 })
-        .eq("id", profile.id);
+        .eq("email", email);
     }
 
     // ─── Stream with <think> tag filter ───────────────────────

@@ -175,7 +175,6 @@ Rules:
         const { userId } = await auth();
         if (userId) {
           const supabase = createAdminClient();
-          // Fetch existing profile_data first to preserve preferences/settings (Email Fallback)
           const userObj = await clerkClient().users.getUser(userId);
           const email = userObj.emailAddresses[0]?.emailAddress;
 
@@ -183,14 +182,6 @@ Rules:
             .select("profile_data")
             .eq("email", email)
             .maybeSingle();
-
-          if (!existing) {
-            const { data: idData } = await supabase.from("profiles")
-              .select("profile_data")
-              .eq("id", userId)
-              .maybeSingle();
-            existing = idData;
-          }
           
           const mergedData = { 
             ...(existing?.profile_data || {}), 
@@ -202,11 +193,11 @@ Rules:
           };
           
           const { error: upsertError } = await supabase.from("profiles").upsert({
-            id: userId,
+            email: email,
             profile_data: mergedData,
             raw_profile: rawText,
             updated_at: new Date().toISOString()
-          });
+          }, { onConflict: 'email' });
 
           if (upsertError) {
             console.error(`[/api/refine-profile] ✗ Database Error for user ${userId}:`, upsertError);

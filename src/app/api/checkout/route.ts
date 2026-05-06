@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
         const { data: profile } = await supabaseAdmin
             .from("profiles")
             .select("stripe_customer_id")
-            .eq("id", userId)
+            .eq("email", email)
             .maybeSingle();
 
         const session = await stripe.checkout.sessions.create({

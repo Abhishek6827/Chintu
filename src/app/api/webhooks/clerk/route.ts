@@ -78,8 +78,8 @@ export async function POST(req: Request) {
     // Check if user already exists to prevent duplicate notifications (for sequential retries)
     const { data: existingProfile } = await supabase
       .from('profiles')
-      .select('id')
-      .eq('id', id)
+      .select('email')
+      .eq('email', email)
       .maybeSingle();
 
     if (existingProfile) {
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
         plan: 'free',
         updated_at: now.toISOString()
       }, {
-        onConflict: 'id'
+        onConflict: 'email'
       });
 
     if (error) {
@@ -187,7 +187,7 @@ export async function POST(req: Request) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('email, display_id, plan')
-      .eq('id', id)
+      .eq('id', id) // Clerk still provides id here, but we should also check email if possible. 
       .maybeSingle();
 
     if (!profile) {

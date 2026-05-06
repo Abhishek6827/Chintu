@@ -233,56 +233,13 @@ export async function POST(req: Request) {
 
 
   async function findProfile(userId?: string | null, email?: string | null) {
-    let profile = null;
-    if (userId) {
-      const { data } = await supabaseAdmin
-        .from("profiles")
-        .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
-        .eq("id", userId)
-        .maybeSingle();
-      profile = data;
-    }
-
-    if (email) {
-      const { data: profileByEmail } = await supabaseAdmin
-        .from("profiles")
-        .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
-        .eq("email", email)
-        .maybeSingle();
-
-      if (profileByEmail) {
-        if (!profile || profile.id === profileByEmail.id) {
-          return profileByEmail;
-        }
-
-        // MERGE LOGIC — legacy profile found for same email
-        console.log(
-          `[Stripe Webhook] Found legacy profile ${profileByEmail.id} for email ${email}. Merging into ${profile.id}.`
-        );
-
-        const mergedCredits = (profile.credits || 0) + (profileByEmail.credits || 0);
-        const legacyExp = profileByEmail.subscription_expires_at
-          ? new Date(profileByEmail.subscription_expires_at)
-          : null;
-        const currentExp = profile.subscription_expires_at
-          ? new Date(profile.subscription_expires_at)
-          : null;
-        let finalExp = profile.subscription_expires_at;
-
-        if (legacyExp && (!currentExp || legacyExp > currentExp)) {
-          finalExp = legacyExp.toISOString();
-        }
-
-        await supabaseAdmin
-          .from("profiles")
-          .update({ email: `migrated_${Date.now()}_${email}`, credits: 0, plan: "free" })
-          .eq("id", profileByEmail.id);
-
-        profile.credits = mergedCredits;
-        profile.subscription_expires_at = finalExp;
-      }
-    }
-    return profile;
+    if (!email) return null;
+    const { data } = await supabaseAdmin
+      .from("profiles")
+      .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
+      .eq("email", email)
+      .maybeSingle();
+    return data;
   }
 
 
@@ -494,7 +451,7 @@ export async function POST(req: Request) {
           last_frequency: frequency,
         },
       })
-      .eq("id", profile.id);
+      .eq("email", profile.email);
 
     if (updateError) {
       console.error("[Webhook] ❌ Supabase update failed:", updateError.message);
@@ -644,7 +601,7 @@ export async function POST(req: Request) {
           last_frequency: planInfo.frequency,
         },
       })
-      .eq("id", profile.id);
+      .eq("email", profile.email);
 
     if (updateError) {
       console.error("[Webhook] ❌ Renewal DB update failed:", updateError.message);
@@ -745,7 +702,7 @@ export async function POST(req: Request) {
     await supabaseAdmin
       .from("profiles")
       .update({ plan: planInfo.plan, updated_at: new Date().toISOString() })
-      .eq("id", profile.id);
+      .eq("email", profile.email);
 
     const symbol = subscription.currency?.toUpperCase() === "inr" ? "₹" : "$";
     const expectedTotal = planInfo.basePrice * 1 * 1.02;
@@ -811,7 +768,7 @@ export async function POST(req: Request) {
         stripe_subscription_id: null,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", profile.id);
+      .eq("email", profile.email);
 
     let customerName = profile.email || "Unknown";
     try {
@@ -879,7 +836,7 @@ export async function POST(req: Request) {
         stripe_subscription_id: null,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", profile.id);
+      .eq("email", profile.email);
 
     await sendTelegramAlert(
       buildTelegramMessage({
@@ -905,6 +862,5 @@ export async function POST(req: Request) {
     );
   }
 
-
   return NextResponse.json({ received: true });
-}
+}

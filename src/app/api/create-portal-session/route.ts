@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/utils/supabase/server";
 
@@ -16,12 +16,15 @@ export async function POST() {
     }
 
     try {
+        const userObj = await clerkClient().users.getUser(userId);
+        const email = userObj.emailAddresses[0]?.emailAddress;
+
         const supabase = createAdminClient();
         const { data: profile } = await supabase
             .from("profiles")
             .select("stripe_customer_id")
-            .eq("id", userId)
-            .single();
+            .eq("email", email)
+            .maybeSingle();
 
         if (!profile?.stripe_customer_id) {
             return NextResponse.json({ error: "No active subscription found. Please subscribe first." }, { status: 400 });

@@ -22,15 +22,6 @@ export async function POST(req: Request) {
       .eq("email", email)
       .maybeSingle();
 
-    if (!existing) {
-      const { data: idData } = await supabaseAdmin
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .maybeSingle();
-      existing = idData;
-    }
-
     const plan = (existing?.plan || "free").toLowerCase();
 
     // Plan Gating: If free, block updates to profile_data, raw_profile and current_jd if they already exist
@@ -51,8 +42,7 @@ export async function POST(req: Request) {
     // List of columns that DEFINITELY exist in the profiles table
     const allowedColumns = ["id", "full_name", "display_id", "profile_data", "raw_profile", "theme", "plan", "credits", "history", "updated_at", "payment_provider", "razorpay_payment_id"];
     
-    const targetId = existing?.id || userId;
-    const updateData: any = { id: targetId, updated_at: new Date().toISOString() };
+    const updateData: any = { email, updated_at: new Date().toISOString() };
 
     // Map rest of body to allowed columns
     Object.keys(rest).forEach(key => {
@@ -76,7 +66,7 @@ export async function POST(req: Request) {
 
     const { error } = await supabaseAdmin
       .from("profiles")
-      .upsert(finalData, { onConflict: 'id' });
+      .upsert(finalData, { onConflict: 'email' });
 
     if (error) {
       console.error("Supabase Profile Save Error:", error);
@@ -99,20 +89,11 @@ export async function GET() {
     const email = userObj.emailAddresses[0]?.emailAddress;
 
     const supabaseAdmin = createAdminClient();
-    let { data } = await supabaseAdmin
+    const { data } = await supabaseAdmin
       .from("profiles")
       .select("*")
       .eq("email", email)
       .maybeSingle();
-
-    if (!data) {
-      const { data: idData } = await supabaseAdmin
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .maybeSingle();
-      data = idData;
-    }
 
     if (data) {
       // Inject virtual current_jd from profile_data for frontend compatibility

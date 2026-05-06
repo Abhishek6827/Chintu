@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import crypto from "crypto";
 import { createAdminClient } from "@/utils/supabase/server";
 import { Resend } from "resend";
@@ -72,68 +72,25 @@ export async function POST(req: NextRequest) {
     const supabaseAdmin = createAdminClient();
     const resend = new Resend(process.env.RESEND_API_KEY);
 
+    const userObj = await clerkClient().users.getUser(userId);
+    const email = userObj.emailAddresses[0]?.emailAddress;
+
     // 1. Initial Profile Fetch
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("*")
-      .eq("id", userId)
+      .eq("email", email)
       .maybeSingle();
 
-    // 2. Resolve Contact Info (Clerk Fallback)
-    let userEmail = profile?.email;
-    let userName = profile?.full_name;
+    // 2. Resolve Contact Info
+    let userEmail = email;
+    let userName = profile?.full_name || `${userObj.firstName || ""} ${userObj.lastName || ""}`.trim();
     
-    if (!profile || !userEmail || !userName) {
-      try {
-        const { clerkClient } = await import("@clerk/nextjs/server");
-        const client = await clerkClient();
-        const clerkUser = await client.users.getUser(userId);
-        userEmail = userEmail || clerkUser.emailAddresses[0]?.emailAddress;
-        userName = userName || `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
-      } catch (err) {
-        console.error("Clerk fetch failed:", err);
-      }
-    }
-
-    // 3. Resolve Profile & Handle Merging (Legacy Account Migration)
+    // 3. Resolve Profile State
     let baseCredits = profile?.credits || 0;
     let baseExpiryStr = profile?.subscription_expires_at;
 
-    if (userEmail) {
-      const { data: legacyProfile } = await supabaseAdmin
-        .from("profiles")
-        .select("id, credits, subscription_expires_at, plan, profile_data")
-        .eq("email", userEmail)
-        .neq("id", userId) // Look for OTHER accounts with same email
-        .maybeSingle();
-
-      if (legacyProfile) {
-        console.log(`[/api/razorpay/verify] Found legacy profile ${legacyProfile.id} for email ${userEmail}. Merging into ${userId}.`);
-        
-        // Merge Credits
-        baseCredits += (legacyProfile.credits || 0);
-        
-        // Merge Expiry (take latest)
-        const legacyExp = legacyProfile.subscription_expires_at ? new Date(legacyProfile.subscription_expires_at) : null;
-        const currentExp = baseExpiryStr ? new Date(baseExpiryStr) : null;
-        if (legacyExp && (!currentExp || legacyExp > currentExp)) {
-          baseExpiryStr = legacyExp.toISOString();
-        }
-
-        // Deactivate legacy profile to prevent future email conflicts
-        await supabaseAdmin
-          .from("profiles")
-          .update({ 
-            email: `migrated_${Date.now()}_${userEmail}`,
-            credits: 0,
-            plan: "free"
-          })
-          .eq("id", legacyProfile.id);
-      }
-    }
-
-    const targetProfile = profile; // The one we are actually updating
-    const targetUserId = userId; 
+    const targetProfile = profile; 
 
     // 4. Calculate Credits & Expiry
     const planKey = `${planId}_${billingCycle}`; 
@@ -192,16 +149,17 @@ export async function POST(req: NextRequest) {
     // Update Profile (from upsert to update for safety)
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
-      .update({
+      .upsert({
         display_id: targetProfile?.display_id || `CHINTU-RAZORPAY-${new Date().toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(/\//g, '-')}-${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).replace(':', '')}`,
+        id: userId,
         plan: planInfo.plan,
         credits: totalCredits,
         subscription_expires_at: newExpiry.toISOString(),
         payment_provider: "razorpay",
         razorpay_payment_id: razorpay_payment_id,
         updated_at: new Date().toISOString(),
-        full_name: userName || (targetProfile ? targetProfile.full_name : null),
-        email: userEmail || (targetProfile ? targetProfile.email : null),
+        full_name: userName || targetProfile?.full_name,
+        email: userEmail,
         profile_data: {
           ...(targetProfile?.profile_data || {}),
           payment_amount: `${planInfo.price}`,
@@ -212,8 +170,7 @@ export async function POST(req: NextRequest) {
           gateway_fee: totalFees,
           last_frequency: planInfo.frequency,
         }
-      })
-      .eq("id", targetUserId);
+      }, { onConflict: 'email' });
 
     if (updateError) throw updateError;
 

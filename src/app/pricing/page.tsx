@@ -102,6 +102,67 @@ const PLANS = [
   },
 ];
 
+const ENGINE_DETAILS = [
+  { 
+    name: "Standard Engine", 
+    model: "Llama 3.3 70B", 
+    desc: "The backbone of Chintu. Fast, reliable, and perfect for standard interview questions.", 
+    plans: ["Starter", "Pro", "Elite"],
+    icon: <Sparkles className="w-4 h-4 text-emerald-400" />
+  },
+  { 
+    name: "Pro Engine", 
+    model: "GPT-OSS 120B", 
+    desc: "Superior reasoning and logic. Best for behavioral questions and complex system design.", 
+    plans: ["Pro", "Elite"],
+    icon: <Shield className="w-4 h-4 text-indigo-400" />
+  },
+  { 
+    name: "Coding Specialist", 
+    model: "Qwen 3 Coder", 
+    desc: "Hardened for technical rounds. Expert at finding silent bugs and optimizing algorithms.", 
+    plans: ["Pro", "Elite"],
+    icon: <Check className="w-4 h-4 text-blue-400" />
+  },
+  { 
+    name: "Titan Engine", 
+    model: "Nemotron 120B", 
+    desc: "Massive intelligence for niche domains. High-fidelity knowledge across all tech stacks.", 
+    plans: ["Pro", "Elite"],
+    icon: <Trophy className="w-4 h-4 text-purple-400" />
+  },
+  { 
+    name: "Turbo Engine", 
+    model: "Qwen 3.6", 
+    desc: "Hyper-intelligence with zero latency. The ultimate strategic companion for Elite users.", 
+    plans: ["Elite Only"],
+    icon: <Crown className="w-4 h-4 text-amber-400" />
+  }
+];
+
+const RESPONSE_DETAILS = [
+  { 
+    name: "Small", 
+    desc: "3-4 short sentences. Ideal for quick, direct answers when time is extremely tight.", 
+    plans: ["Starter", "Pro", "Elite"] 
+  },
+  { 
+    name: "Balanced", 
+    desc: "2-3 natural paragraphs. The default mode for a thoughtful, human-like conversational flow.", 
+    plans: ["Starter", "Pro", "Elite"] 
+  },
+  { 
+    name: "Detailed", 
+    desc: "Structured sections with headers & steps. Perfect for deep dives and complex explanations.", 
+    plans: ["Pro", "Elite"] 
+  },
+  { 
+    name: "Coding", 
+    desc: "Specialized code blocks with inline fixes and line-by-line optimization analysis.", 
+    plans: ["Pro", "Elite"] 
+  }
+];
+
 export default function PricingPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
@@ -639,6 +700,74 @@ export default function PricingPage() {
         <p className="text-center text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-widest mt-12">
           Secure Payments by Razorpay • Global Access Enabled
         </p>
+
+        {/* Intelligence Matrix Section */}
+        <div className="mt-24 max-w-6xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl font-black tracking-tighter uppercase mb-4">The Intelligence Matrix</h2>
+            <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest max-w-md mx-auto leading-relaxed">
+              Understand the strategic capabilities of each neural module and response mode.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Engines Column */}
+            <div className="space-y-6">
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-400 flex items-center gap-2 mb-8">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" /> Neural Engines
+              </h3>
+              <div className="space-y-4">
+                {ENGINE_DETAILS.map((engine, i) => (
+                  <div key={i} className="bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl p-5 hover:border-indigo-500/30 transition-all group">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-indigo-500/10 group-hover:border-indigo-500/20 transition-all">
+                          {engine.icon}
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-black uppercase tracking-tight text-[var(--text-main)]">{engine.name}</h4>
+                          <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">{engine.model}</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        {engine.plans.map((p, idx) => (
+                          <span key={idx} className={`text-[7px] font-black uppercase px-2 py-0.5 rounded ${p.includes('Only') ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-white/5 text-[var(--text-dim)] border border-white/10'}`}>
+                            {p}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-[11px] font-bold text-[var(--text-dim)] leading-relaxed">{engine.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Response Types Column */}
+            <div className="space-y-6">
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-2 mb-8">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Strategic Responses
+              </h3>
+              <div className="space-y-4">
+                {RESPONSE_DETAILS.map((resp, i) => (
+                  <div key={i} className="bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl p-5 hover:border-emerald-500/30 transition-all group">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-black uppercase tracking-tight text-[var(--text-main)]">{resp.name}</h4>
+                      <div className="flex gap-1">
+                        {resp.plans.map((p, idx) => (
+                          <span key={idx} className="bg-white/5 text-[var(--text-dim)] text-[7px] font-black uppercase px-2 py-0.5 rounded border border-white/10">
+                            {p}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-[11px] font-bold text-[var(--text-dim)] leading-relaxed">{resp.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Footer */}

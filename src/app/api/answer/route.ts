@@ -231,19 +231,9 @@ export async function POST(req: NextRequest) {
 
     let { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("id, credits, plan")
+      .select("credits, plan")
       .eq("email", email)
       .maybeSingle();
-
-    if (!profile) {
-      const { data: idData, error: idError } = await supabaseAdmin
-        .from("profiles")
-        .select("id, credits, plan")
-        .eq("id", userId)
-        .maybeSingle();
-      profile = idData;
-      if (idError) profileError = idError;
-    }
 
     if (profileError) {
       console.error("[/api/answer] Profile fetch error:", profileError);
@@ -296,11 +286,10 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Deduct 1 Credit Upfront ─────────────────────────────
-    const targetProfileId = profile?.id || userId;
     const { error: deductError } = await supabaseAdmin
       .from("profiles")
       .update({ credits: currentCredits - 1 })
-      .eq("id", targetProfileId);
+      .eq("email", email);
 
     if (deductError) {
       console.error("[/api/answer] Credit deduction failed:", deductError.message);

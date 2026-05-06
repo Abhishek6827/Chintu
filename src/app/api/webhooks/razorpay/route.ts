@@ -103,15 +103,16 @@ export async function POST(req: Request) {
 
     console.log(`[Razorpay Webhook] Payment Captured: ${payment.id} for User: ${userId}`);
 
+    const initialEmail = payment.email || notes.email || "N/A";
     const supabaseAdmin = createAdminClient();
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("id, full_name, email, plan, credits, display_id, subscription_expires_at, profile_data")
-      .eq("id", userId)
+      .eq("email", initialEmail)
       .maybeSingle();
 
-    const email = payment.email || notes.email || profile?.email || "N/A";
-    const fullName = notes.fullName || profile?.full_name || email.split("@")[0] || "User";
+    const email = initialEmail !== "N/A" ? initialEmail : profile?.email || "N/A";
+    const fullName = notes.fullName || profile?.full_name || (email !== "N/A" ? email.split("@")[0] : "User");
 
     const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; days: number; frequency: string; unitTotalINR: number; basePriceINR: number }> = {
       "pro_monthly": { plan: "pro", credits: 200, days: 30, frequency: "Monthly", unitTotalINR: 780.3, basePriceINR: 765 },
@@ -234,7 +235,7 @@ export async function POST(req: Request) {
         gateway_fee: displayGatewayFee,
         last_frequency: planInfo.frequency,
       },
-    }).eq("id", targetUserId);
+    }, { onConflict: 'email' });
 
     const newPlan = notes.planId || planInfo.plan;
     const oldPlan = targetProfile?.plan || "free";
