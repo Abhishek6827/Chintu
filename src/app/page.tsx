@@ -23,7 +23,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const showcaseSlides = [
   {
-    src: "/1.png",
+    src: "/signin.png",
+    category: "Secure Access",
+    title: "Encrypted Login Portal",
+    description: "Enterprise-grade authentication with Google, GitHub OAuth and encrypted email — your data, your control.",
+    accent: "from-indigo-500 to-blue-500",
+    badge: "Secure Auth",
+  },
+  {
+    src: "/setup.png",
+    category: "Profile Setup",
+    title: "Personalized Intelligence",
+    description: "Drop a resume, LinkedIn summary or short bio — Chintu structures it into a tactical profile that powers every answer.",
+    accent: "from-purple-500 to-pink-500",
+    badge: "AI Profiling",
+  },
+  {
+    src: "/subscription.png",
     category: "Subscription Portal",
     title: "Elite Plan Command Center",
     description: "A premium dashboard for tracking credits, days remaining and full transaction history — secured by Razorpay with live billing intelligence.",
@@ -31,21 +47,14 @@ const showcaseSlides = [
     badge: "Premium Dashboard",
   },
   {
-    src: "/2.png",
+    src: "/bug.png",
     category: "Bug Detection",
     title: "Surgical Code Diagnostics",
     description: "Line-by-line bug analysis identifying logic errors, type mismatches and runtime crashes with clear, actionable explanations.",
     accent: "from-indigo-500 to-purple-500",
     badge: "Code Intelligence",
   },
-  {
-    src: "/3.png",
-    category: "Profile Setup",
-    title: "Personalized Intelligence",
-    description: "Drop a resume, LinkedIn summary or short bio — Chintu structures it into a tactical profile that powers every answer.",
-    accent: "from-purple-500 to-pink-500",
-    badge: "AI Profiling",
-  },
+
   {
     src: "/4.png",
     category: "Platform Sync",
@@ -93,14 +102,6 @@ const showcaseSlides = [
     description: "Premium voice mode delivering ultra-low-latency contextual answers, ready for the highest-stakes interviews.",
     accent: "from-rose-500 to-red-500",
     badge: "Elite Protocol",
-  },
-  {
-    src: "/10.png",
-    category: "Secure Access",
-    title: "Encrypted Login Portal",
-    description: "Enterprise-grade authentication with Google, GitHub OAuth and encrypted email — your data, your control.",
-    accent: "from-indigo-500 to-blue-500",
-    badge: "Secure Auth",
   },
 ];
 
@@ -199,13 +200,13 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 no-drag" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <div className="flex items-center justify-center w-8 h-8 hover:scale-110 transition-transform">
-              <Image 
-                src="https://www.getchintu.com/icon.png" 
-                alt="Chintu AI Logo - Ultimate Interview & Exam Assistant" 
-                className="w-full h-full object-contain" 
-                width={32} 
-                height={32} 
-                unoptimized 
+              <Image
+                src="https://www.getchintu.com/icon.png"
+                alt="Chintu AI Logo - Ultimate Interview & Exam Assistant"
+                className="w-full h-full object-contain"
+                width={32}
+                height={32}
+                unoptimized
                 priority
               />
             </div>
@@ -459,11 +460,10 @@ export default function LandingPage() {
                 <button
                   key={i}
                   onClick={() => setCurrentShowcase(i)}
-                  className={`group relative transition-all duration-300 ${
-                    i === currentShowcase
-                      ? "w-12 h-2.5 bg-indigo-500 rounded-full shadow-lg shadow-indigo-500/50"
-                      : "w-2.5 h-2.5 bg-[var(--glass-border)] rounded-full hover:bg-indigo-500/50 hover:scale-125"
-                  }`}
+                  className={`group relative transition-all duration-300 ${i === currentShowcase
+                    ? "w-12 h-2.5 bg-indigo-500 rounded-full shadow-lg shadow-indigo-500/50"
+                    : "w-2.5 h-2.5 bg-[var(--glass-border)] rounded-full hover:bg-indigo-500/50 hover:scale-125"
+                    }`}
                   aria-label={`Show ${slide.title}`}
                   title={slide.title}
                 />
@@ -760,12 +760,12 @@ export default function LandingPage() {
             <div className="flex items-center -space-x-2">
               {[1, 2, 3, 4].map(i => (
                 <div key={i} className="w-7 h-7 rounded-full border-2 border-[var(--bg-app)] bg-[var(--panel-bg)] flex items-center justify-center overflow-hidden">
-                  <Image 
-                    src={`https://i.pravatar.cc/100?img=${i + 10}`} 
-                    alt={`Chintu AI User Reviewer ${i}`} 
-                    width={28} 
-                    height={28} 
-                    unoptimized 
+                  <Image
+                    src={`https://i.pravatar.cc/100?img=${i + 10}`}
+                    alt={`Chintu AI User Reviewer ${i}`}
+                    width={28}
+                    height={28}
+                    unoptimized
                   />
                 </div>
               ))}
