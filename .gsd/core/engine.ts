@@ -426,7 +426,7 @@ export class GSDEngine {
     // Check git status
     try {
       const status = await this.git.status();
-      if (status.files.length > 0) {
+      if (!status.isClean()) {
         issues.push('Working directory not clean');
       }
     } catch (error) {
