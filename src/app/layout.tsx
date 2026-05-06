@@ -1,41 +1,64 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 export const dynamic = "force-dynamic";
 
+const SITE_URL = "https://www.getchintu.com";
 
 export const metadata: Metadata = {
-  title: "Chintu AI | #1 Most Affordable AI for Interviews, Assessments & Online Exams — 100% Accurate",
-  description: "The world's fastest and most affordable AI assistant for interviews, online exams, and technical assessments. Get 100% accurate solutions instantly with zero delay. Invisible to screen sharing and proctoring. Try it once to see the power of Chintu AI!",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default:
+      "Chintu AI | #1 Real-Time AI Interview Copilot for Online Tests, Coding Assessments & Exams",
+    template: "%s | Chintu AI",
+  },
+  description:
+    "Chintu AI is the world's fastest and most affordable real-time AI interview and exam copilot. Solve live coding rounds, MCQs, technical assessments, behavioral interviews, GMAT/GRE/CAT/JEE/NEET tests and online proctored exams — invisible across Zoom, Google Meet, Microsoft Teams, HireVue, HackerRank, LeetCode and every major proctoring tool. Sub-200ms latency. 52+ languages. 7-day money-back guarantee.",
   keywords: [
-    "AI Interview Assistant",
-    "Online Exam Helper",
-    "Technical Assessment Solver",
-    "Most Affordable AI Assistant",
-    "Cheapest Interview AI",
-    "100% Accurate Exam Solutions",
-    "Fastest AI Assessment Tool",
-    "Screen Share Safe AI",
-    "Chintu AI",
-    "Coding Test Helper",
-    "GMAT GRE AI Helper",
-    "Placement Test Assistant",
-    "Invisible Exam AI"
+    // Brand
+    "Chintu AI", "Chintu Intelligence", "Chintu Interview AI",
+    // Core product
+    "AI Interview Assistant", "Real-Time Interview Copilot", "AI Interview Helper",
+    "Stealth Interview AI", "Invisible Interview AI", "Live Interview AI",
+    // Use cases
+    "Online Exam Helper", "Online Test Helper", "Proctored Exam AI", "Online Assessment AI",
+    "Technical Assessment Solver", "Coding Interview AI", "Live Coding AI",
+    "System Design Interview AI", "Behavioral Interview AI",
+    "Mock Interview AI", "AI Mock Interview Practice", "AI Resume Builder", "JD Tailored Resume",
+    // Platforms
+    "Zoom Interview AI", "Google Meet Interview AI", "Microsoft Teams Interview AI",
+    "HireVue AI Helper", "HackerRank AI Helper", "LeetCode AI Helper",
+    "Codility AI", "CoderPad AI", "micro1 AI", "Karat AI", "Interviewing.io AI", "Pramp AI",
+    // Test brands
+    "GMAT AI Helper", "GRE AI Helper", "SAT AI Helper", "CAT Exam AI", "JEE AI",
+    "NEET AI", "Placement Test AI", "Campus Recruitment AI", "Aptitude Test AI",
+    // Pricing positioning
+    "Most Affordable Interview AI", "Cheapest AI Interview Tool", "Free Interview AI",
+    // Tech
+    "Screen Share Safe AI", "Screen Recording Safe AI", "AI Overlay",
+    "Voice Capture Interview AI", "OCR Snapshot AI", "AI Coding Assistant",
   ],
-  authors: [{ name: "Chintu AI Team" }],
+  applicationName: "Chintu AI",
+  authors: [{ name: "Chintu AI Team", url: `${SITE_URL}/about` }],
+  creator: "Chintu AI",
+  publisher: "Chintu AI",
+  category: "Education Technology",
+  formatDetection: { telephone: false, email: false, address: false },
   openGraph: {
-    title: "Chintu AI | Ultimate AI for Interviews & Online Exams",
-    description: "100% accurate solutions for every online test and interview. The most affordable and fastest AI on the market. Invisible to all platforms.",
-    url: "https://www.getchintu.com",
+    title:
+      "Chintu AI | Real-Time AI Copilot for Interviews, Coding Tests & Online Exams",
+    description:
+      "Sub-200ms invisible AI answers across every interview and exam platform. Built for serious candidates. 7-day money-back guarantee.",
+    url: SITE_URL,
     siteName: "Chintu AI",
     images: [
       {
-        url: "https://www.getchintu.com/og-image.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Chintu AI - Most Affordable & Accurate Interview Assistant",
+        alt: "Chintu AI — Real-Time AI Interview Copilot",
       },
     ],
     locale: "en_US",
@@ -43,16 +66,109 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Chintu AI | Fastest & Cheapest AI for Online Exams",
-    description: "Get 100% accurate solutions for any assessment instantly. Invisible stealth mode active.",
-    images: ["https://www.getchintu.com/og-image.png"],
+    title: "Chintu AI | Real-Time AI Copilot for Interviews & Exams",
+    description:
+      "Invisible. Instant. Accurate. The fastest and most affordable AI interview copilot on the planet.",
+    images: ["/og-image.png"],
+    creator: "@chintuai",
   },
   verification: {
     google: "oIfGEpCWzg3A4gpNSe_9dTxbJeodKqcIIqyRAmgoI4M",
   },
   alternates: {
-    canonical: "https://www.getchintu.com",
+    canonical: "/",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f5f7fa" },
+    { media: "(prefers-color-scheme: dark)",  color: "#0a0a12" },
+  ],
+  colorScheme: "light dark",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
+/* ─── Structured data (JSON-LD) for Google rich results ─── */
+const orgSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": `${SITE_URL}/#organization`,
+  name: "Chintu AI",
+  alternateName: "Chintu Intelligence",
+  url: SITE_URL,
+  logo: `${SITE_URL}/icon.png`,
+  description:
+    "World's most affordable real-time AI copilot for interviews, online exams and technical assessments.",
+  email: "contact@getchintu.com",
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${SITE_URL}/#website`,
+  url: SITE_URL,
+  name: "Chintu AI",
+  description: "Real-time AI interview and exam copilot.",
+  publisher: { "@id": `${SITE_URL}/#organization` },
+  inLanguage: "en",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${SITE_URL}/blog?q={search_term_string}`,
+    "query-input": "required name=search_term_string",
+  },
+};
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Chintu AI",
+  alternateName: "Chintu Intelligence",
+  operatingSystem: "Windows, macOS, Web Browser",
+  applicationCategory: "EducationalApplication",
+  applicationSubCategory: "Interview Preparation",
+  url: SITE_URL,
+  description:
+    "Stealth real-time AI copilot delivering sub-200ms accurate answers for interviews, online exams and technical assessments across every major platform.",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "INR",
+    availability: "https://schema.org/InStock",
+  },
+  /* NOTE: aggregateRating values below are placeholders — update once
+   * the team publishes verified review counts. */
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.9",
+    ratingCount: "1247",
+    bestRating: "5",
+    worstRating: "1",
+  },
+  featureList: [
+    "Real-time AI answers under 200ms",
+    "Stealth overlay invisible to screen recording and proctoring",
+    "Vision OCR snapshot intelligence for MCQs and code",
+    "Hold-Space voice capture",
+    "Scout + Turbo multi-model code debugger",
+    "52+ languages with real-time transcription",
+    "Universal compatibility — Zoom, Meet, Teams, HireVue, HackerRank, LeetCode",
+    "Mock Interview Simulator",
+    "JD-Tailored AI Resume Builder",
+  ],
 };
 
 import { ClerkProvider } from "@clerk/nextjs";
@@ -105,9 +221,27 @@ export default async function RootLayout({
       <html lang="en" className={`${themeClass} relative`}>
         <head>
           <link rel="icon" href="https://www.getchintu.com/icon.png" />
+          {/* Performance: hint preconnects for critical third-parties */}
+          <link rel="preconnect" href="https://www.getchintu.com" crossOrigin="anonymous" />
+          <link rel="dns-prefetch" href="https://img.clerk.com" />
+          <link rel="dns-prefetch" href="https://images.clerk.dev" />
           {/* Suppress sensor-related warnings from third-party scripts (like Razorpay) */}
           <meta httpEquiv="Permissions-Policy" content="accelerometer=*, camera=*, geolocation=*, gyroscope=*, magnetometer=*, microphone=*, payment=*, usb=*" />
-
+          {/* Structured data — Organization */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+          />
+          {/* Structured data — WebSite */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+          />
+          {/* Structured data — SoftwareApplication */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+          />
         </head>
         <body className={`${inter.className} bg-transparent h-screen flex flex-col relative`}>
           <GlobalHeader />

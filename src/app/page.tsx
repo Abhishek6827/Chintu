@@ -166,6 +166,20 @@ const faqItems: FaqItem[] = [
   },
 ];
 
+/* ─── FAQPage JSON-LD schema (auto-built from faqItems above) ─── */
+const faqPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.a,
+    },
+  })),
+};
+
 /* ─── Authentic Voice demo ──────────────────────────────── */
 const humanDemo = {
   question: "What is the toughest bug you have ever debugged in production?",
@@ -483,6 +497,12 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-indigo-500/20 flex flex-col relative overflow-x-hidden" style={{ WebkitAppRegion: 'drag' } as any}>
 
+      {/* SEO: FAQPage structured data so Google can render rich FAQ snippet */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageSchema) }}
+      />
+
       {/* Scroll Progress Bar (web-only, hidden in Electron app) */}
       {!isElectron && <ScrollProgressBar />}
 
@@ -500,37 +520,81 @@ export default function LandingPage() {
       </div>
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-[100] bg-[var(--bg-app)]/70 backdrop-blur-2xl border-b border-[var(--glass-border)] px-6 py-4">
+      <nav role="navigation" aria-label="Main site navigation" className="sticky top-0 z-[100] bg-[var(--bg-app)]/70 backdrop-blur-2xl border-b border-[var(--glass-border)] px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3 no-drag" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          <Link
+            href="/"
+            aria-label="Chintu AI — return to homepage"
+            className="flex items-center gap-3 no-drag hover:opacity-90 transition-opacity"
+            style={{ WebkitAppRegion: 'no-drag' } as any}
+          >
             <div className="flex items-center justify-center w-8 h-8 hover:scale-110 transition-transform">
               <Image
                 src="https://www.getchintu.com/icon.png"
-                alt="Chintu AI Logo - Ultimate Interview & Exam Assistant"
+                alt="Chintu AI Logo - Real-Time AI Interview & Exam Copilot"
                 className="w-full h-full object-contain"
                 width={32}
                 height={32}
                 unoptimized
                 priority
+                fetchPriority="high"
               />
             </div>
             <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)]">
               Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">AI</span>
             </span>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-4 no-drag" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="hidden md:flex items-center gap-6"
+              className="hidden md:flex items-center gap-5 lg:gap-6"
+              role="menubar"
             >
-              <Link href="/blog" className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-600 transition-colors relative group">
+              <Link
+                href="/#power-tools"
+                aria-label="Jump to product features"
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-600 transition-colors relative group"
+                role="menuitem"
+              >
+                Features
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300" />
+              </Link>
+              <Link
+                href="/#compare"
+                aria-label="Compare Chintu vs other AI interview tools"
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-600 transition-colors relative group"
+                role="menuitem"
+              >
+                Compare
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300" />
+              </Link>
+              <Link
+                href="/pricing"
+                aria-label="View Chintu AI pricing plans"
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-600 transition-colors relative group"
+                role="menuitem"
+              >
+                Pricing
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300" />
+              </Link>
+              <Link
+                href="/blog"
+                aria-label="Read the Chintu AI blog"
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-600 transition-colors relative group"
+                role="menuitem"
+              >
                 Blog
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300" />
               </Link>
-              <Link href="/faq" className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-600 transition-colors relative group">
+              <Link
+                href="/faq"
+                aria-label="Browse the full FAQ"
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-600 transition-colors relative group"
+                role="menuitem"
+              >
                 FAQ
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300" />
               </Link>
@@ -604,7 +668,7 @@ export default function LandingPage() {
       <main className="relative z-10 flex-1">
 
         {/* Hero Section — Stylish Split Layout */}
-        <section className="relative px-6 pt-10 lg:pt-16 pb-20 max-w-7xl mx-auto w-full">
+        <section id="hero" aria-label="Chintu AI Hero Section" className="relative px-6 pt-10 lg:pt-16 pb-20 max-w-7xl mx-auto w-full">
           {/* Decorative blobs */}
           <div className="absolute top-0 left-1/4 w-[28rem] h-[28rem] bg-indigo-500/10 blur-[140px] rounded-full pointer-events-none" />
           <div className="absolute top-32 right-0 w-[28rem] h-[28rem] bg-purple-500/10 blur-[140px] rounded-full pointer-events-none" />
@@ -683,9 +747,10 @@ export default function LandingPage() {
                     <div key={i} className="w-8 h-8 rounded-full border-2 border-[var(--bg-app)] bg-[var(--panel-bg)] overflow-hidden shadow-md">
                       <Image
                         src={`https://i.pravatar.cc/100?img=${i + 10}`}
-                        alt={`Reviewer ${i}`}
+                        alt={`Chintu AI candidate review avatar ${i}`}
                         width={32}
                         height={32}
+                        decoding="async"
                         unoptimized
                       />
                     </div>
@@ -712,7 +777,7 @@ export default function LandingPage() {
                 transition={{ delay: 0.6, duration: 0.7 }}
                 className="group relative w-full max-w-sm text-left"
               >
-                <div className="absolute -inset-2 bg-gradient-to-r from-indigo-500/40 via-purple-500/40 to-cyan-400/40 blur-xl rounded-2xl opacity-50 group-hover:opacity-90 transition-opacity duration-500" />
+                <div className="absolute -inset-2 bg-gradient-to-r from-indigo-500/40 via-purple-500/40 to-cyan-400/40 blur-xl opacity-50 group-hover:opacity-90 transition-opacity duration-500" />
                 <div className="relative flex items-center gap-3 p-2.5 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl backdrop-blur-xl shadow-xl group-hover:border-indigo-500/40 group-hover:scale-[1.02] transition-all duration-300">
                   {/* Looping Video Thumbnail */}
                   <div className="relative w-28 h-20 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-white/10">
@@ -805,8 +870,11 @@ export default function LandingPage() {
                         src={showcaseSlides[currentShowcase].src}
                         alt={showcaseSlides[currentShowcase].title}
                         fill
+                        sizes="(max-width: 1024px) 100vw, 50vw"
                         className="object-cover"
                         priority={currentShowcase === 0}
+                        fetchPriority={currentShowcase === 0 ? "high" : "auto"}
+                        decoding={currentShowcase === 0 ? "sync" : "async"}
                         unoptimized
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
@@ -956,7 +1024,7 @@ export default function LandingPage() {
         </AnimatePresence>
 
         {/* ─── How It Works (3 steps) ─────────────────────── */}
-        <section className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
+        <section id="how-it-works" aria-label="How Chintu AI works" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
           <div className="absolute top-0 left-1/4 w-[28rem] h-[28rem] bg-indigo-500/8 blur-[120px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 right-1/4 w-[28rem] h-[28rem] bg-purple-500/8 blur-[120px] rounded-full pointer-events-none" />
 
@@ -1051,15 +1119,15 @@ export default function LandingPage() {
         </section>
 
         {/* Strategic Intelligence Hub */}
-        <section className="py-16 sm:py-20 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+        <section id="strategic-intelligence" aria-label="Chintu AI Strategic Intelligence Hub" className="py-16 sm:py-20 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden">
           {!isElectron && <div className="absolute inset-0 pointer-events-none opacity-50"><Meteors number={10} /></div>}
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-center justify-between gap-8 lg:gap-12">
               <div className="flex-1 space-y-4 sm:space-y-6 w-full">
-                <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
+                <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 shadow-sm">
                   <Layers className="w-3.5 h-3.5" /> System Architecture
                 </div>
-                <h2 className="text-3xl sm:text-4xl lg:text-4xl xl:text-5xl font-black tracking-tighter uppercase leading-none">
+                <h2 className="text-3xl sm:text-4xl lg:text-4xl xl:text-5xl font-black tracking-tighter uppercase leading-none text-[var(--text-main)] mb-6">
                   Advanced <span className="text-indigo-600">Strategic</span> Modules
                 </h2>
                 <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-4">
@@ -1122,13 +1190,13 @@ export default function LandingPage() {
         </section>
 
         {/* Total Coverage Section */}
-        <section className="py-20 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+        <section id="total-coverage" aria-label="Chintu AI Total Coverage" className="py-20 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
           {!isElectron && <div className="absolute inset-0 pointer-events-none opacity-40"><Meteors number={15} /></div>}
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="reveal text-center mb-12 sm:mb-16 lg:mb-24 transition-all duration-1000">
-              <h2 className="text-[10px] sm:text-xs font-black text-indigo-400 uppercase tracking-[0.4em] sm:tracking-[0.5em] mb-4 sm:mb-6">Omniscient Intelligence</h2>
-              <p className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tighter uppercase leading-none text-[var(--text-main)]">
+              <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] sm:tracking-[0.5em] mb-4 sm:mb-6">Omniscient Intelligence</h2>
+              <p className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)]">
                 Zero Gaps. <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Total Dominance.</span>
               </p>
@@ -1162,7 +1230,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Platform Compatibility ─────────────────────── */}
-        <section className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+        <section id="platforms" aria-label="Supported interview and exam platforms" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-cyan-500/5 blur-[120px] rounded-full pointer-events-none" />
 
           <div className="max-w-7xl mx-auto relative z-10">
@@ -1230,14 +1298,14 @@ export default function LandingPage() {
         </section>
 
         {/* Snapshot Section */}
-        <section className="py-20 sm:py-32 lg:py-40 px-6 max-w-7xl mx-auto w-full">
+        <section id="snapshot" aria-label="Chintu AI Snapshot Section" className="py-20 sm:py-32 lg:py-40 px-6 max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
             <div className="reveal transition-all duration-1000">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-6 sm:mb-8">
-                <Zap className="w-4 h-4 text-purple-400 fill-current" />
+                <Zap className="w-4 h-4 text-purple-400" />
                 <span className="text-[10px] font-black text-purple-400 uppercase tracking-[0.3em]">Snapshot Intelligence</span>
               </div>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-7xl font-black tracking-tighter text-[var(--text-main)] mb-6 sm:mb-8 uppercase leading-[0.9]">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-7xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-6 sm:mb-8">
                 See it. <br /><span className="text-purple-400">Solve it.</span>
               </h2>
               <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest leading-relaxed mb-8 sm:mb-10 max-w-md text-xs sm:text-sm md:text-base">
@@ -1278,7 +1346,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Authentic Voice Demo ─── */}
-        <section className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
+        <section id="authentic-voice" aria-label="Authentic conversational AI voice demo" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-cyan-500/5 blur-[100px] rounded-full" />
           </div>
@@ -1417,7 +1485,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Power Tools Spotlight (Mock + Resume) ─── */}
-        <section className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
+        <section id="power-tools" aria-label="Mock Interview and AI Resume Builder" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
           <div className="absolute top-0 left-0 w-[35%] h-[60%] bg-indigo-500/8 blur-[140px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-[35%] h-[60%] bg-cyan-500/8 blur-[140px] rounded-full pointer-events-none" />
 
@@ -1503,7 +1571,7 @@ export default function LandingPage() {
         <TestimonialsSection />
 
         {/* ─── Hired At Top Companies ─────────────────────── */}
-        <section className="py-12 sm:py-16 lg:py-20 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
+        <section id="hired-at" aria-label="Companies whose candidates use Chintu AI" className="py-12 sm:py-16 lg:py-20 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
           <div className="max-w-7xl mx-auto relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1605,7 +1673,7 @@ export default function LandingPage() {
         )}
 
         {/* ─── Comparison Table: Chintu vs alternatives ─── */}
-        <section className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+        <section id="compare" aria-label="Compare Chintu AI to other interview copilots" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
           {!isElectron && <div className="absolute inset-0 pointer-events-none opacity-30"><Meteors number={10} /></div>}
 
@@ -1673,7 +1741,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Pricing Cards (Monthly / Yearly toggle) ─── */}
-        <section className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
+        <section id="pricing" aria-label="Pricing plans for Chintu AI" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[70%] h-[60%] bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-amber-500/5 blur-[140px] rounded-full pointer-events-none" />
           {!isElectron && <div className="absolute inset-0 pointer-events-none opacity-20"><Meteors number={8} /></div>}
 
@@ -1875,7 +1943,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Creator / Affiliate Program ─────────────────── */}
-        <section className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+        <section id="creators" aria-label="Chintu AI Creator and Affiliate Program" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
           <div className="absolute top-0 right-0 w-[40%] h-[60%] bg-amber-500/5 blur-[140px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[40%] h-[60%] bg-rose-500/5 blur-[140px] rounded-full pointer-events-none" />
 
@@ -1966,7 +2034,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── FAQ Accordion ─── */}
-        <section className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
+        <section id="faq" aria-label="Frequently asked questions" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
           <div className="absolute -top-20 left-1/4 w-[24rem] h-[24rem] bg-indigo-500/8 blur-[120px] rounded-full pointer-events-none" />
           <div className="absolute -bottom-20 right-1/4 w-[24rem] h-[24rem] bg-purple-500/8 blur-[120px] rounded-full pointer-events-none" />
 
@@ -1992,11 +2060,33 @@ export default function LandingPage() {
             </motion.div>
 
             <FaqAccordion items={faqItems} />
+
+            {/* "Browse the full FAQ" CTA — bridge to /faq page */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.55, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-10 sm:mt-12 text-center"
+            >
+              <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)] mb-4">
+                Looking for something more specific?
+              </p>
+              <Link
+                href="/faq"
+                aria-label="Browse the full Chintu AI FAQ"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:border-cyan-500 hover:text-white font-black uppercase tracking-[0.25em] text-[10px] transition-colors"
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+                Browse the full FAQ
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </motion.div>
           </div>
         </section>
 
         {/* ─── Final CTA + Guarantee Banner ─────────────────── */}
-        <section className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+        <section id="get-started" aria-label="Get started with Chintu AI today" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
           {!isElectron && <div className="absolute inset-0 pointer-events-none opacity-40"><Meteors number={14} /></div>}
 
           <motion.div
@@ -2156,9 +2246,11 @@ export default function LandingPage() {
                 <div key={i} className="w-7 h-7 rounded-full border-2 border-[var(--bg-app)] bg-[var(--panel-bg)] flex items-center justify-center overflow-hidden">
                   <Image
                     src={`https://i.pravatar.cc/100?img=${i + 10}`}
-                    alt={`Chintu AI User Reviewer ${i}`}
+                    alt={`Chintu AI candidate review avatar ${i}`}
                     width={28}
                     height={28}
+                    loading="lazy"
+                    decoding="async"
                     unoptimized
                   />
                 </div>
