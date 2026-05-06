@@ -235,14 +235,9 @@ export default function LandingPage() {
               </Link>
             </motion.div>
             {!isSignedIn ? (
-              <>
-                <Link href="/sign-in" className="hidden sm:block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-indigo-600 transition-colors px-4">
-                  Portal Login
-                </Link>
-                <Link href="/sign-up" className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl shadow-lg shadow-indigo-500/40 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
-                  Get Started <ArrowRight className="w-3 h-3" />
-                </Link>
-              </>
+              <Link href="/sign-up" className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl shadow-lg shadow-indigo-500/40 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+                Get Started <ArrowRight className="w-3 h-3" />
+              </Link>
             ) : (
               <div className="flex items-center gap-4">
                 {userPlan !== 'free' && userPlan !== '' && (

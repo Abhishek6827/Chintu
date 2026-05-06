@@ -257,9 +257,21 @@ export default function GlobalHeader() {
           )}
           
           {isSignedIn && (
-            <div className="flex items-center ml-1 no-drag">
-              <SyncedUserButton />
-            </div>
+            <>
+              <div className="flex items-center ml-1 no-drag">
+                <button
+                  onClick={() => router.push('/gsd')}
+                  className="px-3 py-1.5 bg-purple-600 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-purple-500 transition-all shadow-lg shadow-purple-500/20 active:scale-95 flex items-center justify-center"
+                  title="GSD Auto Mode Dashboard"
+                >
+                  <span className="hidden min-[450px]:inline">GSD</span>
+                  <span className="min-[450px]:hidden">🤖</span>
+                </button>
+              </div>
+              <div className="flex items-center ml-1 no-drag">
+                <SyncedUserButton />
+              </div>
+            </>
           )}
         </div>
       </div>
