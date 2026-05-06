@@ -109,17 +109,10 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                <Sparkles className="w-6 h-6 animate-spin-slow" />
             </div>
           ) : userPlan === "elite" ? (
-            <div 
-              className="w-[90%] max-w-[400px] aspect-[16/6] min-h-[80px] rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl border border-white/20 relative flex items-center justify-center mx-auto backdrop-blur-md transition-all duration-300"
-              style={{ 
-                backgroundColor: 'rgba(0, 0, 0, calc(0.4 * var(--app-opacity, 1)))',
-                opacity: 'var(--app-opacity, 1)'
-              }}
-            >
+            <div className="w-[90%] max-w-[400px] aspect-[16/6] min-h-[80px] rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl border border-white/20 relative flex items-center justify-center mx-auto bg-black/40 backdrop-blur-md">
               <VideoText 
                 src="https://cdn.magicui.design/ocean-small.webm"
                 className="h-full w-full"
-                videoClassName="opacity-[calc(0.5*var(--app-opacity,1))]"
               >
                 <div className="water-text-wrapper water-text-white" style={{ fontSize: 'clamp(12px, 4vw, 24px)', letterSpacing: '0.2em' }}>
                   <div className="water-text-content flex flex-col items-center leading-none gap-1 sm:gap-2">

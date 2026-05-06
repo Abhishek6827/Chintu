@@ -199,7 +199,7 @@ export default function GlobalHeader() {
             <div className="flex items-center gap-1 min-[400px]:gap-3">
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
                 <div className="flex items-center gap-1">
-                  <Zap className="w-2 h-2 text-indigo-500 fill-indigo-500 hidden min-[450px]:inline" />
+                  <Zap className="w-2 h-2 text-indigo-500 fill-indigo-500 inline" />
                   <span className="text-[10px] font-black text-[var(--text-main)]">{userCredits}</span>
                 </div>
               </div>

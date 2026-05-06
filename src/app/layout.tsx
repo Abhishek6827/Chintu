@@ -7,10 +7,51 @@ export const dynamic = "force-dynamic";
 
 
 export const metadata: Metadata = {
-  title: "Chintu",
-  description: "AI-powered interview assistant — invisible to screen sharing",
+  title: "Chintu AI | #1 Most Affordable AI for Interviews, Assessments & Online Exams — 100% Accurate",
+  description: "The world's fastest and most affordable AI assistant for interviews, online exams, and technical assessments. Get 100% accurate solutions instantly with zero delay. Invisible to screen sharing and proctoring. Try it once to see the power of Chintu AI!",
+  keywords: [
+    "AI Interview Assistant",
+    "Online Exam Helper",
+    "Technical Assessment Solver",
+    "Most Affordable AI Assistant",
+    "Cheapest Interview AI",
+    "100% Accurate Exam Solutions",
+    "Fastest AI Assessment Tool",
+    "Screen Share Safe AI",
+    "Chintu AI",
+    "Coding Test Helper",
+    "GMAT GRE AI Helper",
+    "Placement Test Assistant",
+    "Invisible Exam AI"
+  ],
+  authors: [{ name: "Chintu AI Team" }],
+  openGraph: {
+    title: "Chintu AI | Ultimate AI for Interviews & Online Exams",
+    description: "100% accurate solutions for every online test and interview. The most affordable and fastest AI on the market. Invisible to all platforms.",
+    url: "https://www.getchintu.com",
+    siteName: "Chintu AI",
+    images: [
+      {
+        url: "https://www.getchintu.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Chintu AI - Most Affordable & Accurate Interview Assistant",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Chintu AI | Fastest & Cheapest AI for Online Exams",
+    description: "Get 100% accurate solutions for any assessment instantly. Invisible stealth mode active.",
+    images: ["https://www.getchintu.com/og-image.png"],
+  },
   verification: {
     google: "oIfGEpCWzg3A4gpNSe_9dTxbJeodKqcIIqyRAmgoI4M",
+  },
+  alternates: {
+    canonical: "https://www.getchintu.com",
   },
 };
 
@@ -35,7 +76,7 @@ export default async function RootLayout({
     console.warn("Layout: Auth context not available for this request");
   }
   let themeClass = ""; // Default light
-  
+
   if (userId) {
     try {
       const supabase = createAdminClient();
@@ -44,7 +85,7 @@ export default async function RootLayout({
         .select("plan, theme")
         .eq("id", userId)
         .maybeSingle();
-        
+
       if (profile) {
         const plan = (profile.plan || "free").toLowerCase();
         if (plan === "pro" || plan === "elite") {

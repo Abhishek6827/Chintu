@@ -29,7 +29,7 @@
   --bubble-bg: rgba(255, 255, 255, calc(0.04 * var(--app-opacity, 1)));
   --accent: #818cf8;
   --accent-glow: rgba(129, 140, 248, calc(0.5 * var(--app-opacity, 1)));
-  --panel-bg: rgba(15, 15, 25, calc(0.8 * var(--app-opacity, 1)));
+  --panel-bg: rgba(10, 10, 18, calc(0.8 * var(--app-opacity, 1)));
   --input-bg: rgba(255, 255, 255, calc(0.05 * var(--app-opacity, 1)));
   --bg-app: rgba(10, 10, 18, var(--app-opacity, 1));
   --toolbar-bg: rgba(10, 10, 18, var(--app-opacity, 1));
@@ -61,7 +61,7 @@ html {
 
 html, body, #__next, [data-reactroot] {
   overflow-x: hidden;
-  background: #f5f7fa !important;
+  background: transparent !important;
   margin: 0;
   padding: 0;
 }

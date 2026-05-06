@@ -33,6 +33,7 @@ export default function SupportPage() {
           message: message.trim(),
           userEmail: user.primaryEmailAddress?.emailAddress || "unknown",
           userId: user.id,
+          userName: user.fullName || user.username || "Anonymous",
         }),
       });
 

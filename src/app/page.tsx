@@ -106,7 +106,15 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 no-drag" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <div className="flex items-center justify-center w-8 h-8 hover:scale-110 transition-transform">
-              <Image src="https://www.getchintu.com/icon.png" alt="Chintu" className="w-full h-full object-contain" width={32} height={32} unoptimized />
+              <Image 
+                src="https://www.getchintu.com/icon.png" 
+                alt="Chintu AI Logo - Ultimate Interview & Exam Assistant" 
+                className="w-full h-full object-contain" 
+                width={32} 
+                height={32} 
+                unoptimized 
+                priority
+              />
             </div>
             <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)]">
               Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">AI</span>
@@ -438,7 +446,7 @@ export default function LandingPage() {
                 <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Support Command</span>
               </div>
               <h2 className="text-5xl sm:text-6xl font-black tracking-tighter text-[var(--text-main)] mb-8 uppercase leading-[0.9]">
-                Deploy <br /><span className="text-indigo-400">Intelligence.</span>
+                Deploy <br /><span className="text-indigo-400">Tactical Intelligence.</span>
               </h2>
               <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest leading-relaxed mb-12 max-w-md text-sm sm:text-base">
                 Have questions about deployment or strategy? Our elite support team is active 24/7 to ensure your total success.
@@ -484,7 +492,13 @@ export default function LandingPage() {
             <div className="flex items-center -space-x-2">
               {[1, 2, 3, 4].map(i => (
                 <div key={i} className="w-7 h-7 rounded-full border-2 border-[var(--bg-app)] bg-[var(--panel-bg)] flex items-center justify-center overflow-hidden">
-                  <Image src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" width={28} height={28} unoptimized />
+                  <Image 
+                    src={`https://i.pravatar.cc/100?img=${i + 10}`} 
+                    alt={`Chintu AI User Reviewer ${i}`} 
+                    width={28} 
+                    height={28} 
+                    unoptimized 
+                  />
                 </div>
               ))}
               <div className="w-7 h-7 rounded-full border-2 border-[var(--bg-app)] bg-indigo-600 flex items-center justify-center text-[8px] font-black text-white">+10k</div>

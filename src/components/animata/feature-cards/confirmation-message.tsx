@@ -99,8 +99,8 @@ export default function ConfirmationMessage({
         >
           {/* Message box */}
           <div className="my-4 flex h-fit w-full rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-6 py-4 shadow-2xl backdrop-blur-md">
-            <div className="mr-4 flex h-12 min-w-12 items-center justify-center rounded-full bg-emerald-600 p-2 overflow-hidden">
-              <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={32} height={32} className="w-full h-full object-contain" unoptimized />
+            <div className="mr-4 flex h-12 min-w-12 items-center justify-center rounded-full overflow-hidden border border-emerald-500/20">
+              <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={48} height={48} className="w-full h-full object-cover rounded-full scale-110" unoptimized />
             </div>
             <div className="text-left">
               <p className="text-sm font-black text-emerald-500 uppercase tracking-widest">{labelName}</p>
