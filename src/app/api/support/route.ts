@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth();
   
   try {
-    const { subject, message, userEmail, fullName, userId: providedUserId } = await req.json();
+    const { subject, message, userEmail, fullName, userName, userId: providedUserId } = await req.json();
 
     if (!message?.trim()) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     const tgMessage =
       `📩 <b>NEW SUPPORT INQUIRY</b>\n\n` +
-      `👤 <b>Name:</b> <code>${fullName || "Anonymous"}</code>\n` +
+      `👤 <b>Name:</b> <code>${fullName || userName || "Anonymous"}</code>\n` +
       `📧 <b>Email:</b> <code>${userEmail}</code>\n` +
       `🆔 <b>ID:</b> <code>${userId || providedUserId || "GUEST_SESSION"}</code>\n` +
       `📌 <b>Subject:</b> ${subject || "General Inquiry"}\n` +
