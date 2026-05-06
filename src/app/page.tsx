@@ -19,7 +19,90 @@ import { MarqueeReviews } from '@/components/MarqueeReviews';
 import { TextReveal } from '@/components/magicui/text-reveal';
 import { Meteors } from '@/components/magicui/meteors';
 import CardSpread from '@/components/animata/card/card-spread';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const showcaseSlides = [
+  {
+    src: "/1.png",
+    category: "Subscription Portal",
+    title: "Elite Plan Command Center",
+    description: "A premium dashboard for tracking credits, days remaining and full transaction history — secured by Razorpay with live billing intelligence.",
+    accent: "from-amber-500 to-orange-500",
+    badge: "Premium Dashboard",
+  },
+  {
+    src: "/2.png",
+    category: "Bug Detection",
+    title: "Surgical Code Diagnostics",
+    description: "Line-by-line bug analysis identifying logic errors, type mismatches and runtime crashes with clear, actionable explanations.",
+    accent: "from-indigo-500 to-purple-500",
+    badge: "Code Intelligence",
+  },
+  {
+    src: "/3.png",
+    category: "Profile Setup",
+    title: "Personalized Intelligence",
+    description: "Drop a resume, LinkedIn summary or short bio — Chintu structures it into a tactical profile that powers every answer.",
+    accent: "from-purple-500 to-pink-500",
+    badge: "AI Profiling",
+  },
+  {
+    src: "/4.png",
+    category: "Platform Sync",
+    title: "Universal Interview Overlay",
+    description: "Floating overlay works seamlessly with micro1, HireVue and every global proctored or live interview platform.",
+    accent: "from-blue-500 to-indigo-500",
+    badge: "Cross-Platform",
+  },
+  {
+    src: "/5.png",
+    category: "Long-Form Synthesis",
+    title: "Deep Behavioral Responses",
+    description: "Generates detailed, personalized long-form answers from your real experience for behavioral and case-style questions.",
+    accent: "from-cyan-500 to-blue-500",
+    badge: "Standard Engine",
+  },
+  {
+    src: "/6.png",
+    category: "Live Interview",
+    title: "Real-Time Q&A Assistant",
+    description: "Captures the live question and delivers an intelligent, context-aware response in your tone — the moment you need it.",
+    accent: "from-emerald-500 to-cyan-500",
+    badge: "Live Mode",
+  },
+  {
+    src: "/7.png",
+    category: "Root Cause Engine",
+    title: "Scout + Turbo Debugging",
+    description: "Deep multi-model code reasoning that pinpoints the root cause, explains why it broke and produces a verified fix.",
+    accent: "from-violet-500 to-fuchsia-500",
+    badge: "Scout + Turbo",
+  },
+  {
+    src: "/8.png",
+    category: "Voice Protocol",
+    title: "Hold-Space Voice Capture",
+    description: "Hold space to capture audio, then synthesize a tactical neural answer instantly — completely hands-free.",
+    accent: "from-pink-500 to-rose-500",
+    badge: "Voice Input",
+  },
+  {
+    src: "/9.png",
+    category: "Elite Synthesis",
+    title: "Neural Voice Active",
+    description: "Premium voice mode delivering ultra-low-latency contextual answers, ready for the highest-stakes interviews.",
+    accent: "from-rose-500 to-red-500",
+    badge: "Elite Protocol",
+  },
+  {
+    src: "/10.png",
+    category: "Secure Access",
+    title: "Encrypted Login Portal",
+    description: "Enterprise-grade authentication with Google, GitHub OAuth and encrypted email — your data, your control.",
+    accent: "from-indigo-500 to-blue-500",
+    badge: "Secure Auth",
+  },
+];
 
 export default function LandingPage() {
   const { isSignedIn, isLoaded, user } = useUser();
@@ -27,10 +110,20 @@ export default function LandingPage() {
   const [mounted, setMounted] = React.useState(false);
   const [userCredits, setUserCredits] = React.useState<number | null>(null);
   const [userPlan, setUserPlan] = React.useState<string>("");
+  const [currentShowcase, setCurrentShowcase] = React.useState(0);
+  const [isShowcasePaused, setIsShowcasePaused] = React.useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isShowcasePaused) return;
+    const interval = setInterval(() => {
+      setCurrentShowcase((prev) => (prev + 1) % showcaseSlides.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [isShowcasePaused]);
 
   useEffect(() => {
     if (isSignedIn) {
@@ -206,47 +299,222 @@ export default function LandingPage() {
 
       <main className="relative z-10 flex-1">
 
-        {/* Hero Section */}
-        <section className="min-h-[90vh] flex flex-col items-center justify-center text-center px-6 pt-24 pb-32 max-w-6xl mx-auto w-full">
-          <div className="reveal inline-flex items-center gap-2 px-5 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-10 transition-all duration-1000 shadow-sm">
-            <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
-            <span className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.3em]">v2.5 Hyper-Intelligence Active</span>
-          </div>
-          <h1 className="reveal text-6xl sm:text-8xl lg:text-9xl font-black tracking-tighter text-[var(--text-main)] mb-8 leading-[0.85] transition-all duration-1000 delay-200 uppercase">
-            Destroy Every <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">Assessment.</span>
-          </h1>
-          <p className="reveal text-sm sm:text-xl text-[var(--text-dim)] mb-14 max-w-3xl leading-relaxed font-bold uppercase tracking-widest transition-all duration-1000 delay-400">
-            Interviews, Global Exams, MCQs, or Technical Tests. <br className="hidden sm:block" />
-            Capture any problem. Get the perfect solution. Instantly.
-          </p>
-          <div className="reveal flex flex-col sm:flex-row gap-6 transition-all duration-1000 delay-500">
-            {isSignedIn ? (
-              <button
-                onClick={async () => {
-                  let deepLink = "chintu://open";
-                  try {
-                    deepLink += `?source=web&u=${encodeURIComponent(user?.id || "")}`;
-                  } catch {
-                    // Ignore token errors and proceed with normal launch
-                  }
-                  window.location.href = deepLink;
-                  setTimeout(() => {
-                    router.push("/setup");
-                  }, 500);
-                }}
-                className="relative group overflow-hidden px-16 py-7 bg-indigo-600 text-white font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-4"
-              >
-                Access Dashboard <Zap className="w-5 h-5 fill-current" />
-              </button>
-            ) : (
-              <Link href="/sign-up" className="relative group overflow-hidden px-16 py-7 bg-indigo-600 text-white font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-4">
-                Join the Revolution <ArrowRight className="w-5 h-5" />
+        {/* Hero Section with Premium Showcase */}
+        <section className="relative px-6 pt-16 pb-24 max-w-7xl mx-auto w-full">
+          {/* Hero Top */}
+          <div className="text-center mb-14">
+            <div className="reveal inline-flex items-center gap-2 px-5 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-8 transition-all duration-1000 shadow-sm">
+              <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
+              <span className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.3em]">v2.5 Hyper-Intelligence Active</span>
+            </div>
+            <h1 className="reveal text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter text-[var(--text-main)] mb-6 leading-[0.85] transition-all duration-1000 delay-200 uppercase">
+              Destroy Every <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">Assessment.</span>
+            </h1>
+            <p className="reveal text-sm sm:text-lg text-[var(--text-dim)] mb-10 max-w-3xl mx-auto leading-relaxed font-bold uppercase tracking-widest transition-all duration-1000 delay-400">
+              Interviews, Global Exams, MCQs, or Technical Tests. <br className="hidden sm:block" />
+              Capture any problem. Get the perfect solution. Instantly.
+            </p>
+            <div className="reveal flex flex-col sm:flex-row gap-4 justify-center transition-all duration-1000 delay-500">
+              {isSignedIn ? (
+                <button
+                  onClick={async () => {
+                    let deepLink = "chintu://open";
+                    try {
+                      deepLink += `?source=web&u=${encodeURIComponent(user?.id || "")}`;
+                    } catch {
+                      // Ignore token errors and proceed with normal launch
+                    }
+                    window.location.href = deepLink;
+                    setTimeout(() => {
+                      router.push("/setup");
+                    }, 500);
+                  }}
+                  className="relative group overflow-hidden px-12 py-5 bg-indigo-600 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-3"
+                >
+                  Access Dashboard <Zap className="w-4 h-4 fill-current" />
+                </button>
+              ) : (
+                <Link href="/sign-up" className="relative group overflow-hidden px-12 py-5 bg-indigo-600 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-3">
+                  Join the Revolution <ArrowRight className="w-4 h-4" />
+                </Link>
+              )}
+              <Link href="/pricing" className="px-12 py-5 bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-[var(--text-dim)] font-black uppercase tracking-[0.3em] text-[11px] rounded-2xl hover:border-indigo-500/50 hover:text-indigo-400 hover:bg-indigo-500/5 transition-all flex items-center justify-center">
+                View Access Tiers
               </Link>
-            )}
-            <Link href="/pricing" className="px-16 py-7 bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-[var(--text-dim)] font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl hover:border-indigo-500/50 hover:text-indigo-400 hover:bg-indigo-500/5 transition-all flex items-center justify-center">
-              View Access Tiers
-            </Link>
+            </div>
+          </div>
+
+          {/* Premium Showcase Carousel */}
+          <div
+            className="reveal relative max-w-6xl mx-auto transition-all duration-1000 delay-700"
+            onMouseEnter={() => setIsShowcasePaused(true)}
+            onMouseLeave={() => setIsShowcasePaused(false)}
+          >
+            {/* Animated Glow */}
+            <div className={`absolute -inset-6 bg-gradient-to-r ${showcaseSlides[currentShowcase].accent} blur-3xl opacity-20 transition-all duration-1000 rounded-[3rem]`} />
+
+            {/* Browser Frame */}
+            <div className="relative bg-[var(--panel-bg)] rounded-[2rem] border border-[var(--glass-border)] shadow-2xl shadow-indigo-500/10 overflow-hidden backdrop-blur-2xl">
+              {/* Browser-style Header */}
+              <div className="flex items-center gap-3 px-5 py-3 border-b border-[var(--glass-border)] bg-[var(--bg-app)]/60">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-400/80" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-400/80" />
+                  <div className="w-3 h-3 rounded-full bg-green-400/80" />
+                </div>
+                <div className="flex-1 flex justify-center">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`tab-${currentShowcase}`}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex items-center gap-2 px-4 py-1 bg-[var(--bg-app)] rounded-full border border-[var(--glass-border)]"
+                    >
+                      <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${showcaseSlides[currentShowcase].accent} animate-pulse`} />
+                      <span className="text-[9px] font-black text-[var(--text-dim)] uppercase tracking-[0.2em]">
+                        chintu.ai / {showcaseSlides[currentShowcase].badge.toLowerCase().replace(/\s+/g, "-")}
+                      </span>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+                <div className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                  <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Live</span>
+                </div>
+              </div>
+
+              {/* Image Display */}
+              <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-[var(--bg-app)] to-[var(--panel-bg)]">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`img-${currentShowcase}`}
+                    initial={{ opacity: 0, scale: 1.05 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute inset-0"
+                  >
+                    <Image
+                      src={showcaseSlides[currentShowcase].src}
+                      alt={showcaseSlides[currentShowcase].title}
+                      fill
+                      className="object-cover"
+                      priority={currentShowcase === 0}
+                      unoptimized
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Slide Counter */}
+                <div className="absolute top-5 right-5 z-10 px-3 py-1.5 bg-black/50 backdrop-blur-md border border-white/10 rounded-full">
+                  <span className="text-[10px] font-black text-white/90 uppercase tracking-widest tabular-nums">
+                    {String(currentShowcase + 1).padStart(2, "0")} <span className="text-white/40">/ {String(showcaseSlides.length).padStart(2, "0")}</span>
+                  </span>
+                </div>
+
+                {/* Description Overlay */}
+                <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10 z-10">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`desc-${currentShowcase}`}
+                      initial={{ opacity: 0, y: 24 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -16 }}
+                      transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                      className="max-w-3xl"
+                    >
+                      <span className={`inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r ${showcaseSlides[currentShowcase].accent} bg-opacity-20 backdrop-blur-md border border-white/20 rounded-full text-[9px] font-black text-white uppercase tracking-[0.25em] mb-3 shadow-lg`}>
+                        <Sparkles className="w-3 h-3" />
+                        {showcaseSlides[currentShowcase].category}
+                      </span>
+                      <h3 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight mb-3 leading-[1.05]">
+                        {showcaseSlides[currentShowcase].title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-white/80 font-medium leading-relaxed max-w-2xl">
+                        {showcaseSlides[currentShowcase].description}
+                      </p>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30 z-20">
+                  <motion.div
+                    key={`progress-${currentShowcase}-${isShowcasePaused}`}
+                    className={`h-full bg-gradient-to-r ${showcaseSlides[currentShowcase].accent}`}
+                    initial={{ width: "0%" }}
+                    animate={{ width: isShowcasePaused ? "0%" : "100%" }}
+                    transition={{ duration: isShowcasePaused ? 0 : 4, ease: "linear" }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Thumbnail Navigation */}
+            <div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
+              {showcaseSlides.map((slide, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentShowcase(i)}
+                  className={`group relative transition-all duration-300 ${
+                    i === currentShowcase
+                      ? "w-12 h-2.5 bg-indigo-500 rounded-full shadow-lg shadow-indigo-500/50"
+                      : "w-2.5 h-2.5 bg-[var(--glass-border)] rounded-full hover:bg-indigo-500/50 hover:scale-125"
+                  }`}
+                  aria-label={`Show ${slide.title}`}
+                  title={slide.title}
+                />
+              ))}
+            </div>
+
+            {/* Floating Stat Cards */}
+            <motion.div
+              initial={{ opacity: 0, x: -20, y: 20 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
+              transition={{ delay: 1, duration: 0.7 }}
+              className="hidden lg:flex absolute -left-12 top-1/4 items-center gap-3 px-4 py-3 bg-[var(--panel-bg)]/90 backdrop-blur-xl border border-[var(--glass-border)] rounded-2xl shadow-2xl"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                <Check className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Verified</p>
+                <p className="text-xs font-black text-[var(--text-main)]">99.9% Accuracy</p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20, y: -20 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
+              transition={{ delay: 1.2, duration: 0.7 }}
+              className="hidden lg:flex absolute -right-12 top-1/3 items-center gap-3 px-4 py-3 bg-[var(--panel-bg)]/90 backdrop-blur-xl border border-[var(--glass-border)] rounded-2xl shadow-2xl"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <Zap className="w-5 h-5 text-white fill-white" />
+              </div>
+              <div>
+                <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest">Latency</p>
+                <p className="text-xs font-black text-[var(--text-main)]">&lt; 200ms</p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20, y: 20 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
+              transition={{ delay: 1.4, duration: 0.7 }}
+              className="hidden lg:flex absolute -right-8 -bottom-4 items-center gap-3 px-4 py-3 bg-[var(--panel-bg)]/90 backdrop-blur-xl border border-[var(--glass-border)] rounded-2xl shadow-2xl"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <Star className="w-5 h-5 text-white fill-white" />
+              </div>
+              <div>
+                <p className="text-[8px] font-black text-amber-500 uppercase tracking-widest">Rated</p>
+                <p className="text-xs font-black text-[var(--text-main)]">10k+ Users</p>
+              </div>
+            </motion.div>
           </div>
         </section>
 
