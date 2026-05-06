@@ -2,12 +2,19 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function GlobalFooter() {
   return (
     <footer className="bg-[var(--bg-app)] border-t border-[var(--glass-border)] py-20 px-6 sm:px-12 relative z-10">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-16">
-        <div className="max-w-xs">
+        <motion.div
+          className="max-w-xs"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="flex items-center gap-3 mb-6">
             <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={28} height={28} unoptimized />
             <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)]">Chintu <span className="text-indigo-500">Intelligence</span></span>
@@ -15,7 +22,7 @@ export default function GlobalFooter() {
           <p className="text-[11px] text-[var(--text-dim)] font-bold leading-relaxed uppercase tracking-wider">
             Empowering the next generation of engineers with real-time strategic intelligence. Master every technical challenge with absolute confidence.
           </p>
-        </div>
+        </motion.div>
         
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-16 sm:gap-24">
           <div>

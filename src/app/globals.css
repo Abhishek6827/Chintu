@@ -115,8 +115,6 @@ body {
   min-width: 0;
 }
 
-.light-mode .app-container {
-}
 
 .neural-mesh {
   position: absolute;
@@ -699,4 +697,41 @@ input[type="range"]::-moz-range-thumb {
 @keyframes reading-icon-bounce {
   0% { transform: translateY(0); }
   100% { transform: translateY(-3px); }
+}
+
+/* ─── Global Reveal / Scroll Animations ──────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 8s ease infinite;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 1s ease-out forwards;
 }

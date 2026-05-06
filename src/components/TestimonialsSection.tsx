@@ -1,5 +1,6 @@
 "use client";
 import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
+import { motion } from "framer-motion";
 
 export function TestimonialsSection() {
   const testimonials = [
@@ -307,16 +308,27 @@ export function TestimonialsSection() {
   return (
     <section className="py-32 px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        <div className="reveal text-center mb-16">
-          <h2 className="text-xs font-black text-indigo-600 uppercase tracking-[0.5em] mb-4">Success Stories</h2>
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
+        >
+          <h2 className="text-xs font-black text-indigo-500 uppercase tracking-[0.5em] mb-4">Success Stories</h2>
           <p className="text-4xl sm:text-5xl font-black tracking-tight text-[var(--text-main)] uppercase leading-[0.9]">
             Trusted by Elites <br />
-            <span className="text-indigo-600">at Top Tier Tech.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">at Top Tier Tech.</span>
           </p>
-        </div>
-        <div className="reveal transition-all duration-1000 delay-300">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2, duration: 0.8 }}
+        >
            <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
-        </div>
+        </motion.div>
       </div>
     </section>
   );

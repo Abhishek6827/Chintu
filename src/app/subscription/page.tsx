@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { motion } from "framer-motion";
+import { Meteors } from "@/components/magicui/meteors";
 
 interface SubscriptionData {
   plan: string;
@@ -139,7 +141,16 @@ export default function SubscriptionPage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white" style={{ WebkitAppRegion: "drag" } as any}>
+    <div className="min-h-screen bg-[#0a0a0f] text-white relative overflow-hidden" style={{ WebkitAppRegion: "drag" } as any}>
+      {/* Background for premium users */}
+      {plan !== "free" && (
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <Meteors number={20} />
+          <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/5 blur-[120px] rounded-full animate-pulse" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-500/5 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+        </div>
+      )}
+
       {/* Header */}
       <div className="grid grid-cols-3 items-center px-4 sm:px-8 py-4 sticky top-0 bg-[#0a0a0f]/90 backdrop-blur-md z-50 border-b border-white/5 shrink-0 select-none" style={{ WebkitAppRegion: "drag" } as any}>
         <div className="flex items-center" style={{ WebkitAppRegion: "no-drag" } as any}>
@@ -173,32 +184,49 @@ export default function SubscriptionPage() {
       </div>
 
       {/* Content */}
-      <div className="flex flex-col items-center px-6 pb-16 pt-10" style={{ WebkitAppRegion: "no-drag" } as any}>
+      <div className="relative z-10 flex flex-col items-center px-6 pb-16 pt-10" style={{ WebkitAppRegion: "no-drag" } as any}>
         <div className="w-full max-w-lg space-y-6">
 
           {/* Title */}
-          <div className="text-center mb-8">
+          <motion.div
+            className="text-center mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
+          >
             <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="flex items-center justify-center w-12 h-12 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 shadow-lg shadow-indigo-500/10 p-2 relative">
+              <motion.div
+                className="flex items-center justify-center w-12 h-12 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 shadow-lg shadow-indigo-500/10 p-2 relative"
+                whileHover={{ scale: 1.1, rotate: 6 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
                 <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={48} height={48} className="w-full h-full object-contain" unoptimized />
-              </div>
+              </motion.div>
               <div className="w-8 h-[2px] bg-white/10 rounded-full" />
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-500/10 rounded-2xl border border-blue-500/20 shadow-lg shadow-blue-500/10 p-2">
-                {/* Razorpay Icon (simplified SVG) */}
+              <motion.div
+                className="flex items-center justify-center w-12 h-12 bg-blue-500/10 rounded-2xl border border-blue-500/20 shadow-lg shadow-blue-500/10 p-2"
+                whileHover={{ scale: 1.1, rotate: -6 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
                 <svg viewBox="0 0 100 100" className="w-8 h-8 text-blue-500" fill="currentColor">
                   <path d="M72.5,23.5 L58.5,80.5 L36.5,80.5 L46.5,40.5 L27.5,40.5 L31.5,23.5 L72.5,23.5 Z M85.5,23.5 L71.5,80.5 L60.5,80.5 L74.5,23.5 L85.5,23.5 Z" />
                 </svg>
-              </div>
+              </motion.div>
             </div>
             <h1 className="text-2xl font-black tracking-tight mb-2">Subscription Portal</h1>
             <p className="text-white/40 text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               Secured by Razorpay
             </p>
-          </div>
+          </motion.div>
 
           {/* ─── Plan Card ─────────────────────────────────────── */}
-          <div className={`relative overflow-hidden rounded-3xl border ${planStyle.border} ${planStyle.bg} p-6 shadow-xl ${planStyle.glow}`}>
+          <motion.div
+            className={`relative overflow-hidden rounded-3xl border ${planStyle.border} ${planStyle.bg} p-6 shadow-xl ${planStyle.glow}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.6 }}
+          >
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-white/[0.02] to-transparent rounded-bl-full" />
             <div className="flex items-center justify-between mb-5">
               <div>
@@ -243,10 +271,15 @@ export default function SubscriptionPage() {
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
 
           {/* ─── Payment Details Card ──────────────────────────── */}
-          <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-6 shadow-xl relative overflow-hidden">
+          <motion.div
+            className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-6 shadow-xl relative overflow-hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
             {/* Background elements */}
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 blur-[40px] rounded-full pointer-events-none" />
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-500/10 blur-[40px] rounded-full pointer-events-none" />
@@ -312,10 +345,15 @@ export default function SubscriptionPage() {
                 <span className="text-[11px] font-bold text-white/60">{formatDate(data.updated_at)}</span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* ─── Actions ───────────────────────────────────────── */}
-          <div className="space-y-3">
+          <motion.div
+            className="space-y-3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45, duration: 0.6 }}
+          >
             {/* Upgrade / Renew */}
             {(plan === "free" || isExpired) && (
               <button
@@ -342,7 +380,7 @@ export default function SubscriptionPage() {
             >
               Contact Support
             </button>
-          </div>
+          </motion.div>
 
           {/* Footer */}
           <p className="text-center text-[9px] text-white/15 font-medium mt-6">

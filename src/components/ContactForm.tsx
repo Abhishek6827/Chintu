@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { Send, CheckCircle2, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import ConfirmationMessage from '@/components/animata/feature-cards/confirmation-message';
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
@@ -37,58 +39,72 @@ export default function ContactForm() {
 
   if (status === 'success') {
     return (
-      <div className="bg-white/50 backdrop-blur-xl border border-indigo-100 p-12 rounded-[3rem] text-center animate-in zoom-in duration-500">
-        <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle2 className="w-10 h-10" />
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", damping: 15, stiffness: 100 }}
+      >
+        <ConfirmationMessage
+          successMessage="Message Transmitted"
+          labelName="Chintu Intelligence"
+          labelMessage="Our elite support team will respond within 24 hours. Stand by."
+          icon={<CheckCircle2 className="w-8 h-8 text-white" />}
+          containerClassName="mb-6"
+        />
+        <div className="text-center">
+          <button
+            onClick={() => setStatus('idle')}
+            className="px-8 py-3.5 bg-[var(--panel-bg)] text-indigo-500 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border border-[var(--glass-border)] hover:border-indigo-500/50 transition-all active:scale-95"
+          >
+            Send another message
+          </button>
         </div>
-        <h3 className="text-2xl font-black uppercase tracking-tight text-gray-900 mb-2">Message Transmitted</h3>
-        <p className="text-sm text-gray-500 font-bold uppercase tracking-wide">Our intelligence team will respond shortly.</p>
-        <button 
-          onClick={() => setStatus('idle')}
-          className="mt-8 text-indigo-600 font-black uppercase tracking-widest text-[10px] hover:underline"
-        >
-          Send another message
-        </button>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <motion.form
+      onSubmit={handleSubmit}
+      className="space-y-4"
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Full Name</label>
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] ml-4">Full Name</label>
           <input 
             required
             type="text" 
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="Ghost User" 
-            className="w-full bg-white border border-gray-100 px-6 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+            className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Email Address</label>
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] ml-4">Email Address</label>
           <input 
             required
             type="email" 
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             placeholder="contact@getchintu.com" 
-            className="w-full bg-white border border-gray-100 px-6 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+            className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
           />
         </div>
       </div>
       
       <div className="space-y-2">
-        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Message</label>
+        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] ml-4">Message</label>
         <textarea 
           required
           rows={4}
           value={formData.message}
           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
           placeholder="How can we help your interview strategy?" 
-          className="w-full bg-white border border-gray-100 px-6 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+          className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
         />
       </div>
 
@@ -107,10 +123,14 @@ export default function ContactForm() {
         )}
       </button>
       {status === 'error' && (
-        <p className="text-[10px] font-black text-red-500 uppercase tracking-widest text-center mt-2">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-[10px] font-black text-red-500 uppercase tracking-widest text-center mt-2"
+        >
           Transmission Failed. Please try again.
-        </p>
+        </motion.p>
       )}
-    </form>
+    </motion.form>
   );
 }

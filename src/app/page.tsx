@@ -18,6 +18,7 @@ import { MarqueeReviews } from '@/components/MarqueeReviews';
 import { TextReveal } from '@/components/magicui/text-reveal';
 import { Meteors } from '@/components/magicui/meteors';
 import CardSpread from '@/components/animata/card/card-spread';
+import { motion } from 'framer-motion';
 
 export default function LandingPage() {
   const { isSignedIn, isLoaded, user } = useUser();
@@ -112,6 +113,21 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-4 no-drag" style={{ WebkitAppRegion: 'no-drag' } as any}>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="hidden md:flex items-center gap-6"
+            >
+              <Link href="/blog" className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-600 transition-colors relative group">
+                Blog
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300" />
+              </Link>
+              <Link href="/faq" className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-600 transition-colors relative group">
+                FAQ
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300" />
+              </Link>
+            </motion.div>
             {!isSignedIn ? (
               <>
                 <Link href="/sign-in" className="hidden sm:block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-indigo-600 transition-colors px-4">
@@ -143,12 +159,23 @@ export default function LandingPage() {
                         {userPlan}
                       </div>
                     </div>
-                    <Link
-                      href="/setup"
+                    <button
+                      onClick={async () => {
+                        let deepLink = "chintu://open";
+                        try {
+                          deepLink += `?source=web&u=${encodeURIComponent(user?.id || "")}`;
+                        } catch {
+                          // Ignore token errors and proceed with normal launch
+                        }
+                        window.location.href = deepLink;
+                        setTimeout(() => {
+                          router.push("/setup");
+                        }, 500);
+                      }}
                       className="relative group overflow-hidden bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-indigo-400 text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3 rounded-xl hover:border-indigo-500 hover:bg-indigo-500/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                     >
                       Enter The App <Sparkles className="w-3 h-3 fill-indigo-400" />
-                    </Link>
+                    </button>
                   </>
                 )}
                 {userPlan === 'free' && (
@@ -188,21 +215,13 @@ export default function LandingPage() {
             {isSignedIn ? (
               <button 
                 onClick={async () => {
-                  // Attempt to get a sync token if available, or just open
                   let deepLink = "chintu://open";
                   try {
-                    // Try to get a session sync token from Clerk
-                    // This is a simplified version; Clerk's internal sync works better if configured
-                    // but for now we'll just signal we're coming from web
                     deepLink += `?source=web&u=${encodeURIComponent(user?.id || "")}`;
                   } catch {
                     // Ignore token errors and proceed with normal launch
                   }
-
-                  // Try to open the app via deep link
                   window.location.href = deepLink;
-                  
-                  // Then redirect to setup after a short delay
                   setTimeout(() => {
                     router.push("/setup");
                   }, 500);
@@ -369,27 +388,27 @@ export default function LandingPage() {
               <p className="text-4xl sm:text-5xl font-black tracking-tight text-[var(--text-main)] uppercase">Engineered for Success</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <div className="reveal bg-[var(--panel-bg)] p-12 rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 group">
+              <motion.div whileHover={{ scale: 1.03, y: -6 }} className="reveal bg-[var(--panel-bg)] p-12 rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 group">
                 <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-emerald-500/5">
                   <Shield className="w-8 h-8" />
                 </div>
                 <h3 className="font-black uppercase tracking-[0.2em] text-[13px] mb-6 text-[var(--text-main)]">Ghost Protocol</h3>
                 <p className="text-[13px] text-[var(--text-dim)] font-bold uppercase tracking-wide leading-relaxed">Advanced hardware-level abstraction that keeps your AI companion invisible to all proctoring and monitoring systems.</p>
-              </div>
-              <div className="reveal bg-[var(--panel-bg)] p-12 rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 delay-200 group">
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.03, y: -6 }} className="reveal bg-[var(--panel-bg)] p-12 rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 delay-200 group">
                 <div className="w-16 h-16 bg-indigo-500/10 text-indigo-500 rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-indigo-500/5">
                   <Cpu className="w-8 h-8" />
                 </div>
                 <h3 className="font-black uppercase tracking-[0.2em] text-[13px] mb-6 text-[var(--text-main)]">Quantum Synthesis</h3>
                 <p className="text-[13px] text-[var(--text-dim)] font-bold uppercase tracking-wide leading-relaxed">Proprietary LLM orchestration that combines multiple specialized models for zero-error technical and logical accuracy.</p>
-              </div>
-              <div className="reveal bg-[var(--panel-bg)] p-12 rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 delay-400 group">
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.03, y: -6 }} className="reveal bg-[var(--panel-bg)] p-12 rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 delay-400 group">
                 <div className="w-16 h-16 bg-purple-500/10 text-purple-500 rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-purple-500/5">
                   <Sparkles className="w-8 h-8" />
                 </div>
                 <h3 className="font-black uppercase tracking-[0.2em] text-[13px] mb-6 text-[var(--text-main)]">Stealth Overlay</h3>
                 <p className="text-[13px] text-[var(--text-dim)] font-bold uppercase tracking-wide leading-relaxed">Ultra-minimalist floating interface that stays exactly where you need it, hidden from screenshots and screen recordings.</p>
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>
@@ -497,26 +516,6 @@ export default function LandingPage() {
 
       <GlobalFooter />
 
-      <style jsx global>{`
-        .reveal {
-          opacity: 0;
-          transform: translateY(30px);
-          transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .reveal-visible {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        @keyframes gradient {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .animate-gradient {
-          background-size: 200% 200%;
-          animation: gradient 8s ease infinite;
-        }
-      `}</style>
     </div>
   );
 }

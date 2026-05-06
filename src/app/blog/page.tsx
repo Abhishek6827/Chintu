@@ -1,0 +1,175 @@
+"use client";
+
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Calendar, Clock, ArrowRight, Sparkles, BookOpen } from 'lucide-react';
+import { Meteors } from '@/components/magicui/meteors';
+import GlobalFooter from '@/components/GlobalFooter';
+
+const blogPosts = [
+  {
+    id: 1,
+    title: "Mastering Technical Interviews with AI",
+    excerpt: "Learn how Chintu Intelligence helps you crack FAANG interviews with real-time feedback and strategic insights.",
+    date: "May 2024",
+    readTime: "5 min read",
+    category: "Strategy",
+    gradient: "from-indigo-500 to-purple-500"
+  },
+  {
+    id: 2,
+    title: "The Future of AI-Powered Interview Prep",
+    excerpt: "Explore how artificial intelligence is revolutionizing the way candidates prepare for technical interviews.",
+    date: "April 2024",
+    readTime: "4 min read",
+    category: "Technology",
+    gradient: "from-purple-500 to-pink-500"
+  },
+  {
+    id: 3,
+    title: "Elite vs Premium: Choosing Your Path",
+    excerpt: "A comprehensive guide to understanding the differences between Chintu's subscription tiers and which one fits your goals.",
+    date: "March 2024",
+    readTime: "6 min read",
+    category: "Guide",
+    gradient: "from-pink-500 to-orange-500"
+  },
+  {
+    id: 4,
+    title: "Energy Sync: Maximizing Your Credits",
+    excerpt: "Tips and tricks to optimize your Energy Sync credits and get the most out of every session.",
+    date: "February 2024",
+    readTime: "3 min read",
+    category: "Tips",
+    gradient: "from-orange-500 to-yellow-500"
+  },
+  {
+    id: 5,
+    title: "Building Your AI Profile",
+    excerpt: "How to customize your AI profile in Chintu to receive personalized interview questions tailored to your experience.",
+    date: "January 2024",
+    readTime: "5 min read",
+    category: "Tutorial",
+    gradient: "from-yellow-500 to-green-500"
+  },
+  {
+    id: 6,
+    title: "Chintu v2.5: What&apos;s New",
+    excerpt: "Discover the latest features in Chintu Intelligence v2.5 including Hyper-Intelligence mode and enhanced analytics.",
+    date: "December 2023",
+    readTime: "7 min read",
+    category: "Updates",
+    gradient: "from-green-500 to-teal-500"
+  }
+];
+
+export default function BlogPage() {
+  return (
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-indigo-500/20 flex flex-col relative overflow-x-hidden">
+      {/* Background Elements */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <Meteors number={20} />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-200/20 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-200/20 blur-[120px] rounded-full animate-pulse [animation-delay:700ms]" />
+      </div>
+
+      <main className="relative z-10 flex-1">
+        {/* Header */}
+        <section className="py-24 px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6">
+              <BookOpen className="w-4 h-4 text-indigo-400" />
+              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Knowledge Base</span>
+            </div>
+            <h1 className="text-5xl sm:text-6xl font-black tracking-tighter uppercase leading-[0.9] mb-6">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Chintu</span> Blog
+            </h1>
+            <p className="text-lg sm:text-xl text-[var(--text-dim)] font-bold uppercase tracking-widest max-w-2xl mx-auto">
+              Insights, strategies, and updates to elevate your interview game
+            </p>
+          </motion.div>
+        </section>
+
+        {/* Blog Grid */}
+        <section className="px-6 pb-24">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {blogPosts.map((post, index) => (
+                <motion.article
+                  key={post.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  whileHover={{ y: -8 }}
+                  className="group relative bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-3xl overflow-hidden hover:border-indigo-500/50 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-indigo-500/10"
+                >
+                  <div className={`h-32 bg-gradient-to-br ${post.gradient} opacity-20 group-hover:opacity-30 transition-opacity`} />
+                  <div className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[8px] font-black uppercase tracking-widest text-indigo-400">
+                        {post.category}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-black uppercase tracking-tight mb-3 text-[var(--text-main)] group-hover:text-indigo-500 transition-colors">
+                      {post.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-dim)] font-bold leading-relaxed mb-6">
+                      {post.excerpt}
+                    </p>
+                    <div className="flex items-center justify-between pt-4 border-t border-[var(--glass-border)]">
+                      <div className="flex items-center gap-4 text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {post.date}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {post.readTime}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-indigo-500 text-[10px] font-black uppercase tracking-widest group-hover:gap-3 transition-all">
+                        Read <ArrowRight className="w-3 h-3" />
+                      </div>
+                    </div>
+                  </div>
+                </motion.article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-24 px-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto text-center bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-[3rem] p-12 sm:p-16"
+          >
+            <Sparkles className="w-12 h-12 text-indigo-400 mx-auto mb-6 animate-pulse" />
+            <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter mb-4 text-[var(--text-main)]">
+              Ready to Elevate Your Interview Strategy?
+            </h2>
+            <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest mb-8 max-w-xl mx-auto">
+              Join thousands of candidates who&apos;ve mastered technical interviews with Chintu Intelligence
+            </p>
+            <Link
+              href="/sign-up"
+              className="inline-flex items-center gap-3 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.2em] px-10 py-5 rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-105 active:scale-95 transition-all"
+            >
+              Get Started Free <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        </section>
+      </main>
+
+      <GlobalFooter />
+    </div>
+  );
+}
