@@ -652,6 +652,51 @@ app.whenReady().then(async () => {
     setupAutoUpdater();
   }
 
+  // ─── Universal Shortcuts Management ────────────────────────
+  let universalShortcutsEnabled = false;
+
+  function registerUniversalShortcuts() {
+    // Unregister first to avoid duplicates
+    globalShortcut.unregister("Space");
+    globalShortcut.unregister("Enter");
+
+    // WARNING: Registering "Space" globally will block the spacebar in ALL other apps.
+    globalShortcut.register("Space", () => {
+      if (mainWindow) {
+        mainWindow.webContents.send("trigger-universal-recording");
+      }
+    });
+
+    // WARNING: Registering "Enter" globally will block the Enter key in ALL other apps.
+    globalShortcut.register("Enter", () => {
+      if (mainWindow) {
+        mainWindow.webContents.send("trigger-universal-screenshot");
+      }
+    });
+    console.log("[Main] Universal shortcuts registered");
+  }
+
+  function unregisterUniversalShortcuts() {
+    globalShortcut.unregister("Space");
+    globalShortcut.unregister("Enter");
+    console.log("[Main] Universal shortcuts unregistered");
+  }
+
+  ipcMain.handle("set-universal-shortcuts", (event, enabled) => {
+    universalShortcutsEnabled = enabled;
+    if (enabled) {
+      registerUniversalShortcuts();
+    } else {
+      unregisterUniversalShortcuts();
+    }
+    return universalShortcutsEnabled;
+  });
+
+  ipcMain.handle("get-universal-shortcuts", () => {
+    return universalShortcutsEnabled;
+  });
+
+  // ─── Standard App Shortcuts ───────────────────────────────
   globalShortcut.register("CommandOrControl+Shift+D", () => {
     if (mainWindow) {
       mainWindow.webContents.toggleDevTools();

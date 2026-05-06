@@ -98,6 +98,7 @@ export default function RoomPage() {
   const [spaceMode, setSpaceMode] = useState<"hold" | "toggle">("hold");
   const [selectedModel, setSelectedModel] = useState<ModelKey>("llama-3.3-70b");
   const selectedModelRef = useRef<ModelKey>("llama-3.3-70b");
+  const [universalShortcuts, setUniversalShortcuts] = useState(false);
   const [userPlan, setUserPlan] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const { currentTheme, toggleTheme } = useThemeToggle();
@@ -250,6 +251,11 @@ export default function RoomPage() {
   useEffect(() => {
     const initRoom = async () => {
       if (!isLoaded || !isSignedIn || !user?.id) return;
+
+      if (isElectron) {
+        const shortcutsEnabled = await (window as any).electronAPI.getUniversalShortcuts();
+        setUniversalShortcuts(shortcutsEnabled);
+      }
       
       // BLOCK WEB ACCESS: Room is only for Electron EXE app
       if (!isElectron) {
@@ -1175,9 +1181,31 @@ export default function RoomPage() {
 
     window.addEventListener("keydown", onKeyDown, true);
     window.addEventListener("keyup", onKeyUp, true);
+
+    // Universal Shortcut Listeners
+    let cleanupUniversal: any = null;
+    let cleanupScreenshot: any = null;
+    if (isElectron) {
+      cleanupUniversal = (window as any).electronAPI.onUniversalRecording(() => {
+        if (spaceModeRef.current === "toggle") {
+          if (isRecordingRef.current) stopRecordingRef.current();
+          else startRecordingRef.current();
+        } else {
+          // In 'hold' mode, universal shortcut acts as a toggle since we can't detect 'hold' globally easily without complex logic
+          if (isRecordingRef.current) stopRecordingRef.current();
+          else startRecordingRef.current();
+        }
+      });
+      cleanupScreenshot = (window as any).electronAPI.onUniversalScreenshot(() => {
+        captureScreenshot();
+      });
+    }
+
     return () => {
       window.removeEventListener("keydown", onKeyDown, true);
       window.removeEventListener("keyup", onKeyUp, true);
+      if (cleanupUniversal) cleanupUniversal();
+      if (cleanupScreenshot) cleanupScreenshot();
     };
   }, [captureScreenshot]);
 
@@ -1964,6 +1992,47 @@ export default function RoomPage() {
                 <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
                   {spaceMode === "hold" ? "Hold space to speak, release to send" : "Tap space to start/stop recording"}
                 </p>
+              </div>
+
+              {/* Universal Shortcuts Toggle */}
+              <div 
+                className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
+                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1 flex items-center gap-2">
+                      Universal Keys
+                      {userPlan === 'free' && (
+                        <span className="bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase px-1.5 py-0.5 rounded tracking-widest">PRO</span>
+                      )}
+                    </h4>
+                    <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
+                      Use Space/Enter even in other apps
+                    </p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      if (userPlan === 'free') {
+                        router.push("/pricing");
+                        return;
+                      }
+                      const newVal = !universalShortcuts;
+                      setUniversalShortcuts(newVal);
+                      if (isElectron) {
+                        await (window as any).electronAPI.setUniversalShortcuts(newVal);
+                      }
+                    }}
+                    className={`w-12 h-6 rounded-full transition-all relative ${universalShortcuts ? "bg-indigo-600" : "bg-gray-600/30"}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${universalShortcuts ? "left-7" : "left-1"}`} />
+                  </button>
+                </div>
+                {universalShortcuts && (
+                   <p className="mt-2 text-[8px] text-amber-400 font-bold uppercase tracking-widest leading-relaxed">
+                     ⚠️ Space & Enter will be BLOCKED in other apps while this is ON.
+                   </p>
+                )}
               </div>
 
 

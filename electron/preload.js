@@ -44,5 +44,17 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("deep-link-received", handler);
     return () => ipcRenderer.removeListener("deep-link-received", handler);
   },
+  onUniversalRecording: (callback) => {
+    const handler = () => callback();
+    ipcRenderer.on("trigger-universal-recording", handler);
+    return () => ipcRenderer.removeListener("trigger-universal-recording", handler);
+  },
+  onUniversalScreenshot: (callback) => {
+    const handler = () => callback();
+    ipcRenderer.on("trigger-universal-screenshot", handler);
+    return () => ipcRenderer.removeListener("trigger-universal-screenshot", handler);
+  },
+  setUniversalShortcuts: (enabled) => ipcRenderer.invoke("set-universal-shortcuts", enabled),
+  getUniversalShortcuts: () => ipcRenderer.invoke("get-universal-shortcuts"),
 });
 
