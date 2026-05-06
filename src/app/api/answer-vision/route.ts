@@ -241,7 +241,7 @@ export async function POST(req: NextRequest) {
     const userObj = await clerkClient().users.getUser(userId);
     const email = userObj.emailAddresses[0]?.emailAddress;
 
-    let { data: profile, error: profileError } = await supabaseAdmin
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("credits, plan")
       .eq("email", email)

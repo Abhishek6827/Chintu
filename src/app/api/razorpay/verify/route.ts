@@ -83,12 +83,12 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     // 2. Resolve Contact Info
-    let userEmail = email;
-    let userName = profile?.full_name || `${userObj.firstName || ""} ${userObj.lastName || ""}`.trim();
+    const userEmail = email;
+    const userName = profile?.full_name || `${userObj.firstName || ""} ${userObj.lastName || ""}`.trim();
     
     // 3. Resolve Profile State
-    let baseCredits = profile?.credits || 0;
-    let baseExpiryStr = profile?.subscription_expires_at;
+    const baseCredits = profile?.credits || 0;
+    const baseExpiryStr = profile?.subscription_expires_at;
 
     const targetProfile = profile; 
 

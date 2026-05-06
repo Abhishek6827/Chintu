@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
     // Fetch existing profile to check plan and current data
     const supabaseAdmin = createAdminClient();
-    let { data: existing } = await supabaseAdmin
+    const { data: existing } = await supabaseAdmin
       .from("profiles")
       .select("*")
       .eq("email", email)
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     // List of columns that DEFINITELY exist in the profiles table
     const allowedColumns = ["id", "full_name", "display_id", "profile_data", "raw_profile", "theme", "plan", "credits", "history", "updated_at", "payment_provider", "razorpay_payment_id"];
     
-    const updateData: any = { email, updated_at: new Date().toISOString() };
+    const updateData: any = { id: userId, email, updated_at: new Date().toISOString() };
 
     // Map rest of body to allowed columns
     Object.keys(rest).forEach(key => {

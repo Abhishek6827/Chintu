@@ -170,11 +170,15 @@ export default function SetupPage() {
 
       // Save JD to Supabase if toggle is ON
       if (saveJd) {
-        fetch("/api/profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ current_jd: jd.trim() }),
-        }).catch(err => console.error("Failed to save JD:", err));
+        try {
+          await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ current_jd: jd.trim() }),
+          });
+        } catch (err) {
+          console.error("Failed to save JD:", err);
+        }
       }
 
       try {
@@ -197,11 +201,15 @@ export default function SetupPage() {
       
       // Save JD to Supabase if toggle is ON (for electron/desktop too)
       if (saveJd) {
-        fetch("/api/profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ current_jd: jd.trim() }),
-        }).catch(err => console.error("Failed to save JD:", err));
+        try {
+          await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ current_jd: jd.trim() }),
+          });
+        } catch (err) {
+          console.error("Failed to save JD:", err);
+        }
       }
       
       sessionStorage.setItem("jobDescription", jd.trim());

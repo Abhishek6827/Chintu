@@ -178,7 +178,7 @@ Rules:
           const userObj = await clerkClient().users.getUser(userId);
           const email = userObj.emailAddresses[0]?.emailAddress;
 
-          let { data: existing } = await supabase.from("profiles")
+          const { data: existing } = await supabase.from("profiles")
             .select("profile_data")
             .eq("email", email)
             .maybeSingle();
@@ -193,6 +193,7 @@ Rules:
           };
           
           const { error: upsertError } = await supabase.from("profiles").upsert({
+            id: userId,
             email: email,
             profile_data: mergedData,
             raw_profile: rawText,

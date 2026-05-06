@@ -140,8 +140,6 @@ export async function POST(req: Request) {
         .maybeSingle();
       targetProfile = profileByEmail;
     }
-
-    const targetUserId = targetProfile?.id || userId;
     let currentExpiry = targetProfile?.subscription_expires_at ? new Date(targetProfile.subscription_expires_at) : now;
     if (currentExpiry < now) currentExpiry = now;
     const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
