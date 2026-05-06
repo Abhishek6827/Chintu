@@ -82,11 +82,8 @@ export default function GlobalHeader() {
       setShowOnboarding(false);
       // Clear session storage on logout to ensure JD is requested again next time
       sessionStorage.removeItem("jobDescription");
-      if (isElectron && (window as any).electronAPI?.clearAuthSession) {
-        (window as any).electronAPI.clearAuthSession();
-      }
     }
-  }, [isLoaded, isSignedIn, isElectron]);
+  }, [isLoaded, isSignedIn]);
 
   const [showUnhidePrompt, setShowUnhidePrompt] = useState(false);
   const [isStealthMode, setIsStealthMode] = useState(true); // Default to true based on main.js
