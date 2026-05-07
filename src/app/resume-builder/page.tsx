@@ -132,6 +132,9 @@ export default function ResumeBuilderPage() {
   };
 
   const openPdfPreview = () => {
+    if (tailoredProfile) {
+      sessionStorage.setItem("tailoredProfile", JSON.stringify(tailoredProfile));
+    }
     const previewUrl = `/resume-preview?template=${selectedTemplate}`;
     const fullUrl = `${window.location.origin}${previewUrl}`;
     if (isElectron) (window as any).electronAPI.openExternal(fullUrl);

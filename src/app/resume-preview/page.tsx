@@ -20,25 +20,16 @@ export default function ResumePreviewPage() {
       return;
     }
 
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch("/api/profile");
-        if (res.ok) {
-          const { profile: data } = await res.json();
-          if (data?.profile_data) {
-            // Handle double nesting if it exists (legacy bug)
-            const p = data.profile_data.profile_data || data.profile_data;
-            setProfile(p);
-          }
-        }
-      } catch (err) {
-        console.error("Error fetching profile:", err);
-      } finally {
-        setLoading(false);
+    try {
+      const stored = sessionStorage.getItem("tailoredProfile");
+      if (stored) {
+        setProfile(JSON.parse(stored));
       }
-    };
-
-    fetchProfile();
+    } catch (err) {
+      console.error("Error reading profile from sessionStorage:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [isLoaded, isSignedIn, router]);
 
   useEffect(() => {
@@ -55,8 +46,147 @@ export default function ResumePreviewPage() {
   if (!profile) return <div className="p-10 text-center">No profile data found. Please setup your profile first.</div>;
 
   return (
-    <div className={`min-h-screen bg-[#f3f4f6] text-black leading-snug print:bg-white print:p-0 ${template === 'classic' ? 'font-serif' : 'font-sans'}`}>
+    <div className="resume-page">
       <style jsx global>{`
+        /* Reset ALL app styles on the resume page */
+        .resume-page,
+        .resume-page * {
+          color: #000 !important;
+          font-family: 'Times New Roman', 'Georgia', serif !important;
+        }
+        .resume-page {
+          background: #e8e8e8 !important;
+          min-height: 100vh;
+          padding: 0;
+          margin: 0;
+        }
+        /* Hide app header/footer/nav on this page */
+        nav[role="navigation"],
+        footer[role="contentinfo"],
+        .drag-region {
+          display: none !important;
+        }
+        /* The A4 sheet */
+        .resume-sheet {
+          background: white !important;
+          width: 210mm;
+          min-height: 297mm;
+          margin: 20px auto;
+          padding: 0.5in 0.55in;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+          line-height: 1.35;
+        }
+        /* Section headings */
+        .resume-sheet .section-heading {
+          font-size: 11pt !important;
+          font-weight: bold !important;
+          border-bottom: 1px solid #000 !important;
+          padding-bottom: 2px !important;
+          margin-bottom: 6px !important;
+          margin-top: 10px !important;
+          text-transform: none !important;
+          letter-spacing: 0 !important;
+        }
+        /* Name */
+        .resume-sheet .resume-name {
+          font-size: 18pt !important;
+          font-weight: bold !important;
+          text-align: center !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          line-height: 1.2 !important;
+        }
+        /* Contact line */
+        .resume-sheet .resume-contact {
+          text-align: center !important;
+          font-size: 8.5pt !important;
+          color: #333 !important;
+          margin: 2px 0 0 0 !important;
+          line-height: 1.4 !important;
+        }
+        /* Body text */
+        .resume-sheet .body-text {
+          font-size: 10pt !important;
+          color: #000 !important;
+          text-align: justify !important;
+          line-height: 1.35 !important;
+          margin: 0 !important;
+        }
+        /* Entry header row */
+        .resume-sheet .entry-header {
+          display: flex !important;
+          justify-content: space-between !important;
+          align-items: baseline !important;
+          margin-bottom: 0 !important;
+        }
+        .resume-sheet .entry-title {
+          font-size: 10.5pt !important;
+          font-weight: bold !important;
+        }
+        .resume-sheet .entry-date {
+          font-size: 9.5pt !important;
+          font-weight: normal !important;
+          color: #000 !important;
+          white-space: nowrap !important;
+        }
+        .resume-sheet .entry-subtitle {
+          font-size: 9.5pt !important;
+          font-style: italic !important;
+          color: #444 !important;
+          margin: 0 0 2px 0 !important;
+        }
+        /* Bullet list */
+        .resume-sheet .bullet-list {
+          list-style: disc !important;
+          padding-left: 18px !important;
+          margin: 2px 0 6px 0 !important;
+        }
+        .resume-sheet .bullet-list li {
+          font-size: 9.5pt !important;
+          color: #000 !important;
+          line-height: 1.35 !important;
+          margin-bottom: 1px !important;
+          padding-left: 2px !important;
+        }
+        /* Skills row */
+        .resume-sheet .skill-row {
+          font-size: 9.5pt !important;
+          color: #000 !important;
+          margin: 1px 0 !important;
+          line-height: 1.4 !important;
+        }
+        .resume-sheet .skill-label {
+          font-weight: bold !important;
+        }
+        /* Education entry */
+        .resume-sheet .edu-entry {
+          display: flex !important;
+          justify-content: space-between !important;
+          align-items: baseline !important;
+          margin-bottom: 2px !important;
+        }
+        .resume-sheet .edu-degree {
+          font-size: 10pt !important;
+          font-weight: bold !important;
+        }
+        .resume-sheet .edu-institution {
+          font-size: 9pt !important;
+          font-style: italic !important;
+          color: #444 !important;
+        }
+        .resume-sheet .edu-year {
+          font-size: 9.5pt !important;
+          text-align: right !important;
+          white-space: nowrap !important;
+        }
+        /* Project tech */
+        .resume-sheet .project-tech {
+          font-size: 9pt !important;
+          font-style: italic !important;
+          color: #444 !important;
+          margin: 0 0 2px 0 !important;
+        }
+        /* Print styles */
         @media print {
           @page {
             margin: 0;
@@ -71,173 +201,137 @@ export default function ResumePreviewPage() {
           .no-print {
             display: none !important;
           }
-          .resume-container {
+          .resume-page {
+            background: white !important;
+          }
+          .resume-sheet {
             margin: 0 !important;
             padding: 0.4in 0.5in !important;
             box-shadow: none !important;
             width: 100% !important;
-            height: 100% !important;
           }
-        }
-        body {
-          background: #f3f4f6;
-          margin: 0;
-          padding: 0;
-        }
-        .resume-container {
-          background: white;
-          width: 210mm;
-          margin: 1.5rem auto;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-          min-height: 297mm;
-          padding: 0.5in 0.6in;
-          color: #000;
         }
       `}</style>
 
-      <div className="resume-container flex flex-col">
-        {/* Header */}
-        <header className={`mb-4 ${template === 'minimal' ? 'text-left' : 'text-center'}`}>
-          <h1 className={`${template === 'minimal' ? 'text-3xl' : 'text-2xl'} font-bold uppercase tracking-tight mb-0`}>
-            {profile.name}
-          </h1>
-          <p className={`${template === 'minimal' ? 'text-xs' : 'text-[10px]'} font-bold text-gray-700 uppercase tracking-[0.2em] mb-1`}>
-            {profile.title}
-          </p>
-          <div className={`flex flex-wrap ${template === 'minimal' ? 'justify-start' : 'justify-center'} gap-x-2 text-[9px] text-gray-500 font-medium`}>
-            {[
-              profile.contact?.email || profile.email || user?.emailAddresses[0].emailAddress,
-              profile.contact?.phone || profile.phone,
-              (profile.contact?.linkedin || profile.linkedin)?.replace(/^https?:\/\//, ''),
-              (profile.contact?.github || profile.github)?.replace(/^https?:\/\//, ''),
-              (profile.contact?.portfolio || profile.portfolio)?.replace(/^https?:\/\//, '')
-            ].filter(Boolean).map((item, index, array) => (
-              <span key={index} className="flex items-center gap-2">
-                {item}
-                {index < array.length - 1 && <span className="text-gray-300">|</span>}
-              </span>
-            ))}
-          </div>
-        </header>
+      <div className="resume-sheet">
+        {/* ─── Name ─── */}
+        <h1 className="resume-name">{profile.name}</h1>
 
-        {/* Summary */}
+        {/* ─── Contact Info ─── */}
+        <p className="resume-contact">
+          {[
+            profile.contact?.phone,
+            profile.contact?.email || user?.emailAddresses[0]?.emailAddress,
+            profile.contact?.linkedin?.replace(/^https?:\/\//, ''),
+            profile.contact?.github?.replace(/^https?:\/\//, ''),
+            profile.contact?.portfolio?.replace(/^https?:\/\//, '')
+          ].filter(Boolean).join(' | ')}
+        </p>
+
+        {/* ─── Summary ─── */}
         {profile.summary && (
-          <section className="mb-3">
-            <h2 className={`text-[9.5px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-1 pb-0.5`}>
-              Professional Summary
-            </h2>
-            <p className="text-[10.5px] text-gray-800 text-justify leading-snug">{profile.summary}</p>
-          </section>
+          <div>
+            <h2 className="section-heading">Summary</h2>
+            <p className="body-text">{profile.summary}</p>
+          </div>
         )}
 
-        {/* Experience */}
+        {/* ─── Experience ─── */}
         {profile.experience?.length > 0 && (
-          <section className="mb-3">
-            <h2 className={`text-[9.5px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-1.5 pb-0.5`}>
-              Experience
-            </h2>
+          <div>
+            <h2 className="section-heading">Experience</h2>
             {profile.experience.map((exp: any, i: number) => (
-              <div key={i} className="mb-2 last:mb-0">
-                <div className="flex justify-between items-baseline mb-0">
-                  <h3 className="text-[10.5px] font-bold">{exp.role}</h3>
-                  <span className="text-[9.5px] font-bold text-gray-700">{exp.duration}</span>
+              <div key={i} style={{ marginBottom: '6px' }}>
+                <div className="entry-header">
+                  <span className="entry-title">{exp.role}</span>
+                  <span className="entry-date">{exp.duration}</span>
                 </div>
-                <p className="text-[9.5px] font-bold italic text-gray-600 mb-0.5">{exp.company}</p>
-                <ul className="list-disc ml-4 text-[10px] text-gray-800 space-y-0">
-                  {exp.highlights?.map((h: string, j: number) => (
-                    <li key={j} className="pl-1 leading-tight">{h}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </section>
-        )}
-
-        {/* Projects */}
-        {profile.projects?.length > 0 && (
-          <section className="mb-3">
-            <h2 className={`text-[9.5px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-1.5 pb-0.5`}>
-              Projects
-            </h2>
-            {profile.projects.map((pr: any, i: number) => (
-              <div key={i} className="mb-1.5 last:mb-0">
-                <h3 className="text-[10.5px] font-bold mb-0">{pr.name}</h3>
-                <p className="text-[10px] text-gray-800 leading-snug">{pr.description}</p>
-                {pr.tech?.length > 0 && (
-                  <p className="text-[8.5px] font-bold text-gray-500 mt-0 uppercase tracking-wider">
-                    Tech: {pr.tech.join(", ")}
-                  </p>
+                <p className="entry-subtitle">{exp.company}</p>
+                {exp.highlights?.length > 0 && (
+                  <ul className="bullet-list">
+                    {exp.highlights.map((h: string, j: number) => (
+                      <li key={j}>{h}</li>
+                    ))}
+                  </ul>
                 )}
               </div>
             ))}
-          </section>
+          </div>
         )}
 
-        {/* Skills */}
-        {profile.skills && (
-          <section className="mb-3">
-            <h2 className={`text-[9.5px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-1.5 pb-0.5`}>
-              Technical Skills
-            </h2>
-            <div className="text-[10px] text-gray-800 space-y-0">
-              {profile.skills.languages?.length > 0 && (
-                <p><span className="font-bold">Languages:</span> {profile.skills.languages.join(", ")}</p>
-              )}
-              {profile.skills.frameworks?.length > 0 && (
-                <p><span className="font-bold">Frameworks:</span> {profile.skills.frameworks.join(", ")}</p>
-              )}
-              {profile.skills.tools?.length > 0 && (
-                <p><span className="font-bold">Tools:</span> {profile.skills.tools.join(", ")}</p>
-              )}
-              {profile.skills.other?.length > 0 && (
-                <p><span className="font-bold">Other:</span> {profile.skills.other.join(", ")}</p>
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* Education */}
-        {profile.education?.length > 0 && (
-          <section className="mb-3 last:mb-0">
-            <h2 className={`text-[9.5px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-1.5 pb-0.5`}>
-              Education
-            </h2>
-            {profile.education.map((ed: any, i: number) => (
-              <div key={i} className="flex justify-between items-baseline mb-0.5 last:mb-0">
-                <div>
-                  <h3 className="text-[10.5px] font-bold">{ed.degree}</h3>
-                  <p className="text-[9.5px] italic text-gray-600">{ed.institution}</p>
-                </div>
-                <span className="text-[9.5px] font-bold text-gray-700">{ed.year}</span>
+        {/* ─── Projects ─── */}
+        {profile.projects?.length > 0 && (
+          <div>
+            <h2 className="section-heading">Projects</h2>
+            {profile.projects.map((pr: any, i: number) => (
+              <div key={i} style={{ marginBottom: '6px' }}>
+                <p className="entry-title">{pr.name}</p>
+                {pr.tech?.length > 0 && (
+                  <p className="project-tech">{pr.tech.join(', ')}</p>
+                )}
+                <p className="body-text" style={{ fontSize: '9.5pt' }}>{pr.description}</p>
               </div>
             ))}
-          </section>
+          </div>
         )}
 
-        {/* Certifications/Achievements fallback */}
+        {/* ─── Education ─── */}
+        {profile.education?.length > 0 && (
+          <div>
+            <h2 className="section-heading">Education</h2>
+            {profile.education.map((ed: any, i: number) => (
+              <div key={i} className="edu-entry">
+                <div>
+                  <p className="edu-degree">{ed.degree}</p>
+                  <p className="edu-institution">{ed.institution}</p>
+                </div>
+                <span className="edu-year">{ed.year}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ─── Skills ─── */}
+        {profile.skills && (
+          <div>
+            <h2 className="section-heading">Skills</h2>
+            {profile.skills.languages?.length > 0 && (
+              <p className="skill-row"><span className="skill-label">Languages:</span> {profile.skills.languages.join(', ')}</p>
+            )}
+            {profile.skills.frameworks?.length > 0 && (
+              <p className="skill-row"><span className="skill-label">Frameworks:</span> {profile.skills.frameworks.join(', ')}</p>
+            )}
+            {profile.skills.tools?.length > 0 && (
+              <p className="skill-row"><span className="skill-label">Tools:</span> {profile.skills.tools.join(', ')}</p>
+            )}
+            {profile.skills.other?.length > 0 && (
+              <p className="skill-row"><span className="skill-label">Other:</span> {profile.skills.other.join(', ')}</p>
+            )}
+          </div>
+        )}
+
+        {/* ─── Certifications & Achievements ─── */}
         {(profile.certifications?.length > 0 || profile.achievements?.length > 0) && (
-          <section className="mt-4">
-            <h2 className={`text-[10px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-2 pb-0.5`}>
-              Certifications & Achievements
-            </h2>
-            <ul className="list-disc ml-4 text-[10.5px] text-gray-800 space-y-0.5">
-              {profile.certifications?.map((c: string, i: number) => <li key={`c-${i}`} className="pl-1">{c}</li>)}
-              {profile.achievements?.map((a: string, i: number) => <li key={`a-${i}`} className="pl-1">{a}</li>)}
+          <div>
+            <h2 className="section-heading">Certifications & Achievements</h2>
+            <ul className="bullet-list">
+              {profile.certifications?.map((c: string, i: number) => <li key={`c-${i}`}>{c}</li>)}
+              {profile.achievements?.map((a: string, i: number) => <li key={`a-${i}`}>{a}</li>)}
             </ul>
-          </section>
+          </div>
         )}
       </div>
 
-      <div className="no-print fixed bottom-8 left-1/2 -translate-x-1/2 flex gap-4">
+      <div className="no-print" style={{ position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '16px', zIndex: 50 }}>
         <button 
           onClick={() => window.print()}
-          className="px-6 py-3 bg-black text-white rounded-full font-bold shadow-xl hover:scale-105 transition-all"
+          style={{ padding: '12px 28px', background: '#000', color: '#fff', borderRadius: '999px', fontWeight: 'bold', fontSize: '14px', border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}
         >
           Download PDF
         </button>
         <button 
           onClick={() => router.back()}
-          className="px-6 py-3 bg-white text-black border border-gray-200 rounded-full font-bold shadow-xl hover:scale-105 transition-all"
+          style={{ padding: '12px 28px', background: '#fff', color: '#000', borderRadius: '999px', fontWeight: 'bold', fontSize: '14px', border: '1px solid #ddd', cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}
         >
           Go Back
         </button>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Mail, Shield, Zap } from "lucide-react";
 import React from "react";
@@ -114,6 +115,7 @@ const socialLinks: { label: string; href: string; svg: React.ReactNode }[] = [
 
 export default function GlobalFooter() {
   const [mounted, setMounted] = React.useState(false);
+  const pathname = usePathname();
   const isElectron = typeof window !== "undefined" &&
     (!!(window as any).electronAPI || navigator.userAgent.toLowerCase().includes('electron'));
 
@@ -121,7 +123,8 @@ export default function GlobalFooter() {
     setMounted(true);
   }, []);
 
-  if (!mounted || isElectron) return null;
+  // Don't show on Electron platform or on print-only pages
+  if (!mounted || isElectron || pathname === '/resume-preview') return null;
 
   return (
     <footer

@@ -49,8 +49,8 @@ export default function WebHeader() {
     }
   }, [isSignedIn]);
 
-  // Don't show on Electron platform
-  if (!mounted || isElectron) return null;
+  // Don't show on Electron platform or on print-only pages
+  if (!mounted || isElectron || pathname === '/resume-preview') return null;
 
   return (
     <nav role="navigation" aria-label="Main site navigation" className="sticky top-0 z-[100] bg-[var(--bg-app)]/90 backdrop-blur-3xl border-b border-[var(--glass-border)] px-6 py-4 shadow-xl shadow-indigo-500/5">
