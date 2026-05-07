@@ -448,6 +448,16 @@ export async function POST(req: Request) {
           last_payment_id: dedupId,
           last_gateway: "stripe",
           last_payment_at: new Date().toISOString(),
+          credit_history: [
+            {
+              type: "addition",
+              amount: addedCredits,
+              description: `Plan Upgrade: ${plan.toUpperCase()} (${frequency})`,
+              timestamp: new Date().toISOString(),
+              transaction_id: transactionId
+            },
+            ...((profile.profile_data as any)?.credit_history || [])
+          ].slice(0, 50),
           last_frequency: frequency,
         },
       })

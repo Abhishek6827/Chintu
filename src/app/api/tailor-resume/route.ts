@@ -168,11 +168,24 @@ Rules:
           const userObj = await (await clerkClient()).users.getUser(userId);
           const email = userObj.emailAddresses[0]?.emailAddress;
 
+          const newHistoryEntry = {
+            type: "deduction",
+            amount: 1,
+            description: `Resume Builder (AI Tailoring): ${tailoredProfile.title}`,
+            timestamp: new Date().toISOString()
+          };
+
+          const existingHistory = (profile.profile_data as any)?.credit_history || [];
+
           await supabase.from("profiles").upsert({
             id: userId,
             email: email,
-            credits: (profile.credits || 1) - 1, // Deduct 1
-            profile_data: tailoredProfile,
+            credits: (profile.credits || 1) - 1,
+            profile_data: {
+              ...(profile.profile_data as any || {}),
+              profile_data: tailoredProfile,
+              credit_history: [newHistoryEntry, ...existingHistory].slice(0, 50)
+            },
             updated_at: new Date().toISOString()
           }, { onConflict: 'email' });
         } catch (dbErr) {

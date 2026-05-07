@@ -675,9 +675,23 @@ Rules:
 
     // ─── Deduct Credit (2 credits for screenshot) ──────────────
     if (profile) {
+      const newHistoryEntry = {
+        type: "deduction",
+        amount: 2,
+        description: "Visual Analysis (Screenshot)",
+        timestamp: new Date().toISOString()
+      };
+      const existingHistory = (profile.profile_data as any)?.credit_history || [];
+
       await supabaseAdmin
         .from("profiles")
-        .update({ credits: currentCredits - 2 })
+        .update({ 
+          credits: currentCredits - 2,
+          profile_data: {
+            ...(profile.profile_data as any || {}),
+            credit_history: [newHistoryEntry, ...existingHistory].slice(0, 50)
+          }
+        })
         .eq("email", email);
     }
 

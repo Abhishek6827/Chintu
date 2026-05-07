@@ -509,6 +509,28 @@ Rules:
       throw lastError || new Error("All AI models are currently busy. Please try again.");
     }
 
+    // ─── Deduct Credit (1 credit for text/voice) ──────────────
+    if (profile) {
+      const newHistoryEntry = {
+        type: "deduction",
+        amount: 1,
+        description: "Interview Response (Text/Voice)",
+        timestamp: new Date().toISOString()
+      };
+      const existingHistory = (profile.profile_data as any)?.credit_history || [];
+
+      await supabaseAdmin
+        .from("profiles")
+        .update({ 
+          credits: (currentCredits || 1) - 1,
+          profile_data: {
+            ...(profile.profile_data as any || {}),
+            credit_history: [newHistoryEntry, ...existingHistory].slice(0, 50)
+          }
+        })
+        .eq("email", email);
+    }
+
 
 
     const encoder = new TextEncoder();

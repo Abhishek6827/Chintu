@@ -232,6 +232,16 @@ export async function POST(req: Request) {
         last_payment_at: new Date().toISOString(),
         gateway_fee: displayGatewayFee,
         last_frequency: planInfo.frequency,
+        credit_history: [
+          {
+            type: "addition",
+            amount: purchasedCredits,
+            description: `Plan Upgrade: ${planInfo.plan.toUpperCase()} (${planInfo.frequency})`,
+            timestamp: new Date().toISOString(),
+            transaction_id: payment.id
+          },
+          ...((targetProfile?.profile_data as any)?.credit_history || [])
+        ].slice(0, 50)
       },
     }, { onConflict: 'email' });
 
