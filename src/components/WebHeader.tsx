@@ -53,7 +53,7 @@ export default function WebHeader() {
   if (!mounted || isElectron || pathname === '/resume-preview') return null;
 
   return (
-    <nav role="navigation" aria-label="Main site navigation" className="sticky top-0 z-[100] bg-[var(--bg-app)]/90 backdrop-blur-3xl border-b border-[var(--glass-border)] px-6 py-4 shadow-xl shadow-indigo-500/5">
+    <nav role="navigation" aria-label="Main site navigation" className="sticky top-0 z-[100] bg-[var(--bg-app)] dark:bg-[#0a0a12]/90 backdrop-blur-3xl border-b border-[var(--glass-border)] px-6 py-4 shadow-xl shadow-indigo-500/5">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link
           href="/"
@@ -71,7 +71,7 @@ export default function WebHeader() {
               priority
             />
           </div>
-          <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)]">
+          <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)] dark:text-white">
             Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Ji</span>
           </span>
         </Link>
@@ -86,7 +86,7 @@ export default function WebHeader() {
           >
             <Link
               href="/#power-tools"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
               role="menuitem"
             >
               Features
@@ -94,7 +94,7 @@ export default function WebHeader() {
             </Link>
             <Link
               href="/#compare"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
               role="menuitem"
             >
               Compare
@@ -102,7 +102,7 @@ export default function WebHeader() {
             </Link>
             <Link
               href="/pricing"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
               role="menuitem"
             >
               Pricing
@@ -110,7 +110,7 @@ export default function WebHeader() {
             </Link>
             <Link
               href="/blog"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
               role="menuitem"
             >
               Blog
@@ -118,7 +118,7 @@ export default function WebHeader() {
             </Link>
             <Link
               href="/faq"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
               role="menuitem"
             >
               FAQ

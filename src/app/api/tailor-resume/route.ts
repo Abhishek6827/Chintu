@@ -183,7 +183,7 @@ Rules:
             credits: (profile.credits || 1) - 1,
             profile_data: {
               ...(profile.profile_data as any || {}),
-              ...tailoredProfile,
+              profile_data: tailoredProfile,
               credit_history: [newHistoryEntry, ...existingHistory].slice(0, 50)
             },
             updated_at: new Date().toISOString()

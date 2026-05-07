@@ -37,6 +37,7 @@
     "express": "^4.22.1",
     "framer-motion": "^12.38.0",
     "groq-sdk": "^1.1.2",
+    "html2pdf.js": "^0.14.0",
     "inquirer": "^13.4.2",
     "lucide-react": "^1.11.0",
     "multer": "^1.4.5-lts.1",
