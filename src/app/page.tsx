@@ -1045,6 +1045,7 @@ export default function LandingPage() {
                   <video
                     src="/1.mp4"
                     autoPlay
+                    muted
                     controls
                     playsInline
                     className="w-full aspect-video object-contain bg-black"
