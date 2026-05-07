@@ -53,7 +53,7 @@ export default function ResumePreviewPage() {
   if (!profile) return <div className="p-10 text-center">No profile data found. Please setup your profile first.</div>;
 
   return (
-    <div className={`min-h-screen bg-white text-black p-[1in] leading-snug print:p-0 ${template === 'classic' ? 'font-serif' : 'font-sans'}`}>
+    <div className={`h-screen overflow-y-auto bg-[#f3f4f6] text-black leading-snug print:bg-white print:p-0 ${template === 'classic' ? 'font-serif' : 'font-sans'}`}>
       <style jsx global>{`
         @media print {
           @page {

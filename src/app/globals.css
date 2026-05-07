@@ -830,3 +830,18 @@ input[type="range"]::-moz-range-thumb {
     );
   }
 }
+
+/* Resume specific scrollbar for light background */
+.resume-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.resume-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.resume-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+.resume-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}

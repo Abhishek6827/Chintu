@@ -37,11 +37,18 @@ Optimizations:
 2. Impactful Highlights: Rewrite bullet points to focus on outcomes and metrics (STAR method).
 3. Summary: Craft a compelling 2-3 sentence summary that highlights why the candidate is the perfect fit for THIS specific role.
 4. Skills: Re-categorize and prioritize skills that are most relevant to the JD.
+5. Relevancy Filtering: EXCLUDE experience, projects, or skills that are completely irrelevant to the target role to keep the resume concise and focused.
 
 Return ONLY valid JSON with this exact structure:
 {
   "name": "Full Name",
   "title": "Optimized Role Title",
+  "contact": {
+    "email": "email@example.com",
+    "phone": "+1234567890",
+    "linkedin": "linkedin.com/in/username",
+    "github": "github.com/username"
+  },
   "summary": "Tailored summary",
   "experience": [
     {
@@ -78,7 +85,8 @@ Return ONLY valid JSON with this exact structure:
 Rules:
 - Do not invent experience. Only rephrase and prioritize existing info.
 - Maintain the original tone but make it more professional and data-driven.
-- Return ONLY the JSON object. No prose, no markdown fences.`;
+- Return ONLY the JSON object. No prose, no markdown fences.
+`;
 
     const userMessage = `RESUME:\n${resumeText}\n\nJOB DESCRIPTION:\n${jdText}`;
 

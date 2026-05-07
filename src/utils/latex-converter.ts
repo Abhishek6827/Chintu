@@ -2,6 +2,12 @@
 export interface ProfileData {
   name: string;
   title: string;
+  contact?: {
+    email: string;
+    phone: string;
+    linkedin: string;
+    github: string;
+  };
   summary: string;
   experience: { role: string; company: string; duration: string; highlights: string[] }[];
   projects: { name: string; description: string; tech: string[] }[];
@@ -69,6 +75,13 @@ ${escapeLatex(pr.description)} \\\\
   let styleConfigs = "";
   let headerConfig = "";
 
+  const contactLine = p.contact ? [
+    p.contact.email,
+    p.contact.phone,
+    p.contact.linkedin,
+    p.contact.github
+  ].filter(Boolean).map(item => escapeLatex(item)).join(' \\textbullet{} ') : "";
+
   if (template === 'classic') {
     styleConfigs = `
 \\documentclass[11pt,a4paper,serif]{article}
@@ -79,7 +92,9 @@ ${escapeLatex(pr.description)} \\\\
 \\begin{center}
     {\\huge \\scshape ${escapeLatex(p.name)}} \\\\
     \\vspace{4pt}
-    ${escapeLatex(p.title)}
+    ${escapeLatex(p.title)} \\\\
+    \\vspace{2pt}
+    {\\small ${contactLine}}
 \\end{center}
 `;
   } else if (template === 'minimal') {
@@ -92,6 +107,7 @@ ${escapeLatex(pr.description)} \\\\
     headerConfig = `
 \\noindent {\\Huge \\bfseries ${escapeLatex(p.name)}} \\\\
 \\noindent {\\large ${escapeLatex(p.title)}} \\\\
+\\noindent {\\small ${contactLine}} \\\\
 \\vspace{10pt}
 `;
   } else {
@@ -105,7 +121,9 @@ ${escapeLatex(pr.description)} \\\\
 \\begin{center}
     {\\huge \\bfseries ${escapeLatex(p.name)}} \\\\
     \\vspace{2pt}
-    ${escapeLatex(p.title)}
+    ${escapeLatex(p.title)} \\\\
+    \\vspace{2pt}
+    {\\small ${contactLine}}
 \\end{center}
 `;
   }

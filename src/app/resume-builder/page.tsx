@@ -20,6 +20,12 @@ type FlowType = "enhance" | "new";
 interface ProfileData {
   name: string;
   title: string;
+  contact?: {
+    email: string;
+    phone: string;
+    linkedin: string;
+    github: string;
+  };
   summary: string;
   experience: { role: string; company: string; duration: string; highlights: string[] }[];
   projects: { name: string; description: string; tech: string[] }[];
@@ -410,7 +416,7 @@ export default function ResumeBuilderPage() {
                     <span className="text-[8px] font-black text-[var(--text-dim)] uppercase tracking-widest">A4 Layout • Optimized</span>
                   </div>
 
-                  <div className="bg-white rounded-3xl shadow-2xl overflow-hidden aspect-[1/1.41] overflow-y-auto custom-scrollbar">
+                  <div className="bg-white rounded-3xl shadow-2xl aspect-[1/1.41] overflow-y-auto resume-scrollbar">
                     {/* Standard ATS-Friendly Preview */}
                     <div className={`p-10 text-black space-y-4 ${selectedTemplate === 'classic' ? 'font-serif' : 'font-sans'}`}>
                       <div className="text-center space-y-1">
@@ -420,12 +426,22 @@ export default function ResumeBuilderPage() {
                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                           {tailoredProfile.title}
                         </p>
-                        <div className="flex justify-center gap-2 text-[8px] text-gray-400 font-bold uppercase">
-                          <span>{user?.emailAddresses[0]?.emailAddress}</span>
+                        <div className="flex justify-center gap-2 text-[8px] text-gray-400 font-bold">
+                          <a href={`mailto:${tailoredProfile.contact?.email || user?.emailAddresses[0]?.emailAddress}`} className="hover:text-indigo-500 transition-colors">
+                            {tailoredProfile.contact?.email || user?.emailAddresses[0]?.emailAddress}
+                          </a>
                           <span>|</span>
-                          <span>LinkedIn</span>
+                          {tailoredProfile.contact?.linkedin ? (
+                            <a href={tailoredProfile.contact.linkedin.startsWith('http') ? tailoredProfile.contact.linkedin : `https://${tailoredProfile.contact.linkedin}`} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-500 transition-colors uppercase">
+                              LinkedIn
+                            </a>
+                          ) : <span className="uppercase">LinkedIn</span>}
                           <span>|</span>
-                          <span>GitHub</span>
+                          {tailoredProfile.contact?.github ? (
+                            <a href={tailoredProfile.contact.github.startsWith('http') ? tailoredProfile.contact.github : `https://${tailoredProfile.contact.github}`} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-500 transition-colors uppercase">
+                              GitHub
+                            </a>
+                          ) : <span className="uppercase">GitHub</span>}
                         </div>
                       </div>
 
@@ -482,16 +498,19 @@ export default function ResumeBuilderPage() {
                       )}
 
                       <div className="space-y-2">
-                        <h2 className="text-[10px] font-black uppercase tracking-widest border-b border-black pb-0.5">Skills</h2>
-                        <div className="flex flex-wrap gap-x-3 gap-y-1">
+                        <h2 className="text-[10px] font-black uppercase tracking-widest border-b border-black pb-0.5">Technical Skills</h2>
+                        <div className="grid grid-cols-1 gap-1">
                           {tailoredProfile.skills.languages.length > 0 && (
-                            <p className="text-[9px] font-medium"><span className="font-bold uppercase tracking-tight">Languages:</span> {tailoredProfile.skills.languages.join(", ")}</p>
+                            <p className="text-[9px] font-medium"><span className="font-bold uppercase tracking-tight w-20 inline-block">Languages:</span> {tailoredProfile.skills.languages.join(", ")}</p>
                           )}
                           {tailoredProfile.skills.frameworks.length > 0 && (
-                            <p className="text-[9px] font-medium"><span className="font-bold uppercase tracking-tight">Frameworks:</span> {tailoredProfile.skills.frameworks.join(", ")}</p>
+                            <p className="text-[9px] font-medium"><span className="font-bold uppercase tracking-tight w-20 inline-block">Frameworks:</span> {tailoredProfile.skills.frameworks.join(", ")}</p>
                           )}
                           {tailoredProfile.skills.tools.length > 0 && (
-                            <p className="text-[9px] font-medium"><span className="font-bold uppercase tracking-tight">Tools:</span> {tailoredProfile.skills.tools.join(", ")}</p>
+                            <p className="text-[9px] font-medium"><span className="font-bold uppercase tracking-tight w-20 inline-block">Tools:</span> {tailoredProfile.skills.tools.join(", ")}</p>
+                          )}
+                          {tailoredProfile.skills.other && tailoredProfile.skills.other.length > 0 && (
+                            <p className="text-[9px] font-medium"><span className="font-bold uppercase tracking-tight w-20 inline-block">Other:</span> {tailoredProfile.skills.other.join(", ")}</p>
                           )}
                         </div>
                       </div>
