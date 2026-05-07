@@ -126,7 +126,7 @@ const comparisonRows: CompareRow[] = [
   { feature: "Scout + Turbo Debugger", chintu: true, compA: false, compB: false },
   { feature: "Universal Overlay", chintu: true, compA: true, compB: true },
   { feature: "Latency", chintu: "<200ms", compA: "~500ms", compB: "~400ms" },
-  { feature: "Languages Supported", chintu: "52+", compA: "30+", compB: "52+" },
+  { feature: "Languages Supported", chintu: "63+", compA: "30+", compB: "63+" },
   { feature: "Long-Form Behavioral", chintu: true, compA: true, compB: true },
 ];
 
@@ -154,7 +154,7 @@ const faqItems: FaqItem[] = [
   },
   {
     q: "What languages does Chintu support?",
-    a: "52+ languages with real-time transcription, plus an Authentic Voice engine that crafts answers in a natural, conversational tone — never robotic or rehearsed, never recycled boilerplate.",
+    a: "63+ languages with real-time transcription, plus an Authentic Voice engine that crafts answers in a natural, conversational tone — never robotic or rehearsed, never recycled boilerplate.",
   },
   {
     q: "How does the credit and refund policy work?",
@@ -989,7 +989,7 @@ export default function LandingPage() {
                 <div>
                   <p className="text-[7px] font-black text-emerald-500 uppercase tracking-widest">Verified</p>
                   <p className="text-[10px] font-black text-[var(--text-main)]">
-                    <AnimatedCounter to={99.9} decimals={1} suffix="% Accuracy" />
+                    <AnimatedCounter to={100} decimals={1} suffix="% Accuracy" />
                   </p>
                 </div>
               </motion.div>
@@ -1207,7 +1207,7 @@ export default function LandingPage() {
                     </div>
                     <div className="min-w-0">
                       <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-emerald-400">Verified Intel</p>
-                      <p className="text-[10px] sm:text-xs font-bold text-[var(--text-dim)] truncate">99.9% Accuracy Rating</p>
+                      <p className="text-[10px] sm:text-xs font-bold text-[var(--text-dim)] truncate">100% Accuracy Rating</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-[var(--bg-app)] rounded-xl sm:rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-amber-500/30 transition-all group">
@@ -1504,8 +1504,8 @@ export default function LandingPage() {
               className="mt-10 sm:mt-14 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
             >
               {[
-                { val: 52, suffix: "+", label: "Languages", color: "text-indigo-500" },
-                { val: 99.9, suffix: "%", decimals: 1, label: "Accuracy", color: "text-emerald-500" },
+                { val: 63, suffix: "+", label: "Languages", color: "text-indigo-500" },
+                { val: 100, suffix: "%", decimals: 1, label: "Accuracy", color: "text-emerald-500" },
                 { val: 200, suffix: "ms", prefix: "<", label: "Latency", color: "text-purple-500" },
                 { val: 10, suffix: "k+", label: "Candidates", color: "text-cyan-500" },
               ].map((s, i) => (

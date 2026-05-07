@@ -143,7 +143,7 @@ export default function GlobalFooter() {
             </Link>
 
             <p className="text-[11px] text-[var(--text-dim)] font-bold leading-relaxed uppercase tracking-wider mb-5 max-w-xs">
-              The world&rsquo;s fastest, most affordable real-time AI copilot for interviews, online exams and technical assessments. Sub-200ms. 52+ languages. Universal stealth.
+              The world&rsquo;s fastest, most affordable real-time AI copilot for interviews, online exams and technical assessments. Sub-200ms. 63+ languages. Universal stealth.
             </p>
 
             {/* Trust mini-strip */}
@@ -225,7 +225,7 @@ export default function GlobalFooter() {
           Chintu AI is a real-time AI interview copilot built for serious candidates. Use it for live coding rounds on
           HackerRank, LeetCode, Codility and CoderPad, async video interviews on HireVue and micro1, behavioral and
           system design rounds on Zoom, Google Meet, Microsoft Teams and Webex, plus online proctored exams including
-          GMAT, GRE, SAT, CAT, JEE, NEET and campus placement aptitude tests. Sub-200ms latency, 52+ languages, fully
+          GMAT, GRE, SAT, CAT, JEE, NEET and campus placement aptitude tests. Sub-200ms latency, 63+ languages, fully
           stealth across screen sharing and recording, with mock interview practice and an AI resume builder bundled
           on every paid plan.
         </motion.p>

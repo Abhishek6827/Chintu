@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     template: "%s | Chintu AI",
   },
   description:
-    "Chintu AI is the world's fastest and most affordable real-time AI interview and exam copilot. Solve live coding rounds, MCQs, technical assessments, behavioral interviews, GMAT/GRE/CAT/JEE/NEET tests and online proctored exams — invisible across Zoom, Google Meet, Microsoft Teams, HireVue, HackerRank, LeetCode and every major proctoring tool. Sub-200ms latency. 52+ languages. 7-day money-back guarantee.",
+    "Chintu AI is the world's fastest and most affordable real-time AI interview and exam copilot. Solve live coding rounds, MCQs, technical assessments, behavioral interviews, GMAT/GRE/CAT/JEE/NEET tests and online proctored exams — invisible across Zoom, Google Meet, Microsoft Teams, HireVue, HackerRank, LeetCode and every major proctoring tool. Sub-200ms latency. 63+ languages. 7-day money-back guarantee.",
   keywords: [
     // Brand
     "Chintu AI", "Chintu Intelligence", "Chintu Interview AI",
@@ -94,7 +94,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f5f7fa" },
-    { media: "(prefers-color-scheme: dark)",  color: "#0a0a12" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a12" },
   ],
   colorScheme: "light dark",
   width: "device-width",
@@ -164,7 +164,7 @@ const softwareSchema = {
     "Vision OCR snapshot intelligence for MCQs and code",
     "Hold-Space voice capture",
     "Scout + Turbo multi-model code debugger",
-    "52+ languages with real-time transcription",
+    "63+ languages with real-time transcription",
     "Universal compatibility — Zoom, Meet, Teams, HireVue, HackerRank, LeetCode",
     "Mock Interview Simulator",
     "JD-Tailored AI Resume Builder",
