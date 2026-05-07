@@ -7,7 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from 'next/navigation';
 import {
   ArrowRight, Check, X, Star, Sparkles, Zap, Shield, PlayCircle, Globe, Search, Code, Target, BookOpen, Layers, MousePointer2, Cpu, MessageSquare, HelpCircle, Trophy, ThumbsUp, ThumbsDown,
-  Download, Video, FileText, Play, Users, Building2, Rocket, Crown, Gem, Gift, Briefcase, IndianRupee, Share2, UserCheck, CircleDollarSign
+  Download, Video, FileText, Play, Users, Rocket, Crown, Gem, Gift, Briefcase, IndianRupee, Share2, UserCheck, CircleDollarSign
 } from "lucide-react";
 
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
@@ -219,38 +219,38 @@ const howItWorksSteps = [
 
 /* ─── Platforms that Chintu works on ─────────────────────── */
 const supportedPlatforms: { name: string; icon: any; category: string; logo?: string }[] = [
-  { name: "Zoom",             icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/zoom.us/logo" },
-  { name: "Google Meet",      icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/meet.google.com/logo" },
-  { name: "Microsoft Teams",  icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/teams.microsoft.com/logo" },
-  { name: "Webex",            icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/webex.com/logo" },
-  { name: "Amazon Chime",     icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/chime.aws/logo" },
-  { name: "Skype",            icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/skype.com/logo" },
-  { name: "HireVue",          icon: UserCheck,    category: "AI Interview", logo: "https://cdn.brandfetch.io/hirevue.com/logo" },
-  { name: "micro1",           icon: UserCheck,    category: "AI Interview", logo: "https://cdn.brandfetch.io/micro1.ai/logo" },
-  { name: "Karat",            icon: UserCheck,    category: "AI Interview", logo: "https://cdn.brandfetch.io/karat.com/logo" },
-  { name: "Interviewing.io",  icon: UserCheck,    category: "Live Coding",  logo: "https://cdn.brandfetch.io/interviewing.io/logo" },
-  { name: "HackerRank",       icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/hackerrank.com/logo" },
-  { name: "LeetCode",         icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/leetcode.com/logo" },
-  { name: "CoderPad",         icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/coderpad.io/logo" },
-  { name: "Codility",         icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/codility.com/logo" },
-  { name: "Pramp",            icon: Users,        category: "Peer Practice", logo: "https://cdn.brandfetch.io/pramp.com/logo" },
-  { name: "Discord",          icon: MessageSquare,category: "Chat",          logo: "https://cdn.brandfetch.io/discord.com/logo" },
+  { name: "Zoom",             icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/zoom.us/icon" },
+  { name: "Google Meet",      icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/meet.google.com/icon" },
+  { name: "Microsoft Teams",  icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/teams.microsoft.com/icon" },
+  { name: "Webex",            icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/webex.com/icon" },
+  { name: "Amazon Chime",     icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/chime.aws/icon" },
+  { name: "Skype",            icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/skype.com/icon" },
+  { name: "HireVue",          icon: UserCheck,    category: "AI Interview", logo: "https://cdn.brandfetch.io/hirevue.com/icon" },
+  { name: "micro1",           icon: UserCheck,    category: "AI Interview", logo: "https://cdn.brandfetch.io/micro1.ai/icon" },
+  { name: "Karat",            icon: UserCheck,    category: "AI Interview", logo: "https://cdn.brandfetch.io/karat.com/icon" },
+  { name: "Interviewing.io",  icon: UserCheck,    category: "Live Coding",  logo: "https://cdn.brandfetch.io/interviewing.io/icon" },
+  { name: "HackerRank",       icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/hackerrank.com/icon" },
+  { name: "LeetCode",         icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/leetcode.com/icon" },
+  { name: "CoderPad",         icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/coderpad.io/icon" },
+  { name: "Codility",         icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/codility.com/icon" },
+  { name: "Pramp",            icon: Users,        category: "Peer Practice", logo: "https://cdn.brandfetch.io/pramp.com/icon" },
+  { name: "Discord",          icon: MessageSquare,category: "Chat",          logo: "https://cdn.brandfetch.io/discord.com/icon" },
 ];
 
 /* ─── Companies whose candidates use Chintu ──────────────── */
 const hiredAtCompanies = [
-  { name: "Google",        logo: "https://cdn.brandfetch.io/google.com/logo" },
-  { name: "Meta",          logo: "https://cdn.brandfetch.io/meta.com/logo" },
-  { name: "Amazon",        logo: "https://cdn.brandfetch.io/amazon.com/logo" },
-  { name: "Microsoft",     logo: "https://cdn.brandfetch.io/microsoft.com/logo" },
-  { name: "Apple",         logo: "https://cdn.brandfetch.io/apple.com/logo" },
-  { name: "Netflix",       logo: "https://cdn.brandfetch.io/netflix.com/logo" },
-  { name: "Uber",          logo: "https://cdn.brandfetch.io/uber.com/logo" },
-  { name: "Tesla",         logo: "https://cdn.brandfetch.io/tesla.com/logo" },
-  { name: "Stripe",        logo: "https://cdn.brandfetch.io/stripe.com/logo" },
-  { name: "Goldman Sachs", logo: "https://cdn.brandfetch.io/goldmansachs.com/logo" },
-  { name: "McKinsey",      logo: "https://cdn.brandfetch.io/mckinsey.com/logo" },
-  { name: "Deloitte",      logo: "https://cdn.brandfetch.io/deloitte.com/logo" },
+  { name: "Google",        logo: "https://cdn.brandfetch.io/google.com/icon" },
+  { name: "Meta",          logo: "https://cdn.brandfetch.io/meta.com/icon" },
+  { name: "Amazon",        logo: "https://cdn.brandfetch.io/amazon.com/icon" },
+  { name: "Microsoft",     logo: "https://cdn.brandfetch.io/microsoft.com/icon" },
+  { name: "Apple",         logo: "https://cdn.brandfetch.io/apple.com/icon" },
+  { name: "Netflix",       logo: "https://cdn.brandfetch.io/netflix.com/icon" },
+  { name: "Uber",          logo: "https://cdn.brandfetch.io/uber.com/icon" },
+  { name: "Tesla",         logo: "https://cdn.brandfetch.io/tesla.com/icon" },
+  { name: "Stripe",        logo: "https://cdn.brandfetch.io/stripe.com/icon" },
+  { name: "Goldman Sachs", logo: "https://cdn.brandfetch.io/goldmansachs.com/icon" },
+  { name: "McKinsey",      logo: "https://cdn.brandfetch.io/mckinsey.com/icon" },
+  { name: "Deloitte",      logo: "https://cdn.brandfetch.io/deloitte.com/icon" },
 ];
 
 /* ─── Power Tools spotlight (Mock + Resume) ───────────────
@@ -1276,13 +1276,13 @@ export default function LandingPage() {
                   whileHover={{ y: -4, scale: 1.05 }}
                   className="relative flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-4 rounded-2xl border border-[var(--glass-border)] bg-[var(--panel-bg)]/80 backdrop-blur-xl hover:border-cyan-500/40 hover:bg-cyan-500/5 transition-colors group cursor-default"
                 >
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110 overflow-hidden">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110 overflow-hidden">
                     {p.logo ? (
                       <Image
                         src={p.logo}
                         alt={`${p.name} official logo`}
-                        width={24}
-                        height={24}
+                        width={32}
+                        height={32}
                         className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                         unoptimized
                       />
