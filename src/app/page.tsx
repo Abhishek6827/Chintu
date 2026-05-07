@@ -7,7 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from 'next/navigation';
 import {
   ArrowRight, Check, X, Star, Sparkles, Zap, Shield, PlayCircle, Globe, Search, Code, Target, BookOpen, Layers, MousePointer2, Cpu, MessageSquare, HelpCircle, Trophy, ThumbsUp, ThumbsDown,
-  Download, Video, FileText, Play, Users, Rocket, Crown, Gem, Gift, Briefcase, IndianRupee, Share2, UserCheck, CircleDollarSign
+  Download, Video, FileText, Play, Users, Rocket, Crown, Gem, Gift, Briefcase, Share2, UserCheck, CircleDollarSign, Percent, HeartHandshake
 } from "lucide-react";
 
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
@@ -310,8 +310,8 @@ type PricingPlan = {
 
 const pricingPlans: PricingPlan[] = [
   {
-    name: "Free",
-    blurb: "Kick the tyres.",
+    name: "Starter",
+    blurb: "Explore Chintu's capabilities",
     monthly: 0,
     yearly: 0,
     icon: Gift,
@@ -319,49 +319,51 @@ const pricingPlans: PricingPlan[] = [
     cta: "Start Free",
     href: "/sign-up",
     features: [
-      "5 credits per month",
-      "Basic stealth overlay",
-      "52+ languages",
-      "Email support",
+      "10 Credits (one-time)",
+      "1 Profile & 1 Resume Upload",
+      "Standard Engine only",
+      "Basic Response Types",
+      "Standard History",
+      "Community Support",
     ],
   },
   {
-    name: "Pro",
-    blurb: "For serious candidates.",
-    monthly: 999,
-    yearly: 599,
+    name: "Professional",
+    blurb: "Best for active interviewees",
+    monthly: 29,
+    yearly: 9,
     icon: Gem,
     accent: "from-indigo-500 to-purple-500",
     highlighted: true,
-    cta: "Go Pro",
+    cta: "Upgrade to Pro",
     href: "/pricing",
     features: [
-      "Unlimited credits",
-      "Full stealth overlay on every platform",
-      "Scout + Turbo code debugger",
-      "Vision OCR snapshot intelligence",
-      "Hold-Space voice capture",
-      "Priority streaming answers (<200ms)",
-      "Priority chat support",
+      "100 Credits / month per unit",
+      "Unlimited Profile Uploads",
+      "Unlimited Job Descriptions",
+      "All Premium Engines Unlocked",
+      "All Response Types",
+      "Stealth Session Recording",
+      "Font Size & Opacity Sliders",
     ],
   },
   {
     name: "Elite",
-    blurb: "Zero compromises.",
-    monthly: 2499,
-    yearly: 1499,
+    blurb: "Unrestricted career growth.",
+    monthly: 79,
+    yearly: 29,
     icon: Crown,
     accent: "from-amber-400 via-rose-500 to-purple-500",
     cta: "Unlock Elite",
     href: "/pricing",
     features: [
-      "Everything in Pro",
-      "Dedicated GPT-4o / Claude priority lane",
-      "Custom persona + tone training",
-      "Mock Interview Simulator — unlimited",
-      "AI Resume Builder — unlimited",
-      "Dedicated success manager",
-      "7-day money-back guarantee",
+      "1000 Credits / month per unit",
+      "Unlimited Profile Uploads",
+      "Unlimited Job Descriptions",
+      "All Pro Features",
+      "Dedicated Support",
+      "AI Fine-Tuning",
+      "Early Access",
     ],
   },
 ];
@@ -371,7 +373,7 @@ const creatorTiers = [
   {
     label: "Starter",
     views: "1K – 10K",
-    reward: "₹500",
+    reward: "$5",
     perVideo: "per video",
     icon: Share2,
     accent: "from-slate-400 to-slate-500",
@@ -379,7 +381,7 @@ const creatorTiers = [
   {
     label: "Creator",
     views: "10K – 100K",
-    reward: "₹2,500",
+    reward: "$25",
     perVideo: "per video",
     icon: Rocket,
     accent: "from-indigo-500 to-purple-500",
@@ -388,7 +390,7 @@ const creatorTiers = [
   {
     label: "Elite Creator",
     views: "100K +",
-    reward: "₹10,000",
+    reward: "$100",
     perVideo: "per video",
     icon: Crown,
     accent: "from-amber-400 to-rose-500",
@@ -1829,8 +1831,8 @@ export default function LandingPage() {
                   onClick={() => setPricingMode("monthly")}
                   aria-pressed={pricingMode === "monthly"}
                   className={`relative px-5 sm:px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${pricingMode === "monthly"
-                      ? "text-white"
-                      : "text-[var(--text-dim)] hover:text-[var(--text-main)]"
+                    ? "text-white"
+                    : "text-[var(--text-dim)] hover:text-[var(--text-main)]"
                     }`}
                 >
                   {pricingMode === "monthly" && (
@@ -1846,8 +1848,8 @@ export default function LandingPage() {
                   onClick={() => setPricingMode("yearly")}
                   aria-pressed={pricingMode === "yearly"}
                   className={`relative px-5 sm:px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.25em] transition-colors flex items-center gap-2 ${pricingMode === "yearly"
-                      ? "text-white"
-                      : "text-[var(--text-dim)] hover:text-[var(--text-main)]"
+                    ? "text-white"
+                    : "text-[var(--text-dim)] hover:text-[var(--text-main)]"
                     }`}
                 >
                   {pricingMode === "yearly" && (
@@ -1879,8 +1881,8 @@ export default function LandingPage() {
                     transition={{ duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                     whileHover={{ y: -8 }}
                     className={`relative rounded-[1.5rem] sm:rounded-[2.5rem] border p-6 sm:p-8 backdrop-blur-xl flex flex-col ${plan.highlighted
-                        ? "border-indigo-500/40 bg-[var(--panel-bg)] shadow-2xl shadow-indigo-500/20 md:scale-[1.04]"
-                        : "border-[var(--glass-border)] bg-[var(--panel-bg)]/80 hover:border-indigo-500/30"
+                      ? "border-indigo-500/40 bg-[var(--panel-bg)] shadow-2xl shadow-indigo-500/20 md:scale-[1.04]"
+                      : "border-[var(--glass-border)] bg-[var(--panel-bg)]/80 hover:border-indigo-500/30"
                       } transition-colors`}
                   >
                     {plan.highlighted && (
@@ -1959,8 +1961,8 @@ export default function LandingPage() {
                     <Link
                       href={plan.href}
                       className={`block text-center px-5 py-3.5 rounded-xl font-black uppercase tracking-[0.25em] text-[10px] transition-colors ${plan.highlighted
-                          ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:bg-indigo-500"
-                          : "border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:border-indigo-500 hover:text-white"
+                        ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:bg-indigo-500"
+                        : "border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:border-indigo-500 hover:text-white"
                         }`}
                     >
                       {plan.cta} <ArrowRight className="inline-block w-3.5 h-3.5 ml-1.5" />
@@ -1991,7 +1993,7 @@ export default function LandingPage() {
               </span>
               <span className="text-[var(--text-dim)] opacity-30">•</span>
               <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em]">
-                <IndianRupee className="w-3.5 h-3.5 text-amber-500" /> UPI, Cards, Netbanking
+                <CircleDollarSign className="w-3.5 h-3.5 text-amber-500" /> All Global Payment Methods
               </span>
             </motion.div>
           </div>
@@ -2015,11 +2017,11 @@ export default function LandingPage() {
                 <span className="text-[10px] font-black text-rose-400 uppercase tracking-[0.3em]">Creator Program</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-4">
-                Make A Reel. <br className="sm:hidden" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-rose-500">Get Paid.</span>
+                Partner & <br className="sm:hidden" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-rose-500">Get Rewarded.</span>
               </h2>
               <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest text-[10px] sm:text-xs max-w-2xl mx-auto">
-                Post a video about Chintu on Instagram, YouTube or LinkedIn. Tag us. Earn cash for every view bracket you hit.
+                Promote Chintu to your audience. Whether you are a top creator or just want to refer a friend, we have a tier for you.
               </p>
             </motion.div>
 
@@ -2034,8 +2036,8 @@ export default function LandingPage() {
                   transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                   whileHover={{ y: -6, scale: 1.02 }}
                   className={`relative rounded-[1.5rem] sm:rounded-[2rem] border p-6 sm:p-8 backdrop-blur-xl flex flex-col items-center text-center ${tier.highlighted
-                      ? "border-indigo-500/40 bg-[var(--panel-bg)] shadow-2xl shadow-indigo-500/20 md:scale-105"
-                      : "border-[var(--glass-border)] bg-[var(--panel-bg)]/80 hover:border-rose-500/30"
+                    ? "border-indigo-500/40 bg-[var(--panel-bg)] shadow-2xl shadow-indigo-500/20 md:scale-105"
+                    : "border-[var(--glass-border)] bg-[var(--panel-bg)]/80 hover:border-rose-500/30"
                     } transition-colors`}
                 >
                   {tier.highlighted && (
@@ -2072,16 +2074,31 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-10 sm:mt-14 text-center"
+              className="mt-10 sm:mt-14 flex flex-col items-center"
             >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mb-10">
+                <div className="bg-[var(--panel-bg)] border border-indigo-500/20 p-6 rounded-3xl text-center">
+                  <Percent className="w-8 h-8 text-indigo-400 mx-auto mb-3" />
+                  <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-main)] mb-2">Affiliate Partner</h3>
+                  <p className="text-[10px] text-[var(--text-dim)] font-bold uppercase tracking-wide mb-4">Earn 30% recurring commission for every user you bring to Chintu.</p>
+                  <Link href="/support" className="text-[10px] font-black text-indigo-400 uppercase tracking-widest hover:underline">Apply for Affiliate →</Link>
+                </div>
+                <div className="bg-[var(--panel-bg)] border border-emerald-500/20 p-6 rounded-3xl text-center">
+                  <HeartHandshake className="w-8 h-8 text-emerald-400 mx-auto mb-3" />
+                  <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-main)] mb-2">Refer a Friend</h3>
+                  <p className="text-[10px] text-[var(--text-dim)] font-bold uppercase tracking-wide mb-4">Get 20 free credits for every friend who makes their first purchase.</p>
+                  <Link href="/support" className="text-[10px] font-black text-emerald-400 uppercase tracking-widest hover:underline">Start Referring →</Link>
+                </div>
+              </div>
+
               <Link
-                href="/contact"
+                href="/support"
                 className="inline-flex items-center gap-3 px-7 py-3.5 bg-gradient-to-r from-amber-400 to-rose-500 text-white font-black uppercase tracking-[0.25em] text-[10px] rounded-xl shadow-2xl shadow-rose-500/30 hover:scale-[1.04] active:scale-95 transition-transform"
               >
-                <Share2 className="w-4 h-4" /> Apply To Creator Program <ArrowRight className="w-4 h-4" />
+                <Share2 className="w-4 h-4" /> Join The Community Program <ArrowRight className="w-4 h-4" />
               </Link>
               <p className="mt-4 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)]">
-                Approved creators paid weekly. UPI / PayPal / Bank transfer.
+                Approved partners paid weekly. PayPal / Crypto / Bank transfer.
               </p>
             </motion.div>
           </div>

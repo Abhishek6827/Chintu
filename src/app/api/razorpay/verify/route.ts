@@ -38,9 +38,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { 
-      razorpay_order_id, 
-      razorpay_payment_id, 
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
       razorpay_signature,
       planId,
       quantity,
@@ -85,15 +85,15 @@ export async function POST(req: NextRequest) {
     // 2. Resolve Contact Info
     const userEmail = email;
     const userName = profile?.full_name || `${userObj.firstName || ""} ${userObj.lastName || ""}`.trim();
-    
+
     // 3. Resolve Profile State
     const baseCredits = profile?.credits || 0;
     const baseExpiryStr = profile?.subscription_expires_at;
 
-    const targetProfile = profile; 
+    const targetProfile = profile;
 
     // 4. Calculate Credits & Expiry
-    const planKey = `${planId}_${billingCycle}`; 
+    const planKey = `${planId}_${billingCycle}`;
     const planInfo = RAZORPAY_PLANS[planKey] || RAZORPAY_PLANS["pro_monthly"];
 
     const purchasedCredits = planInfo.credits * quantity;
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     const now = new Date();
     let currentExpiry = baseExpiryStr ? new Date(baseExpiryStr) : now;
     if (currentExpiry < now) currentExpiry = now;
-    
+
     const isDowngrade = (profile?.plan === 'elite' || baseCredits > 1000) && planInfo.plan === 'pro';
     const existingCredits = baseCredits;
     const totalCredits = existingCredits + purchasedCredits;
@@ -123,9 +123,9 @@ export async function POST(req: NextRequest) {
       const displayTotal = Number(payment.amount) / 100;
       const displayPlanPrice = planInfo.basePriceINR * quantity;
       const displayFee = displayTotal - displayPlanPrice;
-      
-      return NextResponse.json({ 
-        success: true, 
+
+      return NextResponse.json({
+        success: true,
         alreadyProcessed: true,
         receipt: {
           transactionId: razorpay_payment_id,
@@ -174,10 +174,10 @@ export async function POST(req: NextRequest) {
 
     if (updateError) throw updateError;
 
-    const eventTime = new Date().toLocaleString('en-IN', { 
+    const eventTime = new Date().toLocaleString('en-IN', {
       timeZone: 'Asia/Kolkata',
       day: '2-digit', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
     }).replace(/,/g, '');
 
     const customerName = profile?.full_name || userName || userEmail || "User";
@@ -236,7 +236,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       receipt: {
         transactionId: razorpay_payment_id,
