@@ -9,8 +9,6 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { generateLaTeX } from "@/utils/latex-converter";
-import GlobalHeader from "@/components/GlobalHeader";
-import GlobalFooter from "@/components/GlobalFooter";
 
 const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 

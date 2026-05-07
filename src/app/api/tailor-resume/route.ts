@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     const { createAdminClient } = await import("@/utils/supabase/server");
     const { clerkClient } = await import("@clerk/nextjs/server");
     const supabase = createAdminClient();
-    
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("credits, email")
@@ -136,7 +136,7 @@ Rules:
         try {
           const groq = new Groq({ apiKey: key });
           response = await groq.chat.completions.create({
-            model: "llama3-70b-8192",
+            model: "gpt-oss-120b",
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: userMessage },
@@ -156,7 +156,7 @@ Rules:
 
     let rawContent = response.choices[0]?.message?.content || "";
     rawContent = rawContent.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
-    
+
     // Extract JSON if wrapped in markdown
     const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
@@ -183,7 +183,7 @@ Rules:
             credits: (profile.credits || 1) - 1,
             profile_data: {
               ...(profile.profile_data as any || {}),
-              profile_data: tailoredProfile,
+              ...tailoredProfile,
               credit_history: [newHistoryEntry, ...existingHistory].slice(0, 50)
             },
             updated_at: new Date().toISOString()

@@ -26,7 +26,9 @@ export default function ResumePreviewPage() {
         if (res.ok) {
           const { profile: data } = await res.json();
           if (data?.profile_data) {
-            setProfile(data.profile_data);
+            // Handle double nesting if it exists (legacy bug)
+            const p = data.profile_data.profile_data || data.profile_data;
+            setProfile(p);
           }
         }
       } catch (err) {
@@ -104,11 +106,11 @@ export default function ResumePreviewPage() {
           </p>
           <div className={`flex flex-wrap ${template === 'minimal' ? 'justify-start' : 'justify-center'} gap-x-2 text-[9px] text-gray-500 font-medium`}>
             {[
-              profile.email || user?.emailAddresses[0].emailAddress,
-              profile.phone,
-              profile.linkedin?.replace(/^https?:\/\//, ''),
-              profile.github?.replace(/^https?:\/\//, ''),
-              profile.portfolio?.replace(/^https?:\/\//, '')
+              profile.contact?.email || profile.email || user?.emailAddresses[0].emailAddress,
+              profile.contact?.phone || profile.phone,
+              (profile.contact?.linkedin || profile.linkedin)?.replace(/^https?:\/\//, ''),
+              (profile.contact?.github || profile.github)?.replace(/^https?:\/\//, ''),
+              (profile.contact?.portfolio || profile.portfolio)?.replace(/^https?:\/\//, '')
             ].filter(Boolean).map((item, index, array) => (
               <span key={index} className="flex items-center gap-2">
                 {item}
