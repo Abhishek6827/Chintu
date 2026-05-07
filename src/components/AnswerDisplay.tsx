@@ -48,34 +48,37 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
   const getSafeModelName = (modelId: string) => {
     if (!modelId) return "";
 
-    const id = modelId.toLowerCase();
-
-    // Check if it's a vision-augmented response (Scout)
-    const isScout = id.includes("scout") || id.includes("vision-preview");
-    let baseModel = id;
-
-    if (id.includes("+")) {
-      baseModel = id.split("+").pop()?.trim() || "";
-    }
-
     const mapping: Record<string, string> = {
-      "llama-3.3-70b": "Standard Engine",
-      "gpt-oss-120b": "Pro Engine",
-      "qwen3-coder": "Coding Specialist",
-      "nemotron-3": "Titan Engine",
+      "Turbo Engine": "Turbo Engine",
+      "Pro Engine": "Pro Engine",
+      "Coding Specialist": "Coding Specialist",
+      "Titan Engine": "Titan Engine",
+      "Standard Engine": "Standard Engine",
+      "AI Engine": "AI Engine",
       "qwen3.6": "Turbo Engine",
-      "scout": "Vision Engine",
-      "llama-4": "Vision Engine"
+      "qwen3.6-plus": "Turbo Engine",
+      "gpt-oss-120b": "Pro Engine",
+      "openai/gpt-oss-120b": "Pro Engine",
+      "llama-3.3-70b": "Standard Engine",
+      "llama-3.3-70b-versatile": "Standard Engine",
+      "qwen3-coder": "Coding Specialist",
+      "nemotron-3-120b": "Titan Engine",
+      "meta-llama/llama-4-scout-17b-16e-instruct": "Standard Engine",
     };
 
-    // Find the closest match in our safe names
-    const safeName = Object.entries(mapping).find(([key]) => baseModel.includes(key))?.[1];
+    // 1. If it's already a known display name, return it
+    if (Object.values(mapping).includes(modelId)) return modelId;
 
-    if (isScout) {
-      return safeName ? `SCOUT + ${safeName}` : "SCOUT ENGINE";
-    }
+    // 2. Check for key matches
+    const id = modelId.toLowerCase();
+    const safeName = Object.entries(mapping).find(([key]) => id.includes(key.toLowerCase()))?.[1];
 
-    return safeName || "NEURAL SYNC";
+    if (safeName) return safeName;
+
+    // 3. Fallback for vision/scout
+    if (id.includes("scout") || id.includes("vision")) return "Standard Engine";
+
+    return "Standard Engine";
   };
 
   const handleCopy = (id: string, text: string) => {
@@ -356,21 +359,21 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                             },
                             table({ children }) {
                               return (
-                                <div className={`overflow-x-auto my-8 rounded-[2rem] border border-[var(--glass-border)] shadow-xl ${isLightMode ? 'bg-white' : 'bg-black/20'}`}>
-                                  <table className="w-full text-left border-collapse min-w-[500px]">
+                                <div className={`overflow-x-auto my-4 rounded-2xl border border-[var(--glass-border)] shadow-lg ${isLightMode ? 'bg-white' : 'bg-black/20'}`}>
+                                  <table className="w-full text-left border-collapse">
                                     {children}
                                   </table>
                                 </div>
                               );
                             },
                             thead({ children }) {
-                              return <thead className={`${isLightMode ? 'bg-indigo-50/50 text-indigo-700' : 'bg-[var(--glass-bg)] text-indigo-400'} font-black uppercase tracking-widest border-b border-[var(--glass-border)] text-[10px]`}>{children}</thead>;
+                              return <thead className={`${isLightMode ? 'bg-indigo-50/50 text-indigo-700' : 'bg-[var(--glass-bg)] text-indigo-400'} font-black uppercase tracking-widest border-b border-[var(--glass-border)]`} style={{ fontSize: `calc(${Math.max(6, fontSize - 4) / 14} * 1rem)` }}>{children}</thead>;
                             },
                             th({ children }) {
-                              return <th className="px-6 py-4 font-black">{children}</th>;
+                              return <th className="px-3 py-2 font-black whitespace-nowrap">{children}</th>;
                             },
                             td({ children }) {
-                              return <td className={`px-6 py-4 text-sm border-b border-[var(--glass-border)] transition-colors ${isLightMode ? 'text-gray-700 font-medium' : 'text-[var(--text-dim)] opacity-90'}`}>{children}</td>;
+                              return <td className={`px-3 py-2 border-b border-[var(--glass-border)] transition-colors whitespace-pre-wrap break-words ${isLightMode ? 'text-gray-700 font-medium' : 'text-[var(--text-dim)] opacity-90'}`} style={{ fontSize: `calc(${Math.max(6, fontSize - 2) / 14} * 1rem)` }}>{children}</td>;
                             },
                           }}
                         >
