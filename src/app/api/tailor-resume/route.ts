@@ -29,6 +29,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing resume or job description" }, { status: 400 });
     }
 
+    // ─── Credit Check ─────────────────────────────────────
+    const { createAdminClient } = await import("@/utils/supabase/server");
+    const { clerkClient } = await import("@clerk/nextjs/server");
+    const supabase = createAdminClient();
+    
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("credits, email")
+      .eq("id", userId)
+      .single();
+
+    if (!profile || (profile.credits || 0) <= 0) {
+      return NextResponse.json({ error: "Insufficient credits. Please upgrade your plan." }, { status: 403 });
+    }
+
     const systemPrompt = `You are an elite career coach and resume strategist. 
 Your task is to take a user's resume and a job description (JD), and tailor the resume to perfectly match the JD while maintaining 100% honesty.
 
@@ -148,22 +163,20 @@ Rules:
       try {
         const tailoredProfile = JSON.parse(jsonMatch[0]);
 
-        // Save to Supabase so preview page can find it
+        // ─── Deduct Credit & Save Profile ───────────────────
         try {
-          const { createAdminClient } = await import("@/utils/supabase/server");
-          const { clerkClient } = await import("@clerk/nextjs/server");
-          const supabase = createAdminClient();
-          const userObj = await clerkClient().users.getUser(userId);
+          const userObj = await (await clerkClient()).users.getUser(userId);
           const email = userObj.emailAddresses[0]?.emailAddress;
 
           await supabase.from("profiles").upsert({
             id: userId,
             email: email,
+            credits: (profile.credits || 1) - 1, // Deduct 1
             profile_data: tailoredProfile,
             updated_at: new Date().toISOString()
           }, { onConflict: 'email' });
-        } catch {
-          console.error("Failed to save tailored resume to Supabase");
+        } catch (dbErr) {
+          console.error("Failed to update credits/profile in Supabase", dbErr);
         }
 
         return NextResponse.json({ profile: tailoredProfile });
