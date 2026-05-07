@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 
-import { Sparkles, Download, FileCode, Printer } from "lucide-react";
+import { Sparkles, FileCode, Printer } from "lucide-react";
 import { generateLaTeX } from "@/utils/latex-converter";
 
 const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
