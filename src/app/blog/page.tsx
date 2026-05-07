@@ -198,7 +198,6 @@ export default function BlogPage() {
         </section>
       </main>
 
-      <GlobalFooter />
     </div>
   );
 }

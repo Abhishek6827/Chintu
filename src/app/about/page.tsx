@@ -33,20 +33,6 @@ export default function AboutPage() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-200/20 blur-[120px] rounded-full animate-pulse [animation-delay:700ms]" />
       </div>
 
-      {/* Header */}
-      <nav className="sticky top-0 z-50 bg-[var(--bg-app)]/80 backdrop-blur-xl border-b border-[var(--glass-border)] px-6 py-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <Link href="/" className="group flex items-center gap-2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-all text-[10px] font-black uppercase tracking-widest">
-            <ArrowLeft className="w-3 h-3 transition-transform group-hover:-translate-x-1" />
-            Dashboard
-          </Link>
-          <div className="flex items-center gap-2">
-            <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={20} height={20} className="w-5 h-5" unoptimized />
-            <span className="text-sm font-black tracking-tight uppercase text-[var(--text-main)]">About <span className="text-indigo-500">Chintu</span></span>
-          </div>
-          <div className="w-20" />
-        </div>
-      </nav>
 
       <main className="relative z-10 flex-1 max-w-4xl mx-auto w-full px-6 py-20">
         {/* Hero Section */}
@@ -192,7 +178,6 @@ export default function AboutPage() {
         </div>
       </main>
 
-      <GlobalFooter />
     </div>
   );
 }

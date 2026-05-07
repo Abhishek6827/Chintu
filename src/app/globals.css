@@ -845,3 +845,25 @@ input[type="range"]::-moz-range-thumb {
 .resume-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.2);
 }
+/* ─── Print Optimizations ──────────────────────────── */
+@media print {
+  nav, 
+  header, 
+  footer, 
+  #update-notification,
+  .drag-region,
+  .no-print {
+    display: none !important;
+  }
+  
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}

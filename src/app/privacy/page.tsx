@@ -31,20 +31,6 @@ export default function PrivacyPage() {
         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-200/20 blur-[120px] rounded-full animate-pulse [animation-delay:700ms]" />
       </div>
 
-      {/* Header */}
-      <nav className="sticky top-0 z-50 bg-[var(--bg-app)]/80 backdrop-blur-2xl border-b border-[var(--glass-border)] px-6 py-5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="group flex items-center gap-3 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-all text-[10px] font-black uppercase tracking-[0.3em]">
-            <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1.5" />
-            Return Home
-          </Link>
-          <div className="flex items-center gap-2.5">
-            <Image src="https://www.getchintu.com/icon.png" alt="Chintu" width={22} height={22} unoptimized />
-            <span className="text-[11px] font-black tracking-tight uppercase text-[var(--text-main)]">Privacy <span className="text-indigo-500">Protocol</span></span>
-          </div>
-          <div className="w-24 hidden sm:block" />
-        </div>
-      </nav>
 
       <main className="relative z-10 flex-1 max-w-4xl mx-auto w-full px-6 py-24 sm:py-32">
         <motion.div
@@ -134,7 +120,6 @@ export default function PrivacyPage() {
         </div>
       </main>
 
-      <GlobalFooter />
 
     </div>
   );

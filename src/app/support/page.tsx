@@ -62,29 +62,6 @@ export default function SupportPage() {
         <div className="absolute bottom-[-5%] left-[-5%] w-[40%] h-[40%] bg-purple-500/[0.05] blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      {/* Header */}
-      <div className="sticky top-0 z-[100] bg-[var(--bg-app)]/80 backdrop-blur-2xl border-b border-[var(--glass-border)] px-4 sm:px-6 py-4 sm:py-6" style={{ WebkitAppRegion: 'no-drag' } as any}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link
-            href="/"
-            className="group flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm hover:shadow-md hover:border-indigo-500/30 transition-all active:scale-95"
-            aria-label="Back to Home"
-          >
-            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--text-dim)] group-hover:text-indigo-500 transition-colors" />
-          </Link>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center p-1.5 sm:p-2">
-              <Image src="https://www.getchintu.com/icon.png" alt="" width={28} height={28} className="w-full h-full object-contain" unoptimized />
-            </div>
-            <span className="text-base sm:text-lg font-black tracking-tighter uppercase text-[var(--text-main)]">
-              Chintu <span className="text-indigo-500">Support</span>
-            </span>
-          </div>
-
-          <div className="w-9 sm:w-10" />
-        </div>
-      </div>
 
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 pb-16 sm:pb-20 pt-8 sm:pt-12">
         <div className="w-full max-w-md" style={{ WebkitAppRegion: 'no-drag' } as any}>

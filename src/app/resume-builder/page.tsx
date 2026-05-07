@@ -150,7 +150,6 @@ export default function ResumeBuilderPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] flex flex-col">
-      <GlobalHeader />
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12">
         <AnimatePresence mode="wait">
@@ -566,7 +565,6 @@ export default function ResumeBuilderPage() {
         </AnimatePresence>
       </main>
 
-      <GlobalFooter />
     </div>
   );
 }

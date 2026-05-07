@@ -255,7 +255,6 @@ export default function FAQPage() {
         </section>
       </main>
 
-      <GlobalFooter />
     </div>
   );
 }

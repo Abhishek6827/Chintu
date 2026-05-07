@@ -123,7 +123,6 @@ export default function DownloadPage() {
         </motion.div>
       </main>
 
-      <GlobalFooter />
 
     </div>
   );

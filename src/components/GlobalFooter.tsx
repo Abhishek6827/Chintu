@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Mail, Shield, Zap } from "lucide-react";
+import React from "react";
 
 /* ─── Footer link clusters (single source of truth) ───────
  * Anchor-style hrefs (e.g. /#pricing) deep-link into the
@@ -112,6 +113,16 @@ const socialLinks: { label: string; href: string; svg: React.ReactNode }[] = [
 ];
 
 export default function GlobalFooter() {
+  const [mounted, setMounted] = React.useState(false);
+  const isElectron = typeof window !== "undefined" &&
+    (!!(window as any).electronAPI || navigator.userAgent.toLowerCase().includes('electron'));
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || isElectron) return null;
+
   return (
     <footer
       role="contentinfo"
