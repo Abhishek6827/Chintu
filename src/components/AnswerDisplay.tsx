@@ -14,6 +14,7 @@ interface AnswerEntry {
   question: string;
   answer: string;
   isStreaming: boolean;
+  images?: string[];
   mode?: string;
   model?: string;
   startTime?: number;
@@ -42,6 +43,7 @@ const parseAnswer = (text: string) => {
 
 export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = false, onUndo, showReadingGuide = false, userPlan = null }: AnswerDisplayProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
 
   const getSafeModelName = (modelId: string) => {
     if (!modelId) return "";
@@ -185,9 +187,40 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                 padding: 'clamp(12px, 2vh, 20px) clamp(16px, 3vw, 24px)'
               }}
             >
-              <p style={{ fontSize: `calc(${Math.max(6, fontSize - 1) / 14} * 1rem)` }} className="text-[var(--text-main)] opacity-100 leading-relaxed font-bold">
-                {entry.question}
-              </p>
+              <div style={{ fontSize: `calc(${Math.max(6, fontSize - 1) / 14} * 1rem)` }} className="text-[var(--text-main)] opacity-100 leading-relaxed font-bold">
+                {entry.images && entry.images.length > 0 ? (
+                  <div className="flex flex-col gap-3">
+                    {/* The text context if any */}
+                    {entry.question && !entry.question.includes("📸 Screenshot") && (
+                      <p className="mb-2">{entry.question}</p>
+                    )}
+                    
+                    {/* Image Grid */}
+                    <div className={`grid gap-2 ${entry.images.length === 1 ? 'grid-cols-1' : entry.images.length === 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3'}`}>
+                      {entry.images.map((img, i) => (
+                        <div 
+                          key={i} 
+                          className="relative aspect-video rounded-lg overflow-hidden border border-white/10 cursor-pointer hover:scale-[1.02] transition-transform shadow-lg group/img"
+                          onClick={() => setFullScreenImage(img)}
+                        >
+                          <img src={img} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                             <div className="bg-black/50 p-2 rounded-full backdrop-blur-sm">
+                               <Sparkles className="w-4 h-4 text-white" />
+                             </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-1.5 opacity-60 mt-1">
+                      <Sparkles className="w-3 h-3 text-cyan-400" />
+                      <span className="text-[10px] uppercase tracking-widest font-black">Captured via Vision Synthesis</span>
+                    </div>
+                  </div>
+                ) : (
+                  entry.question
+                )}
+              </div>
             </div>
           </div>
 
@@ -402,6 +435,28 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
           </div>
         </div>
       ))}
+      {/* Lightbox Modal */}
+      {fullScreenImage && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 animate-in fade-in duration-300"
+          onClick={() => setFullScreenImage(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all z-10"
+            onClick={() => setFullScreenImage(null)}
+          >
+            <RotateCcw className="w-6 h-6 rotate-45" />
+          </button>
+          
+          <div className="relative w-full max-w-5xl aspect-video rounded-3xl overflow-hidden shadow-2xl border border-white/10 animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+            <img src={fullScreenImage} alt="Full Screen Preview" className="w-full h-full object-contain" />
+            
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 bg-black/50 backdrop-blur-md rounded-full border border-white/10">
+               <span className="text-white text-xs font-black uppercase tracking-[0.4em]">Proprietary Vision Intel</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

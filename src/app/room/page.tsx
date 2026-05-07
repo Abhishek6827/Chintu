@@ -26,6 +26,7 @@ interface AnswerEntry {
   question: string;
   answer: string;
   isStreaming: boolean;
+  images?: string[];
   mode?: string;
   model?: string;
   startTime?: number;
@@ -1258,12 +1259,20 @@ export default function RoomPage() {
     setAnswers((prev) => {
       const idx = prev.findIndex((a) => a.id === id);
       if (idx === -1) return prev;
+      
+      const targetEntry = prev[idx];
+      
       // Remove everything from this index onwards
       const newAnswers = prev.slice(0, idx);
 
       // Restore question to input field (unless it's a screenshot indicator)
       if (!question.includes("📸 Screenshot")) {
         setInputText(question);
+      }
+
+      // Restore images if they existed in the entry
+      if (targetEntry.images && targetEntry.images.length > 0) {
+        setCapturedScreenshots(targetEntry.images);
       }
 
       // Sync histories: Each answer corresponds to 2 messages (user + assistant)
@@ -1285,10 +1294,10 @@ export default function RoomPage() {
     const entryId = Date.now().toString();
     const questionText = `📸 Screenshot${capturedScreenshots.length > 1 ? "s" : ""} (${capturedScreenshots.length})`;
     const contextText = inputText.trim();
-
+    const displayQuestion = contextText || questionText;
     const startTime = Date.now();
     const initialDisplayName = resolveDisplayName(selectedModelRef.current, selectedModelRef.current);
-    setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true, mode: responseLengthRef.current, model: initialDisplayName, startTime }]);
+    setAnswers((prev) => [...prev, { id: entryId, question: displayQuestion, answer: "", isStreaming: true, mode: responseLengthRef.current, model: initialDisplayName, startTime, images: screenshotsToSend }]);
 
     // ─── Snapshot current screenshots & context before clearing ─
     const screenshotsToSend = [...capturedScreenshots];
