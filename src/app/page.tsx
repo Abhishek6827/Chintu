@@ -418,7 +418,7 @@ export default function LandingPage() {
     }
     window.location.href = deepLink;
     setTimeout(() => {
-      router.push("/setup");
+      router.push(isElectron ? "/setup" : "/download");
     }, 500);
   }, [isSignedIn, user, router]);
 
@@ -669,7 +669,7 @@ export default function LandingPage() {
                         }
                         window.location.href = deepLink;
                         setTimeout(() => {
-                          router.push("/setup");
+                          router.push(isElectron ? "/setup" : "/download");
                         }, 500);
                       }}
                       className="relative group overflow-hidden bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-indigo-400 text-[9px] font-black uppercase tracking-[0.2em] px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl hover:border-indigo-500 hover:bg-indigo-500/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
@@ -754,7 +754,7 @@ export default function LandingPage() {
                       }
                       window.location.href = deepLink;
                       setTimeout(() => {
-                        router.push("/setup");
+                        router.push(isElectron ? "/setup" : "/download");
                       }, 500);
                     }}
                     className="relative group overflow-hidden px-7 sm:px-9 py-3.5 sm:py-4 bg-indigo-600 text-white font-black uppercase tracking-[0.25em] text-[10px] sm:text-[11px] rounded-xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-3"

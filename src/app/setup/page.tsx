@@ -38,6 +38,11 @@ export default function SetupPage() {
   useEffect(() => {
     setMounted(true);
 
+    if (!isElectron) {
+      router.push("/download");
+      return;
+    }
+
     const checkProfile = async () => {
       // Fetch profile via secure backend API
       try {
@@ -140,51 +145,7 @@ export default function SetupPage() {
       return;
     }
     
-    if (!isElectron) {
-      // On web, we don't allow entering the room, but we can save the JD for the app
-      setIsInitiating(true);
-      setStatusText("☁️ Syncing configurations to cloud...");
-      
-      try {
-        const profileUpdate: any = {};
-        if (saveJd) {
-          profileUpdate.current_jd = jd.trim();
-        }
-        
-        if (Object.keys(profileUpdate).length > 0) {
-          await fetch("/api/profile", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(profileUpdate),
-          });
-        }
-
-        // --- ADDED: Refine profile on web too if provided ---
-        if (aboutMe.trim() && !hasProfile) {
-          setStatusText("✨ AI is structuring your profile...");
-          await fetch("/api/refine-profile", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ rawText: aboutMe.trim() }),
-          });
-        }
-        
-        // Save to sessionStorage for immediate use
-        sessionStorage.setItem("jobDescription", jd.trim());
-        
-        setStatusText("✅ Config Synced.");
-        setTimeout(() => {
-          setIsInitiating(false);
-          setShowAppPrompt(true);
-          // Try to launch app via deep link
-          window.location.href = "chintu://open";
-        }, 1500);
-      } catch (err) {
-        console.error("Failed to sync JD:", err);
-        setIsInitiating(false);
-      }
-      return;
-    }
+    // Since we are in Electron (guarded by the check above), we proceed directly with setup.
 
     setIsInitiating(true);
     setStatusText("🚀 Preparing your interview workspace...");
@@ -243,9 +204,7 @@ export default function SetupPage() {
   };
 
   const handleSkipAndStart = () => {
-    if (!isElectron) {
-      return;
-    }
+    // Since we are in Electron (guarded by the check above), we proceed directly with setup.
     
     // Save JD to Supabase if toggle is ON
     if (saveJd) {
@@ -262,7 +221,7 @@ export default function SetupPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] overflow-x-hidden overflow-y-auto relative">
-      {!isElectron && userPlan !== "free" && <Meteors number={30} />}
+      {userPlan !== "free" && <Meteors number={30} />}
 
 
 
@@ -425,17 +384,9 @@ export default function SetupPage() {
                   }
                 `}
               >
-                {isRefining ? statusText : (isElectron ? "Initiate Session" : "Sync & Start")}
+                {isRefining ? statusText : "Initiate Session"}
               </InteractiveHoverButton>
 
-              {!isElectron && (
-                <InteractiveHoverButton
-                  onClick={() => window.open("https://www.getchintu.com/download", "_blank")}
-                  className="w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 shadow-sm"
-                >
-                  Download App
-                </InteractiveHoverButton>
-              )}
 
               {isRefining && (
                 <button
