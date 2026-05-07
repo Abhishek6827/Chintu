@@ -25,10 +25,10 @@ const sendTelegramAlert = async (message: string) => {
 export const dynamic = 'force-dynamic';
 
 const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; price: string; days: number; frequency: string, basePriceINR: number }> = {
-  "pro_monthly": { plan: "pro", credits: 200, price: "₹765/mo", days: 30, frequency: "Monthly", basePriceINR: 765 },
-  "pro_annual": { plan: "pro", credits: 2400, price: "₹7565/yr", days: 365, frequency: "Annual", basePriceINR: 7565 },
-  "elite_monthly": { plan: "elite", credits: 1000, price: "₹2465/mo", days: 30, frequency: "Monthly", basePriceINR: 2465 },
-  "elite_annual": { plan: "elite", credits: 12000, price: "₹23715/yr", days: 365, frequency: "Annual", basePriceINR: 23715 },
+  "pro_monthly": { plan: "pro", credits: 100, price: "₹765/mo", days: 30, frequency: "Monthly", basePriceINR: 765 },
+  "pro_annual": { plan: "pro", credits: 1200, price: "₹7565/yr", days: 365, frequency: "Annual", basePriceINR: 7565 },
+  "elite_monthly": { plan: "elite", credits: 500, price: "₹2465/mo", days: 30, frequency: "Monthly", basePriceINR: 2465 },
+  "elite_annual": { plan: "elite", credits: 6000, price: "₹23715/yr", days: 365, frequency: "Annual", basePriceINR: 23715 },
 };
 
 export async function POST(req: NextRequest) {

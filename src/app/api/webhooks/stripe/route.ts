@@ -22,19 +22,19 @@ const PRICE_ID_MAP: Record<
   }
 > = {
   "price_1TTF8WLYcsTnVrvkaLcpMyel": {
-    plan: "pro", credits: 200, price: "$9/mo", days: 30,
+    plan: "pro", credits: 100, price: "$9/mo", days: 30,
     frequency: "Monthly", unitTotal: 9.00, basePrice: 9.00,
   },
   "price_1TTcEhLYcsTnVrvkvOjR8hMc": {
-    plan: "pro", credits: 2400, price: "$89/yr", days: 365,
+    plan: "pro", credits: 1200, price: "$89/yr", days: 365,
     frequency: "Annual", unitTotal: 89.00, basePrice: 89.00,
   },
   "price_1TTFBELYcsTnVrvkKpZSsGRN": {
-    plan: "elite", credits: 1000, price: "$29/mo", days: 30,
+    plan: "elite", credits: 500, price: "$29/mo", days: 30,
     frequency: "Monthly", unitTotal: 29.00, basePrice: 29.00,
   },
   "price_1TTcI2LYcsTnVrvk5Y3jkmp0": {
-    plan: "elite", credits: 12000, price: "$279/yr", days: 365,
+    plan: "elite", credits: 6000, price: "$279/yr", days: 365,
     frequency: "Annual", unitTotal: 279.00, basePrice: 279.00,
   },
 };

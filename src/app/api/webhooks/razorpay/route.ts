@@ -115,10 +115,10 @@ export async function POST(req: Request) {
     const fullName = notes.fullName || profile?.full_name || (email !== "N/A" ? email.split("@")[0] : "User");
 
     const RAZORPAY_PLANS: Record<string, { plan: string; credits: number; days: number; frequency: string; unitTotalINR: number; basePriceINR: number }> = {
-      "pro_monthly": { plan: "pro", credits: 200, days: 30, frequency: "Monthly", unitTotalINR: 780.3, basePriceINR: 765 },
-      "pro_annual": { plan: "pro", credits: 2400, days: 365, frequency: "Annual", unitTotalINR: 7716.3, basePriceINR: 7565 },
-      "elite_monthly": { plan: "elite", credits: 1000, days: 30, frequency: "Monthly", unitTotalINR: 2514.3, basePriceINR: 2465 },
-      "elite_annual": { plan: "elite", credits: 12000, days: 365, frequency: "Annual", unitTotalINR: 24189.3, basePriceINR: 23715 },
+      "pro_monthly": { plan: "pro", credits: 100, days: 30, frequency: "Monthly", unitTotalINR: 780.3, basePriceINR: 765 },
+      "pro_annual": { plan: "pro", credits: 1200, days: 365, frequency: "Annual", unitTotalINR: 7716.3, basePriceINR: 7565 },
+      "elite_monthly": { plan: "elite", credits: 500, days: 30, frequency: "Monthly", unitTotalINR: 2514.3, basePriceINR: 2465 },
+      "elite_annual": { plan: "elite", credits: 6000, days: 365, frequency: "Annual", unitTotalINR: 24189.3, basePriceINR: 23715 },
     };
 
 

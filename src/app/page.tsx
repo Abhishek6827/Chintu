@@ -357,7 +357,7 @@ const pricingPlans: PricingPlan[] = [
     cta: "Unlock Elite",
     href: "/pricing",
     features: [
-      "1000 Credits / month per unit",
+      "500 Credits / month per unit",
       "Unlimited Profile Uploads",
       "Unlimited Job Descriptions",
       "All Pro Features",
