@@ -218,29 +218,39 @@ const howItWorksSteps = [
 ];
 
 /* ─── Platforms that Chintu works on ─────────────────────── */
-const supportedPlatforms: { name: string; icon: any; category: string }[] = [
-  { name: "Zoom",             icon: Video,        category: "Video" },
-  { name: "Google Meet",      icon: Video,        category: "Video" },
-  { name: "Microsoft Teams",  icon: Video,        category: "Video" },
-  { name: "Webex",            icon: Video,        category: "Video" },
-  { name: "Amazon Chime",     icon: Video,        category: "Video" },
-  { name: "Skype",            icon: Video,        category: "Video" },
-  { name: "HireVue",          icon: UserCheck,    category: "AI Interview" },
-  { name: "micro1",           icon: UserCheck,    category: "AI Interview" },
-  { name: "Karat",            icon: UserCheck,    category: "AI Interview" },
-  { name: "Interviewing.io",  icon: UserCheck,    category: "Live Coding" },
-  { name: "HackerRank",       icon: Code,         category: "Coding" },
-  { name: "LeetCode",         icon: Code,         category: "Coding" },
-  { name: "CoderPad",         icon: Code,         category: "Coding" },
-  { name: "Codility",         icon: Code,         category: "Coding" },
-  { name: "Pramp",            icon: Users,        category: "Peer Practice" },
-  { name: "Discord",          icon: MessageSquare,category: "Chat" },
+const supportedPlatforms: { name: string; icon: any; category: string; logo?: string }[] = [
+  { name: "Zoom",             icon: Video,        category: "Video",        logo: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Zoom_Communications_Logo.svg" },
+  { name: "Google Meet",      icon: Video,        category: "Video",        logo: "https://upload.wikimedia.org/wikipedia/commons/9/9b/Google_Meet_icon_%282020%29.svg" },
+  { name: "Microsoft Teams",  icon: Video,        category: "Video",        logo: "https://upload.wikimedia.org/wikipedia/commons/c/c9/Microsoft_Office_Teams_%282018%E2%80%93present%29.svg" },
+  { name: "Webex",            icon: Video,        category: "Video",        logo: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Cisco_Webex_logo_2021.svg" },
+  { name: "Amazon Chime",     icon: Video,        category: "Video",        logo: "https://upload.wikimedia.org/wikipedia/commons/6/69/Amazon_Chime_Logo.svg" },
+  { name: "Skype",            icon: Video,        category: "Video",        logo: "https://upload.wikimedia.org/wikipedia/commons/6/60/Skype_logo_%282019%E2%80%93present%29.svg" },
+  { name: "HireVue",          icon: UserCheck,    category: "AI Interview", logo: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Hirevue_logo.svg" },
+  { name: "micro1",           icon: UserCheck,    category: "AI Interview", logo: "https://cdn.brandfetch.io/micro1.ai/logo" },
+  { name: "Karat",            icon: UserCheck,    category: "AI Interview", logo: "https://karat.com/wp-content/themes/karat/assets/img/logo.svg" },
+  { name: "Interviewing.io",  icon: UserCheck,    category: "Live Coding",  logo: "https://vtlogo.com/wp-content/uploads/2020/11/interviewing-io-vector-logo.png" },
+  { name: "HackerRank",       icon: Code,         category: "Coding",       logo: "https://upload.wikimedia.org/wikipedia/commons/4/40/HackerRank_Icon-1000px.png" },
+  { name: "LeetCode",         icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/leetcode.com/logo" },
+  { name: "CoderPad",         icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/coderpad.io/logo" },
+  { name: "Codility",         icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/codility.com/logo" },
+  { name: "Pramp",            icon: Users,        category: "Peer Practice", logo: "https://www.pramp.com/img/pramp_logo_blue.png" },
+  { name: "Discord",          icon: MessageSquare,category: "Chat",          logo: "https://upload.wikimedia.org/wikipedia/commons/7/73/Discord_Color_Text_Logo_%282021%29.svg" },
 ];
 
 /* ─── Companies whose candidates use Chintu ──────────────── */
 const hiredAtCompanies = [
-  "Google", "Meta", "Amazon", "Microsoft", "Apple", "Netflix",
-  "Uber", "Tesla", "Stripe", "Goldman Sachs", "McKinsey", "Deloitte",
+  { name: "Google",        logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" },
+  { name: "Meta",          logo: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg" },
+  { name: "Amazon",        logo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" },
+  { name: "Microsoft",     logo: "https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" },
+  { name: "Apple",         logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" },
+  { name: "Netflix",       logo: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" },
+  { name: "Uber",          logo: "https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" },
+  { name: "Tesla",         logo: "https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg" },
+  { name: "Stripe",        logo: "https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" },
+  { name: "Goldman Sachs", logo: "https://upload.wikimedia.org/wikipedia/commons/6/61/Goldman_Sachs_logo.svg" },
+  { name: "McKinsey",      logo: "https://upload.wikimedia.org/wikipedia/commons/b/ba/McKinsey_%26_Company_logo.svg" },
+  { name: "Deloitte",      logo: "https://upload.wikimedia.org/wikipedia/commons/5/56/Deloitte.svg" },
 ];
 
 /* ─── Power Tools spotlight (Mock + Resume) ───────────────
@@ -1263,11 +1273,22 @@ export default function LandingPage() {
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true, amount: 0.2 }}
                   transition={{ duration: 0.5, delay: (i % 4) * 0.06 + Math.floor(i / 4) * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                  whileHover={{ y: -4, scale: 1.04 }}
+                  whileHover={{ y: -4, scale: 1.05 }}
                   className="relative flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-4 rounded-2xl border border-[var(--glass-border)] bg-[var(--panel-bg)]/80 backdrop-blur-xl hover:border-cyan-500/40 hover:bg-cyan-500/5 transition-colors group cursor-default"
                 >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center flex-shrink-0 group-hover:from-cyan-500/30 group-hover:to-indigo-500/30 transition-colors">
-                    <p.icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400 group-hover:text-cyan-400 transition-colors" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110 overflow-hidden">
+                    {p.logo ? (
+                      <Image
+                        src={p.logo}
+                        alt={`${p.name} official logo`}
+                        width={24}
+                        height={24}
+                        className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                        unoptimized
+                      />
+                    ) : (
+                      <p.icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400 group-hover:text-cyan-400 transition-colors" />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] sm:text-[13px] font-black uppercase tracking-tight text-[var(--text-main)] truncate">
@@ -1592,20 +1613,29 @@ export default function LandingPage() {
               </h3>
             </motion.div>
 
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 lg:gap-10">
               {hiredAtCompanies.map((co, i) => (
                 <motion.div
-                  key={co}
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                  key={co.name}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.4 }}
-                  transition={{ duration: 0.4, delay: i * 0.04, ease: [0.22, 1, 0.36, 1] }}
-                  whileHover={{ scale: 1.06, y: -2 }}
-                  className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full border border-[var(--glass-border)] bg-[var(--panel-bg)]/80 backdrop-blur-xl hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-colors flex items-center gap-2"
+                  transition={{ duration: 0.5, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                  whileHover={{ scale: 1.1, y: -2 }}
+                  className="flex items-center gap-2.5 group transition-all duration-500 cursor-default"
                 >
-                  <Building2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[var(--text-dim)]" />
-                  <span className="text-[11px] sm:text-[13px] font-black uppercase tracking-tight text-[var(--text-main)]">
-                    {co}
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center overflow-hidden">
+                    <Image
+                      src={co.logo}
+                      alt={`${co.name} official logo`}
+                      width={24}
+                      height={24}
+                      className="w-full h-full object-contain"
+                      unoptimized
+                    />
+                  </div>
+                  <span className="text-[10px] sm:text-[12px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] group-hover:text-[var(--text-main)] transition-colors">
+                    {co.name}
                   </span>
                 </motion.div>
               ))}

@@ -32,6 +32,42 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'avatar.vercel.sh',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.simpleicons.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.brandfetch.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.getchintu.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.micro1.ai',
+      },
+      {
+        protocol: 'https',
+        hostname: 'vtlogo.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.pramp.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'unpkg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'karat.com',
       }
     ],
   },

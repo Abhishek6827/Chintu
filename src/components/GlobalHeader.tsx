@@ -38,7 +38,7 @@ export default function GlobalHeader() {
 
     window.addEventListener('chintu-recording-status', handleRecordingStatus);
     window.addEventListener('chintu-open-guide', handleOpenGuide);
-    
+
     return () => {
       window.removeEventListener('chintu-recording-status', handleRecordingStatus);
       window.removeEventListener('chintu-open-guide', handleOpenGuide);
@@ -64,10 +64,10 @@ export default function GlobalHeader() {
     };
 
     fetchProfile();
-    
+
     // Listen for manual refresh requests (e.g. after successful payment)
     window.addEventListener('chintu-profile-refresh', fetchProfile);
-    
+
     // Polling for credits/profile updates if needed
     const interval = setInterval(fetchProfile, 10000);
     return () => {
@@ -75,7 +75,7 @@ export default function GlobalHeader() {
       window.removeEventListener('chintu-profile-refresh', fetchProfile);
     };
   }, [isLoaded, isSignedIn, user?.id]);
-  
+
   // Close modals when signed out
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -98,7 +98,7 @@ export default function GlobalHeader() {
         setShowUnhidePrompt(true);
         return;
       }
-      
+
       // If we are NOT in stealth mode, go into it silently
       await (window as any).electronAPI.ghostToggle();
     }
@@ -130,7 +130,7 @@ export default function GlobalHeader() {
 
   const handleUpgrade = async () => {
     let pricingUrl = "https://www.getchintu.com/pricing";
-    
+
     // Try to get a seamless auth token if in Electron
     if (isElectron && isSignedIn) {
       try {
@@ -168,7 +168,7 @@ export default function GlobalHeader() {
       <div className="drag-region flex items-center justify-between px-2 min-[400px]:px-3 h-12 shrink-0 relative z-[100] w-full bg-[var(--bg-app)] border-b border-[var(--glass-border)] shadow-sm overflow-hidden">
         <div className="flex items-center gap-1.5 min-[400px]:gap-3 no-drag">
 
-          <div 
+          <div
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => {
               if (isSignedIn) {
@@ -181,20 +181,20 @@ export default function GlobalHeader() {
             }}
           >
             <div className="flex items-center justify-center w-8 h-8 hover:scale-110 transition-transform">
-              <Image 
-                src="https://www.getchintu.com/icon.png" 
-                alt="Chintu" 
-                className="w-full h-full object-contain" 
-                width={32} 
-                height={32} 
-                unoptimized 
+              <Image
+                src="https://www.getchintu.com/icon.png"
+                alt="Chintu"
+                className="w-full h-full object-contain"
+                width={32}
+                height={32}
+                unoptimized
               />
             </div>
             <span className="text-sm font-black tracking-tighter uppercase text-[var(--text-main)] ml-2 hidden min-[400px]:inline">
               Chintu <span className="text-indigo-500">AI</span>
             </span>
           </div>
-          
+
           {isSignedIn && userCredits !== null && (
             <div className="flex items-center gap-1 min-[400px]:gap-3">
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
@@ -204,7 +204,7 @@ export default function GlobalHeader() {
                 </div>
               </div>
               {userPlan === 'free' && (
-                <button 
+                <button
                   onClick={handleUpgrade}
                   className="px-2 min-[450px]:px-4 py-1.5 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center justify-center"
                 >
@@ -247,27 +247,17 @@ export default function GlobalHeader() {
                   </svg>
                 )}
               </button>
-              <button 
-                onClick={handleMinimize} 
+              <button
+                onClick={handleMinimize}
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
             </>
           )}
-          
+
           {isSignedIn && (
             <>
-              <div className="flex items-center ml-1 no-drag">
-                <button
-                  onClick={() => router.push('/gsd')}
-                  className="px-3 py-1.5 bg-purple-600 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-purple-500 transition-all shadow-lg shadow-purple-500/20 active:scale-95 flex items-center justify-center"
-                  title="GSD Auto Mode Dashboard"
-                >
-                  <span className="hidden min-[450px]:inline">GSD</span>
-                  <span className="min-[450px]:hidden">🤖</span>
-                </button>
-              </div>
               <div className="flex items-center ml-1 no-drag">
                 <SyncedUserButton />
               </div>
