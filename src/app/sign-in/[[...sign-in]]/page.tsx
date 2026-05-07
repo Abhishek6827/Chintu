@@ -24,8 +24,25 @@ export default function Page() {
   useEffect(() => {
     // 2. Handle seamless auth ticket
     const urlParams = new URLSearchParams(window.location.search);
-    const ticket = urlParams.get("__clerk_ticket");
-    const redirectUrl = urlParams.get("redirect_url") || "/pricing";
+    let ticket = urlParams.get("__clerk_ticket") || urlParams.get("ticket");
+    const topRedirectUrl = urlParams.get("redirect_url") || "/setup";
+
+    // If ticket is not at top level, check inside the redirect_url (common after middleware redirects)
+    if (!ticket && urlParams.get("redirect_url")) {
+      try {
+        const innerUrl = new URL(urlParams.get("redirect_url")!, window.location.origin);
+        const innerDeepLink = innerUrl.searchParams.get("_from_deep_link");
+        if (innerDeepLink) {
+          // Parse the chintu:// deep link inside the _from_deep_link param
+          const deepLinkParams = new URLSearchParams(innerDeepLink.split('?')[1]);
+          ticket = deepLinkParams.get("ticket") || deepLinkParams.get("__clerk_ticket");
+        } else {
+          ticket = innerUrl.searchParams.get("ticket") || innerUrl.searchParams.get("__clerk_ticket");
+        }
+      } catch {
+        // Fallback or ignore
+      }
+    }
 
     if (signInLoaded && ticket && !isSignedIn) {
       const consumeTicket = async () => {
@@ -38,7 +55,7 @@ export default function Page() {
 
           if (result.status === "complete") {
             await setActive({ session: result.createdSessionId });
-            router.push(redirectUrl);
+            router.push(topRedirectUrl);
           }
         } catch (err: any) {
           console.error("Failed to consume seamless auth ticket:", err);

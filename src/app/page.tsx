@@ -405,17 +405,28 @@ export default function LandingPage() {
   // - Signed-in: try to open the Chintu Electron app via the chintu:// deep link, fall
   //   back to /setup after 500ms if the OS handler is missing.
   // - Signed-out: send the visitor to /sign-up first.
-  const launchApp = React.useCallback(() => {
+  const launchApp = React.useCallback(async () => {
     if (!isSignedIn) {
       router.push("/sign-up");
       return;
     }
     let deepLink = "chintu://open";
     try {
+      // ─── Seamless Auth Ticket ──────────────────────────────
+      // We generate a short-lived sign-in ticket to allow the app to
+      // automatically log in as the current user.
+      const res = await fetch("/api/auth/seamless");
+      const { token } = await res.json();
+      
       deepLink += `?source=web&u=${encodeURIComponent(user?.id || "")}`;
-    } catch {
-      // Ignore encoding errors and proceed with the bare deep link.
+      if (token) {
+        deepLink += `&ticket=${token}`;
+      }
+    } catch (err) {
+      console.error("Failed to generate seamless ticket:", err);
+      deepLink += `?source=web&u=${encodeURIComponent(user?.id || "")}`;
     }
+    
     window.location.href = deepLink;
     setTimeout(() => {
       router.push(isElectron ? "/setup" : "/download");
