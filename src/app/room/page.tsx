@@ -55,6 +55,33 @@ const MODELS = [
   { key: "qwen3.6", name: "Turbo Engine" }
 ] as const;
 
+// ─── Display Name Mapper ──────────────────────────────────────
+const MODEL_DISPLAY_NAMES: Record<string, string> = {
+  "Turbo Engine": "Turbo Engine",
+  "Pro Engine": "Pro Engine",
+  "Coding Specialist": "Coding Specialist",
+  "Titan Engine": "Titan Engine",
+  "Standard Engine": "Standard Engine",
+  "AI Engine": "AI Engine",
+  // Internal keys (fallback in case API returns raw key)
+  "qwen3.6": "Turbo Engine",
+  "qwen3.6-plus": "Turbo Engine",
+  "gpt-oss-120b": "Pro Engine",
+  "openai/gpt-oss-120b": "Pro Engine",
+  "llama-3.3-70b": "Standard Engine",
+  "qwen3-Coder": "Coding Specialist",
+  "nemotron-3-120b": "Titan Engine",
+  "meta-llama/llama-4-scout-17b-16e-instruct": "Standard Engine",
+  "Llama-4-Scout (Groq Fallback)": "Standard Engine",
+  "Llama-4-Scout (Fallback)": "Standard Engine",
+};
+
+function resolveDisplayName(raw: string | null, fallbackKey: string): string {
+  if (!raw) return MODEL_DISPLAY_NAMES[fallbackKey] || "AI Engine";
+  // If raw is already a display name, return it
+  if (Object.values(MODEL_DISPLAY_NAMES).includes(raw)) return raw;
+  return MODEL_DISPLAY_NAMES[raw] || MODEL_DISPLAY_NAMES[fallbackKey] || "AI Engine";
+}
 type ModelKey = typeof MODELS[number]["key"];
 
 // ─── Vision models (for screenshot processing) ─────────────
@@ -127,10 +154,10 @@ export default function RoomPage() {
   const [chatConversationHistory, setChatConversationHistory] = useState<HistoryMessage[]>([]);
 
   // ─── Auto-update status ───────────────────────────────────
-  const [updateStatus, setUpdateStatus] = useState<{ 
-    status: string; 
-    version?: string; 
-    percent?: number; 
+  const [updateStatus, setUpdateStatus] = useState<{
+    status: string;
+    version?: string;
+    percent?: number;
     message?: string;
     transferred?: number;
     total?: number;
@@ -150,12 +177,12 @@ export default function RoomPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("refining") === "true") {
       setIsBackgroundRefining(true);
-      
+
       // Clean up URL without reloading
       const url = new URL(window.location.href);
       url.searchParams.delete("refining");
       window.history.replaceState({}, "", url.toString());
-      
+
       // Start polling
       let attempts = 0;
       const poll = setInterval(async () => {
@@ -165,7 +192,7 @@ export default function RoomPage() {
           setIsBackgroundRefining(false);
           return;
         }
-        
+
         try {
           const res = await fetch("/api/profile");
           if (res.ok) {
@@ -177,9 +204,9 @@ export default function RoomPage() {
               setProfileContext(formatProfileContext(profile.profile_data));
             }
           }
-        } catch {}
+        } catch { }
       }, 3000);
-      
+
       return () => clearInterval(poll);
     }
   }, []);
@@ -189,7 +216,7 @@ export default function RoomPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("payment") === "success") {
       setIsPaymentProcessing(true);
-      
+
       // Clean up URL
       const url = new URL(window.location.href);
       url.searchParams.delete("payment");
@@ -215,12 +242,12 @@ export default function RoomPage() {
               setShowSuccessScreen(true);
               setUserPlan(profile.plan);
               setToast({ message: `Upgrade Successful! Welcome to ${profile.plan.toUpperCase()} tier.`, type: "success" });
-              
+
               // Hide success screen after 5 seconds
               setTimeout(() => setShowSuccessScreen(false), 5000);
             }
           }
-        } catch {}
+        } catch { }
       }, 2000);
 
       return () => clearInterval(poll);
@@ -256,13 +283,13 @@ export default function RoomPage() {
         const shortcutsEnabled = await (window as any).electronAPI.getUniversalShortcuts();
         setUniversalShortcuts(shortcutsEnabled);
       }
-      
+
       // BLOCK WEB ACCESS: Room is only for Electron EXE app
       if (!isElectron) {
         router.push("/");
         return;
       }
-      
+
       // Read JD from URL param (primary) or sessionStorage (fallback)
       const params = new URLSearchParams(window.location.search);
       const jdFromUrl = params.get("jd");
@@ -324,19 +351,19 @@ export default function RoomPage() {
         console.error("Error initializing room from API:", err);
       }
     };
-    
+
     initRoom();
   }, [isLoaded, isSignedIn, user?.id, router]);
 
   const saveToHistory = useCallback(async () => {
     if (answers.length === 0 || !user?.id) return;
-    
+
     // Only save history for Pro and Elite plans
     if (userPlan === "free") {
       console.log("History saving skipped: Free plan");
       return;
     }
-    
+
     const newSession: HistorySession = {
       id: Date.now().toString(),
       timestamp: Date.now(),
@@ -346,7 +373,7 @@ export default function RoomPage() {
 
     const updatedHistory = [newSession, ...history].slice(0, 5); // Keep only last 5 sessions
     setHistory(updatedHistory);
-    
+
     // Save to API via secure backend
     try {
       const res = await fetch('/api/profile', {
@@ -354,7 +381,7 @@ export default function RoomPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ history: updatedHistory })
       });
-      
+
       if (!res.ok && isElectron) {
         (window as any).electronAPI.log(`History Save Failed: ${res.status}`);
       }
@@ -389,7 +416,7 @@ export default function RoomPage() {
   const exportHistory = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history, null, 2));
     const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("href", dataStr);
     downloadAnchorNode.setAttribute("download", `chintu_history_${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
@@ -617,7 +644,7 @@ export default function RoomPage() {
     }
 
     if (recordingAudioCtxRef.current) {
-      recordingAudioCtxRef.current.close().catch(() => {});
+      recordingAudioCtxRef.current.close().catch(() => { });
       recordingAudioCtxRef.current = null;
     }
 
@@ -689,16 +716,16 @@ export default function RoomPage() {
       recorder.onstop = async () => {
         const blob = new Blob(screenChunksRef.current, { type: "video/webm" });
         screenChunksRef.current = [];
-        
+
         if (isElectron && (window as any).electronAPI?.saveVideo) {
           // Stealth Auto-save for Electron
           const arrayBuffer = await blob.arrayBuffer();
           const result = await (window as any).electronAPI.saveVideo(arrayBuffer);
           if (result.success) {
             console.log("[Recording] Stealth saved to:", result.path);
-            setToast({ 
-              message: `Recording saved to: ${result.path}`, 
-              type: 'success' 
+            setToast({
+              message: `Recording saved to: ${result.path}`,
+              type: 'success'
             });
             // Auto-hide toast after 5 seconds
             setTimeout(() => setToast(null), 5000);
@@ -785,7 +812,7 @@ export default function RoomPage() {
 
   useEffect(() => {
     setupPlainRecognition();
-    return () => { try { recognitionRef.current?.stop(); } catch {} };
+    return () => { try { recognitionRef.current?.stop(); } catch { } };
   }, [setupPlainRecognition]);
 
   const startWhisperRecording = useCallback(async () => {
@@ -902,7 +929,7 @@ export default function RoomPage() {
       if (!recognition) return;
       try { recognition.start(); }
       catch {
-        try { recognition.stop(); setTimeout(() => recognition.start(), 100); } catch {}
+        try { recognition.stop(); setTimeout(() => recognition.start(), 100); } catch { }
       }
     }
   }, [startWhisperRecording]);
@@ -917,7 +944,7 @@ export default function RoomPage() {
     if (useWhisperFallback.current) {
       transcript = await stopWhisperRecordingAndTranscribe();
     } else {
-      try { recognitionRef.current?.stop(); } catch {}
+      try { recognitionRef.current?.stop(); } catch { }
       await new Promise((r) => setTimeout(r, 300));
       transcript = (finalTranscriptRef.current || liveTranscript).trim();
     }
@@ -965,11 +992,16 @@ export default function RoomPage() {
           selectedModel: selectedModelRef.current,
         }),
       });
-      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Failed"); }
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        const displayName = resolveDisplayName(selectedModelRef.current, selectedModelRef.current);
+        throw new Error(e.error || `${displayName} failed`);
+      }
       if (!res.body) throw new Error("No response body");
 
       const actualModelUsed = res.headers.get("X-Model-Used") || selectedModelRef.current;
-      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: actualModelUsed } : a));
+      const displayModel = resolveDisplayName(actualModelUsed, selectedModelRef.current);
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: displayModel } : a));
 
       let fullResponse = "";
       const reader = res.body.getReader();
@@ -1031,40 +1063,33 @@ export default function RoomPage() {
     const historyToSend = [...chatConversationHistory];
     abortControllerRef.current = new AbortController();
 
-    const tryModels = selectedModelRef.current === "qwen3.6" 
-      ? [selectedModelRef.current] 
-      : [selectedModelRef.current, "llama-3.3-70b", "gpt-oss-120b"];
-    const uniqueModels = Array.from(new Set(tryModels));
-    
     let response: Response | null = null;
     let lastError: any = null;
 
-    for (const modelToTry of uniqueModels) {
-      try {
-        const res = await fetch("/api/answer", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: abortControllerRef.current.signal,
-          body: JSON.stringify({
-            transcript: fullTranscript,
-            jobDescription,
-            aboutYou: profileContext,
-            responseLength: responseLengthRef.current,
-            conversationHistory: historyToSend,
-            selectedModel: modelToTry,
-          }),
-        });
-        
-        if (res.ok) {
-          response = res;
-          break;
-        } else {
-          const e = await res.json().catch(() => ({}));
-          lastError = new Error(e.error || `Model ${modelToTry} failed`);
-        }
-      } catch (err) {
-        lastError = err;
+    try {
+      const res = await fetch("/api/answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: abortControllerRef.current.signal,
+        body: JSON.stringify({
+          transcript: fullTranscript,
+          jobDescription,
+          aboutYou: profileContext,
+          responseLength: responseLengthRef.current,
+          conversationHistory: historyToSend,
+          selectedModel: selectedModelRef.current,
+        }),
+      });
+
+      if (res.ok) {
+        response = res;
+      } else {
+        const e = await res.json().catch(() => ({}));
+        const displayName = resolveDisplayName(selectedModelRef.current, selectedModelRef.current);
+        lastError = new Error(e.error || `${displayName} failed`);
       }
+    } catch (err) {
+      lastError = err;
     }
 
     try {
@@ -1235,17 +1260,17 @@ export default function RoomPage() {
       if (idx === -1) return prev;
       // Remove everything from this index onwards
       const newAnswers = prev.slice(0, idx);
-      
+
       // Restore question to input field (unless it's a screenshot indicator)
       if (!question.includes("📸 Screenshot")) {
         setInputText(question);
       }
-      
+
       // Sync histories: Each answer corresponds to 2 messages (user + assistant)
       setChatConversationHistory((h) => h.slice(0, newAnswers.length * 2));
       setVisionConversationHistory((h) => h.slice(0, newAnswers.length * 2));
       setAiSpeechBubbles((s) => s.slice(0, newAnswers.length));
-      
+
       return newAnswers;
     });
   }, [stopGeneration]);
@@ -1262,52 +1287,46 @@ export default function RoomPage() {
     const contextText = inputText.trim();
 
     const startTime = Date.now();
-    setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true, mode: responseLengthRef.current, model: `scout + ${selectedModelRef.current}`, startTime }]);
+    const initialDisplayName = resolveDisplayName(selectedModelRef.current, selectedModelRef.current);
+    setAnswers((prev) => [...prev, { id: entryId, question: questionText, answer: "", isStreaming: true, mode: responseLengthRef.current, model: initialDisplayName, startTime }]);
 
     // ─── Snapshot current screenshots & context before clearing ─
     const screenshotsToSend = [...capturedScreenshots];
     const historyToSend = [...visionConversationHistory];
     abortControllerRef.current = new AbortController();
-    
+
     // Clear screenshots and input immediately
     setCapturedScreenshots([]);
     setInputText("");
 
-    const tryModels = selectedModelRef.current === "qwen3.6" 
-      ? [selectedModelRef.current] 
-      : [selectedModelRef.current, "llama-3.3-70b", "gpt-oss-120b"];
-    const uniqueModels = Array.from(new Set(tryModels));
-    
+    // API handles all internal fallbacks — we just call with selected model once
     let response: Response | null = null;
     let lastError: any = null;
 
-    for (const modelToTry of uniqueModels) {
-      try {
-        const res = await fetch("/api/answer-vision", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: abortControllerRef.current.signal,
-          body: JSON.stringify({
-            images: screenshotsToSend,
-            jobDescription,
-            aboutYou: profileContext,
-            responseLength: responseLengthRef.current,
-            additionalContext: contextText,
-            conversationHistory: historyToSend,
-            selectedModel: modelToTry,
-          }),
-        });
-        
-        if (res.ok) {
-          response = res;
-          break;
-        } else {
-          const e = await res.json().catch(() => ({}));
-          lastError = new Error(e.error || `Model ${modelToTry} failed`);
-        }
-      } catch (err) {
-        lastError = err;
+    try {
+      const res = await fetch("/api/answer-vision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: abortControllerRef.current.signal,
+        body: JSON.stringify({
+          images: screenshotsToSend,
+          jobDescription,
+          aboutYou: profileContext,
+          responseLength: responseLengthRef.current,
+          additionalContext: contextText,
+          conversationHistory: historyToSend,
+          selectedModel: selectedModelRef.current,
+        }),
+      });
+
+      if (res.ok) {
+        response = res;
+      } else {
+        const e = await res.json().catch(() => ({}));
+        lastError = new Error(e.error || "Service temporarily unavailable. Please try again.");
       }
+    } catch (err) {
+      lastError = err;
     }
 
     try {
@@ -1315,8 +1334,10 @@ export default function RoomPage() {
       const res = response;
       if (!res.body) throw new Error("No response body");
 
-      const actualModelUsed = res.headers.get("X-Model-Used") || selectedModelRef.current;
-      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: `scout + ${actualModelUsed}` } : a));
+      const rawModel = res.headers.get("X-Model-Used") || selectedModelRef.current;
+      // API now returns display names directly; resolve just in case
+      const displayModel = resolveDisplayName(rawModel, selectedModelRef.current);
+      setAnswers((prev) => prev.map((a) => a.id === entryId ? { ...a, model: displayModel } : a));
 
       // ─── Accumulate full response for history ──────────────
       let fullResponse = "";
@@ -1401,8 +1422,8 @@ export default function RoomPage() {
             The Chintu Room is a strategic environment designed exclusively for our Desktop Application. Please launch Chintu on your computer to access live synthesis and stealth mode.
           </p>
           <div className="flex flex-col gap-4">
-             <a href="https://www.getchintu.com/download" className="bg-indigo-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 transition-all">Download Chintu</a>
-             <button onClick={() => router.push('/')} className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest hover:text-[var(--text-main)] transition-colors">Return to Home</button>
+            <a href="https://www.getchintu.com/download" className="bg-indigo-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 transition-all">Download Chintu</a>
+            <button onClick={() => router.push('/')} className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest hover:text-[var(--text-main)] transition-colors">Return to Home</button>
           </div>
         </div>
       </div>
@@ -1431,8 +1452,8 @@ export default function RoomPage() {
         <div className="fixed top-12 left-4 right-4 z-[9999] animate-in fade-in slide-in-from-top-4 duration-500">
           <div className={`
             rounded-2xl px-4 py-3 shadow-2xl backdrop-blur-xl border flex items-center justify-between gap-3
-            ${toast.type === 'success' 
-              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+            ${toast.type === 'success'
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
               : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'}
           `}>
             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -1479,7 +1500,7 @@ export default function RoomPage() {
           <div className="ai-speech-container rounded-xl px-4 py-2">
             <div className="flex items-center gap-1.5 mb-1">
               <svg className="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
               </svg>
               <span className="text-[0.625rem] text-cyan-400 font-semibold uppercase tracking-wider">Chintu Expert</span>
             </div>
@@ -1510,15 +1531,14 @@ export default function RoomPage() {
       {/* Auto-update notification */}
       {updateStatus && (
         <div className="px-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
-          <div className={`rounded-xl px-4 py-3 text-xs flex items-center justify-between border ${
-            updateStatus.status === "error" 
-              ? "bg-red-500/10 border-red-500/20 text-red-600" 
-              : updateStatus.status === "checking"
+          <div className={`rounded-xl px-4 py-3 text-xs flex items-center justify-between border ${updateStatus.status === "error"
+            ? "bg-red-500/10 border-red-500/20 text-red-600"
+            : updateStatus.status === "checking"
               ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-600"
               : updateStatus.status === "up-to-date"
-              ? "bg-green-500/10 border-green-500/20 text-green-600"
-              : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"
-          }`}>
+                ? "bg-green-500/10 border-green-500/20 text-green-600"
+                : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"
+            }`}>
             {updateStatus.status === "checking" ? (
               <span className="flex items-center gap-2">
                 <svg className="animate-spin h-4 w-4 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -1538,11 +1558,11 @@ export default function RoomPage() {
                     {updateStatus.percent || 0}%
                   </span>
                 </div>
-                
+
                 <div className="relative w-full bg-[var(--input-bg)] rounded-full h-2.5 overflow-hidden border border-[var(--glass-border)]">
                   {/* Progress Bar with Glow */}
-                  <div 
-                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 rounded-full transition-all duration-500 ease-out shadow-[0_0_12px_rgba(52,211,153,0.5)]" 
+                  <div
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 rounded-full transition-all duration-500 ease-out shadow-[0_0_12px_rgba(52,211,153,0.5)]"
                     style={{ width: `${updateStatus.percent || 0}%` }}
                   >
                     <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.3)_50%,transparent_100%)] animate-shimmer" />
@@ -1552,8 +1572,8 @@ export default function RoomPage() {
                 <div className="flex items-center justify-between mt-2 text-[0.5625rem] text-emerald-600 font-medium">
                   <div className="flex items-center gap-3">
                     <span>
-                      {updateStatus.transferred ? formatBytes(updateStatus.transferred) : "0 MB"} 
-                      <span className="mx-1 opacity-30">/</span> 
+                      {updateStatus.transferred ? formatBytes(updateStatus.transferred) : "0 MB"}
+                      <span className="mx-1 opacity-30">/</span>
                       {updateStatus.total ? formatBytes(updateStatus.total) : "0 MB"}
                     </span>
                     {updateStatus.speed && (
@@ -1605,9 +1625,9 @@ export default function RoomPage() {
                 </button>
               </div>
             ) : null}
-            
+
             {(updateStatus.status === "error" || updateStatus.status === "up-to-date" || updateStatus.status === "ready") && (
-               <button onClick={() => setUpdateStatus(null)} className="ml-2 opacity-50 hover:opacity-100 transition-opacity">✕</button>
+              <button onClick={() => setUpdateStatus(null)} className="ml-2 opacity-50 hover:opacity-100 transition-opacity">✕</button>
             )}
           </div>
         </div>
@@ -1658,8 +1678,8 @@ export default function RoomPage() {
         <div className="px-4 pb-2">
           <div className={`
             rounded-xl px-4 py-2 text-xs flex items-center justify-between border
-            ${isLightMode 
-              ? "bg-red-50 text-red-600 border-red-200" 
+            ${isLightMode
+              ? "bg-red-50 text-red-600 border-red-200"
               : "bg-red-500/20 text-red-200 border-red-500/30"}
           `}>
             <span>{error}</span>
@@ -1672,11 +1692,11 @@ export default function RoomPage() {
       )}
 
       <div className="flex-1 overflow-y-auto py-3 chat-area-container flex flex-col" style={{ scrollbarGutter: "stable" }}>
-        <AnswerDisplay 
-          answers={answers} 
-          fontSize={fontSize} 
-          isLightMode={isLightMode} 
-          onUndo={handleUndo} 
+        <AnswerDisplay
+          answers={answers}
+          fontSize={fontSize}
+          isLightMode={isLightMode}
+          onUndo={handleUndo}
           showReadingGuide={showReadingGuide}
           userPlan={userPlan}
         />
@@ -1747,43 +1767,43 @@ export default function RoomPage() {
           </div>
           {/* Textarea */}
           <div className="relative flex items-center">
-          <textarea
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                if (capturedScreenshots.length > 0) {
-                  sendScreenshots();
-                } else {
-                  handleSendText();
+            <textarea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (capturedScreenshots.length > 0) {
+                    sendScreenshots();
+                  } else {
+                    handleSendText();
+                  }
                 }
-              }
-            }}
-            placeholder={capturedScreenshots.length > 0 ? "Add context (optional) then press Enter..." : "Ask a question or type..."}
-            className="w-full bg-transparent px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder-[var(--text-dim)] focus:outline-none pr-10 sm:pr-12 resize-none"
-            rows={inputText.split('\n').length > 1 ? Math.min(inputText.split('\n').length, 5) : 1}
-            disabled={status !== "idle"}
-          />
-          <button
-            onClick={capturedScreenshots.length > 0 ? sendScreenshots : handleSendText}
-            disabled={(capturedScreenshots.length === 0 && !inputText.trim()) || status !== "idle"}
-            className="absolute right-1.5 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg sm:rounded-xl bg-indigo-500/80 text-white disabled:opacity-50"
-          >
-            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.125A59.769 59.769 0 0121.485 12 59.768 59.768 0 013.27 20.875L5.999 12Zm0 0h7.5" />
-            </svg>
-          </button>
+              }}
+              placeholder={capturedScreenshots.length > 0 ? "Add context (optional) then press Enter..." : "Ask a question or type..."}
+              className="w-full bg-transparent px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder-[var(--text-dim)] focus:outline-none pr-10 sm:pr-12 resize-none"
+              rows={inputText.split('\n').length > 1 ? Math.min(inputText.split('\n').length, 5) : 1}
+              disabled={status !== "idle"}
+            />
+            <button
+              onClick={capturedScreenshots.length > 0 ? sendScreenshots : handleSendText}
+              disabled={(capturedScreenshots.length === 0 && !inputText.trim()) || status !== "idle"}
+              className="absolute right-1.5 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg sm:rounded-xl bg-indigo-500/80 text-white disabled:opacity-50"
+            >
+              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.125A59.769 59.769 0 0121.485 12 59.768 59.768 0 013.27 20.875L5.999 12Zm0 0h7.5" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Bottom toolbar */}
       <div ref={controlsRef} className="toolbar px-1 sm:px-6 py-2 sm:py-3 flex flex-nowrap items-center justify-center gap-1 sm:gap-4 shrink-0 relative z-10">
-        
+
         {/* Button 1: Settings */}
         <div className="flex items-center gap-2">
-          
+
           <button
             onClick={() => setShowSettings(true)}
             className="no-drag w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
@@ -1791,7 +1811,7 @@ export default function RoomPage() {
             <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
           </button>
         </div>
-        
+
         {/* Button 2: New Conversation / Clear */}
         <button
           onClick={() => {
@@ -1868,7 +1888,7 @@ export default function RoomPage() {
               </svg>
               {userPlan === 'free' && (
                 <div className="absolute -top-1 -right-1 bg-amber-500 rounded-full p-0.5 shadow-lg border border-white/20">
-                  <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+                  <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" /></svg>
                 </div>
               )}
             </>
@@ -1905,9 +1925,9 @@ export default function RoomPage() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowSettings(false)}>
-          <div 
-            className="settings-panel w-full relative" 
-            style={{ 
+          <div
+            className="settings-panel w-full relative"
+            style={{
               maxWidth: 'clamp(140px, 95vw, 400px)',
               padding: 'clamp(10px, 4vw, 24px)',
               display: 'flex',
@@ -1932,7 +1952,7 @@ export default function RoomPage() {
 
             <div className="space-y-6">
               {/* Theme Toggle */}
-              <div 
+              <div
                 className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
                 style={{ padding: 'clamp(8px, 3vw, 20px)' }}
               >
@@ -1947,8 +1967,8 @@ export default function RoomPage() {
                     </div>
                     <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">Toggle dark/light mode</p>
                   </div>
-                  <AnimatedThemeToggler 
-                    theme={isLightMode ? "light" : "dark"} 
+                  <AnimatedThemeToggler
+                    theme={isLightMode ? "light" : "dark"}
                     onToggle={() => {
                       if (userPlan === 'free') {
                         router.push("/pricing");
@@ -1962,7 +1982,7 @@ export default function RoomPage() {
               </div>
 
               {/* Space Mode */}
-              <div 
+              <div
                 className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
                 style={{ padding: 'clamp(8px, 3vw, 20px)' }}
               >
@@ -1971,18 +1991,16 @@ export default function RoomPage() {
                   <div className="flex bg-[var(--input-bg)] rounded-xl p-1">
                     <button
                       onClick={() => setSpaceMode("hold")}
-                      className={`rounded-lg font-black uppercase tracking-widest transition-all ${
-                        spaceMode === "hold" ? "bg-[var(--text-main)] text-[var(--panel-bg)]" : "text-[var(--text-dim)]"
-                      }`}
+                      className={`rounded-lg font-black uppercase tracking-widest transition-all ${spaceMode === "hold" ? "bg-[var(--text-main)] text-[var(--panel-bg)]" : "text-[var(--text-dim)]"
+                        }`}
                       style={{ fontSize: 'clamp(6px, 1.2vw, 9px)', padding: 'clamp(4px, 1vw, 10px) clamp(6px, 1.5vw, 16px)' }}
                     >
                       Hold
                     </button>
                     <button
                       onClick={() => setSpaceMode("toggle")}
-                      className={`rounded-lg font-black uppercase tracking-widest transition-all ${
-                        spaceMode === "toggle" ? "bg-[var(--text-main)] text-[var(--panel-bg)]" : "text-[var(--text-dim)]"
-                      }`}
+                      className={`rounded-lg font-black uppercase tracking-widest transition-all ${spaceMode === "toggle" ? "bg-[var(--text-main)] text-[var(--panel-bg)]" : "text-[var(--text-dim)]"
+                        }`}
                       style={{ fontSize: 'clamp(6px, 1.2vw, 9px)', padding: 'clamp(4px, 1vw, 10px) clamp(6px, 1.5vw, 16px)' }}
                     >
                       Toggle
@@ -1995,7 +2013,7 @@ export default function RoomPage() {
               </div>
 
               {/* Universal Shortcuts Toggle */}
-              <div 
+              <div
                 className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
                 style={{ padding: 'clamp(8px, 3vw, 20px)' }}
               >
@@ -2029,9 +2047,9 @@ export default function RoomPage() {
                   </button>
                 </div>
                 {universalShortcuts && (
-                   <p className="mt-2 text-[8px] text-amber-400 font-bold uppercase tracking-widest leading-relaxed">
-                     ⚠️ Space & Enter will be BLOCKED in other apps while this is ON.
-                   </p>
+                  <p className="mt-2 text-[8px] text-amber-400 font-bold uppercase tracking-widest leading-relaxed">
+                    ⚠️ Space & Enter will be BLOCKED in other apps while this is ON.
+                  </p>
                 )}
               </div>
 
@@ -2039,7 +2057,7 @@ export default function RoomPage() {
 
               {/* Reading Guide Toggle */}
 
-              <div 
+              <div
                 className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
                 style={{ padding: 'clamp(8px, 3vw, 20px)' }}
               >
@@ -2052,7 +2070,7 @@ export default function RoomPage() {
                     onClick={async () => {
                       const newVal = !showReadingGuide;
                       setShowReadingGuide(newVal);
-                      
+
                       // Save to Supabase preferences
                       try {
                         const res = await fetch("/api/profile");
@@ -2064,7 +2082,7 @@ export default function RoomPage() {
                             reading_guide: newVal
                           }
                         };
-                        
+
                         await fetch('/api/profile', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
@@ -2085,7 +2103,7 @@ export default function RoomPage() {
 
               {/* History Section */}
               {userPlan !== "free" && (
-                <div 
+                <div
                   className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)]"
                   style={{ padding: 'clamp(8px, 3vw, 20px)', display: 'flex', flexDirection: 'column', gap: 'clamp(8px, 2vw, 16px)' }}
                 >
@@ -2113,9 +2131,9 @@ export default function RoomPage() {
                       </button>
                     </div>
                   </div>
-                  
+
                   {history.length > 0 && (
-                    <div 
+                    <div
                       className="overflow-y-auto space-y-1.5 pr-1.5 custom-scrollbar"
                       style={{ maxHeight: 'clamp(80px, 25vh, 200px)' }}
                     >
@@ -2160,7 +2178,7 @@ export default function RoomPage() {
 
 
               {/* Update Section */}
-              <div 
+              <div
                 className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)]"
                 style={{ padding: 'clamp(8px, 3vw, 20px)' }}
               >
@@ -2196,8 +2214,8 @@ export default function RoomPage() {
       )}
       {/* Profile Modal */}
       {showProfile && (
-        <ProfileModal 
-          onClose={() => setShowProfile(false)} 
+        <ProfileModal
+          onClose={() => setShowProfile(false)}
           onSuccess={() => setToast({ message: "Profile successfully optimized!", type: "success" })}
           isBackgroundRefining={isBackgroundRefining}
         />
@@ -2235,109 +2253,109 @@ export default function RoomPage() {
         </div>
       )}
 
-    {/* Floating side controls */}
-    {isElectron && (
-      <div className={`floating-side-controls no-drag relative group/side ${userPlan === 'free' ? 'cursor-pointer' : ''}`} onClick={() => { if(userPlan === 'free') router.push("/pricing"); }}>
-        {userPlan === 'free' && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-2xl opacity-0 group-hover/side:opacity-100 transition-opacity p-2 text-center">
-            <Crown className="w-4 h-4 text-amber-400 mb-1" />
-            <span className="text-[8px] font-black uppercase text-white tracking-widest leading-tight">Pro<br/>Features</span>
+      {/* Floating side controls */}
+      {isElectron && (
+        <div className={`floating-side-controls no-drag relative group/side ${userPlan === 'free' ? 'cursor-pointer' : ''}`} onClick={() => { if (userPlan === 'free') router.push("/pricing"); }}>
+          {userPlan === 'free' && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-2xl opacity-0 group-hover/side:opacity-100 transition-opacity p-2 text-center">
+              <Crown className="w-4 h-4 text-amber-400 mb-1" />
+              <span className="text-[8px] font-black uppercase text-white tracking-widest leading-tight">Pro<br />Features</span>
+            </div>
+          )}
+          <div className={`side-control-group ${userPlan === 'free' ? 'opacity-40 grayscale blur-[1px]' : ''}`}>
+            <span className="side-control-label">🔍</span>
+            <input
+              type="range"
+              min="10"
+              max="100"
+              value={Math.round(windowOpacity * 100)}
+              onChange={(e) => handleOpacityChange(parseInt(e.target.value) / 100)}
+              className="side-slider"
+              disabled={userPlan === 'free'}
+            />
+            <span className="side-control-value">{Math.round(windowOpacity * 100)}</span>
           </div>
-        )}
-        <div className={`side-control-group ${userPlan === 'free' ? 'opacity-40 grayscale blur-[1px]' : ''}`}>
-          <span className="side-control-label">🔍</span>
-          <input
-            type="range"
-            min="10"
-            max="100"
-            value={Math.round(windowOpacity * 100)}
-            onChange={(e) => handleOpacityChange(parseInt(e.target.value) / 100)}
-            className="side-slider"
-            disabled={userPlan === 'free'}
-          />
-          <span className="side-control-value">{Math.round(windowOpacity * 100)}</span>
+          <div className={`side-control-group ${userPlan === 'free' ? 'opacity-40 grayscale blur-[1px]' : ''}`}>
+            <span className="side-control-label">Aa</span>
+            <input
+              type="range"
+              min="6"
+              max="22"
+              value={fontSize}
+              onChange={(e) => setFontSize(parseInt(e.target.value))}
+              className="side-slider"
+              disabled={userPlan === 'free'}
+            />
+            <span className="side-control-value">{fontSize}</span>
+          </div>
         </div>
-        <div className={`side-control-group ${userPlan === 'free' ? 'opacity-40 grayscale blur-[1px]' : ''}`}>
-          <span className="side-control-label">Aa</span>
-          <input
-            type="range"
-            min="6"
-            max="22"
-            value={fontSize}
-            onChange={(e) => setFontSize(parseInt(e.target.value))}
-            className="side-slider"
-            disabled={userPlan === 'free'}
-          />
-          <span className="side-control-value">{fontSize}</span>
-        </div>
-      </div>
-    )}
+      )}
 
-    {/* Clear History Confirmation Modal */}
-    {showClearHistoryConfirm && (
-      <div className="absolute inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-md bg-black/40 animate-in fade-in duration-300">
-        <div className="w-full max-w-xs bg-gradient-to-br from-red-500 via-rose-600 to-pink-700 p-[1.5px] rounded-[32px] shadow-[0_20px_50px_rgba(225,29,72,0.3)] animate-in zoom-in-95 duration-300">
-          <div className="bg-[var(--panel-bg)] backdrop-blur-2xl rounded-[30px] p-6 text-center">
-            <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
-              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-black text-[var(--text-main)] mb-2 uppercase tracking-tight">Wipe History?</h3>
-            <p className="text-[var(--text-dim)] text-xs mb-6 leading-relaxed font-medium">
-              This will permanently delete <span className="text-red-500 font-bold underline">{history.length}</span> conversation sessions. This action cannot be undone.
-            </p>
-            <div className="flex flex-col gap-2.5">
-              <button
-                onClick={clearHistory}
-                className="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-red-600/20"
-              >
-                Delete Everything
-              </button>
-              <button
-                onClick={() => setShowClearHistoryConfirm(false)}
-                className="w-full py-3.5 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl transition-all border border-[var(--glass-border)]"
-              >
-                Cancel
-              </button>
+      {/* Clear History Confirmation Modal */}
+      {showClearHistoryConfirm && (
+        <div className="absolute inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-md bg-black/40 animate-in fade-in duration-300">
+          <div className="w-full max-w-xs bg-gradient-to-br from-red-500 via-rose-600 to-pink-700 p-[1.5px] rounded-[32px] shadow-[0_20px_50px_rgba(225,29,72,0.3)] animate-in zoom-in-95 duration-300">
+            <div className="bg-[var(--panel-bg)] backdrop-blur-2xl rounded-[30px] p-6 text-center">
+              <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-black text-[var(--text-main)] mb-2 uppercase tracking-tight">Wipe History?</h3>
+              <p className="text-[var(--text-dim)] text-xs mb-6 leading-relaxed font-medium">
+                This will permanently delete <span className="text-red-500 font-bold underline">{history.length}</span> conversation sessions. This action cannot be undone.
+              </p>
+              <div className="flex flex-col gap-2.5">
+                <button
+                  onClick={clearHistory}
+                  className="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-red-600/20"
+                >
+                  Delete Everything
+                </button>
+                <button
+                  onClick={() => setShowClearHistoryConfirm(false)}
+                  className="w-full py-3.5 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl transition-all border border-[var(--glass-border)]"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
 
-    {/* Single Session Delete Confirmation */}
-    {sessionToDelete && (
-      <div className="absolute inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-md bg-black/40 animate-in fade-in duration-300">
-        <div className="w-full max-w-xs bg-gradient-to-br from-orange-500 via-red-500 to-rose-600 p-[1.5px] rounded-[32px] shadow-[0_20px_50px_rgba(244,63,94,0.3)] animate-in zoom-in-95 duration-300">
-          <div className="bg-[var(--panel-bg)] backdrop-blur-2xl rounded-[30px] p-6 text-center">
-            <div className="w-14 h-14 bg-orange-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-orange-500/20">
-              <svg className="w-7 h-7 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </div>
-            <h3 className="text-base font-black text-[var(--text-main)] mb-2 uppercase tracking-tight">Delete Session?</h3>
-            <p className="text-[var(--text-dim)] text-[10px] mb-6 leading-relaxed font-bold uppercase tracking-wide">
-              &quot;{history.find(s => s.id === sessionToDelete)?.title || "This session"}&quot;
-            </p>
-            <div className="flex gap-2.5">
-              <button
-                onClick={() => setSessionToDelete(null)}
-                className="flex-1 py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] font-black uppercase text-[9px] tracking-widest rounded-xl transition-all border border-[var(--glass-border)]"
-              >
-                No
-              </button>
-              <button
-                onClick={() => deleteSession(sessionToDelete)}
-                className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 shadow-lg shadow-red-600/20"
-              >
-                Yes, Delete
-              </button>
+      {/* Single Session Delete Confirmation */}
+      {sessionToDelete && (
+        <div className="absolute inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-md bg-black/40 animate-in fade-in duration-300">
+          <div className="w-full max-w-xs bg-gradient-to-br from-orange-500 via-red-500 to-rose-600 p-[1.5px] rounded-[32px] shadow-[0_20px_50px_rgba(244,63,94,0.3)] animate-in zoom-in-95 duration-300">
+            <div className="bg-[var(--panel-bg)] backdrop-blur-2xl rounded-[30px] p-6 text-center">
+              <div className="w-14 h-14 bg-orange-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-orange-500/20">
+                <svg className="w-7 h-7 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <h3 className="text-base font-black text-[var(--text-main)] mb-2 uppercase tracking-tight">Delete Session?</h3>
+              <p className="text-[var(--text-dim)] text-[10px] mb-6 leading-relaxed font-bold uppercase tracking-wide">
+                &quot;{history.find(s => s.id === sessionToDelete)?.title || "This session"}&quot;
+              </p>
+              <div className="flex gap-2.5">
+                <button
+                  onClick={() => setSessionToDelete(null)}
+                  className="flex-1 py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] font-black uppercase text-[9px] tracking-widest rounded-xl transition-all border border-[var(--glass-border)]"
+                >
+                  No
+                </button>
+                <button
+                  onClick={() => deleteSession(sessionToDelete)}
+                  className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 shadow-lg shadow-red-600/20"
+                >
+                  Yes, Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
 
 
 

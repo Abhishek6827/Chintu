@@ -42,12 +42,37 @@ const QWEN_FALLBACK = [
   "qwen3-vl-flash"
 ];
 
+// ─── Global Constants & Mappings ─────────────────────────────
 const MODEL_MAP = {
-  "gpt-oss-120b": { provider: "groq", groq: "openai/gpt-oss-120b", openrouter: "openai/gpt-oss-120b" },
-  "qwen3-Coder": { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
+  "gpt-oss-120b":  { provider: "groq",      groq: "openai/gpt-oss-120b",              openrouter: "openai/gpt-oss-120b" },
+  "qwen3-Coder":   { provider: "dashscope", dashscope: "qwen3-coder-480b-a35b-instruct" },
   "nemotron-3-120b": { provider: "openrouter", openrouter: "nvidia/nemotron-3-super-120b-a12b:free" },
-  "llama-3.3-70b": { provider: "groq", groq: "llama-3.3-70b-versatile", openrouter: "meta-llama/llama-3.3-70b-instruct" },
+  "llama-3.3-70b": { provider: "groq",      groq: "llama-3.3-70b-versatile",          openrouter: "meta-llama/llama-3.3-70b-instruct" },
+  "qwen3.6":       { provider: "dashscope", dashscope: "qwen3.6-plus" },
+  "qwen3.6-plus":  { provider: "dashscope", dashscope: "qwen3.6-plus" },
 };
+
+// ─── Display Name Mapper ──────────────────────────────────────
+const DISPLAY_NAMES = {
+  "qwen3.6":        "Turbo Engine",
+  "qwen3.6-plus":   "Turbo Engine",
+  "qwen3-Coder":    "Coding Specialist",
+  "qwen3-coder-480b-a35b-instruct": "Coding Specialist",
+  "gpt-oss-120b":   "Pro Engine",
+  "openai/gpt-oss-120b": "Pro Engine",
+  "llama-3.3-70b":  "Standard Engine",
+  "llama-3.3-70b-versatile": "Standard Engine",
+  "nemotron-3-120b": "Titan Engine",
+  "nvidia/nemotron-3-super-120b-a12b:free": "Titan Engine",
+  "meta-llama/llama-4-scout-17b-16e-instruct": "Standard Engine",
+};
+
+function getDisplayName(modelKey, fallbackKey) {
+  if (!modelKey) return DISPLAY_NAMES[fallbackKey] || "AI Engine";
+  // If modelKey is already a display name, return it
+  if (Object.values(DISPLAY_NAMES).includes(modelKey)) return modelKey;
+  return DISPLAY_NAMES[modelKey] || DISPLAY_NAMES[fallbackKey] || "AI Engine";
+}
 
 const RESPONSE_PROMPTS = {
   small: `Keep your answer very brief — about 3 to 4 short sentences. 
@@ -298,47 +323,87 @@ Rules:
       const trimmedHistory = conversationHistory.slice(-20);
 
       // ─── Handle Qwen Rotation ──────────────────────────────────
-      if (selectedModel === "qwen3.6") {
-        const fullQwenList = [...QWEN_PRIORITY, ...QWEN_FALLBACK];
-        let qwenSuccess = false;
+      // ─── Handle Qwen Rotation ──────────────────────────────────
+if (selectedModel === "qwen3.6") {
+  const fullQwenList = [...QWEN_PRIORITY, ...QWEN_FALLBACK];
+  let qwenStream = null;
+  let qwenModelUsed = null;
 
-        for (const qwenModel of fullQwenList) {
-          try {
-            console.log(`[Qwen Rotation] Trying: ${qwenModel}`);
-            const response = await axios.post(
-              "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
-              {
-                model: qwenModel,
-                messages: [
-                  { role: "system", content: systemPrompt },
-                  ...trimmedHistory,
-                  { role: "user", content: transcript },
-                ],
-                stream: true,
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${dashscopeKey}`,
-                  "Content-Type": "application/json",
-                },
-                responseType: "stream",
-                timeout: 12000, 
-              }
-            );
+  for (const qwenModel of fullQwenList) {
+    try {
+      console.log(`[Qwen Rotation] Trying: ${qwenModel}`);
+      const dashscope = new OpenAI({
+        baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",  // ← FIXED: international URL
+        apiKey: process.env.DASHSCOPE_API_KEY || dashscopeKey,
+      });
+      qwenStream = await dashscope.chat.completions.create({
+        model: qwenModel,
+        stream: true,
+        max_tokens: 2048,
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...trimmedHistory,
+          { role: "user", content: transcript },
+        ],
+      });
+      qwenModelUsed = qwenModel;
+      console.log(`[Qwen Rotation] ✓ Success: ${qwenModel}`);
+      break;
+    } catch (err) {
+      console.error(`[Qwen Rotation] Failed ${qwenModel}: ${err.message?.slice(0, 80)}`);
+    }
+  }
 
-            res.setHeader("X-Model-Used", qwenModel);
-            response.data.pipe(res);
-            qwenSuccess = true;
-            break;
-          } catch (err) {
-            console.error(`[Qwen Rotation] Failed ${qwenModel}: ${err.message}`);
-            continue;
-          }
-        }
+  if (!qwenStream) {
+    console.log(`[Qwen Rotation] All Qwen models failed. Falling back to Scout...`);
+    for (const key of apiKeys) {
+      try {
+        const groq = new Groq({ apiKey: key });
+        qwenStream = await groq.chat.completions.create({
+          model: "meta-llama/llama-4-scout-17b-16e-instruct",
+          stream: true,
+          max_tokens: 2048,
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...trimmedHistory,
+            { role: "user", content: transcript },
+          ],
+        });
+        qwenModelUsed = "meta-llama/llama-4-scout-17b-16e-instruct";
+        console.log(`[Qwen Rotation] ✓ Scout fallback success`);
+        break;
+      } catch (err) { /* try next key */ }
+    }
+  }
 
-        if (qwenSuccess) return;
-        else return res.status(500).json({ error: "All Qwen models failed" });
-      }
+  if (!qwenStream) return res.status(500).json({ error: "Service busy. Please try again." });
+
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Model-Used", getDisplayName(qwenModelUsed, selectedModel));
+
+  let insideThinkTag = false;
+  let buffer = "";
+  for await (const chunk of qwenStream) {
+    const text = chunk.choices[0]?.delta?.content;
+    if (!text) continue;
+    buffer += text;
+    if (buffer.includes("<think>")) { insideThinkTag = true; buffer = buffer.split("<think>").pop() ?? ""; continue; }
+    if (insideThinkTag && buffer.includes("</think>")) {
+      insideThinkTag = false;
+      const afterThink = buffer.split("</think>").pop() ?? "";
+      buffer = afterThink;
+      if (afterThink) res.write(afterThink);
+      continue;
+    }
+    if (insideThinkTag) continue;
+    res.write(text);
+    buffer = "";
+  }
+  res.end();
+  return;
+}
 
       const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
       const isDashScope = modelConfig.provider === "dashscope";
@@ -432,15 +497,13 @@ Rules:
       }
 
       if (!stream) {
-        // ─── OpenRouter fallback ────────────────────────────────
-        if (openRouterKey) {
+        // Final fallback: Scout (Meta Llama 4 Scout)
+        console.log(`[/api/answer] All primary paths failed. Final fallback to Scout...`);
+        for (const key of apiKeys) {
           try {
-            const openrouter = new OpenAI({
-              baseURL: "https://openrouter.ai/api/v1",
-              apiKey: openRouterKey,
-            });
-            stream = await openrouter.chat.completions.create({
-              model: openrouterModel,
+            const groq = new Groq({ apiKey: key });
+            stream = await groq.chat.completions.create({
+              model: "meta-llama/llama-4-scout-17b-16e-instruct",
               stream: true,
               max_tokens: 2048,
               messages: [
@@ -449,45 +512,19 @@ Rules:
                 { role: "user", content: transcript },
               ],
             });
-            actualModelUsed = selectedModel;
-            console.log(`[/api/answer] ✓ OpenRouter stream created`);
-          } catch (orErr) {
-            console.error(`[/api/answer] ✗ OpenRouter also failed:`, orErr?.message?.slice(0, 100));
-            lastError = orErr;
-            
-            console.log(`[/api/answer] 🔄 OpenRouter with ${openrouterModel} failed. Falling back...`);
-            let fallbackStream;
-            for (let i = 0; i < apiKeys.length; i++) {
-              try {
-                console.log(`[/api/answer] Fallback: Trying Groq key ${i + 1} with meta-llama/llama-4-scout-17b-16e-instruct...`);
-                const groq = new Groq({ apiKey: apiKeys[i] });
-                fallbackStream = await groq.chat.completions.create({
-                  model: "meta-llama/llama-4-scout-17b-16e-instruct",
-                  stream: true,
-                  max_tokens: 2048,
-                  messages: [
-                    { role: "system", content: systemPrompt },
-                    ...trimmedHistory,
-                    { role: "user", content: transcript },
-                  ],
-                });
-                stream = fallbackStream;
-                actualModelUsed = "Llama-4-Scout (Groq Fallback)";
-                console.log(`[/api/answer] ✓ Groq fallback stream created`);
-                break;
-              } catch (fallbackGroqErr) {
-                lastError = fallbackGroqErr;
-              }
-            }
-          }
+            actualModelUsed = "meta-llama/llama-4-scout-17b-16e-instruct";
+            console.log(`[/api/answer] ✓ Final Scout fallback success`);
+            break;
+          } catch (err) { /* try next key */ }
         }
       }
-      if (!stream) throw lastError;
+
+      if (!stream) throw lastError || new Error("All AI models are currently busy. Please try again.");
 
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
-      res.setHeader("X-Model-Used", actualModelUsed);
+      res.setHeader("X-Model-Used", getDisplayName(actualModelUsed, selectedModel));
 
       let insideThinkTag = false;
       let buffer = "";
@@ -932,7 +969,7 @@ Rules:
                 ],
               });
               stream = fallbackStream;
-              actualModelUsed = "Llama-4-Scout (Groq Fallback)";
+              actualModelUsed = getDisplayName("meta-llama/llama-4-scout-17b-16e-instruct", selectedModel);
               console.log(`[/api/answer-vision] ✓ Groq fallback stream created`);
               break;
             } catch (fallbackGroqErr) {
@@ -946,7 +983,7 @@ Rules:
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
-      res.setHeader("X-Model-Used", actualModelUsed);
+      res.setHeader("X-Model-Used", getDisplayName(actualModelUsed, selectedModel));
 
       let insideThinkTag = false;
       let buffer = "";

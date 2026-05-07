@@ -222,6 +222,27 @@ const QWEN_FALLBACK = [
   "qwen3-vl-flash"
 ];
 
+// ─── Display Name Mapper ──────────────────────────────────────
+const DISPLAY_NAMES: Record<string, string> = {
+  "qwen3.6": "Turbo Engine",
+  "qwen3.6-plus": "Turbo Engine",
+  "qwen3-Coder": "Coding Specialist",
+  "qwen3-coder-480b-a35b-instruct": "Coding Specialist",
+  "gpt-oss-120b": "Pro Engine",
+  "openai/gpt-oss-120b": "Pro Engine",
+  "llama-3.3-70b": "Standard Engine",
+  "llama-3.3-70b-versatile": "Standard Engine",
+  "nemotron-3-120b": "Titan Engine",
+  "nvidia/nemotron-3-super-120b-a12b:free": "Titan Engine",
+  "meta-llama/llama-4-scout-17b-16e-instruct": "Standard Engine",
+};
+
+function getDisplayName(modelKey: string | null, fallback: string): string {
+  if (!modelKey) return DISPLAY_NAMES[fallback] || "AI Engine";
+  if (Object.values(DISPLAY_NAMES).includes(modelKey)) return modelKey;
+  return DISPLAY_NAMES[modelKey] || DISPLAY_NAMES[fallback] || "AI Engine";
+}
+
 // ─── Check if model is a Qwen 3.6 variant ─────────────────
 function isQwenNativeVision(model: string): boolean {
   return model === "qwen3.6" || model === "qwen3.6-plus";
@@ -640,7 +661,7 @@ Rules:
                 { role: "user", content: finalTranscript },
               ],
             });
-            actualModelUsed = "Llama-4-Scout (Fallback)";
+            actualModelUsed = "meta-llama/llama-4-scout-17b-16e-instruct";
             console.log(`[/api/answer-vision] ✓ Scout fallback stream created`);
             break;
           } catch (err) {
@@ -704,7 +725,7 @@ Rules:
     return new Response(readableStream, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
-        "X-Model-Used": actualModelUsed,
+        "X-Model-Used": getDisplayName(actualModelUsed, selectedModel),
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
       },

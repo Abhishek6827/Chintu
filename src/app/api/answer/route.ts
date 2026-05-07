@@ -215,6 +215,28 @@ const QWEN_FALLBACK = [
   "qwen3-vl-flash"
 ];
 
+// ─── Display Name Mapper ──────────────────────────────────────
+const DISPLAY_NAMES: Record<string, string> = {
+  "qwen3.6": "Turbo Engine",
+  "qwen3.6-plus": "Turbo Engine",
+  "qwen3-Coder": "Coding Specialist",
+  "qwen3-coder-480b-a35b-instruct": "Coding Specialist",
+  "gpt-oss-120b": "Pro Engine",
+  "openai/gpt-oss-120b": "Pro Engine",
+  "llama-3.3-70b": "Standard Engine",
+  "llama-3.3-70b-versatile": "Standard Engine",
+  "nemotron-3-120b": "Titan Engine",
+  "nvidia/nemotron-3-super-120b-a12b:free": "Titan Engine",
+  "meta-llama/llama-4-scout-17b-16e-instruct": "Standard Engine",
+};
+
+function getDisplayName(modelKey: string | null, fallback: string): string {
+  if (!modelKey) return DISPLAY_NAMES[fallback] || "AI Engine";
+  // If modelKey is already a display name, return it
+  if (Object.values(DISPLAY_NAMES).includes(modelKey)) return modelKey;
+  return DISPLAY_NAMES[modelKey] || DISPLAY_NAMES[fallback] || "AI Engine";
+}
+
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   const supabaseAdmin = createAdminClient();
@@ -324,7 +346,6 @@ export async function POST(req: NextRequest) {
     const modelConfig = MODEL_MAP[selectedModel] || MODEL_MAP["gpt-oss-120b"];
     const isDashScope = modelConfig.provider === "dashscope";
     const groqModel = modelConfig.groq || "";
-    const openrouterModel = modelConfig.openrouter || "";
 
     console.log(`[/api/answer] Mode: ${responseLength} | Model: ${selectedModel} | Provider: ${modelConfig.provider} | History: ${conversationHistory.length} messages`);
 
@@ -462,15 +483,13 @@ Rules:
     }
 
     if (!stream) {
-      // ─── OpenRouter fallback ────────────────────────────────
-      if (openRouterKey) {
+      // Final fallback: Scout (Meta Llama 4 Scout)
+      console.log(`[/api/answer] All primary paths failed. Final fallback to Scout...`);
+      for (const key of apiKeys) {
         try {
-          const openrouter = new OpenAI({
-            baseURL: "https://openrouter.ai/api/v1",
-            apiKey: openRouterKey,
-          });
-          stream = await openrouter.chat.completions.create({
-            model: openrouterModel,
+          const groq = new Groq({ apiKey: key });
+          stream = await groq.chat.completions.create({
+            model: "meta-llama/llama-4-scout-17b-16e-instruct",
             stream: true,
             max_tokens: 2048,
             messages: [
@@ -479,42 +498,15 @@ Rules:
               { role: "user", content: transcript },
             ],
           });
-          actualModelUsed = selectedModel;
-          console.log(`[/api/answer] ✓ OpenRouter stream created`);
-        } catch (orErr: any) {
-          console.error(`[/api/answer] ✗ OpenRouter also failed:`, orErr?.message?.slice(0, 100));
-          lastError = orErr;
-
-          console.log(`[/api/answer] 🔄 OpenRouter with ${openrouterModel} failed. Falling back...`);
-          let fallbackStream;
-          for (let i = 0; i < apiKeys.length; i++) {
-            try {
-              console.log(`[/api/answer] Fallback: Trying Groq key ${i + 1} with meta-llama/llama-4-scout-17b-16e-instruct...`);
-              const groq = new Groq({ apiKey: apiKeys[i] });
-              fallbackStream = await groq.chat.completions.create({
-                model: "meta-llama/llama-4-scout-17b-16e-instruct",
-                stream: true,
-                max_tokens: 2048,
-                messages: [
-                  { role: "system", content: systemPrompt },
-                  ...trimmedHistory,
-                  { role: "user", content: transcript },
-                ],
-              });
-              stream = fallbackStream;
-              actualModelUsed = "Llama-4-Scout (Groq Fallback)";
-              console.log(`[/api/answer] ✓ Groq fallback stream created`);
-              break;
-            } catch (fallbackGroqErr: any) {
-              lastError = fallbackGroqErr;
-            }
-          }
-        }
+          actualModelUsed = "meta-llama/llama-4-scout-17b-16e-instruct";
+          console.log(`[/api/answer] ✓ Final Scout fallback success`);
+          break;
+        } catch { /* try next key */ }
       }
     }
 
     if (!stream) {
-      throw lastError;
+      throw lastError || new Error("All AI models are currently busy. Please try again.");
     }
 
 
@@ -566,7 +558,7 @@ Rules:
     return new Response(readableStream, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
-        "X-Model-Used": actualModelUsed,
+        "X-Model-Used": getDisplayName(actualModelUsed, selectedModel),
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
       },
