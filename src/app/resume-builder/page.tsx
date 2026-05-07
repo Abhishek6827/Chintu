@@ -30,7 +30,7 @@ interface ProfileData {
 }
 
 export default function ResumeBuilderPage() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const router = useRouter();
 
   const [state, setState] = useState<BuilderState>("selection");
@@ -382,28 +382,20 @@ export default function ResumeBuilderPage() {
                 <div className="pt-8 border-t border-[var(--glass-border)] space-y-4">
                   <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">Export & Download</p>
 
-                  {isElectron ? (
-                    <div className="grid gap-3">
-                      <button
-                        onClick={downloadTex}
-                        className="flex items-center justify-center gap-3 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
-                      >
-                        <FileCode className="w-4 h-4" /> Download .TEX
-                      </button>
-                      <button
-                        onClick={openPdfPreview}
-                        className="flex items-center justify-center gap-3 py-4 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
-                      >
-                        <Printer className="w-4 h-4" /> Download PDF
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 text-center">
-                      <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest leading-relaxed">
-                        Downloads are only available in the Chintu Desktop App.
-                      </p>
-                    </div>
-                  )}
+                  <div className="grid gap-3">
+                    <button
+                      onClick={downloadTex}
+                      className="flex items-center justify-center gap-3 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
+                    >
+                      <FileCode className="w-4 h-4" /> Download .TEX
+                    </button>
+                    <button
+                      onClick={openPdfPreview}
+                      className="flex items-center justify-center gap-3 py-4 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
+                    >
+                      <Printer className="w-4 h-4" /> Download PDF
+                    </button>
+                  </div>
                   <p className="text-[8px] font-bold text-[var(--text-dim)] opacity-50 uppercase tracking-widest text-center px-4 leading-relaxed">
                     PDF is generated via LaTeX for maximum ATS compatibility.
                   </p>
@@ -419,52 +411,88 @@ export default function ResumeBuilderPage() {
                   </div>
 
                   <div className="bg-white rounded-3xl shadow-2xl overflow-hidden aspect-[1/1.41] overflow-y-auto custom-scrollbar">
-                    {/* Simplified Web Preview */}
-                    <div className={`p-12 text-black space-y-6 ${selectedTemplate === 'classic' ? 'font-serif' : 'font-sans'}`}>
-                      <div className="text-center space-y-2">
-                        <h1 className={`text-3xl font-black uppercase tracking-tight ${selectedTemplate === 'minimal' ? 'text-left' : ''}`}>
+                    {/* Standard ATS-Friendly Preview */}
+                    <div className={`p-10 text-black space-y-4 ${selectedTemplate === 'classic' ? 'font-serif' : 'font-sans'}`}>
+                      <div className="text-center space-y-1">
+                        <h1 className="text-2xl font-bold uppercase tracking-tight">
                           {tailoredProfile.name}
                         </h1>
-                        <p className={`text-sm font-bold text-gray-500 uppercase tracking-widest ${selectedTemplate === 'minimal' ? 'text-left border-b pb-4' : ''}`}>
+                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                           {tailoredProfile.title}
                         </p>
+                        <div className="flex justify-center gap-2 text-[8px] text-gray-400 font-bold uppercase">
+                          <span>{user?.emailAddresses[0]?.emailAddress}</span>
+                          <span>|</span>
+                          <span>LinkedIn</span>
+                          <span>|</span>
+                          <span>GitHub</span>
+                        </div>
                       </div>
 
-                      <div className="space-y-4 pt-4">
-                        <h2 className="text-xs font-black uppercase tracking-widest border-b pb-1">Professional Summary</h2>
-                        <p className="text-xs leading-relaxed font-medium text-gray-700">
+                      <div className="space-y-2 pt-2">
+                        <h2 className="text-[10px] font-black uppercase tracking-widest border-b border-black pb-0.5">Professional Summary</h2>
+                        <p className="text-[10px] leading-relaxed font-medium text-gray-700 text-justify">
                           {tailoredProfile.summary}
                         </p>
                       </div>
 
-                      <div className="space-y-4">
-                        <h2 className="text-xs font-black uppercase tracking-widest border-b pb-1">Experience</h2>
+                      <div className="space-y-3">
+                        <h2 className="text-[10px] font-black uppercase tracking-widest border-b border-black pb-0.5">Experience</h2>
                         {tailoredProfile.experience.map((exp, i) => (
-                          <div key={i} className="space-y-1">
+                          <div key={i} className="space-y-0.5">
                             <div className="flex justify-between items-baseline">
-                              <p className="text-xs font-bold">{exp.role} @ {exp.company}</p>
-                              <p className="text-[10px] text-gray-400 font-bold uppercase">{exp.duration}</p>
+                              <p className="text-[10px] font-bold">{exp.role} @ {exp.company}</p>
+                              <p className="text-[9px] text-gray-400 font-bold uppercase">{exp.duration}</p>
                             </div>
-                            <ul className="list-disc pl-4 space-y-1">
+                            <ul className="list-disc pl-4 space-y-0.5">
                               {exp.highlights.map((h, j) => (
-                                <li key={j} className="text-[10px] text-gray-600 leading-relaxed">{h}</li>
+                                <li key={j} className="text-[9px] text-gray-600 leading-snug">{h}</li>
                               ))}
                             </ul>
                           </div>
                         ))}
                       </div>
 
-                      <div className="space-y-4">
-                        <h2 className="text-xs font-black uppercase tracking-widest border-b pb-1">Skills</h2>
-                        <div className="flex flex-wrap gap-2">
-                          {[
-                            ...tailoredProfile.skills.languages,
-                            ...tailoredProfile.skills.frameworks,
-                            ...tailoredProfile.skills.tools,
-                            ...tailoredProfile.skills.other
-                          ].map((s, i) => (
-                            <span key={i} className="text-[9px] bg-gray-100 px-2 py-1 rounded-md font-bold uppercase tracking-tight">{s}</span>
+                      {tailoredProfile.projects && tailoredProfile.projects.length > 0 && (
+                        <div className="space-y-2">
+                          <h2 className="text-[10px] font-black uppercase tracking-widest border-b border-black pb-0.5">Projects</h2>
+                          {tailoredProfile.projects.map((pr, i) => (
+                            <div key={i} className="space-y-0.5">
+                              <p className="text-[10px] font-bold">{pr.name}</p>
+                              <p className="text-[9px] text-gray-600 leading-snug">{pr.description}</p>
+                              <p className="text-[8px] font-bold text-gray-400 uppercase">Tech: {pr.tech.join(", ")}</p>
+                            </div>
                           ))}
+                        </div>
+                      )}
+
+                      {tailoredProfile.education && tailoredProfile.education.length > 0 && (
+                        <div className="space-y-2">
+                          <h2 className="text-[10px] font-black uppercase tracking-widest border-b border-black pb-0.5">Education</h2>
+                          {tailoredProfile.education.map((ed, i) => (
+                            <div key={i} className="flex justify-between items-baseline">
+                              <div>
+                                <p className="text-[10px] font-bold">{ed.degree}</p>
+                                <p className="text-[9px] italic text-gray-500">{ed.institution}</p>
+                              </div>
+                              <p className="text-[9px] text-gray-400 font-bold uppercase">{ed.year}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="space-y-2">
+                        <h2 className="text-[10px] font-black uppercase tracking-widest border-b border-black pb-0.5">Skills</h2>
+                        <div className="flex flex-wrap gap-x-3 gap-y-1">
+                          {tailoredProfile.skills.languages.length > 0 && (
+                            <p className="text-[9px] font-medium"><span className="font-bold uppercase tracking-tight">Languages:</span> {tailoredProfile.skills.languages.join(", ")}</p>
+                          )}
+                          {tailoredProfile.skills.frameworks.length > 0 && (
+                            <p className="text-[9px] font-medium"><span className="font-bold uppercase tracking-tight">Frameworks:</span> {tailoredProfile.skills.frameworks.join(", ")}</p>
+                          )}
+                          {tailoredProfile.skills.tools.length > 0 && (
+                            <p className="text-[9px] font-medium"><span className="font-bold uppercase tracking-tight">Tools:</span> {tailoredProfile.skills.tools.join(", ")}</p>
+                          )}
                         </div>
                       </div>
                     </div>

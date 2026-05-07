@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     template: "%s | Chintu Ji",
   },
   description:
-    "Chintu Chintu Ji the world's fastest and most affordable real-time AI interview and exam copilot. Solve live coding rounds, MCQs, technical assessments, behavioral interviews, GMAT/GRE/CAT/JEE/NEET tests and online proctored exams — invisible across Zoom, Google Meet, Microsoft Teams, HireVue, HackerRank, LeetCode and every major proctoring tool. Sub-200ms latency. 63+ languages. 7-day money-back guarantee.",
+    "Chintu Ji the world's fastest and most affordable real-time AI interview and exam copilot. Solve live coding rounds, MCQs, technical assessments, behavioral interviews, GMAT/GRE/CAT/JEE/NEET tests and online proctored exams — invisible across Zoom, Google Meet, Microsoft Teams, HireVue, HackerRank, LeetCode and every major proctoring tool. Sub-200ms latency. 63+ languages. 7-day money-back guarantee.",
   keywords: [
     // Brand
-    "Chintu Ji", "Chintu Ji", "Chintu Interview AI",
+    "Chintu Ji", "Chintu Interview AI",
     // Core product
     "AI Interview Assistant", "Real-Time Interview Copilot", "AI Interview Helper",
     "Stealth Interview AI", "Invisible Interview AI", "Live Interview AI",

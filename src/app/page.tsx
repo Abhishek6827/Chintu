@@ -135,14 +135,14 @@ const comparisonRows: CompareRow[] = [
 const faqItems: FaqItem[] = [
   {
     q: "Is Chintu Ji invisible to interviewers and proctors?",
-    a: "Yes. Chintu runs as a stealth overlay at the system level — invisible to screen sharing, recording, and proctoring tools across Zoom, Google Meet, Microsoft Teams, HackerRank, and more.",
+    a: "Yes. Chintu Ji runs as a stealth overlay at the system level — invisible to screen sharing, recording, and proctoring tools across Zoom, Google Meet, Microsoft Teams, HackerRank, and more.",
   },
   {
-    q: "Which interview platforms does Chintu support?",
-    a: "Chintu is platform-agnostic. Our universal overlay works with every major video / proctoring / coding platform including Zoom, Google Meet, Microsoft Teams, HireVue, micro1, HackerRank and LeetCode.",
+    q: "Which interview platforms does Chintu Ji support?",
+    a: "Chintu Ji is platform-agnostic. Our universal overlay works with every major video / proctoring / coding platform including Zoom, Google Meet, Microsoft Teams, HireVue, micro1, HackerRank and LeetCode.",
   },
   {
-    q: "Can Chintu solve coding interview questions?",
+    q: "Can Chintu Ji solve coding interview questions?",
     a: "Absolutely. Scout + Turbo, our multi-model debugger, performs root-cause analysis on logic errors, type mismatches and runtime crashes — and produces verified fixes with line-by-line reasoning.",
   },
   {
@@ -150,11 +150,11 @@ const faqItems: FaqItem[] = [
     a: "Sub-200ms median latency. The vision engine OCRs your screen, the LLM orchestrator routes the question, and the answer streams back instantly — fast enough for live questions.",
   },
   {
-    q: "Does Chintu work for online exams and MCQs?",
+    q: "Does Chintu Ji work for online exams and MCQs?",
     a: "Yes. Snapshot Intelligence captures any MCQ or equation, processes the context with our vision engine, and delivers the exact answer in milliseconds — including multi-step proofs.",
   },
   {
-    q: "What languages does Chintu support?",
+    q: "What languages does Chintu Ji support?",
     a: "63+ languages with real-time transcription, plus an Authentic Voice engine that crafts answers in a natural, conversational tone — never robotic or rehearsed, never recycled boilerplate.",
   },
   {
@@ -162,8 +162,8 @@ const faqItems: FaqItem[] = [
     a: "Credits never expire. Subscriptions and lifetime plans are available for unlimited usage. Every purchase is backed by a 7-day money-back guarantee.",
   },
   {
-    q: "Can I use Chintu on my phone?",
-    a: "Yes. Chintu has a mobile-optimised version accessible directly in your browser — no app store download required. Run desktop and mobile simultaneously on a single session.",
+    q: "Can I use Chintu Ji on my phone?",
+    a: "Yes. Chintu Ji has a mobile-optimised version accessible directly in your browser — no app store download required. Run desktop and mobile simultaneously on a single session.",
   },
 ];
 
@@ -206,7 +206,7 @@ const howItWorksSteps = [
     accent: "from-purple-500 to-pink-500",
     tag: "Step Two",
     title: "Join Your Interview.",
-    desc: "Jump onto any platform — Zoom, Meet, Teams, HireVue, HackerRank, anything. Chintu stays invisible to screen-share, recording and proctoring.",
+    desc: "Jump onto any platform — Zoom, Meet, Teams, HireVue, HackerRank, anything. Chintu Ji stays invisible to screen-share, recording and proctoring.",
   },
   {
     num: "03",
@@ -214,7 +214,7 @@ const howItWorksSteps = [
     accent: "from-emerald-500 to-cyan-400",
     tag: "Step Three",
     title: "Get Instant Answers.",
-    desc: "Hold Space to capture voice. Snapshot the screen for MCQs and code. Chintu streams accurate, human-sounding answers in under 200 ms.",
+    desc: "Hold Space to capture voice. Snapshot the screen for MCQs and code. Chintu Ji streams accurate, human-sounding answers in under 200 ms.",
   },
 ];
 
@@ -279,7 +279,7 @@ const powerTools = [
     tag: "AI Resume Builder",
     title: "JD-Tailored Resume Engine",
     desc:
-      "Paste the job description once. Chintu rewrites your resume to match the keywords, recruiter scanners and the exact voice of the company — ATS-ready in 30 seconds.",
+      "Paste the job description once. Chintu Ji rewrites your resume to match the keywords, recruiter scanners and the exact voice of the company — ATS-ready in 30 seconds.",
     bullets: [
       "ATS keyword optimisation",
       "Role + JD specific tailoring",
@@ -312,7 +312,7 @@ type PricingPlan = {
 const pricingPlans: PricingPlan[] = [
   {
     name: "Starter",
-    blurb: "Explore Chintu's capabilities",
+    blurb: "Explore Chintu Ji's capabilities",
     monthly: 0,
     yearly: 0,
     icon: Gift,
@@ -587,7 +587,7 @@ export default function LandingPage() {
               />
             </div>
             <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)]">
-              Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">AI</span>
+              Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Ji</span>
             </span>
           </Link>
 
