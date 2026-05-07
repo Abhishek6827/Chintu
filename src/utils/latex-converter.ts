@@ -2,6 +2,8 @@
 export interface ProfileData {
   name: string;
   title: string;
+  atsScore?: number;
+  atsFeedback?: string[];
   contact?: {
     email: string;
     phone: string;

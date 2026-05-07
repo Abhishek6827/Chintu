@@ -53,7 +53,7 @@ export default function ResumePreviewPage() {
   if (!profile) return <div className="p-10 text-center">No profile data found. Please setup your profile first.</div>;
 
   return (
-    <div className={`h-screen overflow-y-auto bg-[#f3f4f6] text-black leading-snug print:bg-white print:p-0 ${template === 'classic' ? 'font-serif' : 'font-sans'}`}>
+    <div className={`min-h-screen bg-[#f3f4f6] text-black leading-snug print:bg-white print:p-0 ${template === 'classic' ? 'font-serif' : 'font-sans'}`}>
       <style jsx global>{`
         @media print {
           @page {
@@ -71,11 +71,10 @@ export default function ResumePreviewPage() {
           }
           .resume-container {
             margin: 0 !important;
-            padding: 0.5in 0.6in !important;
+            padding: 0.4in 0.5in !important;
             box-shadow: none !important;
             width: 100% !important;
             height: 100% !important;
-            min-height: 297mm; /* A4 height */
           }
         }
         body {
@@ -85,25 +84,25 @@ export default function ResumePreviewPage() {
         }
         .resume-container {
           background: white;
-          width: 210mm; /* A4 width */
-          margin: 2rem auto;
+          width: 210mm;
+          margin: 1.5rem auto;
           box-shadow: 0 10px 25px rgba(0,0,0,0.1);
           min-height: 297mm;
-          padding: 0.75in 0.8in;
+          padding: 0.5in 0.6in;
           color: #000;
         }
       `}</style>
 
       <div className="resume-container flex flex-col">
         {/* Header */}
-        <header className={`mb-5 ${template === 'minimal' ? 'text-left' : 'text-center'}`}>
-          <h1 className={`${template === 'minimal' ? 'text-4xl' : 'text-2xl'} font-bold uppercase tracking-tight mb-0.5`}>
+        <header className={`mb-4 ${template === 'minimal' ? 'text-left' : 'text-center'}`}>
+          <h1 className={`${template === 'minimal' ? 'text-3xl' : 'text-2xl'} font-bold uppercase tracking-tight mb-0`}>
             {profile.name}
           </h1>
-          <p className={`${template === 'minimal' ? 'text-sm' : 'text-[11px]'} font-bold text-gray-700 uppercase tracking-[0.2em] mb-1.5`}>
+          <p className={`${template === 'minimal' ? 'text-xs' : 'text-[10px]'} font-bold text-gray-700 uppercase tracking-[0.2em] mb-1`}>
             {profile.title}
           </p>
-          <div className={`flex flex-wrap ${template === 'minimal' ? 'justify-start' : 'justify-center'} gap-x-2 text-[9.5px] text-gray-600 font-medium`}>
+          <div className={`flex flex-wrap ${template === 'minimal' ? 'justify-start' : 'justify-center'} gap-x-2 text-[9px] text-gray-500 font-medium`}>
             {[
               profile.email || user?.emailAddresses[0].emailAddress,
               profile.phone,
@@ -121,30 +120,30 @@ export default function ResumePreviewPage() {
 
         {/* Summary */}
         {profile.summary && (
-          <section className="mb-4">
-            <h2 className={`text-[10px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-1.5 pb-0.5`}>
+          <section className="mb-3">
+            <h2 className={`text-[9.5px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-1 pb-0.5`}>
               Professional Summary
             </h2>
-            <p className="text-[11px] text-gray-800 text-justify leading-relaxed">{profile.summary}</p>
+            <p className="text-[10.5px] text-gray-800 text-justify leading-snug">{profile.summary}</p>
           </section>
         )}
 
         {/* Experience */}
         {profile.experience?.length > 0 && (
-          <section className="mb-4">
-            <h2 className={`text-[10px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-2 pb-0.5`}>
+          <section className="mb-3">
+            <h2 className={`text-[9.5px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-1.5 pb-0.5`}>
               Experience
             </h2>
             {profile.experience.map((exp: any, i: number) => (
-              <div key={i} className="mb-3 last:mb-0">
-                <div className="flex justify-between items-baseline mb-0.5">
-                  <h3 className="text-[11px] font-bold">{exp.role}</h3>
-                  <span className="text-[10px] font-bold text-gray-700">{exp.duration}</span>
+              <div key={i} className="mb-2 last:mb-0">
+                <div className="flex justify-between items-baseline mb-0">
+                  <h3 className="text-[10.5px] font-bold">{exp.role}</h3>
+                  <span className="text-[9.5px] font-bold text-gray-700">{exp.duration}</span>
                 </div>
-                <p className="text-[10px] font-bold italic text-gray-600 mb-1">{exp.company}</p>
-                <ul className="list-disc ml-4 text-[10.5px] text-gray-800 space-y-0.5">
+                <p className="text-[9.5px] font-bold italic text-gray-600 mb-0.5">{exp.company}</p>
+                <ul className="list-disc ml-4 text-[10px] text-gray-800 space-y-0">
                   {exp.highlights?.map((h: string, j: number) => (
-                    <li key={j} className="pl-1">{h}</li>
+                    <li key={j} className="pl-1 leading-tight">{h}</li>
                   ))}
                 </ul>
               </div>
@@ -154,16 +153,16 @@ export default function ResumePreviewPage() {
 
         {/* Projects */}
         {profile.projects?.length > 0 && (
-          <section className="mb-4">
-            <h2 className={`text-[10px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-2 pb-0.5`}>
+          <section className="mb-3">
+            <h2 className={`text-[9.5px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-1.5 pb-0.5`}>
               Projects
             </h2>
             {profile.projects.map((pr: any, i: number) => (
-              <div key={i} className="mb-2 last:mb-0">
-                <h3 className="text-[11px] font-bold mb-0.5">{pr.name}</h3>
-                <p className="text-[10.5px] text-gray-800 leading-snug">{pr.description}</p>
+              <div key={i} className="mb-1.5 last:mb-0">
+                <h3 className="text-[10.5px] font-bold mb-0">{pr.name}</h3>
+                <p className="text-[10px] text-gray-800 leading-snug">{pr.description}</p>
                 {pr.tech?.length > 0 && (
-                  <p className="text-[9px] font-bold text-gray-500 mt-0.5 uppercase tracking-wider">
+                  <p className="text-[8.5px] font-bold text-gray-500 mt-0 uppercase tracking-wider">
                     Tech: {pr.tech.join(", ")}
                   </p>
                 )}
@@ -174,11 +173,11 @@ export default function ResumePreviewPage() {
 
         {/* Skills */}
         {profile.skills && (
-          <section className="mb-4">
-            <h2 className={`text-[10px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-2 pb-0.5`}>
+          <section className="mb-3">
+            <h2 className={`text-[9.5px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-1.5 pb-0.5`}>
               Technical Skills
             </h2>
-            <div className="text-[10.5px] text-gray-800 space-y-0.5">
+            <div className="text-[10px] text-gray-800 space-y-0">
               {profile.skills.languages?.length > 0 && (
                 <p><span className="font-bold">Languages:</span> {profile.skills.languages.join(", ")}</p>
               )}
@@ -197,17 +196,17 @@ export default function ResumePreviewPage() {
 
         {/* Education */}
         {profile.education?.length > 0 && (
-          <section className="mb-4 last:mb-0">
-            <h2 className={`text-[10px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-2 pb-0.5`}>
+          <section className="mb-3 last:mb-0">
+            <h2 className={`text-[9.5px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-1.5 pb-0.5`}>
               Education
             </h2>
             {profile.education.map((ed: any, i: number) => (
-              <div key={i} className="flex justify-between items-baseline mb-1 last:mb-0">
+              <div key={i} className="flex justify-between items-baseline mb-0.5 last:mb-0">
                 <div>
-                  <h3 className="text-[11px] font-bold">{ed.degree}</h3>
-                  <p className="text-[10px] italic text-gray-600">{ed.institution}</p>
+                  <h3 className="text-[10.5px] font-bold">{ed.degree}</h3>
+                  <p className="text-[9.5px] italic text-gray-600">{ed.institution}</p>
                 </div>
-                <span className="text-[10px] font-bold text-gray-700">{ed.year}</span>
+                <span className="text-[9.5px] font-bold text-gray-700">{ed.year}</span>
               </div>
             ))}
           </section>

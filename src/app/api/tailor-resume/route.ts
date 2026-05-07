@@ -37,12 +37,16 @@ Optimizations:
 2. Impactful Highlights: Rewrite bullet points to focus on outcomes and metrics (STAR method).
 3. Summary: Craft a compelling 2-3 sentence summary that highlights why the candidate is the perfect fit for THIS specific role.
 4. Skills: Re-categorize and prioritize skills that are most relevant to the JD.
-5. Relevancy Filtering: EXCLUDE experience, projects, or skills that are completely irrelevant to the target role to keep the resume concise and focused.
+5. Relevancy Filtering: EXCLUDE experience, projects, or skills that are completely irrelevant to the target role.
+6. Project Limit: Include ONLY the top 2-3 most relevant projects, but provide more detailed descriptions and multiple bullet points for each to showcase impact.
+7. ATS Scoring: Calculate a simulated ATS compatibility score (0-100) based on keyword match and formatting, and provide 3-4 actionable feedback points.
 
 Return ONLY valid JSON with this exact structure:
 {
   "name": "Full Name",
   "title": "Optimized Role Title",
+  "atsScore": 85,
+  "atsFeedback": ["Include more metrics", "Add specific framework versions"],
   "contact": {
     "email": "email@example.com",
     "phone": "+1234567890",

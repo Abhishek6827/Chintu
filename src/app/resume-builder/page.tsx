@@ -20,6 +20,8 @@ type FlowType = "enhance" | "new";
 interface ProfileData {
   name: string;
   title: string;
+  atsScore?: number;
+  atsFeedback?: string[];
   contact?: {
     email: string;
     phone: string;
@@ -362,6 +364,40 @@ export default function ResumeBuilderPage() {
                   <h2 className="text-2xl font-black uppercase tracking-tight">Select Template</h2>
                 </div>
 
+                {/* ATS Score Dashboard */}
+                {tailoredProfile.atsScore !== undefined && (
+                  <div className="bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-3xl p-6 space-y-4 shadow-xl shadow-indigo-600/5">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Neural ATS Score</p>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-2xl font-black ${tailoredProfile.atsScore >= 80 ? 'text-emerald-500' : tailoredProfile.atsScore >= 60 ? 'text-amber-500' : 'text-red-500'}`}>
+                          {tailoredProfile.atsScore}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-full h-1.5 bg-[var(--glass-bg)] rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${tailoredProfile.atsScore}%` }}
+                        className={`h-full ${tailoredProfile.atsScore >= 80 ? 'bg-emerald-500' : tailoredProfile.atsScore >= 60 ? 'bg-amber-500' : 'bg-red-500'}`}
+                      />
+                    </div>
+                    {tailoredProfile.atsFeedback && tailoredProfile.atsFeedback.length > 0 && (
+                      <div className="pt-2 space-y-2">
+                        <p className="text-[8px] font-black text-[var(--text-dim)] uppercase tracking-widest">Actionable Feedback</p>
+                        <ul className="space-y-1.5">
+                          {tailoredProfile.atsFeedback.map((f, i) => (
+                            <li key={i} className="text-[9px] font-medium text-[var(--text-main)] flex items-start gap-2">
+                              <span className="w-1 h-1 rounded-full bg-indigo-500 mt-1.5 shrink-0" />
+                              {f}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className="space-y-4">
                   {[
                     { id: "modern", name: "Modern Elite", desc: "Clean, sans-serif, high-impact." },
@@ -402,8 +438,8 @@ export default function ResumeBuilderPage() {
                       <Printer className="w-4 h-4" /> Download PDF
                     </button>
                   </div>
-                  <p className="text-[8px] font-bold text-[var(--text-dim)] opacity-50 uppercase tracking-widest text-center px-4 leading-relaxed">
-                    PDF is generated via LaTeX for maximum ATS compatibility.
+                  <p className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em] text-center px-4 leading-relaxed bg-indigo-500/5 py-3 rounded-xl border border-indigo-500/10">
+                    ✨ Final high-fidelity PDF is generated via LaTeX for maximum ATS compatibility.
                   </p>
                 </div>
               </div>
@@ -412,8 +448,13 @@ export default function ResumeBuilderPage() {
               <div className="lg:col-span-8">
                 <div className="sticky top-24 space-y-4">
                   <div className="flex items-center justify-between px-2">
-                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Live Interactive Preview</p>
-                    <span className="text-[8px] font-black text-[var(--text-dim)] uppercase tracking-widest">A4 Layout • Optimized</span>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Live Interactive Preview</p>
+                      <p className="text-[8px] font-bold text-amber-500/80 uppercase tracking-widest flex items-center gap-1">
+                        <Zap className="w-2.5 h-2.5" /> Final ATS-Optimized formatting applied during download
+                      </p>
+                    </div>
+                    <span className="text-[8px] font-black text-[var(--text-dim)] uppercase tracking-widest">A4 Layout • Draft</span>
                   </div>
 
                   <div className="bg-white rounded-3xl shadow-2xl aspect-[1/1.41] overflow-y-auto resume-scrollbar">

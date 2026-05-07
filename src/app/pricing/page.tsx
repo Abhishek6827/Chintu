@@ -64,6 +64,7 @@ const PLANS = [
     popular: true,
     features: [
       "100 Credits / month per unit",
+      "1 Credit = 1 Resume Tailoring",
       "Unlimited Profile Uploads",
       "Unlimited Job Descriptions",
       "All Premium Engines Unlocked",
@@ -89,6 +90,7 @@ const PLANS = [
     color: "amber",
     features: [
       "500 Credits / month per unit",
+      "1 Credit = 1 Resume Tailoring",
       "Unlimited Profile Uploads",
       "Unlimited Job Descriptions",
       "All Pro Features",
@@ -597,6 +599,10 @@ export default function PricingPage() {
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white p-3 rounded-xl text-[9px] font-bold leading-relaxed opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl z-[60]">
               <div className="flex justify-between border-b border-white/10 pb-1.5 mb-1.5">
                 <span>1 TEXT / VOICE CHAT RESPONSE</span>
+                <span className="text-emerald-400">1 CREDIT</span>
+              </div>
+              <div className="flex justify-between border-b border-white/10 pb-1.5 mb-1.5">
+                <span>1 RESUME BUILDER</span>
                 <span className="text-emerald-400">1 CREDIT</span>
               </div>
               <div className="flex justify-between">
