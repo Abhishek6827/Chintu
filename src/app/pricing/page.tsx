@@ -520,6 +520,42 @@ export default function PricingPage() {
         </div>
       )}
 
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 sm:px-8 py-4 sticky top-0 bg-[var(--bg-app)]/90 backdrop-blur-md z-50 border-b border-[var(--glass-border)] shrink-0 select-none" style={{ WebkitAppRegion: 'drag' } as any}>
+        <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          <button
+            onClick={handleBack}
+            className="group flex items-center gap-2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-all text-[10px] font-black uppercase tracking-widest no-drag"
+          >
+            <svg className="w-3 h-3 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            Back to App
+          </button>
+        </div>
+
+        <div className="hidden min-[500px]:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
+          <div className="flex items-center justify-center w-7 h-7 overflow-hidden">
+            <Image
+              src="https://www.getchintu.com/icon.png"
+              alt="Chintu"
+              className="w-full h-full object-contain"
+              width={28}
+              height={28}
+              unoptimized
+            />
+          </div>
+          <span className="text-sm font-black tracking-tighter uppercase text-[var(--text-main)]">Chintu <span className="text-indigo-500">SaaS</span></span>
+        </div>
+
+        <div className="flex items-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          {!isElectron && (
+            <AnimatedThemeToggler
+              theme={currentTheme}
+              onToggle={toggleTheme}
+              className="bg-[var(--panel-bg)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)] shadow-sm"
+            />
+          )}
+        </div>
+      </div>
 
       <div className="flex-1 pb-16 selection:bg-indigo-500/20">
         <div className="text-center px-4 pt-12 pb-8">

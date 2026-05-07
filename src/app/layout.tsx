@@ -176,7 +176,6 @@ import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/utils/supabase/server";
 import UpdateNotification from "@/components/UpdateNotification";
 import GlobalHeader from "@/components/GlobalHeader";
-import GlobalFooter from "@/components/GlobalFooter";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default async function RootLayout({
@@ -249,7 +248,6 @@ export default async function RootLayout({
           <main id="main-content" className="flex-1 min-h-0 relative overflow-y-auto overflow-x-hidden">
             {children}
           </main>
-          <GlobalFooter />
           <UpdateNotification />
           <SpeedInsights />
         </body>
