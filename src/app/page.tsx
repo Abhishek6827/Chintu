@@ -1602,7 +1602,10 @@ export default function LandingPage() {
 
                     <button
                       type="button"
-                      onClick={launchApp}
+                      onClick={tool.cta === "Build My Resume" ? () => {
+                        if (!isSignedIn) router.push("/sign-up");
+                        else router.push("/resume-builder");
+                      } : launchApp}
                       aria-label={`${tool.cta} — open the Chintu app`}
                       className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500 hover:border-indigo-500 hover:text-white text-indigo-400 font-black uppercase tracking-[0.25em] text-[10px] transition-colors"
                     >

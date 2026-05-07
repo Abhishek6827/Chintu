@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import NeuralLoading from "@/components/NeuralLoading";
 
 export default function ResumePreviewPage() {
@@ -11,6 +10,8 @@ export default function ResumePreviewPage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const template = searchParams.get("template") || "modern";
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -52,7 +53,7 @@ export default function ResumePreviewPage() {
   if (!profile) return <div className="p-10 text-center">No profile data found. Please setup your profile first.</div>;
 
   return (
-    <div className="min-h-screen bg-white text-black p-[1in] font-serif leading-snug print:p-0">
+    <div className={`min-h-screen bg-white text-black p-[1in] leading-snug print:p-0 ${template === 'classic' ? 'font-serif' : 'font-sans'}`}>
       <style jsx global>{`
         @media print {
           @page {
@@ -95,10 +96,14 @@ export default function ResumePreviewPage() {
 
       <div className="resume-container flex flex-col">
         {/* Header */}
-        <header className="text-center mb-5">
-          <h1 className="text-2xl font-bold uppercase tracking-tight mb-0.5">{profile.name}</h1>
-          <p className="text-[11px] font-bold text-gray-700 uppercase tracking-[0.2em] mb-1.5">{profile.title}</p>
-          <div className="flex flex-wrap justify-center gap-x-2 text-[9.5px] text-gray-600 font-medium">
+        <header className={`mb-5 ${template === 'minimal' ? 'text-left' : 'text-center'}`}>
+          <h1 className={`${template === 'minimal' ? 'text-4xl' : 'text-2xl'} font-bold uppercase tracking-tight mb-0.5`}>
+            {profile.name}
+          </h1>
+          <p className={`${template === 'minimal' ? 'text-sm' : 'text-[11px]'} font-bold text-gray-700 uppercase tracking-[0.2em] mb-1.5`}>
+            {profile.title}
+          </p>
+          <div className={`flex flex-wrap ${template === 'minimal' ? 'justify-start' : 'justify-center'} gap-x-2 text-[9.5px] text-gray-600 font-medium`}>
             {[
               profile.email || user?.emailAddresses[0].emailAddress,
               profile.phone,
@@ -117,7 +122,9 @@ export default function ResumePreviewPage() {
         {/* Summary */}
         {profile.summary && (
           <section className="mb-4">
-            <h2 className="text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black mb-1.5 pb-0.5">Professional Summary</h2>
+            <h2 className={`text-[10px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-1.5 pb-0.5`}>
+              Professional Summary
+            </h2>
             <p className="text-[11px] text-gray-800 text-justify leading-relaxed">{profile.summary}</p>
           </section>
         )}
@@ -125,7 +132,9 @@ export default function ResumePreviewPage() {
         {/* Experience */}
         {profile.experience?.length > 0 && (
           <section className="mb-4">
-            <h2 className="text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black mb-2 pb-0.5">Experience</h2>
+            <h2 className={`text-[10px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-2 pb-0.5`}>
+              Experience
+            </h2>
             {profile.experience.map((exp: any, i: number) => (
               <div key={i} className="mb-3 last:mb-0">
                 <div className="flex justify-between items-baseline mb-0.5">
@@ -146,7 +155,9 @@ export default function ResumePreviewPage() {
         {/* Projects */}
         {profile.projects?.length > 0 && (
           <section className="mb-4">
-            <h2 className="text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black mb-2 pb-0.5">Projects</h2>
+            <h2 className={`text-[10px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-2 pb-0.5`}>
+              Projects
+            </h2>
             {profile.projects.map((pr: any, i: number) => (
               <div key={i} className="mb-2 last:mb-0">
                 <h3 className="text-[11px] font-bold mb-0.5">{pr.name}</h3>
@@ -164,7 +175,9 @@ export default function ResumePreviewPage() {
         {/* Skills */}
         {profile.skills && (
           <section className="mb-4">
-            <h2 className="text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black mb-2 pb-0.5">Technical Skills</h2>
+            <h2 className={`text-[10px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-2 pb-0.5`}>
+              Technical Skills
+            </h2>
             <div className="text-[10.5px] text-gray-800 space-y-0.5">
               {profile.skills.languages?.length > 0 && (
                 <p><span className="font-bold">Languages:</span> {profile.skills.languages.join(", ")}</p>
@@ -185,7 +198,9 @@ export default function ResumePreviewPage() {
         {/* Education */}
         {profile.education?.length > 0 && (
           <section className="mb-4 last:mb-0">
-            <h2 className="text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black mb-2 pb-0.5">Education</h2>
+            <h2 className={`text-[10px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-2 pb-0.5`}>
+              Education
+            </h2>
             {profile.education.map((ed: any, i: number) => (
               <div key={i} className="flex justify-between items-baseline mb-1 last:mb-0">
                 <div>
@@ -201,7 +216,9 @@ export default function ResumePreviewPage() {
         {/* Certifications/Achievements fallback */}
         {(profile.certifications?.length > 0 || profile.achievements?.length > 0) && (
           <section className="mt-4">
-            <h2 className="text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black mb-2 pb-0.5">Certifications & Achievements</h2>
+            <h2 className={`text-[10px] font-bold uppercase tracking-widest ${template === 'minimal' ? 'border-none' : 'border-b-[1.5px] border-black'} mb-2 pb-0.5`}>
+              Certifications & Achievements
+            </h2>
             <ul className="list-disc ml-4 text-[10.5px] text-gray-800 space-y-0.5">
               {profile.certifications?.map((c: string, i: number) => <li key={`c-${i}`} className="pl-1">{c}</li>)}
               {profile.achievements?.map((a: string, i: number) => <li key={`a-${i}`} className="pl-1">{a}</li>)}
@@ -209,7 +226,6 @@ export default function ResumePreviewPage() {
           </section>
         )}
       </div>
-
 
       <div className="no-print fixed bottom-8 left-1/2 -translate-x-1/2 flex gap-4">
         <button 

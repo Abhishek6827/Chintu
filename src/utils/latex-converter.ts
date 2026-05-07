@@ -11,7 +11,7 @@ export interface ProfileData {
   achievements: string[];
 }
 
-export function generateLaTeX(p: ProfileData): string {
+export function generateLaTeX(p: ProfileData, template: string = 'modern'): string {
   const escapeLatex = (str: string) => {
     if (!str) return "";
     return str
@@ -66,29 +66,65 @@ ${escapeLatex(pr.description)} \\\\
     ${p.achievements.map(a => `\\item ${escapeLatex(a)}`).join('\n    ')}
 \\end{itemize}` : '';
 
-  return `
-\\documentclass[11pt,a4paper,sans]{article}
-\\usepackage[utf8]{inputenc}
+  let styleConfigs = "";
+  let headerConfig = "";
+
+  if (template === 'classic') {
+    styleConfigs = `
+\\documentclass[11pt,a4paper,serif]{article}
 \\usepackage[margin=0.75in]{geometry}
-\\usepackage{enumitem}
-\\usepackage{titlesec}
-\\usepackage{hyperref}
-\\usepackage{xcolor}
-
-% Style definitions
+\\titleformat{\\section}{\\large\\bfseries\\scshape}{}{0em}{}[\\titlerule]
+`;
+    headerConfig = `
+\\begin{center}
+    {\\huge \\scshape ${escapeLatex(p.name)}} \\\\
+    \\vspace{4pt}
+    ${escapeLatex(p.title)}
+\\end{center}
+`;
+  } else if (template === 'minimal') {
+    styleConfigs = `
+\\documentclass[10pt,a4paper,sans]{article}
+\\usepackage[margin=1in]{geometry}
+\\titleformat{\\section}{\\small\\bfseries\\uppercase}{}{0em}{}[\\vspace{2pt}]
+\\titlespacing*{\\section}{0pt}{10pt}{4pt}
+`;
+    headerConfig = `
+\\noindent {\\Huge \\bfseries ${escapeLatex(p.name)}} \\\\
+\\noindent {\\large ${escapeLatex(p.title)}} \\\\
+\\vspace{10pt}
+`;
+  } else {
+    // Default: Modern
+    styleConfigs = `
+\\documentclass[11pt,a4paper,sans]{article}
+\\usepackage[margin=0.75in]{geometry}
 \\titleformat{\\section}{\\large\\bfseries\\uppercase}{}{0em}{}[\\titlerule]
-\\titlespacing*{\\section}{0pt}{12pt}{6pt}
-\\setlist[itemize]{noitemsep, topsep=0pt, leftmargin=*}
-\\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
-
-\\begin{document}
-
-% Header
+`;
+    headerConfig = `
 \\begin{center}
     {\\huge \\bfseries ${escapeLatex(p.name)}} \\\\
     \\vspace{2pt}
     ${escapeLatex(p.title)}
 \\end{center}
+`;
+  }
+
+  return `
+${styleConfigs}
+\\usepackage[utf8]{inputenc}
+\\usepackage{enumitem}
+\\usepackage{titlesec}
+\\usepackage{hyperref}
+\\usepackage{xcolor}
+
+% Universal style definitions
+\\titlespacing*{\\section}{0pt}{12pt}{6pt}
+\\setlist[itemize]{noitemsep, topsep=0pt, leftmargin=*}
+\\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+
+\\begin{document}
+${headerConfig}
 
 % Summary
 \\section*{Professional Summary}
