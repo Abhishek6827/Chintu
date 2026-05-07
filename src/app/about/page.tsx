@@ -64,7 +64,7 @@ export default function AboutPage() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">We help you win.</span>
           </motion.h1>
           <motion.p variants={fadeUp} custom={2} className="text-lg text-[var(--text-dim)] max-w-2xl mx-auto leading-relaxed">
-            Chintu Ji is the world&apos;s most advanced ghost overlay assistant, built for high-stakes technical interviews.
+            Chintu Ji is the world&apos;s most advanced protected overlay assistant, built for high-stakes technical interviews.
           </motion.p>
         </motion.div>
 
@@ -81,7 +81,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-xl font-black mb-4 text-[var(--text-main)]">Unrivaled Stealth</h3>
               <p className="text-[var(--text-dim)] text-sm leading-relaxed">
-                Unlike browser extensions or secondary apps, Chintu operates as a native ghost overlay. It is invisible to screen-sharing tools like Zoom, Teams, and Google Meet. You stay safe, always.
+                Unlike browser extensions or secondary apps, Chintu operates as a native protected overlay. It is invisible to screen-sharing tools like Zoom, Teams, and Google Meet. You stay safe, always.
               </p>
             </motion.div>
             <motion.div

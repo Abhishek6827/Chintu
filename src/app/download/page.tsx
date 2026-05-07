@@ -14,7 +14,7 @@ export default function DownloadPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-indigo-500/20 flex flex-col relative overflow-x-hidden">
-      
+
       {/* Background Orbs */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <Meteors number={20} />
@@ -34,14 +34,14 @@ export default function DownloadPage() {
             <Zap className="w-3 h-3 text-indigo-400 fill-current" />
             <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Official Desktop Release</span>
           </div>
-          
+
           <h1 className="text-5xl sm:text-7xl font-black tracking-tighter text-[var(--text-main)] mb-6 uppercase leading-[0.9]">
             Take Chintu <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Everywhere.</span>
           </h1>
-          
+
           <p className="text-[var(--text-dim)] text-sm sm:text-lg font-bold uppercase tracking-widest max-w-2xl mx-auto leading-relaxed mb-12">
-            Experience the full power of Chintu with our native Windows application. Ghost Mode, Neural Sync, and Screen Intelligence — optimized for performance.
+            Experience the full power of Chintu with our native Windows application. Protected overlay, Neural Sync, and Screen Intelligence — optimized for performance.
           </p>
 
           <div className="flex flex-col items-center gap-6">
@@ -60,7 +60,7 @@ export default function DownloadPage() {
         {/* Feature Highlights */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full mb-32">
           {[
-            { icon: <Shield />, title: "Ghost Protocol", desc: "Invisible to screen-sharing and proctoring software." },
+            { icon: <Shield />, title: "Protected Overlay", desc: "Invisible to screen-sharing and proctoring software." },
             { icon: <Laptop />, title: "Native Speed", desc: "Zero-lag processing with low memory footprint." },
             { icon: <Zap />, title: "Auto Updates", desc: "Always stay synchronized with the latest intelligence." }
           ].map((f, i) => (
@@ -89,14 +89,14 @@ export default function DownloadPage() {
           className="max-w-3xl w-full bg-[var(--panel-bg)] rounded-[4rem] border border-[var(--glass-border)] p-12 sm:p-20 shadow-2xl relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-[4rem] -mr-10 -mt-10" />
-          
+
           <h2 className="text-3xl font-black tracking-tight text-[var(--text-main)] mb-12 uppercase">Installation Guide</h2>
-          
+
           <div className="space-y-10">
             {[
               { step: "01", text: "Download the Chintu-Setup.exe file using the button above." },
               { step: "02", text: "Run the installer. If Windows SmartScreen appears, click 'More Info' then 'Run Anyway'." },
-              { step: "03", text: "Login with your Chintu credentials and activate Ghost Mode to start your mission." }
+              { step: "03", text: "Login with your Chintu credentials and activate protected overlay to start your mission." }
             ].map((s, i) => (
               <motion.div
                 key={i}
@@ -124,7 +124,7 @@ export default function DownloadPage() {
       </main>
 
       <GlobalFooter />
-      
+
     </div>
   );
 }

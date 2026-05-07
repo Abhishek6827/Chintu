@@ -19,7 +19,7 @@ const reviews = [
   {
     name: "Rohan",
     username: "@backend_ninja",
-    body: "The ghost mode is actually undetectable. Proctoring didn't stand a chance. Highly recommend.",
+    body: "The protected mode is actually undetectable. Proctoring didn't stand a chance. Highly recommend.",
     img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=3540&auto=format&fit=crop",
   },
   {
@@ -46,7 +46,7 @@ const reviews = [
   { name: "Deepika", username: "@deepika_dev", body: "Helping me bridge the gap between junior and senior roles. Amazing.", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=3540&auto=format&fit=crop" },
   { name: "Vikram", username: "@vikram_backend", body: "Python, Go, Rust - Chintu knows it all. My new secret weapon.", img: "https://images.unsplash.com/photo-1506803682981-6e718a9dd3ee?q=80&w=3540&auto=format&fit=crop" },
   { name: "Zara", username: "@zara_growth", body: "Behavioral questions are no longer a nightmare. Thanks Chintu!", img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=3540&auto=format&fit=crop" },
-  { name: "Rahul", username: "@rahul_hacks", body: "Ghost mode is legit. Didn't trigger any alerts. Perfect.", img: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=3540&auto=format&fit=crop" },
+  { name: "Rahul", username: "@rahul_hacks", body: "Protected overlay is legit. Didn't trigger any alerts. Perfect.", img: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=3540&auto=format&fit=crop" },
   { name: "Nina", username: "@nina_apps", body: "Got my dream job at Meta. Chintu was the edge I needed.", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=3540&auto=format&fit=crop" },
   { name: "Leo", username: "@leo_builds", body: "System design made easy. The diagrams are crystal clear now.", img: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=3540&auto=format&fit=crop" },
   { name: "Hana", username: "@hana_cloud", body: "AWS certs? Done. Technical rounds? Done. Chintu is key.", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=3540&auto=format&fit=crop" },
@@ -88,13 +88,13 @@ const ReviewCard = ({
       )}
     >
       <div className="flex flex-row items-center gap-2">
-        <Image 
-          className="rounded-full h-8 w-8 object-cover" 
-          width={32} 
-          height={32} 
-          alt={name} 
-          src={img} 
-          unoptimized 
+        <Image
+          className="rounded-full h-8 w-8 object-cover"
+          width={32}
+          height={32}
+          alt={name}
+          src={img}
+          unoptimized
         />
         <div className="flex flex-col">
           <figcaption className="text-sm font-bold text-[var(--text-main)]">
@@ -114,10 +114,10 @@ export function MarqueeReviews() {
       <div className="reveal text-center mb-16 px-6">
         <h2 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.5em] mb-4">Wall of Dominance</h2>
         <p className="text-3xl font-black tracking-tight text-[var(--text-main)] uppercase">Real Feedback. <span className="text-indigo-600">Real Offers.</span></p>
-        
+
         <div className="mt-8 flex flex-col items-center gap-4">
-          <AvatarCircles 
-            numPeople={99} 
+          <AvatarCircles
+            numPeople={99}
             avatarUrls={[
               {
                 imageUrl: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=3540&auto=format&fit=crop",
@@ -143,7 +143,7 @@ export function MarqueeReviews() {
                 imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=3540&auto=format&fit=crop",
                 profileUrl: "#",
               },
-            ]} 
+            ]}
           />
           <p className="text-xs font-bold text-[var(--text-dim)] uppercase tracking-widest">Trusted by 99+ Elite Developers</p>
         </div>
@@ -159,7 +159,7 @@ export function MarqueeReviews() {
           <ReviewCard key={review.username} {...review} />
         ))}
       </Marquee>
-      
+
       <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-[var(--bg-app)] to-transparent"></div>
       <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-[var(--bg-app)] to-transparent"></div>
     </section>

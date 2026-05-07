@@ -7,9 +7,9 @@ interface NeuralLoadingProps {
   subtext?: string;
 }
 
-export default function NeuralLoading({ 
-  text = "Synthesizing Neural Intelligence", 
-  subtext = "Calibrating Ghost Interface" 
+export default function NeuralLoading({
+  text = "Synthesizing Neural Intelligence",
+  subtext = "Calibrating Protected Overlay"
 }: NeuralLoadingProps) {
   return (
     <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[var(--bg-app)] overflow-hidden">
@@ -28,21 +28,21 @@ export default function NeuralLoading({
           <div className="absolute inset-0 border-[1px] border-dashed border-indigo-500/20 rounded-full animate-[spin_10s_linear_infinite]" />
           <div className="absolute inset-4 border-[1px] border-dashed border-purple-500/20 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
           <div className="absolute inset-8 border-[1px] border-dashed border-cyan-500/20 rounded-full animate-[spin_20s_linear_infinite]" />
-          
+
           {/* Orbital Nodes */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-indigo-500 rounded-full shadow-[0_0_15px_rgba(99,102,241,1)]" />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-purple-500 rounded-full shadow-[0_0_15px_rgba(168,85,247,1)]" />
-          
+
           {/* The Pulse Core */}
           <div className="w-20 h-20 bg-gradient-to-br from-indigo-600 via-purple-600 to-cyan-500 rounded-[2.5rem] shadow-[0_0_50px_rgba(99,102,241,0.5)] flex items-center justify-center relative overflow-hidden group">
             {/* Shimmer */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
             <div className="w-10 h-10 border-2 border-white/20 rounded-full animate-ping" />
             <div className="absolute inset-0 flex items-center justify-center">
-               <div className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_#fff]" />
+              <div className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_#fff]" />
             </div>
           </div>
-          
+
           {/* Scanline Effect */}
           <div className="absolute inset-[-40px] bg-gradient-to-b from-transparent via-indigo-500/10 to-transparent h-1 opacity-50 animate-[scan_3s_linear_infinite]" />
         </div>
@@ -52,11 +52,11 @@ export default function NeuralLoading({
             {text}
           </h2>
           <div className="flex items-center gap-4">
-             <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-[var(--text-dim)] opacity-20" />
-             <p className="text-[10px] sm:text-[11px] text-[var(--text-dim)] font-black uppercase tracking-[0.4em] opacity-60">
-               {subtext}
-             </p>
-             <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-[var(--text-dim)] opacity-20" />
+            <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-[var(--text-dim)] opacity-20" />
+            <p className="text-[10px] sm:text-[11px] text-[var(--text-dim)] font-black uppercase tracking-[0.4em] opacity-60">
+              {subtext}
+            </p>
+            <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-[var(--text-dim)] opacity-20" />
           </div>
         </div>
 

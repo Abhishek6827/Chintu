@@ -155,9 +155,8 @@ export default function GlobalHeader() {
     }
   };
 
-  // Hide GlobalHeader on web platform - it's specifically for the EXE app frame
   // Use 'mounted' to prevent hydration errors
-  if (!mounted || !isElectron) {
+  if (!mounted) {
     return null;
   }
 

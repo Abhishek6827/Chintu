@@ -60,14 +60,14 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
                       <div style="width: 16px; height: 16px; background-color: #6366f1; border-radius: 4px;"></div>
                     </td>
                     <td style="padding-bottom: 12px; font-size: 14px; color: #4b5563; line-height: 1.4;">
-                      <b>Activate Stealth:</b> Launch the ghost interface during your live sessions for real-time tactical guidance.
+                      <b>Activate Stealth:</b> Launch the Protected Overlay during your live sessions for real-time tactical guidance.
                     </td>
                   </tr>
                 </table>
               </div>
 
               <div style="text-align: center;">
-                <a href="${appUrl}/room" style="display: inline-block; background-color: #1a1a1c; color: #ffffff; padding: 18px 36px; border-radius: 16px; font-size: 12px; font-weight: 900; text-decoration: none; text-transform: uppercase; letter-spacing: 0.2em; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">Launch Ghost Interface</a>
+                <a href="${appUrl}/room" style="display: inline-block; background-color: #1a1a1c; color: #ffffff; padding: 18px 36px; border-radius: 16px; font-size: 12px; font-weight: 900; text-decoration: none; text-transform: uppercase; letter-spacing: 0.2em; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">Launch Protected Overlay</a>
               </div>
             </td>
           </tr>

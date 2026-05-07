@@ -460,14 +460,14 @@ export default function ResumeBuilderPage() {
                   <div className="bg-white rounded-3xl shadow-2xl aspect-[1/1.41] overflow-y-auto resume-scrollbar">
                     {/* Standard ATS-Friendly Preview */}
                     <div className={`p-10 text-black space-y-4 ${selectedTemplate === 'classic' ? 'font-serif' : 'font-sans'}`}>
-                      <div className="text-center space-y-1">
-                        <h1 className="text-2xl font-bold uppercase tracking-tight">
+                      <div className={`${selectedTemplate === 'minimal' ? 'text-left' : 'text-center'} space-y-1`}>
+                        <h1 className={`${selectedTemplate === 'minimal' ? 'text-3xl' : 'text-2xl'} font-bold uppercase tracking-tight`}>
                           {tailoredProfile.name}
                         </h1>
                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                           {tailoredProfile.title}
                         </p>
-                        <div className="flex justify-center gap-2 text-[8px] text-gray-400 font-bold">
+                        <div className={`flex ${selectedTemplate === 'minimal' ? 'justify-start' : 'justify-center'} gap-2 text-[8px] text-gray-400 font-bold`}>
                           <a href={`mailto:${tailoredProfile.contact?.email || user?.emailAddresses[0]?.emailAddress}`} className="hover:text-indigo-500 transition-colors">
                             {tailoredProfile.contact?.email || user?.emailAddresses[0]?.emailAddress}
                           </a>
@@ -487,14 +487,14 @@ export default function ResumeBuilderPage() {
                       </div>
 
                       <div className="space-y-2 pt-2">
-                        <h2 className="text-[10px] font-black uppercase tracking-widest border-b border-black pb-0.5">Professional Summary</h2>
+                        <h2 className={`text-[10px] font-black uppercase tracking-widest ${selectedTemplate === 'minimal' ? 'border-none' : 'border-b border-black'} pb-0.5`}>Professional Summary</h2>
                         <p className="text-[10px] leading-relaxed font-medium text-gray-700 text-justify">
                           {tailoredProfile.summary}
                         </p>
                       </div>
 
                       <div className="space-y-3">
-                        <h2 className="text-[10px] font-black uppercase tracking-widest border-b border-black pb-0.5">Experience</h2>
+                        <h2 className={`text-[10px] font-black uppercase tracking-widest ${selectedTemplate === 'minimal' ? 'border-none' : 'border-b border-black'} pb-0.5`}>Experience</h2>
                         {tailoredProfile.experience.map((exp, i) => (
                           <div key={i} className="space-y-0.5">
                             <div className="flex justify-between items-baseline">
@@ -512,7 +512,7 @@ export default function ResumeBuilderPage() {
 
                       {tailoredProfile.projects && tailoredProfile.projects.length > 0 && (
                         <div className="space-y-2">
-                          <h2 className="text-[10px] font-black uppercase tracking-widest border-b border-black pb-0.5">Projects</h2>
+                          <h2 className={`text-[10px] font-black uppercase tracking-widest ${selectedTemplate === 'minimal' ? 'border-none' : 'border-b border-black'} pb-0.5`}>Projects</h2>
                           {tailoredProfile.projects.map((pr, i) => (
                             <div key={i} className="space-y-0.5">
                               <p className="text-[10px] font-bold">{pr.name}</p>
@@ -525,7 +525,7 @@ export default function ResumeBuilderPage() {
 
                       {tailoredProfile.education && tailoredProfile.education.length > 0 && (
                         <div className="space-y-2">
-                          <h2 className="text-[10px] font-black uppercase tracking-widest border-b border-black pb-0.5">Education</h2>
+                          <h2 className={`text-[10px] font-black uppercase tracking-widest ${selectedTemplate === 'minimal' ? 'border-none' : 'border-b border-black'} pb-0.5`}>Education</h2>
                           {tailoredProfile.education.map((ed, i) => (
                             <div key={i} className="flex justify-between items-baseline">
                               <div>
@@ -539,7 +539,7 @@ export default function ResumeBuilderPage() {
                       )}
 
                       <div className="space-y-2">
-                        <h2 className="text-[10px] font-black uppercase tracking-widest border-b border-black pb-0.5">Technical Skills</h2>
+                        <h2 className={`text-[10px] font-black uppercase tracking-widest ${selectedTemplate === 'minimal' ? 'border-none' : 'border-b border-black'} pb-0.5`}>Technical Skills</h2>
                         <div className="grid grid-cols-1 gap-1">
                           {tailoredProfile.skills.languages.length > 0 && (
                             <p className="text-[9px] font-medium"><span className="font-bold uppercase tracking-tight w-20 inline-block">Languages:</span> {tailoredProfile.skills.languages.join(", ")}</p>

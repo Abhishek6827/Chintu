@@ -104,13 +104,13 @@ ${escapeLatex(pr.description)} \\\\
 \\documentclass[10pt,a4paper,sans]{article}
 \\usepackage[margin=1in]{geometry}
 \\titleformat{\\section}{\\small\\bfseries\\uppercase}{}{0em}{}[\\vspace{2pt}]
-\\titlespacing*{\\section}{0pt}{10pt}{4pt}
+\\titlespacing*{\\section}{0pt}{15pt}{6pt}
 `;
     headerConfig = `
 \\noindent {\\Huge \\bfseries ${escapeLatex(p.name)}} \\\\
 \\noindent {\\large ${escapeLatex(p.title)}} \\\\
 \\noindent {\\small ${contactLine}} \\\\
-\\vspace{10pt}
+\\vspace{15pt}
 `;
   } else {
     // Default: Modern

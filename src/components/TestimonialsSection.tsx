@@ -6,7 +6,7 @@ export function TestimonialsSection() {
   const testimonials = [
     {
       quote:
-        "The ghost overlay is a game-changer. I could see system design patterns directly on my screen during the live round without anyone noticing. It's like an unfair advantage.",
+        "The protected overlay is a game-changer. I could see system design patterns directly on my screen during the live round without anyone noticing. It's like an unfair advantage.",
       name: "Aman Gupta",
       designation: "SDE at Google",
       src: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=3540&auto=format&fit=crop",
@@ -64,7 +64,7 @@ export function TestimonialsSection() {
       src: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=3540&auto=format&fit=crop",
     },
     {
-      quote: "Ghost protocol works exactly as advertised. Totally undetectable even with advanced monitoring. Secured my role at Microsoft easily.",
+      quote: "Protected overlay works exactly as advertised. Totally undetectable even with advanced monitoring. Secured my role at Microsoft easily.",
       name: "Mark Thompson",
       designation: "Security Engineer at Microsoft",
       src: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=3540&auto=format&fit=crop",
