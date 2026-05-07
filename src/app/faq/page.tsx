@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Sparkles, HelpCircle, ArrowRight, Zap, Shield, CreditCard } from 'lucide-react';
 import { Meteors } from '@/components/magicui/meteors';
-import GlobalFooter from '@/components/GlobalFooter';
 
 const faqData = [
   {

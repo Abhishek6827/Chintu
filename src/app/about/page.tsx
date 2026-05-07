@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Shield, Zap, Brain, Target, Lock, Sparkles, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Meteors } from '@/components/magicui/meteors';
-import GlobalFooter from '@/components/GlobalFooter';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },

@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, Lock, EyeOff, Server, FileCheck, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
-import GlobalFooter from '@/components/GlobalFooter';
 import { Meteors } from '@/components/magicui/meteors';
 
 export default function PrivacyPage() {

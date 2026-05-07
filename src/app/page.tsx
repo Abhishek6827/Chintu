@@ -13,7 +13,6 @@ import {
 
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
-import GlobalFooter from '@/components/GlobalFooter';
 import SyncedUserButton from '@/components/SyncedUserButton';
 import ContactForm from '@/components/ContactForm';
 import { TestimonialsSection } from '@/components/TestimonialsSection';

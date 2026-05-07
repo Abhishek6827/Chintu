@@ -3,7 +3,6 @@
 import React from 'react';
 import { Download, Laptop, Shield, Zap, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import GlobalFooter from '@/components/GlobalFooter';
 import { Meteors } from '@/components/magicui/meteors';
 
 import pkg from '../../../package.json';
