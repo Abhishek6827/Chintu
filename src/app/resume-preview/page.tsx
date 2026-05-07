@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import NeuralLoading from "@/components/NeuralLoading";
@@ -9,11 +9,9 @@ export default function ResumePreviewPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [downloading, setDownloading] = useState(false);
-  const resumeRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const _template = searchParams.get("template") || "modern";
+  const template = searchParams.get("template") || "modern";
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -34,30 +32,15 @@ export default function ResumePreviewPage() {
     }
   }, [isLoaded, isSignedIn, router]);
 
-  const handleDownload = async () => {
-    if (!resumeRef.current || downloading) return;
-    setDownloading(true);
-    try {
-      const html2pdf = (await import("html2pdf.js")).default;
-      const fileName = `${(profile.name || "Resume").replace(/\s+/g, "_")}_Resume.pdf`;
-      await html2pdf()
-        .set({
-          margin: 0,
-          filename: fileName,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        })
-        .from(resumeRef.current)
-        .save();
-    } catch (err) {
-      console.error("PDF download failed:", err);
-      // Fallback to print dialog if html2pdf fails
-      window.print();
-    } finally {
-      setDownloading(false);
+  useEffect(() => {
+    if (profile) {
+      // Small delay to ensure styles are applied before print dialog
+      const timer = setTimeout(() => {
+        window.print();
+      }, 1000);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [profile]);
 
   if (loading) return <NeuralLoading text="Generating ATS Resume..." />;
   if (!profile) return <div className="p-10 text-center">No profile data found. Please setup your profile first.</div>;
@@ -209,28 +192,48 @@ export default function ResumePreviewPage() {
             margin: 0;
             size: A4;
           }
-          body {
+          html, body {
             background: white !important;
             margin: 0 !important;
             padding: 0 !important;
             -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           .no-print {
             display: none !important;
           }
           .resume-page {
             background: white !important;
+            padding: 0 !important;
+            margin: 0 !important;
           }
           .resume-sheet {
             margin: 0 !important;
             padding: 0.4in 0.5in !important;
             box-shadow: none !important;
             width: 100% !important;
+            min-height: auto !important;
+          }
+          /* Prevent sections from being split across pages */
+          .resume-sheet > div {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+          /* Prevent individual entries from being split */
+          .resume-sheet .entry-header,
+          .resume-sheet .edu-entry {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+          /* Keep section heading with its content */
+          .resume-sheet .section-heading {
+            break-after: avoid;
+            page-break-after: avoid;
           }
         }
       `}</style>
 
-      <div className="resume-sheet" ref={resumeRef}>
+      <div className="resume-sheet">
         {/* ─── Name ─── */}
         <h1 className="resume-name">{profile.name}</h1>
 
@@ -341,11 +344,10 @@ export default function ResumePreviewPage() {
 
       <div className="no-print" style={{ position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '16px', zIndex: 50 }}>
         <button 
-          onClick={handleDownload}
-          disabled={downloading}
-          style={{ padding: '12px 28px', background: downloading ? '#555' : '#000', color: '#fff', borderRadius: '999px', fontWeight: 'bold', fontSize: '14px', border: 'none', cursor: downloading ? 'wait' : 'pointer', boxShadow: '0 8px 24px rgba(0,0,0,0.3)', opacity: downloading ? 0.7 : 1 }}
+          onClick={() => window.print()}
+          style={{ padding: '12px 28px', background: '#000', color: '#fff', borderRadius: '999px', fontWeight: 'bold', fontSize: '14px', border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}
         >
-          {downloading ? 'Downloading...' : 'Download PDF'}
+          Download PDF
         </button>
         <button 
           onClick={() => router.back()}
