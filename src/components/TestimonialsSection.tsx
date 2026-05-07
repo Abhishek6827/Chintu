@@ -196,7 +196,7 @@ export function TestimonialsSection() {
       src: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?q=80&w=3540&auto=format&fit=crop",
     },
     {
-      quote: "The low-latency screen capture is so fast, it feels like the AI is looking at the screen with me. Pure magic.",
+      quote: "The low-latency screen capture is so fast, it feels like the Chintu Ji looking at the screen with me. Pure magic.",
       name: "Emily Blunt",
       designation: "UX Researcher at Adobe",
       src: "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=3540&auto=format&fit=crop",
@@ -304,7 +304,7 @@ export function TestimonialsSection() {
       src: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=3540&auto=format&fit=crop",
     },
   ].slice(0, 15);
-  
+
   return (
     <section className="py-32 px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
@@ -327,7 +327,7 @@ export function TestimonialsSection() {
           viewport={{ once: true }}
           transition={{ delay: 0.2, duration: 0.8 }}
         >
-           <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
+          <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
         </motion.div>
       </div>
     </section>

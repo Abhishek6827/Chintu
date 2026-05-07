@@ -23,7 +23,7 @@ export default function TermsPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-indigo-500/20 flex flex-col relative overflow-x-hidden">
-      
+
       {/* Background Orbs */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <Meteors number={12} />
@@ -57,7 +57,7 @@ export default function TermsPage() {
             <Sparkles className="w-3 h-3 text-indigo-400 animate-pulse" />
             <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Global Governance v1.4</span>
           </div>
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tighter text-[var(--text-main)] mb-8 uppercase leading-[0.9]">Terms of <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Service Engagement.</span></h1>
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tighter text-[var(--text-main)] mb-8 uppercase leading-[0.9]">Terms of <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Service Engagement.</span></h1>
           <p className="text-[11px] text-[var(--text-dim)] font-black uppercase tracking-[0.2em] leading-relaxed">Compliance Verified • Effective: April 30, 2026</p>
         </motion.div>
 
@@ -71,7 +71,7 @@ export default function TermsPage() {
             </div>
             <div className="bg-[var(--panel-bg)]/50 backdrop-blur-xl p-8 sm:p-10 rounded-[3rem] border border-[var(--glass-border)] shadow-sm leading-relaxed">
               <p className="text-[var(--text-dim)] text-[14px] font-medium leading-relaxed">
-                By accessing the Chintu Intelligence application, you agree to be bound by these Terms of Service. If you do not agree, you must immediately cease usage of the software.
+                By accessing the Chintu Ji application, you agree to be bound by these Terms of Service. If you do not agree, you must immediately cease usage of the software.
               </p>
             </div>
           </section>
@@ -85,7 +85,7 @@ export default function TermsPage() {
             </div>
             <div className="bg-[var(--panel-bg)]/50 backdrop-blur-xl p-8 sm:p-10 rounded-[3rem] border border-[var(--glass-border)] shadow-sm leading-relaxed">
               <p className="text-[var(--text-dim)] text-[14px] font-medium leading-relaxed">
-                Chintu is provided as an AI-powered interview preparation and assistance tool. Users are responsible for ensuring their usage complies with their local laws, employment contracts, and academic integrity policies. Chintu Intelligence is not liable for any disciplinary actions resulting from the misuse of this tool.
+                Chintu is provided as an AI-powered interview preparation and assistance tool. Users are responsible for ensuring their usage complies with their local laws, employment contracts, and academic integrity policies. Chintu Ji is not liable for any disciplinary actions resulting from the misuse of this tool.
               </p>
             </div>
           </section>
@@ -127,10 +127,10 @@ export default function TermsPage() {
         </div>
 
         <div className="reveal mt-32 pt-16 border-t border-[var(--glass-border)] text-center transition-all duration-1000 delay-700">
-           <p className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-[0.4em] mb-6">Legal Support?</p>
-           <a href="mailto:contact@getchintu.com" className="inline-block bg-[var(--panel-bg)] border border-[var(--glass-border)] px-8 py-4 rounded-2xl text-indigo-500 font-black uppercase tracking-widest text-[11px] hover:border-indigo-500/50 transition-all shadow-sm">
-             Contact Legal Department
-           </a>
+          <p className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-[0.4em] mb-6">Legal Support?</p>
+          <a href="mailto:contact@getchintu.com" className="inline-block bg-[var(--panel-bg)] border border-[var(--glass-border)] px-8 py-4 rounded-2xl text-indigo-500 font-black uppercase tracking-widest text-[11px] hover:border-indigo-500/50 transition-all shadow-sm">
+            Contact Legal Department
+          </a>
         </div>
       </main>
 

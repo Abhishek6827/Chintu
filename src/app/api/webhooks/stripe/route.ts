@@ -491,7 +491,7 @@ export async function POST(req: Request) {
     if (customerEmail) {
       try {
         await resend.emails.send({
-          from: "Chintu Intelligence <welcome@getchintu.com>",
+          from: "Chintu Ji <welcome@getchintu.com>",
           to: customerEmail,
           subject: `CHINTU: ${isDowngrade ? "PLAN UPDATED" : "PROTOCOL UPGRADE VERIFIED"
             } ⚡`,
@@ -638,7 +638,7 @@ export async function POST(req: Request) {
     if (profile.email) {
       try {
         await resend.emails.send({
-          from: "Chintu Intelligence <billing@getchintu.com>",
+          from: "Chintu Ji <billing@getchintu.com>",
           replyTo: "contact@getchintu.com",
           to: profile.email,
           subject: "CHINTU: MISSION EXTENSION VERIFIED 🔄",
@@ -863,4 +863,4 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({ received: true });
-}
+}

@@ -59,10 +59,10 @@ export async function POST(req: Request) {
     }
 
     const now = new Date();
-    const istOptions: Intl.DateTimeFormatOptions = { 
-      timeZone: 'Asia/Kolkata', 
+    const istOptions: Intl.DateTimeFormatOptions = {
+      timeZone: 'Asia/Kolkata',
       day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', hour12: true 
+      hour: '2-digit', minute: '2-digit', hour12: true
     };
     const istString = now.toLocaleString('en-IN', istOptions);
 
@@ -114,12 +114,12 @@ export async function POST(req: Request) {
     try {
       const tgToken = process.env.TELEGRAM_BOT_TOKEN;
       const tgChatId = process.env.TELEGRAM_CHAT_ID;
-      
+
       if (tgToken && tgChatId) {
         console.log(`[/api/webhooks/clerk] Attempting to send Telegram notification to ${tgChatId}...`);
-        
+
         // --- PREMIUM TELEGRAM ALERT ---
-        const message = 
+        const message =
           `🚀 <b>STRATEGIC ALERT: NEW USER ACQUISITION</b>\n\n` +
           `✨ <b>Status:</b> <code>Success / Verified</code>\n` +
           `👤 <b>Name:</b> <code>${fullName}</code>\n` +
@@ -129,8 +129,8 @@ export async function POST(req: Request) {
           `🛡️ <b>Auth Provider:</b> <code>${provider.toUpperCase()}</code>\n` +
           `🕒 <b>Time (IST):</b> <code>${istString}</code>\n\n` +
           `💰 <b>Onboarding Reward:</b> <code>10 Credits Provisioned</code>\n\n` +
-          `📈 <i>Chintu AI Ecosystem Growth +1</i>`;
-        
+          `📈 <i>Chintu Ji Ecosystem Growth +1</i>`;
+
         const tgRes = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -152,14 +152,14 @@ export async function POST(req: Request) {
     try {
       if (process.env.RESEND_API_KEY && email) {
         console.log(`[/api/webhooks/clerk] Attempting to send welcome email to ${email}...`);
-        
+
         await resend.emails.send({
-          from: 'Chintu Intelligence <welcome@getchintu.com>', // Dedicated welcome address
+          from: 'Chintu Ji <welcome@getchintu.com>', // Dedicated welcome address
           replyTo: 'contact@getchintu.com',
           to: email,
-          subject: 'Welcome to Chintu Intelligence Ecosystem 🚀',
+          subject: 'Welcome to Chintu Ji Ecosystem 🚀',
           html: getWelcomeEmailHtml(displayId, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
-          text: `Welcome to Chintu Intelligence!\n\nYour strategic interview assistant is now active. We've provisioned your account with 10 Tactical Credits to jumpstart your career growth with high-precision intelligence.\n\nInternal ID: ${displayId}\n\nNext Steps for Success:\n1. Feed the Engine: Complete your profile with your resume and JD to enable high-context response synthesis.\n2. Activate Stealth: Launch the ghost interface during your live sessions for real-time tactical guidance.\n\nLaunch Ghost Interface: ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/room\n\nQuestions or issues? Contact our strategy team at contact@getchintu.com\n\nYou are receiving this email because you recently created an account at Chintu Intelligence.\nChintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105\n\n© 2026 Chintu Intelligence Ecosystem • All Rights Reserved`
+          text: `Welcome to Chintu Ji!\n\nYour strategic interview assistant is now active. We've provisioned your account with 10 Tactical Credits to jumpstart your career growth with high-precision intelligence.\n\nInternal ID: ${displayId}\n\nNext Steps for Success:\n1. Feed the Engine: Complete your profile with your resume and JD to enable high-context response synthesis.\n2. Activate Stealth: Launch the ghost interface during your live sessions for real-time tactical guidance.\n\nLaunch Ghost Interface: ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/room\n\nQuestions or issues? Contact our strategy team at contact@getchintu.com\n\nYou are receiving this email because you recently created an account at Chintu Ji.\nChintu Ji, 123 Tech Avenue, Innovation District, CA 94105\n\n© 2026 Chintu Ji Ecosystem • All Rights Reserved`
         });
         console.log(`[/api/webhooks/clerk] Welcome email sent successfully to ${email}`);
       } else {
@@ -213,10 +213,10 @@ export async function POST(req: Request) {
 
       if (tgToken && tgChatId) {
         const now = new Date();
-        const istOptions: Intl.DateTimeFormatOptions = { 
-          timeZone: 'Asia/Kolkata', 
+        const istOptions: Intl.DateTimeFormatOptions = {
+          timeZone: 'Asia/Kolkata',
           day: '2-digit', month: '2-digit', year: 'numeric',
-          hour: '2-digit', minute: '2-digit', hour12: true 
+          hour: '2-digit', minute: '2-digit', hour12: true
         };
         const istString = now.toLocaleString('en-IN', istOptions);
 

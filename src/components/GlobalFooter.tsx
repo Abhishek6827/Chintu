@@ -115,7 +115,7 @@ export default function GlobalFooter() {
   return (
     <footer
       role="contentinfo"
-      aria-label="Chintu AI site footer"
+      aria-label="Chintu Ji site footer"
       className="bg-[var(--bg-app)] border-t border-[var(--glass-border)] pt-20 pb-10 px-6 sm:px-12 relative z-10"
     >
       <div className="max-w-7xl mx-auto">
@@ -129,10 +129,10 @@ export default function GlobalFooter() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6 }}
           >
-            <Link href="/" aria-label="Chintu AI homepage" className="inline-flex items-center gap-3 mb-5 hover:opacity-90 transition-opacity">
+            <Link href="/" aria-label="Chintu Ji homepage" className="inline-flex items-center gap-3 mb-5 hover:opacity-90 transition-opacity">
               <Image
                 src="https://www.getchintu.com/icon.png"
-                alt="Chintu AI logo"
+                alt="Chintu Ji logo"
                 width={32}
                 height={32}
                 unoptimized
@@ -157,14 +157,14 @@ export default function GlobalFooter() {
             </div>
 
             {/* Social icons */}
-            <div className="flex items-center gap-2" role="list" aria-label="Chintu AI social profiles">
+            <div className="flex items-center gap-2" role="list" aria-label="Chintu Ji social profiles">
               {socialLinks.map((s) => (
                 <a
                   key={s.label}
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`Chintu AI on ${s.label}`}
+                  aria-label={`Chintu Ji on ${s.label}`}
                   className="w-8 h-8 rounded-full border border-[var(--glass-border)] bg-[var(--panel-bg)] text-[var(--text-dim)] hover:text-indigo-500 hover:border-indigo-500/40 hover:scale-110 active:scale-95 transition-all flex items-center justify-center"
                 >
                   {s.svg}
@@ -222,7 +222,7 @@ export default function GlobalFooter() {
           transition={{ duration: 0.6 }}
           className="mt-14 sm:mt-16 text-[10px] sm:text-[11px] text-[var(--text-dim)] font-medium leading-relaxed max-w-5xl"
         >
-          Chintu AI is a real-time AI interview copilot built for serious candidates. Use it for live coding rounds on
+          Chintu Chintu Ji a real-time AI interview copilot built for serious candidates. Use it for live coding rounds on
           HackerRank, LeetCode, Codility and CoderPad, async video interviews on HireVue and micro1, behavioral and
           system design rounds on Zoom, Google Meet, Microsoft Teams and Webex, plus online proctored exams including
           GMAT, GRE, SAT, CAT, JEE, NEET and campus placement aptitude tests. Sub-200ms latency, 63+ languages, fully
@@ -233,7 +233,7 @@ export default function GlobalFooter() {
         {/* ─── Bottom bar ─────────────────────────────────── */}
         <div className="mt-14 pt-8 border-t border-[var(--glass-border)] flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-[9px] text-[var(--text-dim)] font-black uppercase tracking-[0.3em] text-center sm:text-left">
-            © {new Date().getFullYear()} Chintu AI · All rights reserved · Made with focus
+            © {new Date().getFullYear()} Chintu Ji · All rights reserved · Made with focus
           </p>
           <div className="flex flex-wrap items-center gap-4 sm:gap-6">
             <span className="text-[9px] text-[var(--text-dim)] font-black uppercase tracking-[0.2em] flex items-center gap-2">

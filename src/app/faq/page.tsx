@@ -13,8 +13,8 @@ const faqData = [
     icon: <Sparkles className="w-5 h-5" />,
     questions: [
       {
-        q: "What is Chintu Intelligence?",
-        a: "Chintu Intelligence is an AI-powered interview preparation platform that helps you master technical interviews through real-time feedback, strategic insights, and personalized question generation based on your experience level and target companies."
+        q: "What is Chintu Ji?",
+        a: "Chintu Ji is an AI-powered interview preparation platform that helps you master technical interviews through real-time feedback, strategic insights, and personalized question generation based on your experience level and target companies."
       },
       {
         q: "How do I get started?",
@@ -125,7 +125,7 @@ export default function FAQPage() {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Frequently</span> Asked Questions
             </h1>
             <p className="text-lg sm:text-xl text-[var(--text-dim)] font-bold uppercase tracking-widest max-w-2xl mx-auto">
-              Everything you need to know about Chintu Intelligence
+              Everything you need to know about Chintu Ji
             </p>
           </motion.div>
         </section>

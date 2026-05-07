@@ -14,7 +14,7 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
           <!-- Header -->
           <tr>
             <td style="padding: 40px 40px 30px 40px; text-align: center;">
-              <img src="https://www.getchintu.com/icon.png" alt="Chintu Intelligence" width="60" height="60" style="margin-bottom: 20px;">
+              <img src="https://www.getchintu.com/icon.png" alt="Chintu Ji" width="60" height="60" style="margin-bottom: 20px;">
               <h1 style="margin: 0; font-size: 28px; font-weight: 900; color: #1a1a1c; letter-spacing: -0.02em; text-transform: uppercase;">Identity Verified.</h1>
               <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.2em;">Welcome to the Ecosystem</p>
             </td>
@@ -79,11 +79,11 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
                 Questions or issues? Contact our strategy team at <a href="mailto:contact@getchintu.com" style="color: #6366f1; text-decoration: none;">contact@getchintu.com</a>
               </p>
               <p style="margin: 0 0 15px 0; font-size: 11px; color: #9ca3af; line-height: 1.5;">
-                You are receiving this email because you recently created an account at Chintu Intelligence.<br>
-                Chintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105
+                You are receiving this email because you recently created an account at Chintu Ji.<br>
+                Chintu Ji, 123 Tech Avenue, Innovation District, CA 94105
               </p>
               <p style="margin: 0; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">
-                © 2026 Chintu Intelligence Ecosystem • <a href="${appUrl}/setup" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>
+                © 2026 Chintu Ji Ecosystem • <a href="${appUrl}/setup" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>
               </p>
             </td>
           </tr>
@@ -120,7 +120,7 @@ export const getPaymentEmailHtml = (
           <!-- Header -->
           <tr>
             <td style="padding: 40px 40px 30px 40px; text-align: center;">
-              <img src="https://www.getchintu.com/icon.png" alt="Chintu Intelligence" width="60" height="60" style="margin-bottom: 20px;">
+              <img src="https://www.getchintu.com/icon.png" alt="Chintu Ji" width="60" height="60" style="margin-bottom: 20px;">
               <h1 style="margin: 0; font-size: 28px; font-weight: 900; color: #1a1a1c; letter-spacing: -0.02em; text-transform: uppercase;">CHINTU: MISSION CONTROL</h1>
               <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.2em;">TACTICAL UPGRADE VERIFIED</p>
             </td>
@@ -203,11 +203,11 @@ export const getPaymentEmailHtml = (
                 Billing questions? Contact our support team at <a href="mailto:billing@getchintu.com" style="color: #6366f1; text-decoration: none;">contact@getchintu.com</a>
               </p>
               <p style="margin: 0 0 15px 0; font-size: 11px; color: #9ca3af; line-height: 1.5;">
-                You are receiving this receipt because of a recent transaction on your Chintu Intelligence account.<br>
-                Chintu Intelligence, 123 Tech Avenue, Innovation District, CA 94105
+                You are receiving this receipt because of a recent transaction on your Chintu Ji account.<br>
+                Chintu Ji, 123 Tech Avenue, Innovation District, CA 94105
               </p>
               <p style="margin: 0; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">
-                © 2026 Chintu Intelligence Ecosystem • <a href="${appUrl}/setup" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>
+                © 2026 Chintu Ji Ecosystem • <a href="${appUrl}/setup" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>
               </p>
             </td>
           </tr>

@@ -76,42 +76,42 @@ export const AnimatedCounter: React.FC<{
   decimals = 0,
   className,
 }) => {
-  const ref = useRef<HTMLSpanElement>(null);
-  const [display, setDisplay] = useState(0);
-  const [hasRun, setHasRun] = useState(false);
+    const ref = useRef<HTMLSpanElement>(null);
+    const [display, setDisplay] = useState(0);
+    const [hasRun, setHasRun] = useState(false);
 
-  useEffect(() => {
-    if (!ref.current) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasRun) {
-          setHasRun(true);
-          const start = performance.now();
-          const animate = (now: number) => {
-            const elapsed = (now - start) / (duration * 1000);
-            const t = Math.min(1, elapsed);
-            const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
-            setDisplay(to * eased);
-            if (t < 1) requestAnimationFrame(animate);
-            else setDisplay(to);
-          };
-          requestAnimationFrame(animate);
-        }
-      },
-      { threshold: 0.35 }
+    useEffect(() => {
+      if (!ref.current) return;
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting && !hasRun) {
+            setHasRun(true);
+            const start = performance.now();
+            const animate = (now: number) => {
+              const elapsed = (now - start) / (duration * 1000);
+              const t = Math.min(1, elapsed);
+              const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+              setDisplay(to * eased);
+              if (t < 1) requestAnimationFrame(animate);
+              else setDisplay(to);
+            };
+            requestAnimationFrame(animate);
+          }
+        },
+        { threshold: 0.35 }
+      );
+      io.observe(ref.current);
+      return () => io.disconnect();
+    }, [to, duration, hasRun]);
+
+    return (
+      <span ref={ref} className={className}>
+        {prefix}
+        {display.toFixed(decimals)}
+        {suffix}
+      </span>
     );
-    io.observe(ref.current);
-    return () => io.disconnect();
-  }, [to, duration, hasRun]);
-
-  return (
-    <span ref={ref} className={className}>
-      {prefix}
-      {display.toFixed(decimals)}
-      {suffix}
-    </span>
-  );
-};
+  };
 
 /* ─── FAQ Accordion ────────────────────────────────────────── */
 export type FaqItem = { q: string; a: string };
@@ -192,11 +192,10 @@ const Cell: React.FC<{ value: CompareCell; highlight?: boolean }> = ({
   if (typeof value === "boolean") {
     return value ? (
       <div
-        className={`w-7 h-7 sm:w-9 sm:h-9 mx-auto rounded-full flex items-center justify-center ${
-          highlight
+        className={`w-7 h-7 sm:w-9 sm:h-9 mx-auto rounded-full flex items-center justify-center ${highlight
             ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
             : "bg-emerald-500/15 text-emerald-500"
-        }`}
+          }`}
       >
         <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
       </div>
@@ -208,9 +207,8 @@ const Cell: React.FC<{ value: CompareCell; highlight?: boolean }> = ({
   }
   return (
     <span
-      className={`block text-center text-[10px] sm:text-[11px] font-black uppercase tracking-widest ${
-        highlight ? "text-indigo-500" : "text-[var(--text-dim)]"
-      }`}
+      className={`block text-center text-[10px] sm:text-[11px] font-black uppercase tracking-widest ${highlight ? "text-indigo-500" : "text-[var(--text-dim)]"
+        }`}
     >
       {value}
     </span>
@@ -230,7 +228,7 @@ export const ComparisonTable: React.FC<{
           Feature
         </span>
         <span className="text-center text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">
-          Chintu AI
+          Chintu Ji
         </span>
         <span className="text-center text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">
           {competitorAName}
@@ -249,9 +247,8 @@ export const ComparisonTable: React.FC<{
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.5, delay: i * 0.04, ease: [0.22, 1, 0.36, 1] }}
-            className={`grid grid-cols-[1.4fr_1fr_1fr_1fr] sm:grid-cols-[1.6fr_1fr_1fr_1fr] gap-2 sm:gap-4 px-4 sm:px-8 py-3 sm:py-4 items-center ${
-              i !== rows.length - 1 ? "border-b border-[var(--glass-border)]" : ""
-            } hover:bg-indigo-500/5 transition-colors`}
+            className={`grid grid-cols-[1.4fr_1fr_1fr_1fr] sm:grid-cols-[1.6fr_1fr_1fr_1fr] gap-2 sm:gap-4 px-4 sm:px-8 py-3 sm:py-4 items-center ${i !== rows.length - 1 ? "border-b border-[var(--glass-border)]" : ""
+              } hover:bg-indigo-500/5 transition-colors`}
           >
             <span className="text-[10px] sm:text-[12px] font-black uppercase tracking-tight text-[var(--text-main)]">
               {row.feature}

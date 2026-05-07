@@ -12,7 +12,7 @@ export default function ContactForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus('loading');
-    
+
     try {
       const response = await fetch('/api/support', {
         method: 'POST',
@@ -46,7 +46,7 @@ export default function ContactForm() {
       >
         <ConfirmationMessage
           successMessage="Message Transmitted"
-          labelName="Chintu Intelligence"
+          labelName="Chintu Ji"
           labelMessage="Our elite support team will respond within 24 hours. Stand by."
           icon={<CheckCircle2 className="w-8 h-8 text-white" />}
           containerClassName="mb-6"
@@ -74,41 +74,41 @@ export default function ContactForm() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] ml-4">Full Name</label>
-          <input 
+          <input
             required
-            type="text" 
+            type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Ghost User" 
+            placeholder="Ghost User"
             className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
           />
         </div>
         <div className="space-y-2">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] ml-4">Email Address</label>
-          <input 
+          <input
             required
-            type="email" 
+            type="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            placeholder="contact@getchintu.com" 
+            placeholder="contact@getchintu.com"
             className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
           />
         </div>
       </div>
-      
+
       <div className="space-y-2">
         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] ml-4">Message</label>
-        <textarea 
+        <textarea
           required
           rows={4}
           value={formData.message}
           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-          placeholder="How can we help your interview strategy?" 
+          placeholder="How can we help your interview strategy?"
           className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
         />
       </div>
 
-      <button 
+      <button
         type="submit"
         disabled={status === 'loading'}
         className="w-full bg-indigo-600 text-white font-black uppercase tracking-[0.2em] text-[11px] py-5 rounded-2xl shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"

@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import { 
-  ArrowLeft, Sparkles, Upload, ChevronRight, Check, 
+import {
+  ArrowLeft, Sparkles, Upload, ChevronRight, Check,
   FileCode, Printer, Zap, Layout, FileUp, ArrowRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,16 +32,16 @@ interface ProfileData {
 export default function ResumeBuilderPage() {
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
-  
+
   const [state, setState] = useState<BuilderState>("selection");
   const [flow, setFlow] = useState<FlowType | null>(null);
-  
+
   // Input states
   const [resumeText, setResumeText] = useState("");
   const [jdText, setJdText] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
-  
+
   // Result states
   const [tailoredProfile, setTailoredProfile] = useState<ProfileData | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState("modern");
@@ -67,7 +67,7 @@ export default function ResumeBuilderPage() {
 
     setIsUploading(true);
     setUploadError("");
-    
+
     try {
       const text = await file.text();
       setResumeText(text);
@@ -146,10 +146,10 @@ export default function ResumeBuilderPage() {
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12">
         <AnimatePresence mode="wait">
-          
+
           {/* STEP 1: Selection */}
           {state === "selection" && (
-            <motion.div 
+            <motion.div
               key="selection"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -219,14 +219,14 @@ export default function ResumeBuilderPage() {
 
           {/* STEP 2: Input */}
           {state === "input" && (
-            <motion.div 
+            <motion.div
               key="input"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               className="max-w-5xl mx-auto space-y-8"
             >
-              <button 
+              <button
                 onClick={() => setState("selection")}
                 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors"
               >
@@ -244,27 +244,27 @@ export default function ResumeBuilderPage() {
                       <Zap className="w-2.5 h-2.5 inline mr-1" /> Fastest via Paste
                     </span>
                   </div>
-                  
+
                   <div className="bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-3xl p-6 space-y-4">
-                    <textarea 
+                    <textarea
                       value={resumeText}
                       onChange={(e) => setResumeText(e.target.value)}
                       placeholder={flow === "enhance" ? "Paste your current resume content here..." : "Describe your experience, skills, and projects in plain text. AI will structure it."}
                       className="w-full h-80 bg-[var(--bg-app)] border border-[var(--glass-border)] rounded-2xl p-5 text-sm text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all resize-none font-medium placeholder:text-[var(--text-dim)]/50"
                     />
-                    
+
                     {flow === "enhance" && (
                       <div className="pt-4 border-t border-[var(--glass-border)]">
                         <div className="flex items-center justify-between">
                           <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">Or Upload File (.txt only)</p>
-                          <input 
-                            type="file" 
+                          <input
+                            type="file"
                             ref={fileInputRef}
                             onChange={handleFileUpload}
                             className="hidden"
                             accept=".txt"
                           />
-                          <button 
+                          <button
                             onClick={() => fileInputRef.current?.click()}
                             disabled={isUploading}
                             className="flex items-center gap-2 px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[var(--glass-bg)]/80 transition-all active:scale-95"
@@ -282,22 +282,21 @@ export default function ResumeBuilderPage() {
                 <div className="space-y-4">
                   <h2 className="text-xl font-black uppercase tracking-tight">2. Target Job Description</h2>
                   <div className="bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-3xl p-6">
-                    <textarea 
+                    <textarea
                       value={jdText}
                       onChange={(e) => setJdText(e.target.value)}
                       placeholder="Paste the Job Description (JD) you are targeting. AI will optimize your resume for these specific requirements."
                       className="w-full h-80 bg-[var(--bg-app)] border border-[var(--glass-border)] rounded-2xl p-5 text-sm text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-purple-500/30 transition-all resize-none font-medium placeholder:text-[var(--text-dim)]/50"
                     />
-                    
+
                     <div className="mt-6">
-                      <button 
+                      <button
                         onClick={handleStartTailoring}
                         disabled={!resumeText.trim() || !jdText.trim() || isProcessing}
-                        className={`w-full py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 active:scale-[0.98] ${
-                          resumeText.trim() && jdText.trim() && !isProcessing
+                        className={`w-full py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 active:scale-[0.98] ${resumeText.trim() && jdText.trim() && !isProcessing
                             ? "bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/40 hover:scale-[1.01]"
                             : "bg-[var(--glass-bg)] text-[var(--text-dim)] cursor-not-allowed opacity-50"
-                        }`}
+                          }`}
                       >
                         {isProcessing ? "✨ Engineering Tailored Resume..." : <>✨ Build Tailored Resume <ArrowRight className="w-4 h-4" /></>}
                       </button>
@@ -311,7 +310,7 @@ export default function ResumeBuilderPage() {
 
           {/* STEP 3: Processing */}
           {state === "processing" && (
-            <motion.div 
+            <motion.div
               key="processing"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -328,7 +327,7 @@ export default function ResumeBuilderPage() {
               </div>
               <div className="text-center space-y-3">
                 <h2 className="text-3xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 animate-pulse">
-                  AI is Tailoring Your Success...
+                  Chintu Ji Tailoring Your Success...
                 </h2>
                 <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">
                   Aligning keywords • Optimizing impact • Engineering precision
@@ -339,7 +338,7 @@ export default function ResumeBuilderPage() {
 
           {/* STEP 4: Result */}
           {state === "result" && tailoredProfile && (
-            <motion.div 
+            <motion.div
               key="result"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -348,7 +347,7 @@ export default function ResumeBuilderPage() {
               {/* Left: Template & Preview Controls */}
               <div className="lg:col-span-4 space-y-8">
                 <div className="space-y-4">
-                  <button 
+                  <button
                     onClick={() => setState("input")}
                     className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors"
                   >
@@ -366,11 +365,10 @@ export default function ResumeBuilderPage() {
                     <button
                       key={tpl.id}
                       onClick={() => setSelectedTemplate(tpl.id)}
-                      className={`w-full p-6 text-left rounded-3xl border transition-all ${
-                        selectedTemplate === tpl.id 
-                          ? "bg-indigo-600/10 border-indigo-600/50 shadow-lg shadow-indigo-600/10" 
+                      className={`w-full p-6 text-left rounded-3xl border transition-all ${selectedTemplate === tpl.id
+                          ? "bg-indigo-600/10 border-indigo-600/50 shadow-lg shadow-indigo-600/10"
                           : "bg-[var(--panel-bg)] border-[var(--glass-border)] hover:border-indigo-500/30"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-black uppercase tracking-tight">{tpl.name}</span>
@@ -383,16 +381,16 @@ export default function ResumeBuilderPage() {
 
                 <div className="pt-8 border-t border-[var(--glass-border)] space-y-4">
                   <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">Export & Download</p>
-                  
+
                   {isElectron ? (
                     <div className="grid gap-3">
-                      <button 
+                      <button
                         onClick={downloadTex}
                         className="flex items-center justify-center gap-3 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
                       >
                         <FileCode className="w-4 h-4" /> Download .TEX
                       </button>
-                      <button 
+                      <button
                         onClick={openPdfPreview}
                         className="flex items-center justify-center gap-3 py-4 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
                       >
@@ -419,7 +417,7 @@ export default function ResumeBuilderPage() {
                     <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Live Interactive Preview</p>
                     <span className="text-[8px] font-black text-[var(--text-dim)] uppercase tracking-widest">A4 Layout • Optimized</span>
                   </div>
-                  
+
                   <div className="bg-white rounded-3xl shadow-2xl overflow-hidden aspect-[1/1.41] overflow-y-auto custom-scrollbar">
                     {/* Simplified Web Preview */}
                     <div className={`p-12 text-black space-y-6 ${selectedTemplate === 'classic' ? 'font-serif' : 'font-sans'}`}>

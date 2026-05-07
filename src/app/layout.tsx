@@ -11,14 +11,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default:
-      "Chintu AI | #1 Real-Time AI Interview Copilot for Online Tests, Coding Assessments & Exams",
-    template: "%s | Chintu AI",
+      "Chintu Ji | #1 Real-Time AI Interview Copilot for Online Tests, Coding Assessments & Exams",
+    template: "%s | Chintu Ji",
   },
   description:
-    "Chintu AI is the world's fastest and most affordable real-time AI interview and exam copilot. Solve live coding rounds, MCQs, technical assessments, behavioral interviews, GMAT/GRE/CAT/JEE/NEET tests and online proctored exams — invisible across Zoom, Google Meet, Microsoft Teams, HireVue, HackerRank, LeetCode and every major proctoring tool. Sub-200ms latency. 63+ languages. 7-day money-back guarantee.",
+    "Chintu Chintu Ji the world's fastest and most affordable real-time AI interview and exam copilot. Solve live coding rounds, MCQs, technical assessments, behavioral interviews, GMAT/GRE/CAT/JEE/NEET tests and online proctored exams — invisible across Zoom, Google Meet, Microsoft Teams, HireVue, HackerRank, LeetCode and every major proctoring tool. Sub-200ms latency. 63+ languages. 7-day money-back guarantee.",
   keywords: [
     // Brand
-    "Chintu AI", "Chintu Intelligence", "Chintu Interview AI",
+    "Chintu Ji", "Chintu Ji", "Chintu Interview AI",
     // Core product
     "AI Interview Assistant", "Real-Time Interview Copilot", "AI Interview Helper",
     "Stealth Interview AI", "Invisible Interview AI", "Live Interview AI",
@@ -40,25 +40,25 @@ export const metadata: Metadata = {
     "Screen Share Safe AI", "Screen Recording Safe AI", "AI Overlay",
     "Voice Capture Interview AI", "OCR Snapshot AI", "AI Coding Assistant",
   ],
-  applicationName: "Chintu AI",
-  authors: [{ name: "Chintu AI Team", url: `${SITE_URL}/about` }],
-  creator: "Chintu AI",
-  publisher: "Chintu AI",
+  applicationName: "Chintu Ji",
+  authors: [{ name: "Chintu Ji Team", url: `${SITE_URL}/about` }],
+  creator: "Chintu Ji",
+  publisher: "Chintu Ji",
   category: "Education Technology",
   formatDetection: { telephone: false, email: false, address: false },
   openGraph: {
     title:
-      "Chintu AI | Real-Time AI Copilot for Interviews, Coding Tests & Online Exams",
+      "Chintu Ji | Real-Time AI Copilot for Interviews, Coding Tests & Online Exams",
     description:
       "Sub-200ms invisible AI answers across every interview and exam platform. Built for serious candidates. 7-day money-back guarantee.",
     url: SITE_URL,
-    siteName: "Chintu AI",
+    siteName: "Chintu Ji",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Chintu AI — Real-Time AI Interview Copilot",
+        alt: "Chintu Ji — Real-Time AI Interview Copilot",
       },
     ],
     locale: "en_US",
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Chintu AI | Real-Time AI Copilot for Interviews & Exams",
+    title: "Chintu Ji | Real-Time AI Copilot for Interviews & Exams",
     description:
       "Invisible. Instant. Accurate. The fastest and most affordable AI interview copilot on the planet.",
     images: ["/og-image.png"],
@@ -107,8 +107,8 @@ const orgSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   "@id": `${SITE_URL}/#organization`,
-  name: "Chintu AI",
-  alternateName: "Chintu Intelligence",
+  name: "Chintu Ji",
+  alternateName: "Chintu Ji",
   url: SITE_URL,
   logo: `${SITE_URL}/icon.png`,
   description:
@@ -121,7 +121,7 @@ const websiteSchema = {
   "@type": "WebSite",
   "@id": `${SITE_URL}/#website`,
   url: SITE_URL,
-  name: "Chintu AI",
+  name: "Chintu Ji",
   description: "Real-time AI interview and exam copilot.",
   publisher: { "@id": `${SITE_URL}/#organization` },
   inLanguage: "en",
@@ -135,8 +135,8 @@ const websiteSchema = {
 const softwareSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "Chintu AI",
-  alternateName: "Chintu Intelligence",
+  name: "Chintu Ji",
+  alternateName: "Chintu Ji",
   operatingSystem: "Windows, macOS, Web Browser",
   applicationCategory: "EducationalApplication",
   applicationSubCategory: "Interview Preparation",

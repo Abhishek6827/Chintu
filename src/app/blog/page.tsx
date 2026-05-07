@@ -11,7 +11,7 @@ const blogPosts = [
   {
     id: 1,
     title: "Introducing Chintu Desktop App",
-    excerpt: "Experience the power of Chintu Intelligence with our native desktop application. Seamless integration, real-time feedback, and stealth mode for ultimate interview preparation.",
+    excerpt: "Experience the power of Chintu Ji with our native desktop application. Seamless integration, real-time feedback, and stealth mode for ultimate interview preparation.",
     date: "May 2026",
     readTime: "3 min read",
     category: "Product",
@@ -21,7 +21,7 @@ const blogPosts = [
   {
     id: 2,
     title: "Mastering Technical Interviews with AI",
-    excerpt: "Learn how Chintu Intelligence helps you crack FAANG interviews with real-time feedback and strategic insights.",
+    excerpt: "Learn how Chintu Ji helps you crack FAANG interviews with real-time feedback and strategic insights.",
     date: "May 2024",
     readTime: "5 min read",
     category: "Strategy",
@@ -71,7 +71,7 @@ const blogPosts = [
   {
     id: 7,
     title: "Chintu v2.5: What's New",
-    excerpt: "Discover the latest features in Chintu Intelligence v2.5 including Hyper-Intelligence mode and enhanced analytics.",
+    excerpt: "Discover the latest features in Chintu Ji v2.5 including Hyper-Intelligence mode and enhanced analytics.",
     date: "December 2023",
     readTime: "7 min read",
     category: "Updates",
@@ -186,7 +186,7 @@ export default function BlogPage() {
               Ready to Elevate Your Interview Strategy?
             </h2>
             <p className="text-xs sm:text-sm md:text-base text-[var(--text-dim)] font-bold uppercase tracking-wider sm:tracking-widest mb-6 sm:mb-8 max-w-xl mx-auto px-4">
-              Join thousands of candidates who&apos;ve mastered technical interviews with Chintu Intelligence
+              Join thousands of candidates who&apos;ve mastered technical interviews with Chintu Ji
             </p>
             <Link
               href="/sign-up"

@@ -17,7 +17,7 @@ export default function SupportPage() {
   const [sent, setSent] = useState(false);
 
   useEffect(() => {
-    document.title = "Support | Chintu Intelligence";
+    document.title = "Support | Chintu Ji";
   }, []);
 
   const handleSubmit = async () => {
@@ -96,12 +96,12 @@ export default function SupportPage() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
           >
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-indigo-500/5 shadow-xl border border-indigo-500/20">
-               <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-500" />
+              <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-500" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--text-main)] mb-2 uppercase px-2">How can we help?</h1>
             <div className="flex items-center justify-center gap-2 text-[var(--text-dim)]">
-               <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-               <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Active Response Grid: Under 24h</p>
+              <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Active Response Grid: Under 24h</p>
             </div>
           </motion.div>
 
@@ -161,11 +161,10 @@ export default function SupportPage() {
               <button
                 onClick={handleSubmit}
                 disabled={!message.trim() || sending}
-                className={`w-full py-4 sm:py-5 rounded-[1.5rem] sm:rounded-[2rem] text-[11px] sm:text-[12px] font-black uppercase tracking-[0.25em] sm:tracking-[0.3em] transition-all flex items-center justify-center gap-2 sm:gap-3 ${
-                  message.trim() && !sending
+                className={`w-full py-4 sm:py-5 rounded-[1.5rem] sm:rounded-[2rem] text-[11px] sm:text-[12px] font-black uppercase tracking-[0.25em] sm:tracking-[0.3em] transition-all flex items-center justify-center gap-2 sm:gap-3 ${message.trim() && !sending
                     ? "bg-indigo-600 text-white shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95"
                     : "bg-[var(--panel-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] cursor-not-allowed"
-                }`}
+                  }`}
               >
                 {sending ? "Processing..." : (
                   <>
@@ -176,10 +175,10 @@ export default function SupportPage() {
 
               {/* User info footer */}
               <div className="flex items-center justify-center gap-2 mt-4 sm:mt-6">
-                 <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
-                 <p className="text-[8px] sm:text-[9px] text-[var(--text-dim)] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em]">
-                   Identity: {user?.primaryEmailAddress?.emailAddress || "Unknown Unit"}
-                 </p>
+                <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
+                <p className="text-[8px] sm:text-[9px] text-[var(--text-dim)] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em]">
+                  Identity: {user?.primaryEmailAddress?.emailAddress || "Unknown Unit"}
+                </p>
               </div>
             </motion.div>
           )}

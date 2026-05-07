@@ -60,11 +60,11 @@ export default function AboutPage() {
             <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">The Future of Interviewing</span>
           </motion.div>
           <motion.h1 variants={fadeUp} custom={1} className="text-4xl sm:text-6xl font-black tracking-tighter text-[var(--text-main)] mb-6 leading-none uppercase">
-            We don&apos;t just help you prepare.<br/>
+            We don&apos;t just help you prepare.<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">We help you win.</span>
           </motion.h1>
           <motion.p variants={fadeUp} custom={2} className="text-lg text-[var(--text-dim)] max-w-2xl mx-auto leading-relaxed">
-            Chintu Intelligence is the world&apos;s most advanced ghost overlay assistant, built for high-stakes technical interviews.
+            Chintu Ji is the world&apos;s most advanced ghost overlay assistant, built for high-stakes technical interviews.
           </motion.p>
         </motion.div>
 
@@ -103,9 +103,9 @@ export default function AboutPage() {
         <section className="reveal mb-32 bg-gray-900 rounded-[50px] p-12 sm:p-20 text-white overflow-hidden relative transition-all duration-1000">
           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/20 blur-[120px] rounded-full" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/20 blur-[120px] rounded-full" />
-          
+
           <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-16 relative z-10">Advanced Functionality</h2>
-          
+
           <div className="space-y-12 relative z-10">
             <div className="flex flex-col sm:flex-row gap-6 items-start">
               <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
@@ -153,7 +153,7 @@ export default function AboutPage() {
               <thead>
                 <tr className="bg-[var(--glass-bg)]">
                   <th className="p-8 text-[10px] font-black uppercase tracking-widest text-[var(--text-dim)]">Capability</th>
-                  <th className="p-8 text-[10px] font-black uppercase tracking-widest text-indigo-500 text-center">Chintu AI</th>
+                  <th className="p-8 text-[10px] font-black uppercase tracking-widest text-indigo-500 text-center">Chintu Ji</th>
                   <th className="p-8 text-[10px] font-black uppercase tracking-widest text-[var(--text-dim)] text-center">Others</th>
                 </tr>
               </thead>

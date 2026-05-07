@@ -216,7 +216,7 @@ export async function POST(req: NextRequest) {
     if (userEmail) {
       try {
         await resend.emails.send({
-          from: 'Chintu Intelligence <welcome@getchintu.com>',
+          from: 'Chintu Ji <welcome@getchintu.com>',
           to: userEmail,
           subject: `CHINTU: ${statusLabel} VERIFIED ⚡`,
           html: getPaymentEmailHtml(

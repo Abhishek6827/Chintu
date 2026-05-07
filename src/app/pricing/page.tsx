@@ -322,7 +322,7 @@ export default function PricingPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
-        name: "Chintu Intelligence",
+        name: "Chintu Ji",
         description: `${plan.name} Plan Upgrade`,
         image: "https://www.getchintu.com/icon.png",
         order_id: order.id,
@@ -451,7 +451,7 @@ export default function PricingPage() {
             >
               <ConfirmationMessage
                 successMessage="Protocol Active"
-                labelName="Chintu AI"
+                labelName="Chintu Ji"
                 labelMessage={`Welcome to the ${successPlan?.name} tier. Your account has been initialized with ${successPlan?.credits * (quantity || 1)} credits. All premium strategic modules are now unlocked.`}
                 icon={successPlan?.id === 'elite' ? <Crown className="w-8 h-8 text-white" /> : <Trophy className="w-8 h-8 text-white" />}
                 containerClassName="mb-8"
@@ -810,7 +810,7 @@ export default function PricingPage() {
 
         <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-gray-50 flex flex-col sm:row justify-between items-center gap-4">
           <p className="text-[9px] text-gray-300 font-black uppercase tracking-[0.2em]">
-            © 2026 CHINTU INTELLIGENCE ECOSYSTEM • ALL RIGHTS RESERVED
+            © 2026 Chintu Ji ECOSYSTEM • ALL RIGHTS RESERVED
           </p>
         </div>
       </footer>

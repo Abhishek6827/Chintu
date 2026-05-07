@@ -23,14 +23,14 @@ export default function SetupPage() {
   const [mounted, setMounted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-   const [isInitiating, setIsInitiating] = useState(false);
+  const [isInitiating, setIsInitiating] = useState(false);
   const [userPlan, setUserPlan] = useState("free");
   const [isJdLocked, setIsJdLocked] = useState(false);
   const [saveJd, setSaveJd] = useState(false);
   const [showJdOnly, setShowJdOnly] = useState(false);
   const [hasSavedJd, setHasSavedJd] = useState(false);
   const [showAppPrompt, setShowAppPrompt] = useState(false);
-  
+
   const router = useRouter();
   const isElectron = typeof window !== "undefined" && (!!(window as any).electronAPI || navigator.userAgent.toLowerCase().includes('electron'));
 
@@ -54,11 +54,11 @@ export default function SetupPage() {
             // Logic based on new requirements:
             // If Profile + JD exist -> go to room
             // Robust check for actual candidate profile data (ignoring virtual fields like saved_jd)
-            const hasStructuredProfile = profileRow.profile_data && 
-              (profileRow.profile_data.name || 
-               profileRow.profile_data.experience || 
-               profileRow.profile_data.skills || 
-               profileRow.profile_data.summary);
+            const hasStructuredProfile = profileRow.profile_data &&
+              (profileRow.profile_data.name ||
+                profileRow.profile_data.experience ||
+                profileRow.profile_data.skills ||
+                profileRow.profile_data.summary);
 
             if (hasStructuredProfile) {
               setHasProfile(true);
@@ -105,15 +105,15 @@ export default function SetupPage() {
           const res = await fetch("/api/profile");
           const { profile: p } = await res.json();
           if (!p?.full_name && user.fullName) {
-             await fetch("/api/profile", {
+            await fetch("/api/profile", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ 
-                full_name: user.fullName 
+              body: JSON.stringify({
+                full_name: user.fullName
               }),
             });
           }
-        } catch {}
+        } catch { }
         setIsLoadingProfile(false);
       });
     } else if (isLoaded && !isSignedIn) {
@@ -125,7 +125,7 @@ export default function SetupPage() {
 
   // If not mounted or Clerk not loaded yet or profile still loading, show premium loading
   if (!mounted || !isLoaded || isLoadingProfile) {
-    return <NeuralLoading text="Establishing Neural Link" subtext="Chintu AI Interface" />;
+    return <NeuralLoading text="Establishing Neural Link" subtext="Chintu Ji Interface" />;
   }
 
   // Double check auth (Middleware should handle this, but for safety)
@@ -139,12 +139,12 @@ export default function SetupPage() {
       setError("Please provide a Job Description to proceed.");
       return;
     }
-    
+
     if (!hasProfile && !aboutMe.trim()) {
       setError("Please provide your profile or experience to personalize your session.");
       return;
     }
-    
+
     // Since we are in Electron (guarded by the check above), we proceed directly with setup.
 
     setIsInitiating(true);
@@ -152,7 +152,7 @@ export default function SetupPage() {
 
     if (aboutMe.trim() && !hasProfile) {
       setIsRefining(true);
-      setStatusText("✨ AI is structuring your profile...");
+      setStatusText("✨ Chintu Ji structuring your profile...");
 
       // Save JD to Supabase if toggle is ON
       if (saveJd) {
@@ -173,7 +173,7 @@ export default function SetupPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rawText: aboutMe.trim() }),
         });
-        
+
         setStatusText("🎯 Finalizing workspace...");
         sessionStorage.setItem("jobDescription", jd.trim());
         router.push("/room?jd=" + encodeURIComponent(jd.trim()));
@@ -184,7 +184,7 @@ export default function SetupPage() {
       }
     } else {
       setStatusText("🎯 Synchronizing with neural network...");
-      
+
       // Save JD to Supabase if toggle is ON (for electron/desktop too)
       if (saveJd) {
         try {
@@ -197,7 +197,7 @@ export default function SetupPage() {
           console.error("Failed to save JD:", err);
         }
       }
-      
+
       sessionStorage.setItem("jobDescription", jd.trim());
       router.push("/room?jd=" + encodeURIComponent(jd.trim()));
     }
@@ -205,7 +205,7 @@ export default function SetupPage() {
 
   const handleSkipAndStart = () => {
     // Since we are in Electron (guarded by the check above), we proceed directly with setup.
-    
+
     // Save JD to Supabase if toggle is ON
     if (saveJd) {
       fetch("/api/profile", {
@@ -214,7 +214,7 @@ export default function SetupPage() {
         body: JSON.stringify({ current_jd: jd.trim() }),
       }).catch(err => console.error("Failed to save JD on skip:", err));
     }
-    
+
     sessionStorage.setItem("jobDescription", jd.trim());
     router.push("/room?jd=" + encodeURIComponent(jd.trim()));
   };
@@ -231,23 +231,23 @@ export default function SetupPage() {
           <div className="text-center mb-8">
             <div className="w-20 h-20 mx-auto mb-6 bg-[var(--panel-bg)] rounded-[2rem] border border-[var(--glass-border)] shadow-xl flex items-center justify-center p-3 relative overflow-hidden group hover:scale-105 transition-transform">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Image 
-                src="https://www.getchintu.com/icon.png" 
-                alt="Chintu" 
-                className="w-full h-full object-contain relative z-10" 
-                width={80} 
-                height={80} 
-                unoptimized 
+              <Image
+                src="https://www.getchintu.com/icon.png"
+                alt="Chintu"
+                className="w-full h-full object-contain relative z-10"
+                width={80}
+                height={80}
+                unoptimized
               />
             </div>
             <h1 className="text-3xl font-black tracking-tight uppercase text-[var(--text-main)] leading-none">Chintu</h1>
             <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.4em] mt-2 text-center">AI Interview Assistant</p>
-             {showJdOnly && (
-               <div className="mt-6 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 animate-in fade-in slide-in-from-top-2">
-                 <p className="text-xs font-bold text-indigo-400">Welcome back!</p>
-                 <p className="text-[10px] text-indigo-400/70 font-bold uppercase tracking-wider mt-1">Enter your Job Description to continue.</p>
-               </div>
-             )}
+            {showJdOnly && (
+              <div className="mt-6 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 animate-in fade-in slide-in-from-top-2">
+                <p className="text-xs font-bold text-indigo-400">Welcome back!</p>
+                <p className="text-[10px] text-indigo-400/70 font-bold uppercase tracking-wider mt-1">Enter your Job Description to continue.</p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-5">
@@ -326,7 +326,7 @@ export default function SetupPage() {
               <div className="flex items-center justify-between ml-1">
                 <label className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">Job Description</label>
                 {userPlan !== "free" && jd && (
-                  <button 
+                  <button
                     onClick={() => setJd("")}
                     className="text-[9px] font-black text-indigo-400 hover:text-indigo-600 uppercase tracking-widest"
                   >
@@ -346,11 +346,11 @@ export default function SetupPage() {
                 placeholder={isJdLocked ? "Upgrade to Pro to change Job Description" : "Paste the job description you are interviewing for..."}
                 className={`w-full h-40 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none placeholder:text-[var(--text-dim)] shadow-sm text-[var(--text-main)] ${isJdLocked ? "opacity-60 cursor-not-allowed bg-[var(--glass-bg)]" : ""}`}
               />
-              
+
               <div className="flex items-center gap-2 mt-3 px-1">
                 {!isJdLocked && (
                   <>
-                    <button 
+                    <button
                       onClick={() => setSaveJd(!saveJd)}
                       className={`w-10 h-5 rounded-full transition-all relative ${saveJd ? 'bg-indigo-600' : 'bg-[var(--glass-border)]'}`}
                     >
@@ -362,7 +362,7 @@ export default function SetupPage() {
               </div>
 
               {isJdLocked && (
-                <button 
+                <button
                   onClick={() => router.push("/pricing")}
                   className="w-full py-2 text-[8px] font-black text-indigo-600 uppercase tracking-widest hover:bg-indigo-50 rounded-lg transition-colors"
                 >
@@ -418,51 +418,51 @@ export default function SetupPage() {
       {showAppPrompt && (
         <div className="fixed inset-0 z-[110] flex flex-col items-center justify-center bg-[var(--bg-app)] animate-in fade-in zoom-in duration-500">
           <div className="max-w-sm w-full px-8 text-center">
-             <div className="relative w-32 h-32 mx-auto mb-10">
-                <div className="absolute inset-0 bg-indigo-500/10 rounded-[2.5rem] animate-pulse" />
-                <div className="absolute inset-4 bg-[var(--panel-bg)] rounded-[2rem] shadow-xl flex items-center justify-center border border-[var(--glass-border)] overflow-hidden">
-                   <Image 
-                    src="https://www.getchintu.com/icon.png" 
-                    alt="Chintu" 
-                    width={60} 
-                    height={60} 
-                    unoptimized 
-                   />
-                </div>
-                <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white w-8 h-8 rounded-full border-4 border-white flex items-center justify-center animate-bounce">
-                   <span className="text-sm font-bold">✓</span>
-                </div>
-             </div>
-             
-             <h2 className="text-2xl font-black tracking-tight text-[var(--text-main)] uppercase mb-2 leading-none">Sync Complete!</h2>
-             <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest leading-relaxed mb-10">
-               Your interview workspace is ready. Launch the desktop app to begin.
-             </p>
-             
-             <div className="space-y-3">
-               <button 
-                 onClick={() => window.location.href = "chintu://open"}
-                 className="w-full py-4 bg-indigo-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all"
-               >
-                 Launch Desktop App
-               </button>
-               
-               <a 
-                 href="https://www.getchintu.com/download" 
-                 target="_blank"
-                 rel="noopener noreferrer"
-                 className="block w-full py-4 bg-white text-gray-400 border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-gray-900 hover:bg-gray-50 transition-all text-center"
-               >
-                 Download Chintu App
-               </a>
-             </div>
-             
-             <button 
-               onClick={() => setShowAppPrompt(false)}
-               className="mt-12 text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest hover:text-indigo-400 transition-colors"
-             >
-               Return to Setup
-             </button>
+            <div className="relative w-32 h-32 mx-auto mb-10">
+              <div className="absolute inset-0 bg-indigo-500/10 rounded-[2.5rem] animate-pulse" />
+              <div className="absolute inset-4 bg-[var(--panel-bg)] rounded-[2rem] shadow-xl flex items-center justify-center border border-[var(--glass-border)] overflow-hidden">
+                <Image
+                  src="https://www.getchintu.com/icon.png"
+                  alt="Chintu"
+                  width={60}
+                  height={60}
+                  unoptimized
+                />
+              </div>
+              <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white w-8 h-8 rounded-full border-4 border-white flex items-center justify-center animate-bounce">
+                <span className="text-sm font-bold">✓</span>
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-black tracking-tight text-[var(--text-main)] uppercase mb-2 leading-none">Sync Complete!</h2>
+            <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest leading-relaxed mb-10">
+              Your interview workspace is ready. Launch the desktop app to begin.
+            </p>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => window.location.href = "chintu://open"}
+                className="w-full py-4 bg-indigo-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all"
+              >
+                Launch Desktop App
+              </button>
+
+              <a
+                href="https://www.getchintu.com/download"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full py-4 bg-white text-gray-400 border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-gray-900 hover:bg-gray-50 transition-all text-center"
+              >
+                Download Chintu App
+              </a>
+            </div>
+
+            <button
+              onClick={() => setShowAppPrompt(false)}
+              className="mt-12 text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest hover:text-indigo-400 transition-colors"
+            >
+              Return to Setup
+            </button>
           </div>
         </div>
       )}

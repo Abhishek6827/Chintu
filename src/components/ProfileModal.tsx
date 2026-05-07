@@ -38,7 +38,7 @@ export function formatProfileContext(p: any): string {
     });
   }
   if (p.skills) {
-    const all = [...(p.skills.languages||[]), ...(p.skills.frameworks||[]), ...(p.skills.tools||[]), ...(p.skills.other||[])];
+    const all = [...(p.skills.languages || []), ...(p.skills.frameworks || []), ...(p.skills.tools || []), ...(p.skills.other || [])];
     if (all.length) lines.push(`Skills: ${all.join(", ")}`);
   }
   if (p.education?.length) {
@@ -50,12 +50,12 @@ export function formatProfileContext(p: any): string {
   return lines.join("\n");
 }
 
-export default function ProfileModal({ 
-  onClose, 
-  onSuccess, 
-  isBackgroundRefining = false 
-}: { 
-  onClose: () => void, 
+export default function ProfileModal({
+  onClose,
+  onSuccess,
+  isBackgroundRefining = false
+}: {
+  onClose: () => void,
   onSuccess?: () => void,
   isBackgroundRefining?: boolean
 }) {
@@ -69,7 +69,7 @@ export default function ProfileModal({
   const [editMode, setEditMode] = useState(false);
   const [editJson, setEditJson] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  
+
   // JD Management State
   const [isEditingJd, setIsEditingJd] = useState(false);
   const [jdText, setJdText] = useState("");
@@ -77,7 +77,7 @@ export default function ProfileModal({
 
   useEffect(() => {
     if (!user?.id) return;
-    
+
     const fetchProfile = async () => {
       try {
         const res = await fetch("/api/profile");
@@ -88,12 +88,12 @@ export default function ProfileModal({
             const dbJd = data.current_jd || "";
             const sessionJd = typeof window !== "undefined" ? sessionStorage.getItem("jobDescription") || "" : "";
             const activeJd = dbJd || sessionJd;
-            
+
             setSavedJd(activeJd);
             setJdText(activeJd);
-            
+
             // Only set the structured profile if it actually contains profile content (not just metadata like saved_jd)
-            const hasStructuredData = data.profile_data && 
+            const hasStructuredData = data.profile_data &&
               (data.profile_data.name || data.profile_data.experience || data.profile_data.skills || data.profile_data.summary);
 
             if (hasStructuredData) {
@@ -271,11 +271,10 @@ export default function ProfileModal({
             <button
               onClick={handleRefine}
               disabled={!rawText.trim() || isRefining}
-              className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${
-                rawText.trim() && !isRefining
+              className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${rawText.trim() && !isRefining
                   ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-[var(--text-main)] shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.01]"
                   : "bg-[var(--glass-bg)] text-[var(--text-dim)] cursor-not-allowed"
-              }`}
+                }`}
             >
               {isRefining ? "✨ Optimizing Profile..." : "✨ Build Profile"}
             </button>
@@ -286,20 +285,20 @@ export default function ProfileModal({
         {editMode && (
           <div className="space-y-4 animate-in fade-in">
             <div className="flex bg-[var(--input-bg)] p-1 rounded-xl">
-              <button 
+              <button
                 onClick={() => setEditJson("")}
                 className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${!editJson.startsWith('{') ? 'bg-[var(--glass-bg)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-dim)] hover:text-[var(--text-main)]'}`}
               >
                 Free Text
               </button>
-              <button 
+              <button
                 onClick={() => setEditJson(JSON.stringify(profile, null, 2))}
                 className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${editJson.startsWith('{') ? 'bg-[var(--glass-bg)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-dim)] hover:text-[var(--text-main)]'}`}
               >
                 JSON
               </button>
             </div>
-            
+
             <textarea
               value={editJson.startsWith('{') ? editJson : rawText}
               onChange={e => editJson.startsWith('{') ? setEditJson(e.target.value) : setRawText(e.target.value)}
@@ -307,8 +306,8 @@ export default function ProfileModal({
               className={`w-full h-80 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all resize-none ${editJson.startsWith('{') ? 'font-mono text-[var(--text-main)]' : 'text-[var(--text-main)] font-medium'}`}
             />
             <div className="flex gap-3">
-              <button 
-                onClick={editJson.startsWith('{') ? handleSaveEdit : handleRefine} 
+              <button
+                onClick={editJson.startsWith('{') ? handleSaveEdit : handleRefine}
                 disabled={(!editJson.startsWith('{') && !rawText.trim()) || isRefining}
                 className="flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20 active:scale-95 disabled:opacity-50"
               >
@@ -340,25 +339,25 @@ export default function ProfileModal({
                   </div>
                 )}
               </div>
-              
+
               <div className="bg-[var(--input-bg)] rounded-2xl p-4 border border-[var(--glass-border)] group relative">
                 {isEditingJd ? (
                   <div className="space-y-3">
-                    <textarea 
+                    <textarea
                       value={jdText}
                       onChange={e => setJdText(e.target.value)}
                       className="w-full h-32 bg-black/20 border border-[var(--glass-border)] rounded-xl p-3 text-xs text-[var(--text-main)] focus:outline-none focus:ring-1 focus:ring-indigo-500/50 resize-none font-medium"
                       placeholder="Paste Job Description..."
                     />
                     <div className="flex gap-2">
-                      <button 
+                      <button
                         onClick={handleSaveJd}
                         disabled={isSavingJd}
                         className="flex-1 py-2 bg-indigo-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-indigo-500 transition-all disabled:opacity-50"
                       >
                         {isSavingJd ? "Saving..." : "Save JD"}
                       </button>
-                      <button 
+                      <button
                         onClick={() => {
                           setIsEditingJd(false);
                           setJdText(savedJd);
@@ -378,16 +377,16 @@ export default function ProfileModal({
                     {userPlan === "free" ? "No JD saved." : "No JD saved. You can save one from the landing page."}
                   </p>
                 )}
-                
+
                 {userPlan === "free" && savedJd && (
-                   <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px] rounded-2xl">
-                     <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest bg-black/80 px-3 py-1.5 rounded-lg border border-indigo-500/30">
-                       Starter Limit: One-time fill
-                     </p>
-                   </div>
+                  <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px] rounded-2xl">
+                    <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest bg-black/80 px-3 py-1.5 rounded-lg border border-indigo-500/30">
+                      Starter Limit: One-time fill
+                    </p>
+                  </div>
                 )}
               </div>
-              
+
               {userPlan === "free" && (
                 <p className="text-[8px] font-bold text-[var(--text-dim)]/40 uppercase tracking-widest mt-1 ml-1 leading-relaxed">
                   Upgrade to Pro to edit or delete your Job Description.
@@ -463,7 +462,7 @@ export default function ProfileModal({
             <div className="pt-4 border-t border-[var(--glass-border)] space-y-3">
               <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">Support & Guide</p>
               <div className="grid grid-cols-2 gap-3">
-                <button 
+                <button
                   onClick={() => {
                     const supportUrl = "https://www.getchintu.com/support";
                     if (isElectron) (window as any).electronAPI.openExternal(supportUrl);
@@ -474,7 +473,7 @@ export default function ProfileModal({
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                   Support
                 </button>
-                <button 
+                <button
                   onClick={() => {
                     // Trigger onboarding event that GlobalHeader listens to
                     window.dispatchEvent(new CustomEvent('chintu-open-guide'));
@@ -490,8 +489,8 @@ export default function ProfileModal({
 
             {/* Action buttons */}
             <div className="flex gap-3 pt-2">
-              <button 
-                onClick={handleEdit} 
+              <button
+                onClick={handleEdit}
                 disabled={userPlan === "free"}
                 className={`flex-1 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-[var(--glass-border)] ${userPlan === "free" ? "bg-white/5 text-[var(--text-dim)]/30 cursor-not-allowed" : "bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)]"}`}
               >
@@ -508,7 +507,7 @@ export default function ProfileModal({
             {userPlan === "free" && (
               <div className="mt-4 bg-indigo-600/10 border border-indigo-600/20 rounded-2xl p-4 text-center">
                 <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 leading-relaxed">Unlock editing & more features</p>
-                <button 
+                <button
                   onClick={async () => {
                     const pricingUrl = "https://www.getchintu.com/pricing";
                     if (isElectron && isSignedIn) {
@@ -551,7 +550,7 @@ export default function ProfileModal({
             </div>
           </div>
           <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 animate-pulse tracking-wide mb-3 text-center px-4">
-            AI is structuring your profile...
+            Chintu Ji structuring your profile...
           </h2>
           <div className="flex gap-1.5 items-center">
             <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "0ms" }}></div>
@@ -562,11 +561,11 @@ export default function ProfileModal({
             Please wait • Making you look awesome<br />
             <span className="text-[var(--text-dim)] opacity-80 text-[0.65rem] normal-case tracking-normal">This may take a few moments</span>
           </p>
-          <button 
+          <button
             onClick={() => {
               // Dismiss UI, refinement continues in background
               onClose();
-            }} 
+            }}
             className="mt-8 px-6 py-3 rounded-xl bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-main)] text-[10px] font-black uppercase tracking-widest hover:bg-[var(--glass-bg)] transition-all active:scale-95 shadow-lg shadow-black/20"
           >
             Skip & Run in Background
