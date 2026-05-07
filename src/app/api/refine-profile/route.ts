@@ -35,6 +35,11 @@ Return ONLY valid JSON (no markdown, no code fences, no explanation) with this e
 {
   "name": "Full Name",
   "title": "Current Role / Title (e.g. 'Full Stack Developer')",
+  "email": "email@example.com",
+  "phone": "+1 234 567 890",
+  "linkedin": "linkedin.com/in/username",
+  "github": "github.com/username",
+  "portfolio": "portfolio.com",
   "summary": "A 2-3 sentence professional summary written in first person ('I am...') that captures their essence",
   "experience": [
     {

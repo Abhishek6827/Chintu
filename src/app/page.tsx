@@ -118,16 +118,16 @@ const showcaseSlides = [
 
 /* ─── Comparison data: Chintu vs alternative AI interview copilots ─── */
 const comparisonRows: CompareRow[] = [
-  { feature: "Real-Time AI Answers",      chintu: true,                  compA: true,           compB: true            },
-  { feature: "Stealth / Invisible Mode",  chintu: true,                  compA: true,           compB: true            },
-  { feature: "Conversational Human Tone", chintu: true,                  compA: false,          compB: false           },
-  { feature: "Vision OCR Snapshot",       chintu: true,                  compA: false,          compB: false           },
-  { feature: "Hold-Space Voice Capture",  chintu: true,                  compA: false,          compB: false           },
-  { feature: "Scout + Turbo Debugger",    chintu: true,                  compA: false,          compB: false           },
-  { feature: "Universal Overlay",         chintu: true,                  compA: true,           compB: true            },
-  { feature: "Latency",                   chintu: "<200ms",              compA: "~500ms",       compB: "~400ms"        },
-  { feature: "Languages Supported",       chintu: "52+",                 compA: "30+",          compB: "52+"           },
-  { feature: "Long-Form Behavioral",      chintu: true,                  compA: true,           compB: true            },
+  { feature: "Real-Time AI Answers", chintu: true, compA: true, compB: true },
+  { feature: "Stealth / Invisible Mode", chintu: true, compA: true, compB: true },
+  { feature: "Conversational Human Tone", chintu: true, compA: false, compB: false },
+  { feature: "Vision OCR Snapshot", chintu: true, compA: false, compB: false },
+  { feature: "Hold-Space Voice Capture", chintu: true, compA: false, compB: false },
+  { feature: "Scout + Turbo Debugger", chintu: true, compA: false, compB: false },
+  { feature: "Universal Overlay", chintu: true, compA: true, compB: true },
+  { feature: "Latency", chintu: "<200ms", compA: "~500ms", compB: "~400ms" },
+  { feature: "Languages Supported", chintu: "52+", compA: "30+", compB: "52+" },
+  { feature: "Long-Form Behavioral", chintu: true, compA: true, compB: true },
 ];
 
 /* ─── FAQ data ──────────────────────────────────────────── */
@@ -219,38 +219,38 @@ const howItWorksSteps = [
 
 /* ─── Platforms that Chintu works on ─────────────────────── */
 const supportedPlatforms: { name: string; icon: any; category: string; logo?: string }[] = [
-  { name: "Zoom",             icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/zoom.us/icon" },
-  { name: "Google Meet",      icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/meet.google.com/icon" },
-  { name: "Microsoft Teams",  icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/teams.microsoft.com/icon" },
-  { name: "Webex",            icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/webex.com/icon" },
-  { name: "Amazon Chime",     icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/chime.aws/icon" },
-  { name: "Skype",            icon: Video,        category: "Video",        logo: "https://cdn.brandfetch.io/skype.com/icon" },
-  { name: "HireVue",          icon: UserCheck,    category: "AI Interview", logo: "https://cdn.brandfetch.io/hirevue.com/icon" },
-  { name: "micro1",           icon: UserCheck,    category: "AI Interview", logo: "https://cdn.brandfetch.io/micro1.ai/icon" },
-  { name: "Karat",            icon: UserCheck,    category: "AI Interview", logo: "https://cdn.brandfetch.io/karat.com/icon" },
-  { name: "Interviewing.io",  icon: UserCheck,    category: "Live Coding",  logo: "https://cdn.brandfetch.io/interviewing.io/icon" },
-  { name: "HackerRank",       icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/hackerrank.com/icon" },
-  { name: "LeetCode",         icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/leetcode.com/icon" },
-  { name: "CoderPad",         icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/coderpad.io/icon" },
-  { name: "Codility",         icon: Code,         category: "Coding",       logo: "https://cdn.brandfetch.io/codility.com/icon" },
-  { name: "Pramp",            icon: Users,        category: "Peer Practice", logo: "https://cdn.brandfetch.io/pramp.com/icon" },
-  { name: "Discord",          icon: MessageSquare,category: "Chat",          logo: "https://cdn.brandfetch.io/discord.com/icon" },
+  { name: "Zoom", icon: Video, category: "Video", logo: "https://cdn.brandfetch.io/zoom.us/icon" },
+  { name: "Google Meet", icon: Video, category: "Video", logo: "https://cdn.brandfetch.io/meet.google.com/icon" },
+  { name: "Microsoft Teams", icon: Video, category: "Video", logo: "https://cdn.brandfetch.io/teams.microsoft.com/icon" },
+  { name: "Webex", icon: Video, category: "Video", logo: "https://cdn.brandfetch.io/webex.com/icon" },
+  { name: "Amazon Chime", icon: Video, category: "Video", logo: "https://cdn.brandfetch.io/chime.aws/icon" },
+  { name: "Skype", icon: Video, category: "Video", logo: "https://cdn.brandfetch.io/skype.com/icon" },
+  { name: "HireVue", icon: UserCheck, category: "AI Interview", logo: "https://cdn.brandfetch.io/hirevue.com/icon" },
+  { name: "micro1", icon: UserCheck, category: "AI Interview", logo: "https://cdn.brandfetch.io/micro1.ai/icon" },
+  { name: "Karat", icon: UserCheck, category: "AI Interview", logo: "https://cdn.brandfetch.io/karat.com/icon" },
+  { name: "Interviewing.io", icon: UserCheck, category: "Live Coding", logo: "https://cdn.brandfetch.io/interviewing.io/icon" },
+  { name: "HackerRank", icon: Code, category: "Coding", logo: "https://cdn.brandfetch.io/hackerrank.com/icon" },
+  { name: "LeetCode", icon: Code, category: "Coding", logo: "https://cdn.brandfetch.io/leetcode.com/icon" },
+  { name: "CoderPad", icon: Code, category: "Coding", logo: "https://cdn.brandfetch.io/coderpad.io/icon" },
+  { name: "Codility", icon: Code, category: "Coding", logo: "https://cdn.brandfetch.io/codility.com/icon" },
+  { name: "Pramp", icon: Users, category: "Peer Practice", logo: "https://cdn.brandfetch.io/pramp.com/icon" },
+  { name: "Discord", icon: MessageSquare, category: "Chat", logo: "https://cdn.brandfetch.io/discord.com/icon" },
 ];
 
 /* ─── Companies whose candidates use Chintu ──────────────── */
 const hiredAtCompanies = [
-  { name: "Google",        logo: "https://cdn.brandfetch.io/google.com/icon" },
-  { name: "Meta",          logo: "https://cdn.brandfetch.io/meta.com/icon" },
-  { name: "Amazon",        logo: "https://cdn.brandfetch.io/amazon.com/icon" },
-  { name: "Microsoft",     logo: "https://cdn.brandfetch.io/microsoft.com/icon" },
-  { name: "Apple",         logo: "https://cdn.brandfetch.io/apple.com/icon" },
-  { name: "Netflix",       logo: "https://cdn.brandfetch.io/netflix.com/icon" },
-  { name: "Uber",          logo: "https://cdn.brandfetch.io/uber.com/icon" },
-  { name: "Tesla",         logo: "https://cdn.brandfetch.io/tesla.com/icon" },
-  { name: "Stripe",        logo: "https://cdn.brandfetch.io/stripe.com/icon" },
+  { name: "Google", logo: "https://cdn.brandfetch.io/google.com/icon" },
+  { name: "Meta", logo: "https://cdn.brandfetch.io/meta.com/icon" },
+  { name: "Amazon", logo: "https://cdn.brandfetch.io/amazon.com/icon" },
+  { name: "Microsoft", logo: "https://cdn.brandfetch.io/microsoft.com/icon" },
+  { name: "Apple", logo: "https://cdn.brandfetch.io/apple.com/icon" },
+  { name: "Netflix", logo: "https://cdn.brandfetch.io/netflix.com/icon" },
+  { name: "Uber", logo: "https://cdn.brandfetch.io/uber.com/icon" },
+  { name: "Tesla", logo: "https://cdn.brandfetch.io/tesla.com/icon" },
+  { name: "Stripe", logo: "https://cdn.brandfetch.io/stripe.com/icon" },
   { name: "Goldman Sachs", logo: "https://cdn.brandfetch.io/goldmansachs.com/icon" },
-  { name: "McKinsey",      logo: "https://cdn.brandfetch.io/mckinsey.com/icon" },
-  { name: "Deloitte",      logo: "https://cdn.brandfetch.io/deloitte.com/icon" },
+  { name: "McKinsey", logo: "https://cdn.brandfetch.io/mckinsey.com/icon" },
+  { name: "Deloitte", logo: "https://cdn.brandfetch.io/deloitte.com/icon" },
 ];
 
 /* ─── Power Tools spotlight (Mock + Resume) ───────────────
@@ -398,6 +398,28 @@ const creatorTiers = [
 export default function LandingPage() {
   const { isSignedIn, isLoaded, user } = useUser();
   const router = useRouter();
+
+  // Smart launcher used by every "Open Dashboard / Start Practising / Build My Resume" CTA.
+  // - Signed-in: try to open the Chintu Electron app via the chintu:// deep link, fall
+  //   back to /setup after 500ms if the OS handler is missing.
+  // - Signed-out: send the visitor to /sign-up first.
+  const launchApp = React.useCallback(() => {
+    if (!isSignedIn) {
+      router.push("/sign-up");
+      return;
+    }
+    let deepLink = "chintu://open";
+    try {
+      deepLink += `?source=web&u=${encodeURIComponent(user?.id || "")}`;
+    } catch {
+      // Ignore encoding errors and proceed with the bare deep link.
+    }
+    window.location.href = deepLink;
+    setTimeout(() => {
+      router.push("/setup");
+    }, 500);
+  }, [isSignedIn, user, router]);
+
   const [mounted, setMounted] = React.useState(false);
   const [userCredits, setUserCredits] = React.useState<number | null>(null);
   const [userPlan, setUserPlan] = React.useState<string>("");
@@ -1109,12 +1131,13 @@ export default function LandingPage() {
                   Get Chintu Now <ArrowRight className="w-4 h-4" />
                 </Link>
               ) : (
-                <Link
-                  href="/dashboard"
+                <button
+                  type="button"
+                  onClick={launchApp}
                   className="px-7 py-3.5 bg-indigo-600 text-white font-black uppercase tracking-[0.25em] text-[10px] rounded-xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-3"
                 >
                   Open Dashboard <ArrowRight className="w-4 h-4" />
-                </Link>
+                </button>
               )}
               <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.25em] text-[var(--text-dim)]">
                 No download required for web — overlay optional
@@ -1576,12 +1599,14 @@ export default function LandingPage() {
                       ))}
                     </ul>
 
-                    <Link
-                      href={tool.href}
+                    <button
+                      type="button"
+                      onClick={launchApp}
+                      aria-label={`${tool.cta} — open the Chintu app`}
                       className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500 hover:border-indigo-500 hover:text-white text-indigo-400 font-black uppercase tracking-[0.25em] text-[10px] transition-colors"
                     >
                       {tool.cta} <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
+                    </button>
                   </div>
                 </motion.div>
               ))}
@@ -1799,11 +1824,10 @@ export default function LandingPage() {
                 <button
                   onClick={() => setPricingMode("monthly")}
                   aria-pressed={pricingMode === "monthly"}
-                  className={`relative px-5 sm:px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${
-                    pricingMode === "monthly"
+                  className={`relative px-5 sm:px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${pricingMode === "monthly"
                       ? "text-white"
                       : "text-[var(--text-dim)] hover:text-[var(--text-main)]"
-                  }`}
+                    }`}
                 >
                   {pricingMode === "monthly" && (
                     <motion.span
@@ -1817,11 +1841,10 @@ export default function LandingPage() {
                 <button
                   onClick={() => setPricingMode("yearly")}
                   aria-pressed={pricingMode === "yearly"}
-                  className={`relative px-5 sm:px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.25em] transition-colors flex items-center gap-2 ${
-                    pricingMode === "yearly"
+                  className={`relative px-5 sm:px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.25em] transition-colors flex items-center gap-2 ${pricingMode === "yearly"
                       ? "text-white"
                       : "text-[var(--text-dim)] hover:text-[var(--text-main)]"
-                  }`}
+                    }`}
                 >
                   {pricingMode === "yearly" && (
                     <motion.span
@@ -1851,11 +1874,10 @@ export default function LandingPage() {
                     viewport={{ once: true, amount: 0.15 }}
                     transition={{ duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                     whileHover={{ y: -8 }}
-                    className={`relative rounded-[1.5rem] sm:rounded-[2.5rem] border p-6 sm:p-8 backdrop-blur-xl flex flex-col ${
-                      plan.highlighted
+                    className={`relative rounded-[1.5rem] sm:rounded-[2.5rem] border p-6 sm:p-8 backdrop-blur-xl flex flex-col ${plan.highlighted
                         ? "border-indigo-500/40 bg-[var(--panel-bg)] shadow-2xl shadow-indigo-500/20 md:scale-[1.04]"
                         : "border-[var(--glass-border)] bg-[var(--panel-bg)]/80 hover:border-indigo-500/30"
-                    } transition-colors`}
+                      } transition-colors`}
                   >
                     {plan.highlighted && (
                       <>
@@ -1932,11 +1954,10 @@ export default function LandingPage() {
                     {/* CTA */}
                     <Link
                       href={plan.href}
-                      className={`block text-center px-5 py-3.5 rounded-xl font-black uppercase tracking-[0.25em] text-[10px] transition-colors ${
-                        plan.highlighted
+                      className={`block text-center px-5 py-3.5 rounded-xl font-black uppercase tracking-[0.25em] text-[10px] transition-colors ${plan.highlighted
                           ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:bg-indigo-500"
                           : "border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:border-indigo-500 hover:text-white"
-                      }`}
+                        }`}
                     >
                       {plan.cta} <ArrowRight className="inline-block w-3.5 h-3.5 ml-1.5" />
                     </Link>
@@ -2008,11 +2029,10 @@ export default function LandingPage() {
                   viewport={{ once: true, amount: 0.2 }}
                   transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                   whileHover={{ y: -6, scale: 1.02 }}
-                  className={`relative rounded-[1.5rem] sm:rounded-[2rem] border p-6 sm:p-8 backdrop-blur-xl flex flex-col items-center text-center ${
-                    tier.highlighted
+                  className={`relative rounded-[1.5rem] sm:rounded-[2rem] border p-6 sm:p-8 backdrop-blur-xl flex flex-col items-center text-center ${tier.highlighted
                       ? "border-indigo-500/40 bg-[var(--panel-bg)] shadow-2xl shadow-indigo-500/20 md:scale-105"
                       : "border-[var(--glass-border)] bg-[var(--panel-bg)]/80 hover:border-rose-500/30"
-                  } transition-colors`}
+                    } transition-colors`}
                 >
                   {tier.highlighted && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-amber-400 to-rose-500 text-white text-[8px] font-black uppercase tracking-[0.3em] rounded-full shadow-lg whitespace-nowrap">
@@ -2161,12 +2181,13 @@ export default function LandingPage() {
                         <Rocket className="w-4 h-4" /> Start Free Now <ArrowRight className="w-4 h-4" />
                       </Link>
                     ) : (
-                      <Link
-                        href="/dashboard"
+                      <button
+                        type="button"
+                        onClick={launchApp}
                         className="px-7 py-4 bg-indigo-600 text-white font-black uppercase tracking-[0.25em] text-[11px] rounded-xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-3"
                       >
                         <Rocket className="w-4 h-4" /> Open Dashboard <ArrowRight className="w-4 h-4" />
-                      </Link>
+                      </button>
                     )}
                     <Link
                       href="/pricing"

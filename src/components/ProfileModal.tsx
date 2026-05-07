@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 
-import { Sparkles } from "lucide-react";
+import { Sparkles, Download, FileCode, Printer } from "lucide-react";
+import { generateLaTeX } from "@/utils/latex-converter";
 
 const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
@@ -486,6 +487,47 @@ export default function ProfileModal({
                   Operation Guide
                 </button>
               </div>
+            </div>
+
+            {/* Export Resume Section */}
+            <div className="pt-4 border-t border-[var(--glass-border)] space-y-3">
+              <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">📄 Export ATS Resume</p>
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={() => {
+                    if (!profile) return;
+                    const tex = generateLaTeX(profile);
+                    const blob = new Blob([tex], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${(profile.name || 'Resume').replace(/\s+/g, '_')}.tex`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="flex items-center justify-center gap-2 py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-[var(--glass-border)]"
+                >
+                  <FileCode className="w-3 h-3" />
+                  Download .TEX
+                </button>
+                <button 
+                  onClick={() => {
+                    const previewUrl = "/resume-preview";
+                    const fullUrl = `${window.location.origin}${previewUrl}`;
+                    if (isElectron) (window as any).electronAPI.openExternal(fullUrl);
+                    else window.open(previewUrl, "_blank");
+                  }}
+                  className="flex items-center justify-center gap-2 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-emerald-500/20"
+                >
+                  <Printer className="w-3 h-3" />
+                  Download PDF
+                </button>
+              </div>
+              <p className="text-[8px] font-bold text-[var(--text-dim)] opacity-50 uppercase tracking-widest text-center">
+                PDF is generated via LaTeX for maximum ATS compatibility.
+              </p>
             </div>
 
             {/* Action buttons */}
