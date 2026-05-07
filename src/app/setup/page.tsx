@@ -152,7 +152,7 @@ export default function SetupPage() {
 
     if (aboutMe.trim() && !hasProfile) {
       setIsRefining(true);
-      setStatusText("✨ Chintu Ji structuring your profile...");
+      setStatusText("✨ Chintu Ji is structuring your profile...");
 
       // Save JD to Supabase if toggle is ON
       if (saveJd) {

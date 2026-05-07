@@ -272,8 +272,8 @@ export default function ProfileModal({
               onClick={handleRefine}
               disabled={!rawText.trim() || isRefining}
               className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${rawText.trim() && !isRefining
-                  ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-[var(--text-main)] shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.01]"
-                  : "bg-[var(--glass-bg)] text-[var(--text-dim)] cursor-not-allowed"
+                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-[var(--text-main)] shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.01]"
+                : "bg-[var(--glass-bg)] text-[var(--text-dim)] cursor-not-allowed"
                 }`}
             >
               {isRefining ? "✨ Optimizing Profile..." : "✨ Build Profile"}
@@ -550,7 +550,7 @@ export default function ProfileModal({
             </div>
           </div>
           <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 animate-pulse tracking-wide mb-3 text-center px-4">
-            Chintu Ji structuring your profile...
+            Chintu Ji is structuring your profile...
           </h2>
           <div className="flex gap-1.5 items-center">
             <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "0ms" }}></div>

@@ -1652,7 +1652,7 @@ export default function RoomPage() {
                 <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
                 <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "300ms" }}></div>
               </div>
-              <span className="font-bold tracking-tight">Chintu Ji optimizing your profile in the background...</span>
+              <span className="font-bold tracking-tight">Chintu Ji is optimizing your profile in the background...</span>
             </div>
             <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Almost Done</span>
           </div>

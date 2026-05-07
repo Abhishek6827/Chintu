@@ -294,8 +294,8 @@ export default function ResumeBuilderPage() {
                         onClick={handleStartTailoring}
                         disabled={!resumeText.trim() || !jdText.trim() || isProcessing}
                         className={`w-full py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 active:scale-[0.98] ${resumeText.trim() && jdText.trim() && !isProcessing
-                            ? "bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/40 hover:scale-[1.01]"
-                            : "bg-[var(--glass-bg)] text-[var(--text-dim)] cursor-not-allowed opacity-50"
+                          ? "bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/40 hover:scale-[1.01]"
+                          : "bg-[var(--glass-bg)] text-[var(--text-dim)] cursor-not-allowed opacity-50"
                           }`}
                       >
                         {isProcessing ? "✨ Engineering Tailored Resume..." : <>✨ Build Tailored Resume <ArrowRight className="w-4 h-4" /></>}
@@ -327,7 +327,7 @@ export default function ResumeBuilderPage() {
               </div>
               <div className="text-center space-y-3">
                 <h2 className="text-3xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 animate-pulse">
-                  Chintu Ji Tailoring Your Success...
+                  Chintu Ji is Tailoring Your Success...
                 </h2>
                 <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">
                   Aligning keywords • Optimizing impact • Engineering precision
@@ -366,8 +366,8 @@ export default function ResumeBuilderPage() {
                       key={tpl.id}
                       onClick={() => setSelectedTemplate(tpl.id)}
                       className={`w-full p-6 text-left rounded-3xl border transition-all ${selectedTemplate === tpl.id
-                          ? "bg-indigo-600/10 border-indigo-600/50 shadow-lg shadow-indigo-600/10"
-                          : "bg-[var(--panel-bg)] border-[var(--glass-border)] hover:border-indigo-500/30"
+                        ? "bg-indigo-600/10 border-indigo-600/50 shadow-lg shadow-indigo-600/10"
+                        : "bg-[var(--panel-bg)] border-[var(--glass-border)] hover:border-indigo-500/30"
                         }`}
                     >
                       <div className="flex items-center justify-between mb-2">
