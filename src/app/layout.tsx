@@ -11,14 +11,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default:
-      "Chintu Ji | #1 Real-Time AI Interview Copilot for Online Tests, Coding Assessments & Exams",
+      "Chintu Ji — AI Interview Copilot | Real-Time AI for Coding Tests, Online Exams & Assessments",
     template: "%s | Chintu Ji",
   },
   description:
-    "Chintu Ji the world's fastest and most affordable real-time AI interview and exam copilot. Solve live coding rounds, MCQs, technical assessments, behavioral interviews, GMAT/GRE/CAT/JEE/NEET tests and online proctored exams — invisible across Zoom, Google Meet, Microsoft Teams, HireVue, HackerRank, LeetCode and every major proctoring tool. Sub-200ms latency. 63+ languages. 7-day money-back guarantee.",
+    "Chintu Ji (getchintu.com) is the world's fastest and most affordable real-time AI interview and exam copilot. Solve live coding rounds, MCQs, technical assessments, behavioral interviews, GMAT/GRE/CAT/JEE/NEET tests and online proctored exams — invisible across Zoom, Google Meet, Microsoft Teams, HireVue, HackerRank, LeetCode and every major proctoring tool. Sub-200ms latency. 63+ languages. 7-day money-back guarantee.",
   keywords: [
     // Brand
-    "Chintu Ji", "Chintu Interview AI",
+    "Chintu Ji", "Chintu AI", "Chintu Ji AI", "Chintu Interview AI", "getchintu", "getchintu.com",
     // Core product
     "AI Interview Assistant", "Real-Time Interview Copilot", "AI Interview Helper",
     "Stealth Interview AI", "Invisible Interview AI", "Live Interview AI",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     description:
       "Sub-200ms invisible AI answers across every interview and exam platform. Built for serious candidates. 7-day money-back guarantee.",
     url: SITE_URL,
-    siteName: "Chintu Ji",
+    siteName: "Chintu Ji — AI Interview Copilot",
     images: [
       {
         url: "/og-image.png",
@@ -108,12 +108,29 @@ const orgSchema = {
   "@type": "Organization",
   "@id": `${SITE_URL}/#organization`,
   name: "Chintu Ji",
-  alternateName: "Chintu Ji",
+  alternateName: ["Chintu AI", "Chintu Ji AI", "getchintu", "Chintu Ji Interview AI"],
   url: SITE_URL,
   logo: `${SITE_URL}/icon.png`,
+  image: `${SITE_URL}/og-image.png`,
   description:
-    "World's most affordable real-time AI copilot for interviews, online exams and technical assessments.",
+    "World's most affordable real-time AI copilot for interviews, online exams and technical assessments. Not the 2009 Bollywood movie.",
   email: "contact@getchintu.com",
+  foundingDate: "2024",
+  // TODO: Add sameAs social links here once profiles are created
+  // sameAs: ["https://x.com/chintuai", "https://youtube.com/@ChintuJiAI"],
+  contactPoint: {
+    "@type": "ContactPoint",
+    email: "contact@getchintu.com",
+    contactType: "customer support",
+    availableLanguage: ["English", "Hindi"],
+  },
+  brand: {
+    "@type": "Brand",
+    name: "Chintu Ji",
+    alternateName: "Chintu AI",
+    logo: `${SITE_URL}/icon.png`,
+    description: "AI-powered interview copilot software",
+  },
 };
 
 const websiteSchema = {
@@ -121,8 +138,9 @@ const websiteSchema = {
   "@type": "WebSite",
   "@id": `${SITE_URL}/#website`,
   url: SITE_URL,
-  name: "Chintu Ji",
-  description: "Real-time AI interview and exam copilot.",
+  name: "Chintu Ji — AI Interview Copilot",
+  alternateName: ["Chintu AI", "getchintu"],
+  description: "Real-time AI interview and exam copilot software by Chintu Ji.",
   publisher: { "@id": `${SITE_URL}/#organization` },
   inLanguage: "en",
   potentialAction: {
@@ -135,14 +153,16 @@ const websiteSchema = {
 const softwareSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "Chintu Ji",
-  alternateName: "Chintu Ji",
+  name: "Chintu Ji — AI Interview Copilot",
+  alternateName: ["Chintu AI", "Chintu Ji AI", "Chintu Ji Interview App"],
   operatingSystem: "Windows, macOS, Web Browser",
   applicationCategory: "EducationalApplication",
   applicationSubCategory: "Interview Preparation",
   url: SITE_URL,
+  downloadUrl: `${SITE_URL}/download`,
+  screenshot: `${SITE_URL}/og-image.png`,
   description:
-    "Stealth real-time AI copilot delivering sub-200ms accurate answers for interviews, online exams and technical assessments across every major platform.",
+    "Stealth real-time AI copilot delivering sub-200ms accurate answers for interviews, online exams and technical assessments across every major platform. Not a movie — this is AI software.",
   offers: {
     "@type": "Offer",
     price: "0",
