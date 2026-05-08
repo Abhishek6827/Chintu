@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, ArrowRight, Sparkles, BookOpen } from 'lucide-react';
 import { Meteors } from '@/components/magicui/meteors';
-import GlobalFooter from '@/components/GlobalFooter';
 
 const blogPosts = [
   {

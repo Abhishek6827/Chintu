@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Meteors } from "@/components/magicui/meteors";
 
 interface SubscriptionData {

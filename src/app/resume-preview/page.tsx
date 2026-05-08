@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import NeuralLoading from "@/components/NeuralLoading";
 
 export default function ResumePreviewPage() {
@@ -10,8 +10,6 @@ export default function ResumePreviewPage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const template = searchParams.get("template") || "modern";
 
   useEffect(() => {
     if (!isLoaded) return;

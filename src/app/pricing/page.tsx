@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
 import { VideoText } from "@/components/magicui/video-text";
 import ConfirmationMessage from "@/components/animata/feature-cards/confirmation-message";
-import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
+
 import { useThemeToggle } from "@/hooks/useThemeToggle";
 import SyncedUserButton from "@/components/SyncedUserButton";
 // import { StripeCheckoutButton } from "@/components/StripeCheckoutButton";
@@ -255,6 +255,7 @@ export default function PricingPage() {
   // Conversion rate (approx 1 USD = 85 INR for Razorpay processing)
   const USD_TO_INR = 85;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleBack = () => {
     const jd = sessionStorage.getItem("jobDescription");
     router.push(jd ? "/room" : "/setup");
@@ -410,8 +411,10 @@ export default function PricingPage() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { currentTheme, toggleTheme } = useThemeToggle();
 
   if (!isLoaded) return <div className="h-screen bg-[var(--bg-app)] flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;

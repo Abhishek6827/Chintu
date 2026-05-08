@@ -11,9 +11,8 @@ import {
   Brain, Activity, BarChart3
 } from "lucide-react";
 
-import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
+
 import { useThemeToggle } from "@/hooks/useThemeToggle";
-import SyncedUserButton from '@/components/SyncedUserButton';
 import ContactForm from '@/components/ContactForm';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { MarqueeReviews } from '@/components/MarqueeReviews';
@@ -431,9 +430,11 @@ export default function LandingPage() {
     setTimeout(() => {
       router.push(isElectron ? "/setup" : "/download");
     }, 500);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn, user, router]);
 
   const [mounted, setMounted] = React.useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [userCredits, setUserCredits] = React.useState<number | null>(null);
   const [userPlan, setUserPlan] = React.useState<string>("");
   const [currentShowcase, setCurrentShowcase] = React.useState(0);
@@ -517,6 +518,7 @@ export default function LandingPage() {
     }
   }, [isLoaded, isElectron, isSignedIn, router]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { currentTheme, toggleTheme } = useThemeToggle();
 
 

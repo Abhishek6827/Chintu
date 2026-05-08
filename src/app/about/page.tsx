@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { Shield, Zap, Brain, Target, Lock, Sparkles, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Shield, Zap, Brain, Target, Lock, Sparkles, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Meteors } from '@/components/magicui/meteors';
 

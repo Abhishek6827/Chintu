@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { FileText, ArrowLeft, AlertCircle, Ban, Globe, Sparkles } from 'lucide-react';
+import { FileText, AlertCircle, Ban, Globe, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Meteors } from '@/components/magicui/meteors';
 

@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import Link from "next/link";
-import Image from "next/image";
-import { ArrowLeft, Send, MessageCircle, Clock, CheckCircle2 } from "lucide-react";
+import { Send, MessageCircle, Clock, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Meteors } from "@/components/magicui/meteors";
 import ConfirmationMessage from "@/components/animata/feature-cards/confirmation-message";

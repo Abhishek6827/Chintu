@@ -12,7 +12,7 @@ import { useThemeToggle } from "@/hooks/useThemeToggle";
 import SyncedUserButton from "@/components/SyncedUserButton";
 
 export default function WebHeader() {
-  const { isSignedIn, isLoaded, user } = useUser();
+  const { isSignedIn, user } = useUser();
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
