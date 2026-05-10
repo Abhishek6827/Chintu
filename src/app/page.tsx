@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useUser } from "@clerk/nextjs";
@@ -13,22 +13,26 @@ import {
 
 
 import { useThemeToggle } from "@/hooks/useThemeToggle";
-import ContactForm from '@/components/ContactForm';
-import { TestimonialsSection } from '@/components/TestimonialsSection';
-import { MarqueeReviews } from '@/components/MarqueeReviews';
-import { TextReveal } from '@/components/magicui/text-reveal';
-import { Meteors } from '@/components/magicui/meteors';
-import { VideoText } from '@/components/magicui/video-text';
+import dynamic from 'next/dynamic';
+
+const ContactForm = dynamic(() => import('@/components/ContactForm'), { ssr: false });
+const TestimonialsSection = dynamic(() => import('@/components/TestimonialsSection').then(mod => mod.TestimonialsSection), { ssr: false });
+const MarqueeReviews = dynamic(() => import('@/components/MarqueeReviews').then(mod => mod.MarqueeReviews), { ssr: false });
+const TextReveal = dynamic(() => import('@/components/magicui/text-reveal').then(mod => mod.TextReveal), { ssr: false });
+const Meteors = dynamic(() => import('@/components/magicui/meteors').then(mod => mod.Meteors), { ssr: false });
+const VideoText = dynamic(() => import('@/components/magicui/video-text').then(mod => mod.VideoText), { ssr: false });
 import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
-import CardSpread from '@/components/animata/card/card-spread';
+const CardSpread = dynamic(() => import('@/components/animata/card/card-spread'), { ssr: false });
+
 import {
   ScrollProgressBar,
   AnimatedCounter,
-  FaqAccordion,
-  ComparisonTable,
   type FaqItem,
   type CompareRow,
 } from '@/components/LandingEnhancements';
+
+const FaqAccordion = dynamic(() => import('@/components/LandingEnhancements').then(mod => mod.FaqAccordion), { ssr: false });
+const ComparisonTable = dynamic(() => import('@/components/LandingEnhancements').then(mod => mod.ComparisonTable), { ssr: false });
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 const showcaseSlides = [
@@ -399,6 +403,22 @@ const creatorTiers = [
 export default function LandingPage() {
   const { isSignedIn, isLoaded, user } = useUser();
   const router = useRouter();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && videoRef.current) {
+          videoRef.current.play().catch(e => console.log("Video auto-play prevented:", e));
+        } else if (!entry.isIntersecting && videoRef.current) {
+          videoRef.current.pause();
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    if (videoRef.current) observer.observe(videoRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Smart launcher used by every "Open Dashboard / Start Practising / Build My Resume" CTA.
   // - Signed-in: try to open the Chintu Electron app via the chintu:// deep link, fall
@@ -685,8 +705,9 @@ export default function LandingPage() {
                   {/* Looping Video Thumbnail */}
                   <div className="relative w-28 h-20 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-white/10">
                     <video
+                      ref={videoRef}
                       src="/1.mp4"
-                      autoPlay
+                      preload="none"
                       loop
                       muted
                       playsInline
