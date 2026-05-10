@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
-export const dynamic = "force-dynamic";
 
 const SITE_URL = "https://www.getchintu.com";
 
@@ -192,55 +191,21 @@ const softwareSchema = {
 };
 
 import { ClerkProvider } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
-import { createAdminClient } from "@/utils/supabase/server";
 import UpdateNotification from "@/components/UpdateNotification";
+import ThemeProvider from "@/components/ThemeProvider";
 import GlobalHeader from "@/components/GlobalHeader";
 import WebHeader from "@/components/WebHeader";
 import GlobalFooter from "@/components/GlobalFooter";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let userId = null;
-  try {
-    const authData = await auth();
-    userId = authData.userId;
-  } catch {
-    // This happens during 404s for static assets where middleware is skipped
-    console.warn("Layout: Auth context not available for this request");
-  }
-  let themeClass = ""; // Default light
-
-  if (userId) {
-    try {
-      const supabase = createAdminClient();
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("plan, theme")
-        .eq("id", userId)
-        .maybeSingle();
-
-      if (profile) {
-        const plan = (profile.plan || "free").toLowerCase();
-        if (plan === "pro" || plan === "elite") {
-          // Premium users default to dark unless explicitly light
-          if (profile.theme !== "light") {
-            themeClass = "dark-mode";
-          }
-        }
-      }
-    } catch (err) {
-      console.error("Layout: Theme fetch error:", err);
-    }
-  }
-
   return (
     <ClerkProvider>
-      <html lang="en" className={`${themeClass} relative`}>
+      <html lang="en" className="relative">
         <head>
           <link rel="icon" href="https://www.getchintu.com/icon.png" />
           {/* Performance: hint preconnects for critical third-parties */}
@@ -266,6 +231,7 @@ export default async function RootLayout({
           />
         </head>
         <body className={`${inter.className} bg-transparent h-screen flex flex-col relative`}>
+          <ThemeProvider />
           <GlobalHeader />
           <WebHeader />
           <main id="main-content" className="flex-1 min-h-0 relative overflow-y-auto overflow-x-hidden">
