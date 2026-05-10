@@ -145,11 +145,10 @@ export default function GlobalFooter() {
           >
             <Link href="/" aria-label="Chintu Ji homepage" className="inline-flex items-center gap-3 mb-5 hover:opacity-90 transition-opacity">
               <Image
-                src="https://www.getchintu.com/icon.png"
+                src="/icon.png"
                 alt="Chintu Ji logo"
                 width={32}
                 height={32}
-                unoptimized
               />
               <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)] dark:text-white">
                 Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">AI</span>

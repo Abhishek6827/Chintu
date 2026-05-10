@@ -182,12 +182,11 @@ export default function GlobalHeader() {
           >
             <div className="flex items-center justify-center w-8 h-8 hover:scale-110 transition-transform">
               <Image
-                src="https://www.getchintu.com/icon.png"
+                src="/icon.png"
                 alt="Chintu"
                 className="w-full h-full object-contain"
                 width={32}
                 height={32}
-                unoptimized
               />
             </div>
             <span className="text-sm font-black tracking-tighter uppercase text-[var(--text-main)] ml-2 hidden min-[400px]:inline">

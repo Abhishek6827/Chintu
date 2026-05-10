@@ -94,6 +94,7 @@ const ReviewCard = ({
           height={32}
           alt={name}
           src={img}
+          loading="lazy"
           unoptimized
         />
         <div className="flex flex-col">

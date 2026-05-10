@@ -652,6 +652,7 @@ export default function LandingPage() {
                         alt={`Chintu Ji candidate review avatar ${i}`}
                         width={32}
                         height={32}
+                        loading="lazy"
                         decoding="async"
                         unoptimized
                       />
@@ -777,7 +778,6 @@ export default function LandingPage() {
                         priority={currentShowcase === 0}
                         fetchPriority={currentShowcase === 0 ? "high" : "auto"}
                         decoding={currentShowcase === 0 ? "sync" : "async"}
-                        unoptimized
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
                     </motion.div>
@@ -1181,6 +1181,7 @@ export default function LandingPage() {
                         width={32}
                         height={32}
                         className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                        loading="lazy"
                         unoptimized
                       />
                     ) : (
@@ -1533,6 +1534,7 @@ export default function LandingPage() {
                       width={24}
                       height={24}
                       className="w-full h-full object-contain"
+                      loading="lazy"
                       unoptimized
                     />
                   </div>

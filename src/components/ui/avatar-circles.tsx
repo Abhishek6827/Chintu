@@ -34,6 +34,7 @@ export const AvatarCircles = ({
             width={40}
             height={40}
             alt={`Avatar ${index + 1}`}
+            loading="lazy"
             unoptimized
           />
         </a>
