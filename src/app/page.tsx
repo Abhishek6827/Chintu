@@ -424,22 +424,6 @@ const creatorTiers = [
 export default function LandingPage() {
   const { isSignedIn, isLoaded, user } = useUser();
   const router = useRouter();
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && videoRef.current) {
-          videoRef.current.play().catch(e => console.log("Video auto-play prevented:", e));
-        } else if (!entry.isIntersecting && videoRef.current) {
-          videoRef.current.pause();
-        }
-      });
-    }, { threshold: 0.1 });
-    
-    if (videoRef.current) observer.observe(videoRef.current);
-    return () => observer.disconnect();
-  }, []);
 
   // Smart launcher used by every "Open Dashboard / Start Practising / Build My Resume" CTA.
   // - Signed-in: try to open the Chintu Electron app via the chintu:// deep link, fall
@@ -633,8 +617,8 @@ export default function LandingPage() {
             >
               {/* Eyebrow */}
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
-                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">v2.5 Hyper-Intelligence Active</span>
+                <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 animate-pulse" />
+                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em]">v2.5 Hyper-Intelligence Active</span>
               </div>
 
               {/* Title */}
@@ -683,7 +667,7 @@ export default function LandingPage() {
                 )}
                 <InteractiveHoverButton
                   onClick={() => router.push("/pricing")}
-                  className="px-7 sm:px-9 py-3.5 sm:py-4 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-[var(--text-dim)] hover:text-indigo-400 bg-[var(--panel-bg)] sm:max-w-[260px]"
+                  className="px-7 sm:px-9 py-3.5 sm:py-4 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-[var(--text-dim)] hover:text-indigo-600 dark:text-indigo-400 bg-[var(--panel-bg)] sm:max-w-[260px]"
                 >
                   View Access Tiers
                 </InteractiveHoverButton>
@@ -710,7 +694,7 @@ export default function LandingPage() {
                 <div className="flex flex-col">
                   <div className="flex items-center gap-0.5">
                     {[1, 2, 3, 4, 5].map(i => (
-                      <Star key={i} className="w-3 h-3 text-amber-400 fill-amber-400" />
+                      <Star key={i} className="w-3 h-3 text-amber-600 dark:text-amber-400 fill-amber-400" />
                     ))}
                     <span className="text-[10px] font-black text-[var(--text-main)] ml-1.5">4.9</span>
                   </div>
@@ -731,14 +715,12 @@ export default function LandingPage() {
                 <div className="relative flex items-center gap-3 p-2.5 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl backdrop-blur-xl shadow-xl group-hover:border-indigo-500/40 group-hover:scale-[1.02] transition-all duration-300">
                   {/* Looping Video Thumbnail */}
                   <div className="relative w-28 h-20 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-white/10">
-                    <video
-                      ref={videoRef}
-                      src="/1.mp4"
-                      preload="none"
-                      loop
-                      muted
-                      playsInline
-                      className="absolute inset-0 w-full h-full object-cover"
+                    <Image
+                      src="/og-image.png"
+                      alt="Chintu Demo Thumbnail"
+                      fill
+                      className="absolute inset-0 object-cover opacity-80"
+                      sizes="112px"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -753,7 +735,7 @@ export default function LandingPage() {
                   </div>
                   {/* Label */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[8px] font-black text-indigo-400 uppercase tracking-[0.25em] mb-0.5">Watch Demo</p>
+                    <p className="text-[8px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.25em] mb-0.5">Watch Demo</p>
                     <p className="text-sm font-black text-[var(--text-main)] uppercase tracking-tight mb-0.5 truncate">See It In Action</p>
                     <p className="text-[9px] font-bold text-[var(--text-dim)] uppercase tracking-widest flex items-center gap-1">
                       30s walkthrough <ArrowRight className="w-2.5 h-2.5 group-hover:translate-x-1 transition-transform" />
@@ -988,8 +970,8 @@ export default function LandingPage() {
               className="text-center mb-12 sm:mb-16 lg:mb-20"
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-5 sm:mb-6">
-                <Rocket className="w-3.5 h-3.5 text-indigo-400" />
-                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Get Started in 60s</span>
+                <Rocket className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em]">Get Started in 60s</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-4">
                 How It <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">Works.</span>
@@ -1023,7 +1005,7 @@ export default function LandingPage() {
                     <step.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
 
-                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-2">{step.tag}</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-600 dark:text-indigo-400 mb-2">{step.tag}</p>
                   <h3 className="text-lg sm:text-xl lg:text-2xl font-black tracking-tighter uppercase text-[var(--text-main)] mb-3 leading-tight">
                     {step.title}
                   </h3>
@@ -1098,7 +1080,7 @@ export default function LandingPage() {
                       whileHover={{ y: -4, scale: 1.02 }}
                       className="p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] border border-[var(--glass-border)] bg-[var(--panel-bg)] hover:border-indigo-500/50 hover:bg-[var(--glass-bg)] transition-colors group cursor-default"
                     >
-                      <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-dim)] group-hover:text-indigo-400 mb-2 sm:mb-3 transition-colors" />
+                      <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-dim)] group-hover:text-indigo-600 dark:text-indigo-400 mb-2 sm:mb-3 transition-colors" />
                       <p className="text-[11px] sm:text-xs font-black uppercase tracking-tight text-[var(--text-main)]">{item.label}</p>
                       <p className="text-[9px] sm:text-[10px] text-[var(--text-dim)] font-bold uppercase">{item.desc}</p>
                     </motion.div>
@@ -1113,7 +1095,7 @@ export default function LandingPage() {
                       <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-indigo-400">Global Sync</p>
+                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Global Sync</p>
                       <p className="text-[10px] sm:text-xs font-bold text-[var(--text-dim)] truncate">Connected to Tactical Grid</p>
                     </div>
                   </div>
@@ -1122,7 +1104,7 @@ export default function LandingPage() {
                       <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-emerald-400">Verified Intel</p>
+                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Verified Intel</p>
                       <p className="text-[10px] sm:text-xs font-bold text-[var(--text-dim)] truncate">100% Accuracy Rating</p>
                     </div>
                   </div>
@@ -1131,7 +1113,7 @@ export default function LandingPage() {
                       <PlayCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-amber-400">Auto Pilot</p>
+                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">Auto Pilot</p>
                       <p className="text-[10px] sm:text-xs font-bold text-[var(--text-dim)] truncate">Autonomous Reasoning</p>
                     </div>
                   </div>
@@ -1147,7 +1129,7 @@ export default function LandingPage() {
           {!isElectron && <div className="absolute inset-0 pointer-events-none opacity-40"><Meteors number={15} /></div>}
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="reveal text-center mb-12 sm:mb-16 lg:mb-24 transition-all duration-1000">
-              <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] sm:tracking-[0.5em] mb-4 sm:mb-6">Omniscient Intelligence</h2>
+              <h2 className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.4em] sm:tracking-[0.5em] mb-4 sm:mb-6">Omniscient Intelligence</h2>
               <p className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)]">
                 Zero Gaps. <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Total Dominance.</span>
@@ -1176,7 +1158,7 @@ export default function LandingPage() {
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
                     <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
                   </div>
-                  <h3 className="font-black text-[10px] sm:text-[12px] uppercase tracking-widest text-indigo-400 mb-2 sm:mb-3 group-hover:text-[var(--text-main)] transition-colors">{item.title}</h3>
+                  <h3 className="font-black text-[10px] sm:text-[12px] uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2 sm:mb-3 group-hover:text-[var(--text-main)] transition-colors">{item.title}</h3>
                   <p className="text-[9px] sm:text-[11px] text-[var(--text-dim)] font-bold uppercase tracking-tight leading-relaxed group-hover:text-[var(--text-main)] transition-colors">{item.desc}</p>
                 </motion.div>
               ))}
@@ -1197,8 +1179,8 @@ export default function LandingPage() {
               className="text-center mb-10 sm:mb-14"
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full mb-5 sm:mb-6">
-                <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.3em]">Universal Compatibility</span>
+                <Globe className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+                <span className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-[0.3em]">Universal Compatibility</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-4">
                 Works <br className="sm:hidden" />
@@ -1233,7 +1215,7 @@ export default function LandingPage() {
                         unoptimized
                       />
                     ) : (
-                      <p.icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400 group-hover:text-cyan-400 transition-colors" />
+                      <p.icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-400 group-hover:text-cyan-600 dark:text-cyan-400 transition-colors" />
                     )}
                   </div>
                   <div className="min-w-0">
@@ -1269,11 +1251,11 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
             <div className="reveal transition-all duration-1000">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-6 sm:mb-8">
-                <Zap className="w-4 h-4 text-purple-400" />
-                <span className="text-[10px] font-black text-purple-400 uppercase tracking-[0.3em]">Snapshot Intelligence</span>
+                <Zap className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span className="text-[10px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-[0.3em]">Snapshot Intelligence</span>
               </div>
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-7xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-6 sm:mb-8">
-                See it. <br /><span className="text-purple-400">Solve it.</span>
+                See it. <br /><span className="text-purple-600 dark:text-purple-400">Solve it.</span>
               </h2>
               <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest leading-relaxed mb-8 sm:mb-10 max-w-md text-xs sm:text-sm md:text-base">
                 Stuck on a complex MCQ or a difficult equation? Just take a screenshot. Our vision engine processes the context, identifies the core problem, and generates the exact answer in milliseconds.
@@ -1303,7 +1285,7 @@ export default function LandingPage() {
                     <span className="text-[8px] font-black text-white/90 uppercase tracking-widest">Vision Active</span>
                   </div>
                   <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-10 flex items-center gap-1.5 px-2 py-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-full">
-                    <Target className="w-2.5 h-2.5 text-purple-400" />
+                    <Target className="w-2.5 h-2.5 text-purple-600 dark:text-purple-400" />
                     <span className="text-[8px] font-black text-white/90 uppercase tracking-widest">OCR Engine</span>
                   </div>
                 </div>
@@ -1327,8 +1309,8 @@ export default function LandingPage() {
               className="text-center mb-10 sm:mb-16"
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-full mb-5 sm:mb-6">
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                <span className="text-[10px] font-black text-purple-400 uppercase tracking-[0.3em]">Authentic Voice</span>
+                <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                <span className="text-[10px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-[0.3em]">Authentic Voice</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-4">
                 Sound <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">Human.</span> <br className="sm:hidden" />Not Robotic.
@@ -1465,8 +1447,8 @@ export default function LandingPage() {
               className="text-center mb-12 sm:mb-16"
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-full mb-5 sm:mb-6">
-                <Layers className="w-3.5 h-3.5 text-purple-400" />
-                <span className="text-[10px] font-black text-purple-400 uppercase tracking-[0.3em]">Beyond The Overlay</span>
+                <Layers className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                <span className="text-[10px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-[0.3em]">Beyond The Overlay</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-4">
                 More <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">Power.</span> One Subscription.
@@ -1497,7 +1479,7 @@ export default function LandingPage() {
                       <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${tool.accent} flex items-center justify-center shadow-xl`}>
                         <tool.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                       </div>
-                      <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+                      <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 dark:text-indigo-400 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
                         {tool.tag}
                       </span>
                     </div>
@@ -1529,7 +1511,7 @@ export default function LandingPage() {
                         else router.push("/resume-builder");
                       } : launchApp}
                       aria-label={`${tool.cta} — open the Chintu app`}
-                      className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500 hover:border-indigo-500 hover:text-white text-indigo-400 font-black uppercase tracking-[0.25em] text-[10px] transition-colors"
+                      className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500 hover:border-indigo-500 hover:text-white text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-[0.25em] text-[10px] transition-colors"
                     >
                       {tool.cta} <ArrowRight className="w-3.5 h-3.5" />
                     </button>
@@ -1553,8 +1535,8 @@ export default function LandingPage() {
               className="text-center mb-8 sm:mb-10"
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-4">
-                <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Trusted Outcomes</span>
+                <Briefcase className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.3em]">Trusted Outcomes</span>
               </div>
               <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.4em] text-[var(--text-dim)] mb-2">
                 Candidates Using Chintu Got Hired At
@@ -1609,7 +1591,7 @@ export default function LandingPage() {
         <section className="py-20 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] border-y border-[var(--glass-border)]">
           <div className="max-w-7xl mx-auto">
             <div className="reveal text-center mb-12 sm:mb-16 lg:mb-24 transition-all duration-1000">
-              <h2 className="text-[10px] sm:text-xs font-black text-indigo-400 uppercase tracking-[0.4em] sm:tracking-[0.5em] mb-3 sm:mb-4">Tactical Superiority</h2>
+              <h2 className="text-[10px] sm:text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.4em] sm:tracking-[0.5em] mb-3 sm:mb-4">Tactical Superiority</h2>
               <p className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--text-main)] uppercase">Engineered for Success</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-12">
@@ -1644,7 +1626,7 @@ export default function LandingPage() {
             <div className="absolute inset-0 pointer-events-none opacity-30"><Meteors number={8} /></div>
             <div className="max-w-7xl mx-auto relative z-10">
               <div className="reveal text-center mb-10 sm:mb-16 transition-all duration-1000">
-                <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-2">Protocol Resources</h2>
+                <h2 className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.4em] mb-2">Protocol Resources</h2>
                 <p className="text-2xl sm:text-3xl font-black text-[var(--text-main)] uppercase tracking-tight">Master the Interview Logic</p>
               </div>
               <div className="reveal transition-all duration-1000 delay-300">
@@ -1668,8 +1650,8 @@ export default function LandingPage() {
               className="text-center mb-10 sm:mb-14"
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-5 sm:mb-6">
-                <Trophy className="w-3.5 h-3.5 text-indigo-400" />
-                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Why Chintu Wins</span>
+                <Trophy className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em]">Why Chintu Wins</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-4">
                 Chintu vs <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">The Rest.</span>
@@ -1736,8 +1718,8 @@ export default function LandingPage() {
               className="text-center mb-10 sm:mb-14"
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full mb-5 sm:mb-6">
-                <CircleDollarSign className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-[10px] font-black text-amber-400 uppercase tracking-[0.3em]">Honest Pricing</span>
+                <CircleDollarSign className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-[0.3em]">Honest Pricing</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-4">
                 Simple <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-amber-400">Plans.</span> No Lock-in.
@@ -1883,7 +1865,7 @@ export default function LandingPage() {
                       href={plan.href}
                       className={`block text-center px-5 py-3.5 rounded-xl font-black uppercase tracking-[0.25em] text-[10px] transition-colors ${plan.highlighted
                         ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 hover:bg-indigo-500"
-                        : "border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:border-indigo-500 hover:text-white"
+                        : "border border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500 hover:border-indigo-500 hover:text-white"
                         }`}
                     >
                       {plan.cta} <ArrowRight className="inline-block w-3.5 h-3.5 ml-1.5" />
@@ -1934,8 +1916,8 @@ export default function LandingPage() {
               className="text-center mb-10 sm:mb-14"
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-full mb-5 sm:mb-6">
-                <Gift className="w-3.5 h-3.5 text-rose-400" />
-                <span className="text-[10px] font-black text-rose-400 uppercase tracking-[0.3em]">Creator Program</span>
+                <Gift className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-[0.3em]">Creator Program</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-4">
                 Partner & <br className="sm:hidden" />
@@ -1999,16 +1981,16 @@ export default function LandingPage() {
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mb-10">
                 <div className="bg-[var(--panel-bg)] border border-indigo-500/20 p-6 rounded-3xl text-center">
-                  <Percent className="w-8 h-8 text-indigo-400 mx-auto mb-3" />
+                  <Percent className="w-8 h-8 text-indigo-600 dark:text-indigo-400 mx-auto mb-3" />
                   <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-main)] mb-2">Affiliate Partner</h3>
                   <p className="text-[10px] text-[var(--text-dim)] font-bold uppercase tracking-wide mb-4">Earn 30% recurring commission for every user you bring to Chintu.</p>
-                  <Link href="/support" className="text-[10px] font-black text-indigo-400 uppercase tracking-widest hover:underline">Apply for Affiliate →</Link>
+                  <Link href="/support" className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest hover:underline">Apply for Affiliate →</Link>
                 </div>
                 <div className="bg-[var(--panel-bg)] border border-emerald-500/20 p-6 rounded-3xl text-center">
-                  <HeartHandshake className="w-8 h-8 text-emerald-400 mx-auto mb-3" />
+                  <HeartHandshake className="w-8 h-8 text-emerald-600 dark:text-emerald-400 mx-auto mb-3" />
                   <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-main)] mb-2">Refer a Friend</h3>
                   <p className="text-[10px] text-[var(--text-dim)] font-bold uppercase tracking-wide mb-4">Get 20 free credits for every friend who makes their first purchase.</p>
-                  <Link href="/support" className="text-[10px] font-black text-emerald-400 uppercase tracking-widest hover:underline">Start Referring →</Link>
+                  <Link href="/support" className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest hover:underline">Start Referring →</Link>
                 </div>
               </div>
 
@@ -2039,8 +2021,8 @@ export default function LandingPage() {
               className="text-center mb-10 sm:mb-14"
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full mb-5 sm:mb-6">
-                <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.3em]">Knowledge Base</span>
+                <HelpCircle className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+                <span className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-[0.3em]">Knowledge Base</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-4">
                 Frequently <br className="sm:hidden" />
@@ -2067,7 +2049,7 @@ export default function LandingPage() {
               <Link
                 href="/faq"
                 aria-label="Browse the full Chintu Ji FAQ"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:border-cyan-500 hover:text-white font-black uppercase tracking-[0.25em] text-[10px] transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500 hover:border-cyan-500 hover:text-white font-black uppercase tracking-[0.25em] text-[10px] transition-colors"
               >
                 <HelpCircle className="w-3.5 h-3.5" />
                 Browse the full FAQ
@@ -2098,8 +2080,8 @@ export default function LandingPage() {
               <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 lg:gap-12 items-center">
                 <div>
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/15 border border-indigo-500/30 rounded-full mb-5 sm:mb-6">
-                    <Rocket className="w-3.5 h-3.5 text-indigo-400" />
-                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Final Mission Brief</span>
+                    <Rocket className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em]">Final Mission Brief</span>
                   </div>
 
                   <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tighter uppercase leading-[0.85] text-[var(--text-main)] mb-5 sm:mb-7">
@@ -2187,11 +2169,11 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
             <div className="reveal transition-all duration-1000">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6 sm:mb-8">
-                <MessageSquare className="w-4 h-4 text-indigo-400" />
-                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Support Command</span>
+                <MessageSquare className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em]">Support Command</span>
               </div>
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter text-[var(--text-main)] mb-6 sm:mb-8 uppercase leading-[0.9]">
-                Deploy <br /><span className="text-indigo-400">Tactical Intelligence.</span>
+                Deploy <br /><span className="text-indigo-600 dark:text-indigo-400">Tactical Intelligence.</span>
               </h2>
               <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest leading-relaxed mb-8 sm:mb-12 max-w-md text-xs sm:text-sm md:text-base">
                 Have questions about deployment or strategy? Our elite support team is active 24/7 to ensure your total success.
@@ -2231,8 +2213,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
             <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
-              <Star className="w-3.5 h-3.5 text-indigo-400 fill-indigo-400" />
-              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-indigo-400">Rated #1 Tactical AI</span>
+              <Star className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 fill-indigo-400" />
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Rated #1 Tactical AI</span>
             </div>
             <div className="flex items-center -space-x-2">
               {[1, 2, 3, 4].map(i => (

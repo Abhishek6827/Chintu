@@ -143,7 +143,7 @@ export const FaqAccordion: React.FC<{ items: FaqItem[] }> = ({ items }) => {
               <motion.span
                 animate={{ rotate: open ? 45 : 0 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400"
+                className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400"
               >
                 <Plus className="w-3.5 h-3.5" />
               </motion.span>
