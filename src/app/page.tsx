@@ -1863,22 +1863,22 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-5 sm:gap-8">
             <a href="#" className="flex items-center gap-2 group">
-              <Globe className="w-4 h-4 text-gray-400 group-hover:text-[#1DA1F2] transition-colors" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">
+              <Globe className="w-4 h-4 text-gray-500 group-hover:text-[#1DA1F2] transition-colors" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-gray-600 group-hover:text-gray-900 transition-colors">
                 Follow
               </span>
             </a>
 
             <a href="#" className="flex items-center gap-2 group">
-              <Code className="w-4 h-4 text-gray-400 group-hover:text-[#333] transition-colors" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">
+              <Code className="w-4 h-4 text-gray-500 group-hover:text-[#333] transition-colors" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-gray-600 group-hover:text-gray-900 transition-colors">
                 Repo
               </span>
             </a>
 
             <a href="#" className="flex items-center gap-2 group">
-              <Star className="w-4 h-4 text-gray-400 group-hover:text-[#0077B5] transition-colors" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">
+              <Star className="w-4 h-4 text-gray-500 group-hover:text-[#0077B5] transition-colors" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-gray-600 group-hover:text-gray-900 transition-colors">
                 Connect
               </span>
             </a>

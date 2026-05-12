@@ -210,6 +210,7 @@ export default function RootLayout({
           <link rel="icon" href="https://www.getchintu.com/icon.png" />
           {/* Performance: hint preconnects for critical third-parties */}
           <link rel="preconnect" href="https://www.getchintu.com" crossOrigin="anonymous" />
+          <link rel="preconnect" href="https://clerk.getchintu.com" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://img.clerk.com" />
           <link rel="dns-prefetch" href="https://images.clerk.dev" />
           {/* Suppress sensor-related warnings from third-party scripts (like Razorpay) */}

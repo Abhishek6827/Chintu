@@ -8,7 +8,7 @@
   /* Default LIGHT Mode (Premium Professional) */
   --app-opacity: 1;
   --text-main: rgba(26, 26, 46, var(--app-opacity, 1));
-  --text-dim: rgba(26, 26, 46, calc(0.5 * var(--app-opacity, 1)));
+  --text-dim: rgba(26, 26, 46, calc(0.7 * var(--app-opacity, 1)));
   --glass-bg: rgba(0, 0, 0, calc(0.02 * var(--app-opacity, 1)));
   --glass-border: rgba(0, 0, 0, calc(0.08 * var(--app-opacity, 1)));
   --bubble-bg: rgba(255, 255, 255, calc(0.9 * var(--app-opacity, 1)));

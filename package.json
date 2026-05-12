@@ -57,6 +57,14 @@
     "svix": "^1.92.2",
     "tailwind-merge": "^3.5.0"
   },
+  "browserslist": [
+    "chrome >= 90",
+    "edge >= 90",
+    "firefox >= 88",
+    "safari >= 14",
+    "not dead",
+    "not op_mini all"
+  ],
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "@types/inquirer": "^9.0.9",
