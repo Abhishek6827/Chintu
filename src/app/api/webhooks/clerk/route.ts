@@ -180,17 +180,22 @@ export async function POST(req: Request) {
     const email = email_addresses[0]?.email_address;
     const fullName = [first_name, last_name].filter(Boolean).join(" ") || "Unknown User";
 
-    console.log(`[/api/webhooks/clerk] Updating user ${id} in Supabase...`);
+    if (!email) {
+      console.warn(`[/api/webhooks/clerk] User ${id} updated without email. Skipping.`);
+      return new Response('No email found, skipping update', { status: 200 });
+    }
+
+    console.log(`[/api/webhooks/clerk] Updating user ${id} (email: ${email}) in Supabase...`);
 
     const { error } = await supabase
       .from('profiles')
       .update({
-        email: email,
+        id: id,
         full_name: fullName,
         username: (evt.data as any).username || null,
         updated_at: new Date().toISOString()
       })
-      .eq('id', id);
+      .eq('email', email);
 
     if (error) {
       console.error('[/api/webhooks/clerk] Error updating user in Supabase:', error.message);
@@ -202,32 +207,45 @@ export async function POST(req: Request) {
 
   // ─── Handle User Deleted ───────────────────────────────
   if (eventType === 'user.deleted') {
-    const { id } = evt.data;
+    const { id, email_addresses } = evt.data as any;
+    const deletedEmail = email_addresses?.[0]?.email_address;
 
-    if (!id) {
-      console.warn('[/api/webhooks/clerk] user.deleted event with no ID. Skipping.');
-      return new Response('No user ID', { status: 200 });
+    if (!id && !deletedEmail) {
+      console.warn('[/api/webhooks/clerk] user.deleted event with no ID or email. Skipping.');
+      return new Response('No user ID or email', { status: 200 });
     }
 
-    console.log(`[/api/webhooks/clerk] Deleting user ${id} from Supabase...`);
+    console.log(`[/api/webhooks/clerk] Deleting user ${id} (email: ${deletedEmail}) from Supabase...`);
 
-    // Fetch profile before deleting (to check if it exists and get info for alert)
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('email, display_id, plan')
-      .eq('id', id) // Clerk still provides id here, but we should also check email if possible. 
-      .maybeSingle();
+    // Fetch profile before deleting — try email first, fallback to id
+    let profile = null;
+    if (deletedEmail) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('email, display_id, plan')
+        .eq('email', deletedEmail)
+        .maybeSingle();
+      profile = data;
+    }
+    if (!profile && id) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('email, display_id, plan')
+        .eq('id', id)
+        .maybeSingle();
+      profile = data;
+    }
 
     if (!profile) {
       console.log(`[/api/webhooks/clerk] User ${id} not found in Supabase. Likely already deleted or never synced. skipping alert.`);
       return new Response('User not found, skipping', { status: 200 });
     }
 
-    // Delete from Supabase
+    // Delete from Supabase using email (the unique key)
     const { error } = await supabase
       .from('profiles')
       .delete()
-      .eq('id', id);
+      .eq('email', profile.email);
 
     if (error) {
       console.error('[/api/webhooks/clerk] Error deleting user from Supabase:', error.message);

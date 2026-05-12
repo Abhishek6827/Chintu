@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import Groq from "groq-sdk";
 import OpenAI from "openai";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,16 +29,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing resume or job description" }, { status: 400 });
     }
 
-    // ─── Credit Check ─────────────────────────────────────
+    // ─── Credit Check (Email-based lookup) ─────────────────
     const { createAdminClient } = await import("@/utils/supabase/server");
-    const { clerkClient } = await import("@clerk/nextjs/server");
     const supabase = createAdminClient();
+
+    const userObj = await clerkClient().users.getUser(userId);
+    const email = userObj.emailAddresses[0]?.emailAddress;
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("credits, email")
-      .eq("id", userId)
-      .single();
+      .select("credits, email, profile_data")
+      .eq("email", email)
+      .maybeSingle();
 
     if (!profile || (profile.credits || 0) <= 0) {
       return NextResponse.json({ error: "Insufficient credits. Please upgrade your plan." }, { status: 403 });
@@ -165,9 +167,6 @@ Rules:
 
         // ─── Deduct Credit & Save Profile ───────────────────
         try {
-          const userObj = await (await clerkClient()).users.getUser(userId);
-          const email = userObj.emailAddresses[0]?.emailAddress;
-
           const newHistoryEntry = {
             type: "deduction",
             amount: 1,

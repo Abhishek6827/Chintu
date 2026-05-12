@@ -252,9 +252,20 @@ export async function POST(req: Request) {
     if (data) return data;
 
     console.warn(
-      `[Webhook] Profile not found by stripe_subscription_id=${subscriptionId}. Checking Stripe metadata...`
+      `[Webhook] Profile not found by stripe_subscription_id=${subscriptionId}. Checking email/metadata fallback...`
     );
 
+    // Try email first (most reliable unique key)
+    if (email) {
+      const { data: byEmail } = await supabaseAdmin
+        .from("profiles")
+        .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
+        .eq("email", email)
+        .maybeSingle();
+      if (byEmail) return byEmail;
+    }
+
+    // Fallback: try userId from Stripe metadata
     try {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
       const userId = subscription.metadata?.userId;
@@ -270,14 +281,6 @@ export async function POST(req: Request) {
       console.error("[Webhook] Stripe subscription retrieve failed:", err);
     }
 
-    if (email) {
-      const { data: byEmail } = await supabaseAdmin
-        .from("profiles")
-        .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
-        .eq("email", email)
-        .maybeSingle();
-      return byEmail;
-    }
     return null;
   }
 
