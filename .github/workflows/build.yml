@@ -78,6 +78,17 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
+      - name: Delete old desktop releases from Chintu_Releases
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          $releases = gh api repos/Abhishek6827/Chintu_Releases/releases --jq '.[] | select(.tag_name | startswith("v")) | .id' | Select-Object -Skip 3
+          foreach ($id in $releases) {
+            Write-Host "Deleting old desktop release $id"
+            gh api -X DELETE repos/Abhishek6827/Chintu_Releases/releases/$id || true
+          }
+        shell: pwsh
+
       - name: Build Electron & Publish to GitHub Releases
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
