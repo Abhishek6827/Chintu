@@ -174,6 +174,32 @@ export async function POST(req: Request) {
     return new Response('User synced successfully', { status: 200 });
   }
 
+  // ─── Handle User Updated ───────────────────────────────
+  if (eventType === 'user.updated') {
+    const { id, email_addresses, first_name, last_name } = evt.data;
+    const email = email_addresses[0]?.email_address;
+    const fullName = [first_name, last_name].filter(Boolean).join(" ") || "Unknown User";
+
+    console.log(`[/api/webhooks/clerk] Updating user ${id} in Supabase...`);
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        email: email,
+        full_name: fullName,
+        username: (evt.data as any).username || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error('[/api/webhooks/clerk] Error updating user in Supabase:', error.message);
+      return new Response('Error updating user', { status: 500 });
+    }
+
+    return new Response('User updated successfully', { status: 200 });
+  }
+
   // ─── Handle User Deleted ───────────────────────────────
   if (eventType === 'user.deleted') {
     const { id } = evt.data;
