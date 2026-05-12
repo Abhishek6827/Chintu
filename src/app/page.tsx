@@ -20,7 +20,7 @@ const TestimonialsSection = dynamic(() => import('@/components/TestimonialsSecti
 const MarqueeReviews = dynamic(() => import('@/components/MarqueeReviews').then(mod => mod.MarqueeReviews), { ssr: false });
 const TextReveal = dynamic(() => import('@/components/magicui/text-reveal').then(mod => mod.TextReveal), { ssr: false });
 const Meteors = dynamic(() => import('@/components/magicui/meteors').then(mod => mod.Meteors), { ssr: false });
-const VideoText = dynamic(() => import('@/components/magicui/video-text').then(mod => mod.VideoText), { ssr: false });
+
 const InteractiveHoverButton = dynamic(() => import('@/components/magicui/interactive-hover-button').then(mod => mod.InteractiveHoverButton), { ssr: false });
 const CardSpread = dynamic(() => import('@/components/animata/card/card-spread'), { ssr: false });
 
@@ -949,7 +949,9 @@ export default function LandingPage() {
                     controls
                     playsInline
                     className="w-full aspect-video object-contain bg-black"
-                  />
+                  >
+                    <track kind="captions" />
+                  </video>
                 </div>
               </motion.div>
             </motion.div>
@@ -1273,13 +1275,12 @@ export default function LandingPage() {
               <div className="absolute -inset-4 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-[2rem] sm:rounded-[4rem] blur-3xl opacity-20 animate-pulse" />
               <div className="relative bg-black border border-[var(--glass-border)] p-3 sm:p-4 rounded-[2rem] sm:rounded-[4rem] shadow-2xl overflow-hidden">
                 <div className="bg-black rounded-[1.5rem] sm:rounded-[3rem] aspect-video overflow-hidden relative">
-                  <VideoText
-                    src="/1.mp4"
-                    className="h-full w-full"
-                    videoClassName="grayscale-0 opacity-90"
-                  >
-                    SOLVE.
-                  </VideoText>
+                  <div className="relative w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-black overflow-hidden">
+                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+                    <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 font-black uppercase tracking-[0.2em] text-4xl sm:text-6xl drop-shadow-2xl">
+                      SOLVE.
+                    </span>
+                  </div>
                   <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex items-center gap-1.5 px-2 py-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-full">
                     <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
                     <span className="text-[8px] font-black text-white/90 uppercase tracking-widest">Vision Active</span>
