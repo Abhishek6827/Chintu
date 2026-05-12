@@ -244,8 +244,8 @@ export default function LandingPage() {
             >
               {/* Eyebrow */}
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 animate-pulse" />
-                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em]">v2.5 Hyper-Intelligence Active</span>
+                <Sparkles className="w-3.5 h-3.5 text-indigo-700 dark:text-indigo-400 animate-pulse" />
+                <span className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-[0.3em]">v2.5 Hyper-Intelligence Active</span>
               </div>
 
               {/* Title */}
@@ -599,8 +599,8 @@ export default function LandingPage() {
               className="text-center mb-12 sm:mb-16 lg:mb-20"
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-5 sm:mb-6">
-                <Rocket className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em]">Get Started in 60s</span>
+                <Rocket className="w-3.5 h-3.5 text-indigo-700 dark:text-indigo-400" />
+                <span className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-[0.3em]">Get Started in 60s</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-4">
                 How It <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">Works.</span>
@@ -634,7 +634,7 @@ export default function LandingPage() {
                     <step.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
 
-                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-600 dark:text-indigo-400 mb-2">{step.tag}</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-700 dark:text-indigo-400 mb-2">{step.tag}</p>
                   <h3 className="text-lg sm:text-xl lg:text-2xl font-black tracking-tighter uppercase text-[var(--text-main)] mb-3 leading-tight">
                     {step.title}
                   </h3>
@@ -687,7 +687,7 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-center justify-between gap-8 lg:gap-12">
               <div className="flex-1 space-y-4 sm:space-y-6 w-full">
-                <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 shadow-sm">
+                <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 shadow-sm">
                   <Layers className="w-3.5 h-3.5" /> System Architecture
                 </div>
                 <h2 className="text-3xl sm:text-4xl lg:text-4xl xl:text-5xl font-black tracking-tighter uppercase leading-none text-[var(--text-main)] mb-6">
@@ -724,7 +724,7 @@ export default function LandingPage() {
                       <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Global Sync</p>
+                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-indigo-700 dark:text-indigo-400">Global Sync</p>
                       <p className="text-[10px] sm:text-xs font-bold text-[var(--text-dim)] truncate">Connected to Tactical Grid</p>
                     </div>
                   </div>
@@ -733,7 +733,7 @@ export default function LandingPage() {
                       <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Verified Intel</p>
+                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Verified Intel</p>
                       <p className="text-[10px] sm:text-xs font-bold text-[var(--text-dim)] truncate">100% Accuracy Rating</p>
                     </div>
                   </div>
@@ -742,7 +742,7 @@ export default function LandingPage() {
                       <PlayCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">Auto Pilot</p>
+                      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-400">Auto Pilot</p>
                       <p className="text-[10px] sm:text-xs font-bold text-[var(--text-dim)] truncate">Autonomous Reasoning</p>
                     </div>
                   </div>
@@ -758,7 +758,7 @@ export default function LandingPage() {
 
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="reveal text-center mb-12 sm:mb-16 lg:mb-24 transition-all duration-1000">
-              <h2 className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.4em] sm:tracking-[0.5em] mb-4 sm:mb-6">Omniscient Intelligence</h2>
+              <h2 className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-[0.4em] sm:tracking-[0.5em] mb-4 sm:mb-6">Omniscient Intelligence</h2>
               <p className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)]">
                 Zero Gaps. <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Total Dominance.</span>
@@ -785,9 +785,9 @@ export default function LandingPage() {
                   className="bg-[var(--panel-bg)] border border-[var(--glass-border)] p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[2rem] lg:rounded-[2.5rem] hover:bg-[var(--glass-bg)] hover:border-indigo-500/50 transition-colors duration-500 group"
                 >
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
-                    <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
+                    <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-700 dark:text-indigo-400" />
                   </div>
-                  <h3 className="font-black text-[10px] sm:text-[12px] uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2 sm:mb-3 group-hover:text-[var(--text-main)] transition-colors">{item.title}</h3>
+                  <h3 className="font-black text-[10px] sm:text-[12px] uppercase tracking-widest text-indigo-700 dark:text-indigo-400 mb-2 sm:mb-3 group-hover:text-[var(--text-main)] transition-colors">{item.title}</h3>
                   <p className="text-[9px] sm:text-[11px] text-[var(--text-dim)] font-bold uppercase tracking-tight leading-relaxed group-hover:text-[var(--text-main)] transition-colors">{item.desc}</p>
                 </motion.div>
               ))}
@@ -808,8 +808,8 @@ export default function LandingPage() {
               className="text-center mb-10 sm:mb-14"
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full mb-5 sm:mb-6">
-                <Globe className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-                <span className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-[0.3em]">Universal Compatibility</span>
+                <Globe className="w-3.5 h-3.5 text-cyan-700 dark:text-cyan-400" />
+                <span className="text-[10px] font-black text-cyan-700 dark:text-cyan-400 uppercase tracking-[0.3em]">Universal Compatibility</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-4">
                 Works <br className="sm:hidden" />

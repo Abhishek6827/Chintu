@@ -1,0 +1,10 @@
+# Electron main process — Node.js code, not Next.js/React
+electron/
+
+# Build outputs
+out/
+dist-electron/
+.next/
+
+# Dependencies
+node_modules/

@@ -117,8 +117,8 @@
     "publish": {
       "provider": "github",
       "owner": "Abhishek6827",
-      "repo": "Chintu",
-      "private": true,
+      "repo": "Chintu_Releases",
+      "private": false,
       "releaseType": "release"
     },
     "forceCodeSigning": false

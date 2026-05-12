@@ -71,8 +71,7 @@ jobs:
             "GROQ_API_KEY_2": "${{ secrets.GROQ_API_KEY_2 }}",
             "GROQ_API_KEY_3": "${{ secrets.GROQ_API_KEY_3 }}",
             "OPENROUTER_API_KEY": "${{ secrets.OPENROUTER_API_KEY }}",
-            "DASHSCOPE_API_KEY": "${{ secrets.DASHSCOPE_API_KEY }}",
-            "GH_TOKEN": "${{ secrets.GH_PAT }}"
+            "DASHSCOPE_API_KEY": "${{ secrets.DASHSCOPE_API_KEY }}"
           }
           "@ | Out-File -FilePath electron/config.json -Encoding UTF8
 
@@ -81,7 +80,7 @@ jobs:
 
       - name: Build Electron & Publish to GitHub Releases
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: npx electron-builder --win --publish always
 
       - name: Send Telegram Notification

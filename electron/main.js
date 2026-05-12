@@ -6,7 +6,7 @@ const fs = require("fs");
 // Configure logging first
 log.transports.file.level = "info";
 log.transports.console.level = "info";
-// This overrides the global console so console.log goes to the log file too
+// This overrides the global console so console.log goes to the log file .too
 Object.assign(console, log.functions);
 log.errorHandler.startCatching();
 
@@ -46,14 +46,11 @@ if (process.defaultApp) {
 // ─────────────────────────────────────────────────────────────
 
 
-// Load token as early as possible for auto-updater
+// Pre-load config (unused since local server disabled, kept for future compat)
 const configPath = path.join(__dirname, "config.json");
 if (fs.existsSync(configPath)) {
   try {
-    const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-    if (config.GH_TOKEN) {
-      process.env.GH_TOKEN = config.GH_TOKEN;
-    }
+    JSON.parse(fs.readFileSync(configPath, "utf-8"));
   } catch (err) {
     console.error("[Main] Error pre-loading config:", err.message);
   }
@@ -718,16 +715,8 @@ function setupAutoUpdater() {
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
 
-  // Ensure headers are set if token exists
-  if (process.env.GH_TOKEN) {
-    autoUpdater.requestHeaders = {
-      "Authorization": `token ${process.env.GH_TOKEN}`,
-      "Accept": "application/vnd.github.v3+json"
-    };
-    log.info("[AutoUpdater] GH_TOKEN found, headers configured");
-  } else {
-    log.warn("[AutoUpdater] GH_TOKEN NOT found, update checks on private repo will fail");
-  }
+  // Public releases repo — no token needed
+  log.info("[AutoUpdater] Public releases mode — no auth headers required");
 
   autoUpdater.on("checking-for-update", () => {
     if (mainWindow) mainWindow.webContents.send("update-status", { status: "checking" });
@@ -797,13 +786,12 @@ function setupAutoUpdater() {
 
   // ─── Debug Shortcut for Updates ─────────────────────────
   globalShortcut.register("CommandOrControl+Shift+U", () => {
-    const tokenPresent = !!process.env.GH_TOKEN;
     const version = app.getVersion();
     const packaged = app.isPackaged;
     
     dialog.showMessageBox({
       title: "Update Debug Info",
-      message: `Version: ${version}\nPackaged: ${packaged}\nToken Present: ${tokenPresent}\n\nChecking for updates now...`,
+      message: `Version: ${version}\nPackaged: ${packaged}\nRelease repo: Chintu_Releases (public)\n\nChecking for updates now...`,
       buttons: ["OK"]
     });
     autoUpdater.checkForUpdatesAndNotify();
