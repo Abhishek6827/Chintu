@@ -84,7 +84,7 @@ export default function Page() {
           <div className="text-center mb-8 relative">
             <div className="w-20 h-20 mx-auto mb-4 drop-shadow-2xl relative">
               <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 animate-pulse rounded-full" />
-              <Image src="/icon.png" alt="Chintu" className="w-full h-full object-contain relative z-10" width={40} height={40} />
+              <Image src="/icon-sm.png" alt="Chintu" className="w-full h-full object-contain relative z-10" width={40} height={40} />
             </div>
             <h1 className="text-2xl font-black tracking-tight uppercase text-gray-900">Chintu</h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">AI Interview Assistant</p>

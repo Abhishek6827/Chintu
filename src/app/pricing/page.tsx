@@ -754,7 +754,7 @@ export default function PricingPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start gap-8">
           <div className="max-w-xs">
             <div className="flex items-center gap-2 mb-4">
-              <Image src="/icon.png" alt="Chintu" width={24} height={24} />
+              <Image src="/icon-sm.png" alt="Chintu" width={24} height={24} />
               <span className="text-sm font-black tracking-tighter uppercase text-[var(--text-main)]">Chintu <span className="text-indigo-500">SaaS</span></span>
             </div>
             <p className="text-[11px] text-[var(--text-dim)] font-bold leading-relaxed uppercase tracking-wider">
@@ -820,7 +820,7 @@ export default function PricingPage() {
 
                 <div className="flex items-center gap-2 mb-5 relative z-10">
                   <div className="w-8 h-8 flex items-center justify-center">
-                    <Image src="/icon.png" alt="Chintu" width={20} height={20} />
+                    <Image src="/icon-sm.png" alt="Chintu" width={20} height={20} />
                   </div>
                   <span className="text-xs font-black tracking-tighter uppercase text-[var(--text-main)]">Chintu <span className="text-indigo-500">SaaS</span></span>
                 </div>

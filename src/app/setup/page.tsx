@@ -232,7 +232,7 @@ export default function SetupPage() {
             <div className="w-20 h-20 mx-auto mb-6 bg-[var(--panel-bg)] rounded-[2rem] border border-[var(--glass-border)] shadow-xl flex items-center justify-center p-3 relative overflow-hidden group hover:scale-105 transition-transform">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <Image
-                src="/icon.png"
+                src="/icon-sm.png"
                 alt="Chintu"
                 className="w-full h-full object-contain relative z-10"
                 width={80}
@@ -421,7 +421,7 @@ export default function SetupPage() {
               <div className="absolute inset-0 bg-indigo-500/10 rounded-[2.5rem] animate-pulse" />
               <div className="absolute inset-4 bg-[var(--panel-bg)] rounded-[2rem] shadow-xl flex items-center justify-center border border-[var(--glass-border)] overflow-hidden">
                 <Image
-                  src="/icon.png"
+                  src="/icon-sm.png"
                   alt="Chintu"
                   width={60}
                   height={60}

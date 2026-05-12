@@ -1424,7 +1424,7 @@ export default function RoomPage() {
       <div className="h-screen bg-[var(--bg-app)] flex flex-col items-center justify-center p-8 text-center">
         <div className="max-w-md">
           <div className="w-20 h-20 bg-indigo-500/10 border border-indigo-500/20 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-xl">
-            <Image src="/icon.png" alt="Chintu" width={40} height={40} />
+            <Image src="/icon-sm.png" alt="Chintu" width={40} height={40} />
           </div>
           <h1 className="text-3xl font-black tracking-tighter text-[var(--text-main)] mb-4 uppercase">Desktop Exclusive.</h1>
           <p className="text-[11px] text-[var(--text-dim)] font-bold uppercase tracking-widest leading-relaxed mb-10">

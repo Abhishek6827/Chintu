@@ -51,6 +51,7 @@
     "react-syntax-highlighter": "^16.1.1",
     "remark-gfm": "^4.0.1",
     "resend": "^6.12.2",
+    "sharp": "^0.34.5",
     "simple-git": "^3.36.0",
     "stripe": "^22.1.0",
     "svix": "^1.92.2",

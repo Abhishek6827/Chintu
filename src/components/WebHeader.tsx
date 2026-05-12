@@ -62,7 +62,7 @@ export default function WebHeader() {
         >
           <div className="flex items-center justify-center w-8 h-8 hover:scale-110 transition-transform">
             <Image
-              src="/icon.png"
+              src="/icon-sm.png"
               alt="Chintu Ji Logo"
               className="w-full h-full object-contain"
               width={32}

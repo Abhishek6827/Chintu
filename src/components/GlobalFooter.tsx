@@ -145,7 +145,7 @@ export default function GlobalFooter() {
           >
             <Link href="/" aria-label="Chintu Ji homepage" className="inline-flex items-center gap-3 mb-5 hover:opacity-90 transition-opacity">
               <Image
-                src="/icon.png"
+                src="/icon-sm.png"
                 alt="Chintu Ji logo"
                 width={32}
                 height={32}
