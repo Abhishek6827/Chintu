@@ -170,7 +170,7 @@ export default function GlobalFooter() {
             </div>
 
             {/* Social icons */}
-            <div className="flex items-center gap-2" role="list" aria-label="Chintu Ji social profiles">
+            <div className="flex items-center gap-2" aria-label="Chintu Ji social profiles">
               {socialLinks.map((s) => (
                 <a
                   key={s.label}

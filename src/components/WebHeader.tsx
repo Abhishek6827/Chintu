@@ -81,12 +81,10 @@ export default function WebHeader() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="hidden md:flex items-center gap-5 lg:gap-6"
-            role="menubar"
           >
             <Link
               href="/#power-tools"
               className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
-              role="menuitem"
             >
               Features
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
@@ -94,7 +92,6 @@ export default function WebHeader() {
             <Link
               href="/#compare"
               className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
-              role="menuitem"
             >
               Compare
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
@@ -102,7 +99,6 @@ export default function WebHeader() {
             <Link
               href="/pricing"
               className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
-              role="menuitem"
             >
               Pricing
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
@@ -110,7 +106,6 @@ export default function WebHeader() {
             <Link
               href="/blog"
               className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
-              role="menuitem"
             >
               Blog
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
@@ -118,7 +113,6 @@ export default function WebHeader() {
             <Link
               href="/faq"
               className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
-              role="menuitem"
             >
               FAQ
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />

@@ -852,9 +852,9 @@ export default function LandingPage() {
                           <Sparkles className="w-2.5 h-2.5" />
                           {showcaseSlides[currentShowcase].category}
                         </span>
-                        <h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight mb-2 leading-[1.05]">
+                        <h2 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight mb-2 leading-[1.05]">
                           {showcaseSlides[currentShowcase].title}
-                        </h3>
+                        </h2>
                         <p className="text-[11px] sm:text-xs text-white/85 font-medium leading-relaxed">
                           {showcaseSlides[currentShowcase].description}
                         </p>
@@ -1176,7 +1176,7 @@ export default function LandingPage() {
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
                     <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
                   </div>
-                  <h4 className="font-black text-[10px] sm:text-[12px] uppercase tracking-widest text-indigo-400 mb-2 sm:mb-3 group-hover:text-[var(--text-main)] transition-colors">{item.title}</h4>
+                  <h3 className="font-black text-[10px] sm:text-[12px] uppercase tracking-widest text-indigo-400 mb-2 sm:mb-3 group-hover:text-[var(--text-main)] transition-colors">{item.title}</h3>
                   <p className="text-[9px] sm:text-[11px] text-[var(--text-dim)] font-bold uppercase tracking-tight leading-relaxed group-hover:text-[var(--text-main)] transition-colors">{item.desc}</p>
                 </motion.div>
               ))}
@@ -1559,9 +1559,9 @@ export default function LandingPage() {
               <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.4em] text-[var(--text-dim)] mb-2">
                 Candidates Using Chintu Got Hired At
               </p>
-              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tighter uppercase text-[var(--text-main)]">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tighter uppercase text-[var(--text-main)]">
                 Top <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-400">Global</span> Companies.
-              </h3>
+              </h2>
             </motion.div>
 
             <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 lg:gap-10">
