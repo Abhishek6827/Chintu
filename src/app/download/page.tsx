@@ -2,8 +2,10 @@
 
 import React from 'react';
 import { Download, Laptop, Shield, Zap, ArrowRight, CheckCircle2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
-import { Meteors } from '@/components/magicui/meteors';
+
+const Meteors = dynamic(() => import('@/components/magicui/meteors').then(mod => mod.Meteors), { ssr: false });
 
 import pkg from '../../../package.json';
 

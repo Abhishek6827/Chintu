@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Sparkles, HelpCircle, ArrowRight, Zap, Shield, CreditCard } from 'lucide-react';
-import { Meteors } from '@/components/magicui/meteors';
+
+const Meteors = dynamic(() => import('@/components/magicui/meteors').then(mod => mod.Meteors), { ssr: false });
 
 const faqData = [
   {

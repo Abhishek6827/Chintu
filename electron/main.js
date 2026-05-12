@@ -721,8 +721,12 @@ function setupAutoUpdater() {
   // Ensure headers are set if token exists
   if (process.env.GH_TOKEN) {
     autoUpdater.requestHeaders = {
-      "Authorization": `token ${process.env.GH_TOKEN}`
+      "Authorization": `token ${process.env.GH_TOKEN}`,
+      "Accept": "application/vnd.github.v3+json"
     };
+    log.info("[AutoUpdater] GH_TOKEN found, headers configured");
+  } else {
+    log.warn("[AutoUpdater] GH_TOKEN NOT found, update checks on private repo will fail");
   }
 
   autoUpdater.on("checking-for-update", () => {

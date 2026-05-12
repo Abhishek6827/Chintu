@@ -92,11 +92,13 @@ export async function GET() {
     const supabaseAdmin = createAdminClient();
     
     // Attempt to fetch profile
-    let { data, error: fetchError } = await supabaseAdmin
+    const { data: initialData, error: fetchError } = await supabaseAdmin
       .from("profiles")
       .select("*")
       .eq("email", email)
       .maybeSingle();
+
+    let data = initialData;
 
     // AUTO-SYNC: If profile doesn't exist in Supabase but user is logged in via Clerk
     if (!data && !fetchError) {

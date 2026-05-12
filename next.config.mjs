@@ -14,6 +14,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "50mb",
     },
+    optimizePackageImports: ['lucide-react', 'framer-motion', '@tabler/icons-react'],
   },
   // Allow external images (like Clerk profile photos)
   images: {

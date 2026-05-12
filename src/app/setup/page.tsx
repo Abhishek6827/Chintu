@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
-import { Meteors } from "@/components/magicui/meteors";
-import { PremiumWelcome } from "@/components/PremiumWelcome";
-import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
-import NeuralLoading from "@/components/NeuralLoading";
+import dynamic from 'next/dynamic';
+
+const Meteors = dynamic(() => import('@/components/magicui/meteors').then(mod => mod.Meteors), { ssr: false });
+const PremiumWelcome = dynamic(() => import('@/components/PremiumWelcome').then(mod => mod.PremiumWelcome), { ssr: false });
+const InteractiveHoverButton = dynamic(() => import('@/components/magicui/interactive-hover-button').then(mod => mod.InteractiveHoverButton), { ssr: false });
+const NeuralLoading = dynamic(() => import('@/components/NeuralLoading'), { ssr: false });
 
 
 

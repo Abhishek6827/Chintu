@@ -6,14 +6,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Check, Sparkles, Minus, Shield, Plus, HelpCircle, Trophy, Crown, ArrowRight, MessageSquare, FileText, Layout, Code } from "lucide-react";
+import dynamic from 'next/dynamic';
 
 import { motion, AnimatePresence } from "framer-motion";
-import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
-import { VideoText } from "@/components/magicui/video-text";
-import ConfirmationMessage from "@/components/animata/feature-cards/confirmation-message";
+const InteractiveHoverButton = dynamic(() => import('@/components/magicui/interactive-hover-button').then(mod => mod.InteractiveHoverButton), { ssr: false });
+const VideoText = dynamic(() => import('@/components/magicui/video-text').then(mod => mod.VideoText), { ssr: false });
+const ConfirmationMessage = dynamic(() => import('@/components/animata/feature-cards/confirmation-message'), { ssr: false });
 
 import { useThemeToggle } from "@/hooks/useThemeToggle";
-import SyncedUserButton from "@/components/SyncedUserButton";
+const SyncedUserButton = dynamic(() => import('@/components/SyncedUserButton'), { ssr: false });
 // import { StripeCheckoutButton } from "@/components/StripeCheckoutButton";
 
 
