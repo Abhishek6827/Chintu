@@ -45,7 +45,6 @@ if (process.defaultApp) {
 }
 // ─────────────────────────────────────────────────────────────
 
-const { createServer } = require("./server");
 
 // Load token as early as possible for auto-updater
 const configPath = path.join(__dirname, "config.json");
@@ -65,7 +64,6 @@ const { autoUpdater } = require("electron-updater");
 let mainWindow = null;
 let tray = null;
 let isHidden = false;
-let serverPort = null;
 let userOpacity = 1;
 
 // ─── Production Vercel URLs (with and without www) ───────
@@ -132,57 +130,6 @@ function loadEnv() {
   }
 }
 
-// ─── Load all API keys ────────────────────────────────────
-function getAllApiKeys() {
-  const keys = [];
-  let openRouterKey = "";
-  let dashscopeKey = "";
-
-  if (process.env.GROQ_API_KEY) keys.push(process.env.GROQ_API_KEY);
-  if (process.env.GROQ_API_KEY_2) keys.push(process.env.GROQ_API_KEY_2);
-  if (process.env.GROQ_API_KEY_3) keys.push(process.env.GROQ_API_KEY_3);
-  if (process.env.OPENROUTER_API_KEY) openRouterKey = process.env.OPENROUTER_API_KEY;
-  if (process.env.DASHSCOPE_API_KEY) dashscopeKey = process.env.DASHSCOPE_API_KEY;
-
-  if (keys.length === 0) {
-    const configPath = path.join(__dirname, "config.json");
-    try {
-      const config = JSON.parse(require("fs").readFileSync(configPath, "utf-8"));
-      if (config.GROQ_API_KEY) keys.push(config.GROQ_API_KEY);
-      if (config.GROQ_API_KEY_2) keys.push(config.GROQ_API_KEY_2);
-      if (config.GROQ_API_KEY_3) keys.push(config.GROQ_API_KEY_3);
-      if (!openRouterKey && config.OPENROUTER_API_KEY) openRouterKey = config.OPENROUTER_API_KEY;
-      if (!dashscopeKey && config.DASHSCOPE_API_KEY) dashscopeKey = config.DASHSCOPE_API_KEY;
-    } catch {}
-  }
-
-  console.log(`[Main] Groq keys: ${keys.length}, OpenRouter: ${openRouterKey ? "yes" : "no"}, DashScope: ${dashscopeKey ? "yes" : "no"}`);
-  return { groqKeys: keys, openRouterKey, dashscopeKey };
-}
-
-// ─── Start embedded Express server (production only) ──────
-function startServer() {
-  return new Promise((resolve, reject) => {
-    const { groqKeys, openRouterKey, dashscopeKey } = getAllApiKeys();
-    if (groqKeys.length === 0 && !openRouterKey) {
-      reject(new Error("No API keys found. Add them to electron/config.json or a .env file next to the executable."));
-      return;
-    }
-
-    const staticDir = path.join(__dirname, "..", "out");
-    const server = createServer(groqKeys, openRouterKey, dashscopeKey, staticDir);
-
-    // Use a fixed port in production to ensure localStorage persists across restarts
-    const FIXED_PORT = 52431;
-    const listener = server.listen(FIXED_PORT, "127.0.0.1", () => {
-      serverPort = listener.address().port;
-      console.log(`[Server] Running on http://127.0.0.1:${serverPort}`);
-      resolve(serverPort);
-    });
-
-    listener.on("error", (err) => reject(err));
-  });
-}
 
 // ─── Helper: Truly hide window (invisible, not minimized) ─
 function hideWindow() {
@@ -628,19 +575,6 @@ app.whenReady().then(async () => {
 
 
 
-  if (!isDev && false) { // Disabled local server for SaaS mode
-    try {
-      await startServer();
-    } catch (err) {
-      const { dialog } = require("electron");
-      dialog.showErrorBox(
-        "Startup Error",
-        `Failed to start the server:\n\n${err.message}\n\nMake sure you have a .env file with GROQ_API_KEY next to the executable.`
-      );
-      app.quit();
-      return;
-    }
-  }
 
   // ─── App Setup ──────────────────────────────────────────
   app.name = "Chintu";
