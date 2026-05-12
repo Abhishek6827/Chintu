@@ -940,15 +940,15 @@ export default function LandingPage() {
                 >
                   Close <span className="text-base">×</span>
                 </button>
-                <div className="relative bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                <div className="relative bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl p-2">
                   <div className="absolute -inset-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 blur-2xl opacity-30 -z-10 rounded-2xl" />
                   <video
                     src="/1.mp4"
                     autoPlay
                     muted
-                    controls
+                    loop
                     playsInline
-                    className="w-full aspect-video object-contain bg-black"
+                    className="w-full h-auto object-contain bg-black"
                   >
                     <track kind="captions" />
                   </video>

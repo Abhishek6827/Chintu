@@ -53,6 +53,7 @@ export default function ResumeBuilderPage() {
   const [selectedTemplate, setSelectedTemplate] = useState("modern");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -110,7 +111,12 @@ export default function ResumeBuilderPage() {
       setTailoredProfile(data.profile);
       setState("result");
     } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
+      const msg = err.message || "An unexpected error occurred.";
+      if (msg.toLowerCase().includes("insufficient credits")) {
+        setShowUpgradeModal(true);
+      } else {
+        setError(msg);
+      }
       setState("input");
     } finally {
       setIsProcessing(false);
@@ -565,6 +571,72 @@ export default function ResumeBuilderPage() {
 
         </AnimatePresence>
       </main>
+
+      {/* ─── Upgrade Modal ─────────────────────────────── */}
+      <AnimatePresence>
+        {showUpgradeModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md"
+            onClick={() => setShowUpgradeModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Background Glow */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/20 blur-[80px] rounded-full" />
+              <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-500/20 blur-[80px] rounded-full" />
+
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="absolute top-6 right-6 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 rotate-90" />
+              </button>
+
+              <div className="relative z-10 text-center space-y-6">
+                <div className="w-20 h-20 mx-auto rounded-[2rem] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-xl shadow-indigo-500/20">
+                  <Zap className="w-10 h-10 text-white fill-white" />
+                </div>
+
+                <div className="space-y-2">
+                  <h2 className="text-3xl font-black uppercase tracking-tighter leading-none">
+                    Upgrade <span className="text-indigo-500">Required.</span>
+                  </h2>
+                  <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.2em]">
+                    Premium Neural Engineering
+                  </p>
+                </div>
+
+                <p className="text-xs text-[var(--text-dim)] font-medium leading-relaxed px-4">
+                  The AI Resume Architect requires a Pro or Elite plan to engineer high-fidelity, ATS-optimized tailored resumes. Upgrade now to unlock your full potential.
+                </p>
+
+                <div className="pt-4 space-y-3">
+                  <button
+                    onClick={() => router.push("/pricing")}
+                    className="w-full py-4 bg-indigo-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all"
+                  >
+                    View Pricing & Plans
+                  </button>
+                  <button
+                    onClick={() => setShowUpgradeModal(false)}
+                    className="w-full py-4 bg-[var(--glass-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-[var(--text-main)] hover:bg-[var(--glass-bg)]/80 transition-all"
+                  >
+                    Maybe Later
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
