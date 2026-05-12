@@ -21,15 +21,16 @@ const MarqueeReviews = dynamic(() => import('@/components/MarqueeReviews').then(
 const TextReveal = dynamic(() => import('@/components/magicui/text-reveal').then(mod => mod.TextReveal), { ssr: false });
 const Meteors = dynamic(() => import('@/components/magicui/meteors').then(mod => mod.Meteors), { ssr: false });
 const VideoText = dynamic(() => import('@/components/magicui/video-text').then(mod => mod.VideoText), { ssr: false });
-import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
+const InteractiveHoverButton = dynamic(() => import('@/components/magicui/interactive-hover-button').then(mod => mod.InteractiveHoverButton), { ssr: false });
 const CardSpread = dynamic(() => import('@/components/animata/card/card-spread'), { ssr: false });
 
 import {
-  ScrollProgressBar,
-  AnimatedCounter,
   type FaqItem,
   type CompareRow,
 } from '@/components/LandingEnhancements';
+
+const ScrollProgressBar = dynamic(() => import('@/components/LandingEnhancements').then(mod => mod.ScrollProgressBar), { ssr: false });
+const AnimatedCounter = dynamic(() => import('@/components/LandingEnhancements').then(mod => mod.AnimatedCounter), { ssr: false });
 
 const FaqAccordion = dynamic(() => import('@/components/LandingEnhancements').then(mod => mod.FaqAccordion), { ssr: false });
 const ComparisonTable = dynamic(() => import('@/components/LandingEnhancements').then(mod => mod.ComparisonTable), { ssr: false });
