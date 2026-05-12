@@ -439,7 +439,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
           </div>
         </div>
       ))}
-      {/* Lightbox Modal */}
+      {/* Lightbox Modal **/}
       {fullScreenImage && (
         <div
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 animate-in fade-in duration-300"
