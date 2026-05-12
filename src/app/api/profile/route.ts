@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     const { current_jd, ...rest } = body;
 
     // List of columns that DEFINITELY exist in the profiles table
-    const allowedColumns = ["id", "full_name", "display_id", "profile_data", "raw_profile", "theme", "plan", "credits", "history", "updated_at", "payment_provider", "razorpay_payment_id"];
+    const allowedColumns = ["id", "full_name", "username", "display_id", "profile_data", "raw_profile", "theme", "plan", "credits", "history", "updated_at", "payment_provider", "razorpay_payment_id"];
     
     const updateData: any = { id: userId, email, updated_at: new Date().toISOString() };
 

@@ -93,6 +93,8 @@ export async function POST(req: Request) {
       .upsert({
         id: id,
         email: email,
+        full_name: fullName,
+        username: (evt.data as any).username || null,
         display_id: displayId,
         credits: 10,
         plan: 'free',
