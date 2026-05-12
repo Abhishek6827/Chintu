@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export const NotesCard = ({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) => (
   <div className={cn("flex flex-col gap-3 rounded-[2rem] bg-[#fef9c3] p-6 shadow-xl border border-yellow-200/50 w-52 h-64 overflow-hidden", className)}>
-    <h4 className="font-black text-yellow-900 uppercase tracking-widest text-[10px] border-b border-yellow-900/10 pb-2">{title}</h4>
+    <h3 className="font-black text-yellow-900 uppercase tracking-widest text-[10px] border-b border-yellow-900/10 pb-2">{title}</h3>
     <div className="text-[11px] text-yellow-800 font-bold leading-relaxed space-y-2 mt-2 italic">
       {children}
     </div>

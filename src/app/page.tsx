@@ -903,7 +903,7 @@ export default function LandingPage() {
               <div className="relative bg-black border border-[var(--glass-border)] p-3 sm:p-4 rounded-[2rem] sm:rounded-[4rem] shadow-2xl overflow-hidden">
                 <div className="bg-black rounded-[1.5rem] sm:rounded-[3rem] aspect-video overflow-hidden relative">
                   <div className="relative w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-black overflow-hidden">
-                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+                    <div className="absolute inset-0 bg-indigo-500/5 opacity-20 mix-blend-overlay"></div>
                     <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 font-black uppercase tracking-[0.2em] text-4xl sm:text-6xl drop-shadow-2xl">
                       SOLVE.
                     </span>

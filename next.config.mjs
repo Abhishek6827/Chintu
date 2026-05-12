@@ -8,6 +8,9 @@ const nextConfig = {
   compress: true,
   // Security + Performance: remove X-Powered-By header
   poweredByHeader: false,
+  // Modern performance optimizations
+  reactStrictMode: true,
+  swcMinify: true,
 
   // Increase API route body size limit
   experimental: {

@@ -17,6 +17,7 @@ export function AnimatedThemeToggler({
   return (
     <button
       onClick={onToggle}
+      aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
       className={`relative h-8 w-8 rounded-xl bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90 flex items-center justify-center overflow-hidden ${className}`}
     >
       <AnimatePresence mode="wait" initial={false}>

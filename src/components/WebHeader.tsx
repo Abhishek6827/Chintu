@@ -84,28 +84,28 @@ export default function WebHeader() {
           >
             <Link
               href="/#power-tools"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/80 hover:text-indigo-400 transition-colors relative group"
             >
               Features
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/#compare"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/80 hover:text-indigo-400 transition-colors relative group"
             >
               Compare
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/pricing"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/80 hover:text-indigo-400 transition-colors relative group"
             >
               Pricing
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/blog"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/80 hover:text-indigo-400 transition-colors relative group"
             >
               Blog
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />

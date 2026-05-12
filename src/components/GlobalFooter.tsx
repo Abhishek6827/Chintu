@@ -197,9 +197,9 @@ export default function GlobalFooter() {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.5, delay: ci * 0.05 }}
               >
-                <h4 className="text-[10px] font-black text-[var(--text-main)] dark:text-white uppercase tracking-[0.35em] mb-5">
+                <h3 className="text-[10px] font-black text-[var(--text-main)] dark:text-white uppercase tracking-[0.35em] mb-5">
                   {cluster.title}
-                </h4>
+                </h3>
                 <ul className="space-y-3">
                   {cluster.links.map((l) => (
                     <li key={l.label}>

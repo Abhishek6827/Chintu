@@ -23,7 +23,7 @@
 .dark-mode {
   /* Premium DARK Mode (Ghost) */
   --text-main: rgba(255, 255, 255, var(--app-opacity, 1));
-  --text-dim: rgba(255, 255, 255, calc(0.4 * var(--app-opacity, 1)));
+  --text-dim: rgba(255, 255, 255, calc(0.6 * var(--app-opacity, 1)));
   --glass-bg: rgba(255, 255, 255, calc(0.03 * var(--app-opacity, 1)));
   --glass-border: rgba(255, 255, 255, calc(0.08 * var(--app-opacity, 1)));
   --bubble-bg: rgba(255, 255, 255, calc(0.04 * var(--app-opacity, 1)));
