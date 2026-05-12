@@ -8,6 +8,7 @@ import { vscDarkPlus, oneLight } from "react-syntax-highlighter/dist/esm/styles/
 import { Copy, Check, Info, ChevronDown, Sparkles, Cpu, Clock, RotateCcw } from "lucide-react";
 import AIProcessing from "./AIProcessing";
 import { VideoText } from "./magicui/video-text";
+import Image from "next/image";
 
 interface AnswerEntry {
   id: string;
@@ -206,7 +207,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                           className="relative aspect-video rounded-lg overflow-hidden border border-white/10 cursor-pointer hover:scale-[1.02] transition-transform shadow-lg group/img"
                           onClick={() => setFullScreenImage(img)}
                         >
-                          <img src={img} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
+                          <Image src={img} alt={`Screenshot ${i + 1}`} fill unoptimized className="object-cover" />
                           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                              <div className="bg-black/50 p-2 rounded-full backdrop-blur-sm">
                                <Sparkles className="w-4 h-4 text-white" />
@@ -452,7 +453,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
           </button>
           
           <div className="relative w-full max-w-5xl aspect-video rounded-3xl overflow-hidden shadow-2xl border border-white/10 animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
-            <img src={fullScreenImage} alt="Full Screen Preview" className="w-full h-full object-contain" />
+            <Image src={fullScreenImage} alt="Full Screen Preview" fill unoptimized className="object-contain" />
             
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 bg-black/50 backdrop-blur-md rounded-full border border-white/10">
                <span className="text-white text-xs font-black uppercase tracking-[0.4em]">Proprietary Vision Intel</span>
