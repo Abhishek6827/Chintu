@@ -87,21 +87,55 @@ export async function GET() {
 
     const userObj = await clerkClient().users.getUser(userId);
     const email = userObj.emailAddresses[0]?.emailAddress;
+    const fullName = [userObj.firstName, userObj.lastName].filter(Boolean).join(" ") || "Unknown User";
 
     const supabaseAdmin = createAdminClient();
-    const { data } = await supabaseAdmin
+    
+    // Attempt to fetch profile
+    let { data, error: fetchError } = await supabaseAdmin
       .from("profiles")
       .select("*")
       .eq("email", email)
       .maybeSingle();
 
+    // AUTO-SYNC: If profile doesn't exist in Supabase but user is logged in via Clerk
+    if (!data && !fetchError) {
+      console.log(`[Auto-Sync] Creating missing profile for ${email}`);
+      const now = new Date();
+      const provider = userObj.externalAccounts[0]?.provider || 'email';
+      const dateStr = now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(/\//g, '-');
+      const displayTimeStr = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).replace(':', '');
+      const displayId = `CHINTU-${provider.toUpperCase()}-${dateStr}-${displayTimeStr}`;
+
+      const { data: newData, error: upsertError } = await supabaseAdmin
+        .from("profiles")
+        .upsert({
+          id: userId,
+          email: email,
+          full_name: fullName,
+          username: userObj.username || null,
+          display_id: displayId,
+          credits: 10,
+          plan: 'free',
+          updated_at: now.toISOString()
+        }, { onConflict: 'email' })
+        .select()
+        .single();
+
+      if (upsertError) {
+        console.error("[Auto-Sync] Failed:", upsertError.message);
+      } else {
+        data = newData;
+      }
+    }
+
     if (data) {
-      // Inject virtual current_jd from profile_data for frontend compatibility
       data.current_jd = data.current_jd || data.profile_data?.saved_jd || "";
     }
 
     return NextResponse.json({ profile: data });
-  } catch {
+  } catch (error) {
+    console.error("Profile API GET error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
