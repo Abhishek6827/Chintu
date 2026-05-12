@@ -844,7 +844,7 @@ export default function LandingPage() {
                         unoptimized
                       />
                     ) : (
-                      <p.icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-400 group-hover:text-cyan-600 dark:text-cyan-400 transition-colors" />
+                      <p.icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors" />
                     )}
                   </div>
                   <div className="min-w-0">
