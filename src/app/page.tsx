@@ -183,6 +183,26 @@ const faqPageSchema = {
   })),
 };
 
+/* ─── VideoObject Schema for GSC Indexing ─── */
+const videoSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": "Chintu Ji — Real-Time AI Interview Copilot Demo",
+  "description": "Watch how Chintu Ji helps you solve coding tests, MCQs, and online exams in real-time with sub-200ms latency. Stealth, invisible, and accurate.",
+  "thumbnailUrl": [
+    "https://www.getchintu.com/og-image.png"
+  ],
+  "uploadDate": "2026-05-01T08:00:00+05:30",
+  "duration": "PT0M30S",
+  "contentUrl": "https://www.getchintu.com/1.mp4",
+  "embedUrl": "https://www.getchintu.com/",
+  "potentialAction": {
+    "@type": "SeekAction",
+    "target": "https://www.getchintu.com/?={seek_to_start_time}",
+    "startOffset-input": "required name=seek_to_start_time"
+  }
+};
+
 /* ─── Authentic Voice demo ──────────────────────────────── */
 const humanDemo = {
   question: "What is the toughest bug you have ever debugged in production?",
@@ -568,6 +588,12 @@ export default function LandingPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageSchema) }}
+      />
+
+      {/* SEO: VideoObject structured data for GSC indexing */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoSchema) }}
       />
 
       {/* Scroll Progress Bar (web-only, hidden in Electron app) */}
