@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Check, Sparkles, Minus, Shield, Plus, HelpCircle, Trophy, Crown, ArrowRight, MessageSquare, FileText, Layout, Code } from "lucide-react";
+import { Check, Sparkles, Minus, Shield, Plus, HelpCircle, Trophy, Crown, ArrowRight, MessageSquare, FileText, Layout, Code, Smartphone } from "lucide-react";
 import dynamic from 'next/dynamic';
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -527,8 +527,11 @@ export default function PricingPage() {
 
       <div className="flex-1 pb-16 selection:bg-indigo-500/20">
         <div className="text-center px-4 pt-12 pb-8">
-          <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-6 border border-indigo-500/20">
+          <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-3 border border-indigo-500/20">
             <Sparkles className="w-3 h-3 animate-pulse" /> Premium Access
+          </div>
+          <div className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-6 border border-emerald-500/20">
+            <Smartphone className="w-3 h-3" /> Available on Windows & Android
           </div>
 
           {currentPlan === 'elite' && (
