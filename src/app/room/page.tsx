@@ -141,6 +141,15 @@ export default function RoomPage() {
     setAnswers(prev => prev.map(a => a.isStreaming ? { ...a, isStreaming: false } : a));
   }, []);
 
+  const openPricingExternal = useCallback(() => {
+    const pricingUrl = "https://www.getchintu.com/pricing";
+    if (isElectron) {
+      (window as any).electronAPI.openExternal(pricingUrl);
+    } else {
+      window.open(pricingUrl, "_blank");
+    }
+  }, []);
+
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [isStealthMode, setIsStealthMode] = useState(true);
 
@@ -1759,7 +1768,7 @@ export default function RoomPage() {
                 setSelectedModel(val as ModelKey);
                 selectedModelRef.current = val as ModelKey;
               }}
-              onLockedClick={() => router.push("/pricing")}
+              onLockedClick={() => openPricingExternal()}
             />
 
             <CustomDropdown
@@ -1771,7 +1780,7 @@ export default function RoomPage() {
               ]}
               value={responseLength}
               onChange={(val) => setResponseLength(val as ResponseLength)}
-              onLockedClick={() => router.push("/pricing")}
+              onLockedClick={() => openPricingExternal()}
             />
           </div>
           {/* Textarea */}
@@ -1871,7 +1880,7 @@ export default function RoomPage() {
         <button
           onClick={() => {
             if (userPlan === 'free') {
-              router.push("/pricing");
+              openPricingExternal();
               return;
             }
             if (isScreenRecording) stopScreenRecording();
@@ -1980,7 +1989,7 @@ export default function RoomPage() {
                     theme={isLightMode ? "light" : "dark"}
                     onToggle={() => {
                       if (userPlan === 'free') {
-                        router.push("/pricing");
+                        openPricingExternal();
                         return;
                       }
                       toggleTheme();
@@ -2041,7 +2050,7 @@ export default function RoomPage() {
                   <button
                     onClick={async () => {
                       if (userPlan === 'free') {
-                        router.push("/pricing");
+                        openPricingExternal();
                         return;
                       }
                       const newVal = !universalShortcuts;
@@ -2264,7 +2273,7 @@ export default function RoomPage() {
 
       {/* Floating side controls */}
       {isElectron && (
-        <div className={`floating-side-controls no-drag relative group/side ${userPlan === 'free' ? 'cursor-pointer' : ''}`} onClick={() => { if (userPlan === 'free') router.push("/pricing"); }}>
+        <div className={`floating-side-controls no-drag relative group/side ${userPlan === 'free' ? 'cursor-pointer' : ''}`} onClick={() => { if (userPlan === 'free') openPricingExternal(); }}>
           {userPlan === 'free' && (
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-2xl opacity-0 group-hover/side:opacity-100 transition-opacity p-2 text-center">
               <Crown className="w-4 h-4 text-amber-400 mb-1" />
