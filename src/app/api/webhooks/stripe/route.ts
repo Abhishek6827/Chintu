@@ -773,13 +773,19 @@ export async function POST(req: Request) {
 
     const oldPlan = profile.plan || "unknown";
 
+    const now = new Date();
+    const nextRefill = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
     await supabaseAdmin
       .from("profiles")
       .update({
         plan: "free",
         credits: 10,
         stripe_subscription_id: null,
-        updated_at: new Date().toISOString(),
+        updated_at: now.toISOString(),
+        profile_data: {
+          ...(profile.profile_data || {}),
+          free_credits_refill_at: nextRefill
+        }
       })
       .eq("email", profile.email);
 

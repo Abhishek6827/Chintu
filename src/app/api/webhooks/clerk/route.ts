@@ -88,6 +88,7 @@ export async function POST(req: Request) {
     }
 
     // Use UPSERT to handle cases where the user record was partially created by other routes
+    const nextRefill = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
     const { error } = await supabase
       .from('profiles')
       .upsert({
@@ -98,7 +99,10 @@ export async function POST(req: Request) {
         display_id: displayId,
         credits: 10,
         plan: 'free',
-        updated_at: now.toISOString()
+        updated_at: now.toISOString(),
+        profile_data: {
+          free_credits_refill_at: nextRefill
+        }
       }, {
         onConflict: 'email'
       });

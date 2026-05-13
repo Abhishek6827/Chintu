@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
     // List of columns that DEFINITELY exist in the profiles table
     const allowedColumns = ["id", "full_name", "username", "display_id", "profile_data", "raw_profile", "theme", "plan", "credits", "history", "updated_at", "payment_provider", "razorpay_payment_id"];
-    
+
     const updateData: any = { id: userId, email, updated_at: new Date().toISOString() };
 
     // Map rest of body to allowed columns
@@ -90,7 +90,7 @@ export async function GET() {
     const fullName = [userObj.firstName, userObj.lastName].filter(Boolean).join(" ") || "Unknown User";
 
     const supabaseAdmin = createAdminClient();
-    
+
     // Attempt to fetch profile
     const { data: initialData, error: fetchError } = await supabaseAdmin
       .from("profiles")
@@ -108,6 +108,7 @@ export async function GET() {
       const dateStr = now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(/\//g, '-');
       const displayTimeStr = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).replace(':', '');
       const displayId = `CHINTU-${provider.toUpperCase()}-${dateStr}-${displayTimeStr}`;
+      const nextRefill = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
       const { data: newData, error: upsertError } = await supabaseAdmin
         .from("profiles")
@@ -119,7 +120,10 @@ export async function GET() {
           display_id: displayId,
           credits: 10,
           plan: 'free',
-          updated_at: now.toISOString()
+          updated_at: now.toISOString(),
+          profile_data: {
+            free_credits_refill_at: nextRefill
+          }
         }, { onConflict: 'email' })
         .select()
         .single();
@@ -133,6 +137,36 @@ export async function GET() {
 
     if (data) {
       data.current_jd = data.current_jd || data.profile_data?.saved_jd || "";
+
+      // Monthly free credits refill for free users
+      const userPlan = (data.plan || "free").toLowerCase();
+      if (userPlan === "free") {
+        const now = new Date();
+        const refillAt = data.profile_data?.free_credits_refill_at;
+        if (!refillAt || new Date(refillAt) <= now) {
+          const nextRefill = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+          const { data: updatedProfile, error: refillError } = await supabaseAdmin
+            .from("profiles")
+            .update({
+              credits: 10,
+              updated_at: now.toISOString(),
+              profile_data: {
+                ...(data.profile_data || {}),
+                free_credits_refill_at: nextRefill
+              }
+            })
+            .eq("email", email)
+            .select()
+            .single();
+
+          if (!refillError && updatedProfile) {
+            data = updatedProfile;
+            data.current_jd = data.current_jd || data.profile_data?.saved_jd || "";
+          } else if (refillError) {
+            console.error("[Free Refill] Failed:", refillError.message);
+          }
+        }
+      }
     }
 
     return NextResponse.json({ profile: data });

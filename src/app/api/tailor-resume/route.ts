@@ -42,8 +42,8 @@ export async function POST(req: NextRequest) {
       .eq("email", email)
       .maybeSingle();
 
-    if (!profile || (profile.credits || 0) <= 0) {
-      return NextResponse.json({ error: "Insufficient credits. Please upgrade your plan." }, { status: 403 });
+    if (!profile || (profile.credits || 0) < 5) {
+      return NextResponse.json({ error: "Insufficient credits. Resume Builder requires 5 credits. Please upgrade your plan." }, { status: 403 });
     }
 
     const systemPrompt = `You are an elite career coach and resume strategist. 
@@ -169,7 +169,7 @@ Rules:
         try {
           const newHistoryEntry = {
             type: "deduction",
-            amount: 1,
+            amount: 5,
             description: `Resume Builder (AI Tailoring): ${tailoredProfile.title}`,
             timestamp: new Date().toISOString()
           };
@@ -179,7 +179,7 @@ Rules:
           await supabase.from("profiles").upsert({
             id: userId,
             email: email,
-            credits: (profile.credits || 1) - 1,
+            credits: (profile.credits || 5) - 5,
             profile_data: {
               ...(profile.profile_data as any || {}),
               profile_data: tailoredProfile,

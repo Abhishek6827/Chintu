@@ -202,6 +202,9 @@ export default function GlobalHeader() {
                   <span className="text-[10px] font-black text-[var(--text-main)]">{userCredits}</span>
                 </div>
               </div>
+              <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${userPlan === 'free' ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white'}`}>
+                {userPlan}
+              </div>
               {userPlan === 'free' && (
                 <button
                   onClick={handleUpgrade}

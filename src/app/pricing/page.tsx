@@ -34,7 +34,7 @@ const PLANS = [
     badge: "🌱",
     color: "emerald",
     features: [
-      "10 Credits (one-time)",
+      "10 Credits / month (resets monthly)",
       "1 Profile & 1 Resume Upload",
       "Standard Engine only",
       "Basic Response Types",
@@ -65,7 +65,7 @@ const PLANS = [
     popular: true,
     features: [
       "100 Credits / month per unit",
-      "1 Credit = 1 Resume Tailoring",
+      "5 Credits = 1 Resume Tailoring",
       "Unlimited Profile Uploads",
       "Unlimited Job Descriptions",
       "All Premium Engines Unlocked",
@@ -91,7 +91,7 @@ const PLANS = [
     color: "amber",
     features: [
       "500 Credits / month per unit",
-      "1 Credit = 1 Resume Tailoring",
+      "5 Credits = 1 Resume Tailoring",
       "Unlimited Profile Uploads",
       "Unlimited Job Descriptions",
       "All Pro Features",
@@ -571,7 +571,7 @@ export default function PricingPage() {
               </div>
               <div className="flex justify-between border-b border-white/10 pb-1.5 mb-1.5">
                 <span>1 RESUME BUILDER</span>
-                <span className="text-emerald-400">1 CREDIT</span>
+                <span className="text-emerald-400">5 CREDITS</span>
               </div>
               <div className="flex justify-between">
                 <span>1 SCREENSHOT RESPONSE</span>

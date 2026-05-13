@@ -294,7 +294,7 @@ export const pricingPlans: PricingPlan[] = [
     cta: "Start Free",
     href: "/sign-up",
     features: [
-      "10 Credits (one-time)",
+      "10 Credits / month (resets monthly)",
       "1 Profile & 1 Resume Upload",
       "Standard Engine only",
       "Basic Response Types",

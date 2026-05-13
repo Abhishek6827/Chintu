@@ -125,41 +125,38 @@ export default function WebHeader() {
             </Link>
           ) : (
             <div className="flex items-center gap-4">
-              {userPlan !== 'free' && userPlan !== '' && (
-                <>
-                  <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
-                    <AnimatedThemeToggler
-                      theme={currentTheme}
-                      onToggle={toggleTheme}
-                      className="bg-[var(--bg-app)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)] shadow-sm"
-                    />
-                    <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
-                    <div className="flex flex-col items-end">
-                      <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Energy Sync</span>
-                      <span className="text-[11px] font-black text-indigo-400 tracking-tight flex items-center gap-1">
-                        <Zap className="w-2.5 h-2.5 fill-indigo-400" /> {userCredits ?? '--'}
-                      </span>
-                    </div>
-                    <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
-                    <div className="px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20">
-                      {userPlan}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const deepLink = `chintu://open?source=web&u=${encodeURIComponent(user?.id || "")}`;
-                      window.location.href = deepLink;
-                      setTimeout(() => router.push("/setup"), 500);
-                    }}
-                    className="relative group overflow-hidden bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-indigo-400 text-[9px] font-black uppercase tracking-[0.2em] px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl hover:border-indigo-500 hover:bg-indigo-500/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
-                  >
-                    <span className="hidden sm:inline">Enter The App</span>
-                    <span className="sm:hidden">Open</span>
-                    <Sparkles className="w-3 h-3 fill-indigo-400" />
-                  </button>
-                </>
-              )}
-              {userPlan === 'free' && (
+              <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
+                <AnimatedThemeToggler
+                  theme={currentTheme}
+                  onToggle={toggleTheme}
+                  className="bg-[var(--bg-app)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)] shadow-sm"
+                />
+                <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
+                <div className="flex flex-col items-end">
+                  <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Energy Sync</span>
+                  <span className="text-[11px] font-black text-indigo-400 tracking-tight flex items-center gap-1">
+                    <Zap className="w-2.5 h-2.5 fill-indigo-400" /> {userCredits ?? '--'}
+                  </span>
+                </div>
+                <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
+                <div className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 ${userPlan === 'free' ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white'}`}>
+                  {userPlan || 'free'}
+                </div>
+              </div>
+              {userPlan !== 'free' && userPlan !== '' ? (
+                <button
+                  onClick={() => {
+                    const deepLink = `chintu://open?source=web&u=${encodeURIComponent(user?.id || "")}`;
+                    window.location.href = deepLink;
+                    setTimeout(() => router.push("/setup"), 500);
+                  }}
+                  className="relative group overflow-hidden bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-indigo-400 text-[9px] font-black uppercase tracking-[0.2em] px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl hover:border-indigo-500 hover:bg-indigo-500/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                >
+                  <span className="hidden sm:inline">Enter The App</span>
+                  <span className="sm:hidden">Open</span>
+                  <Sparkles className="w-3 h-3 fill-indigo-400" />
+                </button>
+              ) : (
                 <Link
                   href="/pricing"
                   className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-4 sm:px-8 py-3 sm:py-3.5 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
