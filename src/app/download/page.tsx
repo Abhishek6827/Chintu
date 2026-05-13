@@ -7,13 +7,9 @@ import { motion } from 'framer-motion';
 
 const Meteors = dynamic(() => import('@/components/magicui/meteors').then(mod => mod.Meteors), { ssr: false });
 
-import pkg from '../../../package.json';
-
 export default function DownloadPage() {
-  const version = pkg.version;
   const [desktopUrl, setDesktopUrl] = React.useState<string>("https://github.com/Abhishek6827/Chintu_Releases/releases");
   const [apkUrl, setApkUrl] = React.useState<string | null>(null);
-  const [apkVersion, setApkVersion] = React.useState<string>("");
 
   React.useEffect(() => {
     fetch("https://api.github.com/repos/Abhishek6827/Chintu_Releases/releases")
@@ -30,7 +26,6 @@ export default function DownloadPage() {
           const apkAsset = mobileRelease.assets.find((a: any) => a.name.endsWith(".apk"));
           if (apkAsset) {
             setApkUrl(apkAsset.browser_download_url);
-            setApkVersion(mobileRelease.tag_name.replace(/^mobile-/, "").replace(/^v/, ""));
           }
         }
       })
