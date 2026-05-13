@@ -204,7 +204,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      signInFallbackRedirectUrl="/setup"
+      signUpFallbackRedirectUrl="/setup"
+    >
       <html lang="en" className="relative">
         <head>
           <link rel="icon" href="https://www.getchintu.com/icon.png" />
