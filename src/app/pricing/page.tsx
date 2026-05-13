@@ -418,9 +418,6 @@ export default function PricingPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { currentTheme, toggleTheme } = useThemeToggle();
 
-  if (!isLoaded) return <div className="h-screen bg-[var(--bg-app)] flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>;
-
-
   return (
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] flex flex-col relative">
       <AnimatePresence>
