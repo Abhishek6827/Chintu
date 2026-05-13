@@ -76,7 +76,6 @@ export default function DownloadPage() {
             >
               <Download className="w-5 h-5 group-hover:animate-bounce" />
               Download for Windows
-              <div className="absolute -top-3 -right-3 bg-emerald-500 text-[8px] text-white px-2 py-1 rounded-full border-2 border-[var(--bg-app)] shadow-lg font-black z-10">v{version}</div>
             </a>
             <a
               href={apkUrl || "https://github.com/Abhishek6827/Chintu_Releases/releases"}
@@ -84,7 +83,6 @@ export default function DownloadPage() {
             >
               <Smartphone className="w-5 h-5 group-hover:animate-bounce" />
               Download for Android
-              {apkVersion && <div className="absolute -top-3 -right-3 bg-indigo-500 text-[8px] text-white px-2 py-1 rounded-full border-2 border-[var(--bg-app)] shadow-lg font-black z-10">v{apkVersion}</div>}
             </a>
           </div>
           <div className="flex items-center justify-center gap-6 text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">
