@@ -388,7 +388,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                   })()}
                 </div>
 
-                {/* Footer Actions */}
+                {/* Footer Actions **/}
                 <div
                   className="flex items-center justify-between gap-4 border-t border-[var(--glass-border)]"
                   style={{
