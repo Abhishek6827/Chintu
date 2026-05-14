@@ -148,6 +148,9 @@ jobs:
 
       - name: Build Next.js
         if: steps.check.outputs.HAS_DESKTOP_CHANGE == 'true'
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
         run: npm run build
 
       - name: Delete old desktop releases from Chintu_Releases
