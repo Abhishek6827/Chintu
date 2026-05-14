@@ -18,9 +18,41 @@ const isPublicRoute = createRouteMatcher([
   '/api/webhooks/razorpay(.*)'
 ]);
 
+// Origins allowed to call /api/* cross-origin (Chintu-Mobile web + APK).
+const ALLOWED_ORIGINS = [
+  'https://mobile.getchintu.com',
+  'https://chintu-mobile.vercel.app',
+  'https://www.getchintu.com',
+  'https://chintu-phi.vercel.app',
+  'http://localhost',
+  'https://localhost',
+  'capacitor://localhost',
+  'ionic://localhost',
+  'http://localhost:3000',
+];
+
+function buildCorsHeaders(origin: string | null): Record<string, string> {
+  const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin',
+  };
+}
+
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
   const url = new URL(req.url);
+  const origin = req.headers.get('origin');
+  const isApiRoute = url.pathname.startsWith('/api/');
+
+  // Short-circuit CORS preflight for /api/* — no auth check, just headers.
+  if (isApiRoute && req.method === 'OPTIONS') {
+    return new NextResponse(null, { status: 204, headers: buildCorsHeaders(origin) });
+  }
+
+  const { userId } = await auth();
 
   // App-specific redirection: App users should never see the landing page
   const isElectron = req.headers.get("user-agent")?.toLowerCase().includes("electron");
@@ -35,6 +67,17 @@ export default clerkMiddleware(async (auth, req) => {
 
   if (!isPublicRoute(req)) {
     (await auth()).protect();
+  }
+
+  // Attach CORS headers to /api/* responses so cross-origin clients
+  // (Chintu-Mobile web + APK) can read the body.
+  if (isApiRoute) {
+    const res = NextResponse.next();
+    const corsHeaders = buildCorsHeaders(origin);
+    for (const [k, v] of Object.entries(corsHeaders)) {
+      res.headers.set(k, v);
+    }
+    return res;
   }
 });
 
