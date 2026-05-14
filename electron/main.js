@@ -764,24 +764,53 @@ function setupAutoUpdater() {
         message: errorMsg 
       });
     }
-    // Only show dialog for non-auth errors to avoid annoying popups if token is just expired
-    if (!errorMsg.includes("401") && !errorMsg.includes("403")) {
+    // Suppress expected errors: auth failures + 404 when mobile release is latest (no latest.yml)
+    const suppressed = errorMsg.includes("401") || errorMsg.includes("403") || errorMsg.includes("404") || errorMsg.includes("latest.yml");
+    if (!suppressed) {
       dialog.showErrorBox("Update Error", `Failed to check for updates: ${errorMsg}`);
     }
   });
 
-  setTimeout(() => {
+  // ─── Pre-check: skip update if latest release is mobile-only (no desktop assets) ──
+  async function shouldSkipUpdateCheck() {
+    try {
+      const res = await fetch("https://api.github.com/repos/Abhishek6827/Chintu_Releases/releases/latest");
+      if (!res.ok) return false;
+      const release = await res.json();
+      const tag = (release.tag_name || "").toLowerCase();
+      const assets = release.assets || [];
+      const hasDesktopAsset = assets.some(a => /latest\.yml|\.exe|\.zip|\.dmg/i.test(a.name));
+      const isMobileRelease = tag.startsWith("mobile-") || tag.includes("android") || tag.includes("apk");
+      if (isMobileRelease && !hasDesktopAsset) {
+        console.log("[AutoUpdater] Latest release is mobile-only, skipping desktop update check.");
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error("[AutoUpdater] Pre-check error:", e.message);
+      return false;
+    }
+  }
+
+  async function checkForUpdatesSafe() {
+    const skip = await shouldSkipUpdateCheck();
+    if (skip) {
+      if (mainWindow) {
+        mainWindow.webContents.send("update-status", { status: "up-to-date", version: app.getVersion() });
+      }
+      return;
+    }
     autoUpdater.checkForUpdatesAndNotify().catch(err => {
       console.error("[AutoUpdater] Check error:", err);
     });
-  }, 5000);
+  }
+
+  setTimeout(() => checkForUpdatesSafe(), 5000);
 
   // ─── Periodic update check every 30 minutes ─────────────
   setInterval(() => {
     console.log("[AutoUpdater] Periodic check for updates...");
-    autoUpdater.checkForUpdatesAndNotify().catch(err => {
-      console.error("[AutoUpdater] Periodic check error:", err);
-    });
+    checkForUpdatesSafe();
   }, 30 * 60 * 1000);
 
   // ─── Debug Shortcut for Updates ─────────────────────────
