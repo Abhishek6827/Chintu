@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import { Meteors } from './magicui/meteors';
+import { useThemeToggle } from '@/hooks/useThemeToggle';
 
 interface NeuralLoadingProps {
   text?: string;
@@ -11,11 +12,13 @@ export default function NeuralLoading({
   text = "Synthesizing Neural Intelligence",
   subtext = "Calibrating Protected Overlay"
 }: NeuralLoadingProps) {
+  const { plan } = useThemeToggle();
+  const isPremium = plan === "pro" || plan === "elite";
   return (
     <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[var(--bg-app)] overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute inset-0 pointer-events-none">
-        <Meteors number={40} />
+        {isPremium && <Meteors number={40} />}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" />
         <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] bg-purple-500/5 blur-[80px] rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-cyan-500/5 blur-[80px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />

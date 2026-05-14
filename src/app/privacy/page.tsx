@@ -4,9 +4,12 @@ import React, { useEffect } from 'react';
 import { Lock, EyeOff, Server, FileCheck, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Meteors } from '@/components/magicui/meteors';
+import { useThemeToggle } from '@/hooks/useThemeToggle';
 
 export default function PrivacyPage() {
-  
+  const { plan } = useThemeToggle();
+  const isPremium = plan === "pro" || plan === "elite";
+
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -23,7 +26,7 @@ export default function PrivacyPage() {
       
       {/* Background Orbs */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <Meteors number={12} />
+        {isPremium && <Meteors number={12} />}
         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-200/20 blur-[120px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-200/20 blur-[120px] rounded-full animate-pulse [animation-delay:700ms]" />
       </div>

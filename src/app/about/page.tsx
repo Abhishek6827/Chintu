@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Shield, Zap, Brain, Target, Lock, Sparkles, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Meteors } from '@/components/magicui/meteors';
+import { useThemeToggle } from '@/hooks/useThemeToggle';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -12,6 +13,9 @@ const fadeUp = {
 };
 
 export default function AboutPage() {
+  const { plan } = useThemeToggle();
+  const isPremium = plan === "pro" || plan === "elite";
+
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -26,7 +30,7 @@ export default function AboutPage() {
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-indigo-500/20 flex flex-col relative overflow-x-hidden">
       {/* Background Elements */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <Meteors number={15} />
+        {isPremium && <Meteors number={15} />}
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-200/20 blur-[120px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-200/20 blur-[120px] rounded-full animate-pulse [animation-delay:700ms]" />
       </div>

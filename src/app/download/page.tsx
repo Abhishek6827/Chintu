@@ -5,9 +5,13 @@ import { Download, Laptop, Shield, Zap, ArrowRight, CheckCircle2, Smartphone } f
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 
+import { useThemeToggle } from '@/hooks/useThemeToggle';
+
 const Meteors = dynamic(() => import('@/components/magicui/meteors').then(mod => mod.Meteors), { ssr: false });
 
 export default function DownloadPage() {
+  const { plan } = useThemeToggle();
+  const isPremium = plan === "pro" || plan === "elite";
   const [desktopUrl, setDesktopUrl] = React.useState<string>("https://github.com/Abhishek6827/Chintu_Releases/releases");
   const [apkUrl, setApkUrl] = React.useState<string | null>(null);
 
@@ -37,7 +41,7 @@ export default function DownloadPage() {
 
       {/* Background Orbs */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <Meteors number={20} />
+        {isPremium && <Meteors number={20} />}
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-200/20 blur-[120px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-200/20 blur-[120px] rounded-full animate-pulse [animation-delay:700ms]" />
       </div>

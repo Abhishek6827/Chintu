@@ -5,10 +5,13 @@ import { useUser } from "@clerk/nextjs";
 import { Send, MessageCircle, Clock, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Meteors } from "@/components/magicui/meteors";
+import { useThemeToggle } from "@/hooks/useThemeToggle";
 import ConfirmationMessage from "@/components/animata/feature-cards/confirmation-message";
 
 export default function SupportPage() {
   const { user, isLoaded } = useUser();
+  const { plan } = useThemeToggle();
+  const isPremium = plan === "pro" || plan === "elite";
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -55,7 +58,7 @@ export default function SupportPage() {
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-indigo-500/20 flex flex-col relative overflow-x-hidden" style={{ WebkitAppRegion: 'drag' } as any}>
       {/* Background Ambience */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <Meteors number={12} />
+        {isPremium && <Meteors number={12} />}
         <div className="absolute top-[-5%] right-[-5%] w-[40%] h-[40%] bg-indigo-500/[0.05] blur-[120px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-5%] left-[-5%] w-[40%] h-[40%] bg-purple-500/[0.05] blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
