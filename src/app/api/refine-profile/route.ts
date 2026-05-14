@@ -180,23 +180,24 @@ Rules:
         const { userId } = await auth();
         if (userId) {
           const supabase = createAdminClient();
-          const userObj = await clerkClient().users.getUser(userId);
+          const client = await clerkClient();
+          const userObj = await client.users.getUser(userId);
           const email = userObj.emailAddresses[0]?.emailAddress;
 
           const { data: existing } = await supabase.from("profiles")
             .select("profile_data")
             .eq("email", email)
             .maybeSingle();
-          
-          const mergedData = { 
-            ...(existing?.profile_data || {}), 
+
+          const mergedData = {
+            ...(existing?.profile_data || {}),
             ...profileData,
             preferences: {
               ...(existing?.profile_data?.preferences || {}),
               ...(profileData?.preferences || {})
             }
           };
-          
+
           const { error: upsertError } = await supabase.from("profiles").upsert({
             id: userId,
             email: email,

@@ -72,7 +72,8 @@ export async function POST(req: NextRequest) {
     const supabaseAdmin = createAdminClient();
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    const userObj = await clerkClient().users.getUser(userId);
+    const client = await clerkClient();
+    const userObj = await client.users.getUser(userId);
     const email = userObj.emailAddresses[0]?.emailAddress;
 
     // 1. Initial Profile Fetch

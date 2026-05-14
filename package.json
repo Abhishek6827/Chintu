@@ -20,7 +20,7 @@
     "gsd:status": "tsx .gsd/cli/gsd-cli.ts status"
   },
   "dependencies": {
-    "@clerk/nextjs": "^5.7.6",
+    "@clerk/nextjs": "^6.39.3",
     "@google/generative-ai": "^0.24.1",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",

@@ -75,8 +75,8 @@ export default clerkMiddleware(async (auth, req) => {
     }
   }
 
-  if (!isPublicRoute(req)) {
-    (await auth()).protect();
+  if (!isPublicRoute(req) && !userId) {
+    return NextResponse.redirect(new URL('/sign-in', req.url));
   }
 
   // Attach CORS headers to /api/* responses so cross-origin clients

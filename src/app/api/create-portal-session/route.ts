@@ -16,7 +16,8 @@ export async function POST() {
     }
 
     try {
-        const userObj = await clerkClient().users.getUser(userId);
+        const client = await clerkClient();
+        const userObj = await client.users.getUser(userId);
         const email = userObj.emailAddresses[0]?.emailAddress;
 
         const supabase = createAdminClient();

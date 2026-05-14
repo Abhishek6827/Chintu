@@ -248,7 +248,8 @@ export async function POST(req: NextRequest) {
     // ─── Credit Check (graceful) ──────────────────────────────
     let currentCredits = 999;
     // ─── Profile lookup with Email Fallback ───────────────────
-    const userObj = await clerkClient().users.getUser(userId);
+    const client = await clerkClient();
+    const userObj = await client.users.getUser(userId);
     const email = userObj.emailAddresses[0]?.emailAddress;
 
     const { data: profile, error: profileError } = await supabaseAdmin
@@ -521,7 +522,7 @@ Rules:
 
       await supabaseAdmin
         .from("profiles")
-        .update({ 
+        .update({
           credits: (currentCredits || 1) - 1,
           profile_data: {
             ...(profile.profile_data as any || {}),

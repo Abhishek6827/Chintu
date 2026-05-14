@@ -13,7 +13,8 @@ export async function GET() {
     apiVersion: "2024-06-20" as any,
   });
 
-  const userObj = await clerkClient().users.getUser(userId);
+  const client = await clerkClient();
+  const userObj = await client.users.getUser(userId);
   const email = userObj.emailAddresses[0]?.emailAddress;
 
   const supabaseAdmin = createAdminClient();

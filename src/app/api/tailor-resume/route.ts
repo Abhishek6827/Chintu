@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
     const { createAdminClient } = await import("@/utils/supabase/server");
     const supabase = createAdminClient();
 
-    const userObj = await clerkClient().users.getUser(userId);
+    const client = await clerkClient();
+    const userObj = await client.users.getUser(userId);
     const email = userObj.emailAddresses[0]?.emailAddress;
 
     const { data: profile } = await supabase

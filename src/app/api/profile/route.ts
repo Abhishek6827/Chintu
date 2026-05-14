@@ -11,7 +11,8 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    const userObj = await clerkClient().users.getUser(userId);
+    const client = await clerkClient();
+    const userObj = await client.users.getUser(userId);
     const email = userObj.emailAddresses[0]?.emailAddress;
 
     // Fetch existing profile to check plan and current data
@@ -85,7 +86,8 @@ export async function GET() {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
-    const userObj = await clerkClient().users.getUser(userId);
+    const client = await clerkClient();
+    const userObj = await client.users.getUser(userId);
     const email = userObj.emailAddresses[0]?.emailAddress;
     const fullName = [userObj.firstName, userObj.lastName].filter(Boolean).join(" ") || "Unknown User";
 

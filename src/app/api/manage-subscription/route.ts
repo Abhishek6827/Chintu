@@ -11,7 +11,8 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const userObj = await clerkClient().users.getUser(userId);
+  const client = await clerkClient();
+  const userObj = await client.users.getUser(userId);
   const email = userObj.emailAddresses[0]?.emailAddress;
 
   const supabaseAdmin = createAdminClient();
@@ -49,14 +50,14 @@ export async function GET() {
 
   // ─── Razorpay ───────────────────────────────────────────
   if (provider === "razorpay") {
-    return NextResponse.json({ 
+    return NextResponse.json({
       url: `${appUrl}/subscription`,
       provider: "razorpay"
     });
   }
 
   // ─── Fallback: Unknown Provider ─────────────────────────
-  return NextResponse.json({ 
+  return NextResponse.json({
     error: "No payment provider found. Please contact support.",
     supportUrl: `${appUrl}/support`
   }, { status: 400 });
