@@ -294,11 +294,9 @@ export default function RoomPage() {
         setUniversalShortcuts(shortcutsEnabled);
       }
 
-      // BLOCK WEB ACCESS: Room is only for Electron EXE app
-      if (!isElectron) {
-        router.push("/");
-        return;
-      }
+      // Note: web (non-Electron) users are redirected to /download at the edge
+      // by middleware.ts, so we never reach this page in the browser. The
+      // !isElectron JSX fallback below remains as a defense-in-depth safety net.
 
       // Read JD from URL param (primary) or sessionStorage (fallback)
       const params = new URLSearchParams(window.location.search);

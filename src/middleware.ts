@@ -65,6 +65,16 @@ export default clerkMiddleware(async (auth, req) => {
     }
   }
 
+  // Web users (non-Electron) should never see app-only routes — redirect at the
+  // edge so they don't wait for the heavy client bundle to load just to bounce.
+  // (Same behavior as the in-page useEffect router.push, but instant.)
+  if (!isElectron && !isApiRoute) {
+    const APP_ONLY_ROUTES = ["/setup", "/room", "/subscription"];
+    if (APP_ONLY_ROUTES.includes(url.pathname)) {
+      return NextResponse.redirect(new URL("/download", req.url));
+    }
+  }
+
   if (!isPublicRoute(req)) {
     (await auth()).protect();
   }

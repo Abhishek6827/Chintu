@@ -40,10 +40,8 @@ export default function SetupPage() {
   useEffect(() => {
     setMounted(true);
 
-    if (!isElectron) {
-      router.push("/download");
-      return;
-    }
+    // Note: web (non-Electron) users are redirected to /download at the edge
+    // by middleware.ts, so we never reach this page in the browser.
 
     const checkProfile = async () => {
       // Fetch profile via secure backend API

@@ -210,9 +210,8 @@ export default function RootLayout({
     >
       <html lang="en" className="relative">
         <head>
-          <link rel="icon" href="https://www.getchintu.com/icon.png" />
+          {/* Favicon is auto-served by Next from src/app/icon.png — no manual <link> needed */}
           {/* Performance: hint preconnects for critical third-parties */}
-          <link rel="preconnect" href="https://www.getchintu.com" crossOrigin="anonymous" />
           <link rel="preconnect" href="https://clerk.getchintu.com" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://img.clerk.com" />
           <link rel="dns-prefetch" href="https://images.clerk.dev" />
