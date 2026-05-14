@@ -38,7 +38,7 @@ export default function SyncedUserButton() {
 
   return (
     <div className="relative group">
-      <UserButton afterSignOutUrl="/">
+      <UserButton>
         <UserButton.MenuItems>
           <UserButton.Action 
             label="Manage Subscription" 
