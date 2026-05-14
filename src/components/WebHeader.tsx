@@ -126,12 +126,16 @@ export default function WebHeader() {
           ) : (
             <div className="flex items-center gap-4">
               <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
-                <AnimatedThemeToggler
-                  theme={currentTheme}
-                  onToggle={toggleTheme}
-                  className="bg-[var(--bg-app)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)] shadow-sm"
-                />
-                <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
+                {userPlan !== 'free' && (
+                  <>
+                    <AnimatedThemeToggler
+                      theme={currentTheme}
+                      onToggle={toggleTheme}
+                      className="bg-[var(--bg-app)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)] shadow-sm"
+                    />
+                    <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
+                  </>
+                )}
                 <div className="flex flex-col items-end">
                   <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Energy Sync</span>
                   <span className="text-[11px] font-black text-indigo-400 tracking-tight flex items-center gap-1">
