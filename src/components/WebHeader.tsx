@@ -67,7 +67,6 @@ export default function WebHeader() {
               className="w-full h-full object-contain"
               width={32}
               height={32}
-              priority
             />
           </div>
           <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)] dark:text-white">

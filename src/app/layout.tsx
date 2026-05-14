@@ -215,6 +215,8 @@ export default function RootLayout({
           <link rel="preconnect" href="https://clerk.getchintu.com" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://img.clerk.com" />
           <link rel="dns-prefetch" href="https://images.clerk.dev" />
+          {/* Preload hero showcase image for faster LCP */}
+          <link rel="preload" as="image" href="/signin.png" />
           {/* Suppress sensor-related warnings from third-party scripts (like Razorpay) */}
           <meta httpEquiv="Permissions-Policy" content="accelerometer=*, camera=*, geolocation=*, gyroscope=*, magnetometer=*, microphone=*, payment=*, usb=*" />
           {/* Structured data — Organization */}

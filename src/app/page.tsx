@@ -106,15 +106,21 @@ export default function LandingPage() {
     setMounted(true);
     const el = document.getElementById('main-content');
     const target: HTMLElement | Window = el || window;
+    let ticking = false;
     const update = () => {
-      if (el) {
-        const { scrollTop, scrollHeight, clientHeight } = el;
-        const max = scrollHeight - clientHeight;
-        scrollProgress.set(max > 0 ? scrollTop / max : 0);
-      } else {
-        const max = (document.documentElement.scrollHeight || 0) - window.innerHeight;
-        scrollProgress.set(max > 0 ? window.scrollY / max : 0);
-      }
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        if (el) {
+          const { scrollTop, scrollHeight, clientHeight } = el;
+          const max = scrollHeight - clientHeight;
+          scrollProgress.set(max > 0 ? scrollTop / max : 0);
+        } else {
+          const max = (document.documentElement.scrollHeight || 0) - window.innerHeight;
+          scrollProgress.set(max > 0 ? window.scrollY / max : 0);
+        }
+        ticking = false;
+      });
     };
     update();
     target.addEventListener('scroll', update, { passive: true });
@@ -238,9 +244,9 @@ export default function LandingPage() {
             {/* ─── LEFT: Hero Content ─────────────────────────── */}
             <motion.div
               className="lg:col-span-6"
-              initial={{ opacity: 0, y: 32 }}
+              initial={{ opacity: 1, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               {/* Eyebrow */}
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6 shadow-sm">
@@ -333,9 +339,9 @@ export default function LandingPage() {
               <motion.button
                 type="button"
                 onClick={() => setIsVideoModalOpen(true)}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 1, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.7 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
                 className="group relative w-full max-w-sm text-left"
               >
                 <div className="absolute -inset-2 bg-gradient-to-r from-indigo-500/40 via-purple-500/40 to-cyan-400/40 blur-xl opacity-50 group-hover:opacity-90 transition-opacity duration-500" />
@@ -346,6 +352,7 @@ export default function LandingPage() {
                       src="/og-image.png"
                       alt="Chintu Demo Thumbnail"
                       fill
+                      loading="lazy"
                       className="absolute inset-0 object-cover opacity-80"
                       sizes="112px"
                     />
@@ -375,9 +382,9 @@ export default function LandingPage() {
             {/* ─── RIGHT: Image Showcase Carousel ─────────────── */}
             <motion.div
               className="lg:col-span-6 relative"
-              initial={{ opacity: 0, scale: 0.95, y: 32 }}
+              initial={{ opacity: 1, scale: 1, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
               onMouseEnter={() => setIsShowcasePaused(true)}
               onMouseLeave={() => setIsShowcasePaused(false)}
             >
@@ -432,9 +439,6 @@ export default function LandingPage() {
                         fill
                         sizes="(max-width: 1024px) 100vw, 50vw"
                         className="object-cover"
-                        priority={currentShowcase === 0}
-                        fetchPriority={currentShowcase === 0 ? "high" : "auto"}
-                        decoding={currentShowcase === 0 ? "sync" : "async"}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
                     </motion.div>
