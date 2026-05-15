@@ -48,6 +48,19 @@ import {
   creatorTiers
 } from "@/constants/landing-data";
 
+const accentClassMap: Record<string, string> = {
+  "from-indigo-500 to-blue-500": "bg-gradient-to-r from-indigo-500 to-blue-500",
+  "from-purple-500 to-pink-500": "bg-gradient-to-r from-purple-500 to-pink-500",
+  "from-amber-500 to-orange-500": "bg-gradient-to-r from-amber-500 to-orange-500",
+  "from-indigo-500 to-purple-500": "bg-gradient-to-r from-indigo-500 to-purple-500",
+  "from-blue-500 to-indigo-500": "bg-gradient-to-r from-blue-500 to-indigo-500",
+  "from-cyan-500 to-blue-500": "bg-gradient-to-r from-cyan-500 to-blue-500",
+  "from-emerald-500 to-cyan-500": "bg-gradient-to-r from-emerald-500 to-cyan-500",
+  "from-violet-500 to-fuchsia-500": "bg-gradient-to-r from-violet-500 to-fuchsia-500",
+  "from-pink-500 to-rose-500": "bg-gradient-to-r from-pink-500 to-rose-500",
+  "from-rose-500 to-red-500": "bg-gradient-to-r from-rose-500 to-red-500",
+};
+
 export default function LandingPage() {
   const { isSignedIn, isLoaded, user } = useUser();
   const router = useRouter();
@@ -445,6 +458,16 @@ export default function LandingPage() {
                     </motion.div>
                   </AnimatePresence>
 
+                  {/* Top gradient to hide baked-in screenshot labels without cutting image */}
+                  <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/90 via-black/50 to-transparent pointer-events-none" />
+
+                  {/* Slide Label — colored gradient pill replaces baked-in screenshot labels */}
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className={`inline-flex items-center gap-2 px-4 py-1.5 ${accentClassMap[showcaseSlides[currentShowcase].accent]} rounded-full text-[10px] font-black text-white uppercase tracking-widest shadow-lg`}>
+                      {showcaseSlides[currentShowcase].badge}
+                    </span>
+                  </div>
+
                   {/* Slide Counter */}
                   <div className="absolute top-4 right-4 z-10 px-2.5 py-1 bg-black/50 backdrop-blur-md border border-white/10 rounded-full">
                     <span className="text-[9px] font-black text-white/90 uppercase tracking-widest tabular-nums">
@@ -462,8 +485,8 @@ export default function LandingPage() {
                         exit={{ opacity: 0, y: -16 }}
                         transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
                       >
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r ${showcaseSlides[currentShowcase].accent} backdrop-blur-md border border-white/20 rounded-full text-[8px] font-black text-white uppercase tracking-[0.25em] mb-2 shadow-lg`}>
-                          <Sparkles className="w-2.5 h-2.5" />
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 ${accentClassMap[showcaseSlides[currentShowcase].accent]} rounded-full text-[9px] font-black text-white uppercase tracking-widest mb-2 shadow-lg`}>
+                          <Sparkles className="w-3 h-3 text-white" />
                           {showcaseSlides[currentShowcase].category}
                         </span>
                         <h2 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight mb-2 leading-[1.05]">
