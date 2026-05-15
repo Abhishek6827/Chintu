@@ -439,6 +439,7 @@ export default function LandingPage() {
                         fill
                         sizes="(max-width: 1024px) 100vw, 50vw"
                         className="object-cover"
+                        priority
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
                     </motion.div>

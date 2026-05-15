@@ -17,7 +17,7 @@ export default function WebHeader() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [userCredits, setUserCredits] = useState<number | null>(null);
-  const [userPlan, setUserPlan] = useState<string>("");
+  const [userPlan, setUserPlan] = useState<string>("free");
 
   const { currentTheme, toggleTheme } = useThemeToggle();
 

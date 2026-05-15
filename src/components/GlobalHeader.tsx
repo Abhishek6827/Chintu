@@ -46,7 +46,7 @@ export default function GlobalHeader() {
   }, []);
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn || !user?.id) return;
+    if (!isLoaded || !isSignedIn || !user?.id || !isElectron) return;
 
     const fetchProfile = async () => {
       try {
@@ -74,7 +74,7 @@ export default function GlobalHeader() {
       clearInterval(interval);
       window.removeEventListener('chintu-profile-refresh', fetchProfile);
     };
-  }, [isLoaded, isSignedIn, user?.id]);
+  }, [isLoaded, isSignedIn, user?.id, isElectron]);
 
   // Close modals when signed out
   useEffect(() => {

@@ -76,6 +76,12 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   if (!isPublicRoute(req) && !userId) {
+    if (isApiRoute) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401, headers: buildCorsHeaders(origin) }
+      );
+    }
     return NextResponse.redirect(new URL('/sign-in', req.url));
   }
 
