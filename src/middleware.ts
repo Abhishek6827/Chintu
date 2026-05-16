@@ -15,7 +15,8 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/api/webhooks/clerk(.*)',
   '/api/webhooks/stripe(.*)',
-  '/api/webhooks/razorpay(.*)'
+  '/api/webhooks/razorpay(.*)',
+  '/api/chat'
 ]);
 
 // Origins allowed to call /api/* cross-origin (Chintu-Mobile web + APK).

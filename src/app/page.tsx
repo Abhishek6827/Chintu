@@ -321,9 +321,16 @@ export default function LandingPage() {
 
               {/* Trust Indicators */}
               <div className="flex items-center gap-4 mb-8">
-                <div className="flex items-center -space-x-2">
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="w-8 h-8 rounded-full border-2 border-[var(--bg-app)] bg-[var(--panel-bg)] overflow-hidden shadow-md">
+                <div
+                  className="flex items-center -space-x-2"
+                  style={{ perspective: '600px', transformStyle: 'preserve-3d', transform: 'rotateY(-12deg) rotateX(5deg)' }}
+                >
+                  {[1, 2, 3, 4].map((i, idx) => (
+                    <div
+                      key={i}
+                      className="w-8 h-8 rounded-full border-2 border-[var(--bg-app)] bg-[var(--panel-bg)] overflow-hidden shadow-xl"
+                      style={{ transform: `translateZ(${idx * 12}px)`, transformStyle: 'preserve-3d' }}
+                    >
                       <Image
                         src={`https://i.pravatar.cc/100?img=${i + 10}`}
                         alt={`Chintu Ji candidate review avatar ${i}`}
@@ -335,7 +342,12 @@ export default function LandingPage() {
                       />
                     </div>
                   ))}
-                  <div className="w-8 h-8 rounded-full border-2 border-[var(--bg-app)] bg-indigo-600 flex items-center justify-center text-[8px] font-black text-white shadow-md">+10k</div>
+                  <div
+                    className="w-8 h-8 rounded-full border-2 border-[var(--bg-app)] bg-indigo-600 flex items-center justify-center text-[8px] font-black text-white shadow-xl"
+                    style={{ transform: 'translateZ(60px)', transformStyle: 'preserve-3d' }}
+                  >
+                    +10k
+                  </div>
                 </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-0.5">
