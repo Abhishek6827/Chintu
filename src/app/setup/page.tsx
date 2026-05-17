@@ -59,8 +59,10 @@ export default function SetupPage() {
                 profileRow.profile_data.experience ||
                 profileRow.profile_data.skills ||
                 profileRow.profile_data.summary);
+            const hasRawProfile = !!(profileRow.raw_profile && String(profileRow.raw_profile).trim());
+            const profileExists = hasStructuredProfile || hasRawProfile;
 
-            if (hasStructuredProfile) {
+            if (profileExists) {
               setHasProfile(true);
               if (profileRow.raw_profile) setAboutMe(profileRow.raw_profile);
             } else {
@@ -80,14 +82,14 @@ export default function SetupPage() {
               setShowJdOnly(false); // Reset if missing
             }
 
-            // Auto-redirect ONLY if BOTH are present
-            if (hasStructuredProfile && profileRow.current_jd) {
+            // Auto-redirect when raw_profile + JD exist (or structured profile + JD)
+            if (profileExists && profileRow.current_jd) {
               router.push("/room");
               return;
             }
 
             // If profile exists but no JD, show JD-only welcome
-            if (hasStructuredProfile && !profileRow.current_jd) {
+            if (profileExists && !profileRow.current_jd) {
               setShowJdOnly(true);
             }
           }
@@ -351,9 +353,9 @@ export default function SetupPage() {
                   <>
                     <button
                       onClick={() => setSaveJd(!saveJd)}
-                      className={`w-10 h-5 rounded-full transition-all relative ${saveJd ? 'bg-indigo-600' : 'bg-[var(--glass-border)]'}`}
+                      className={`w-9 h-5 rounded-full transition-all relative ${saveJd ? 'bg-indigo-600' : 'bg-[var(--glass-border)]'}`}
                     >
-                      <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${saveJd ? 'left-6' : 'left-1'}`} />
+                      <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${saveJd ? 'left-5' : 'left-1'}`} />
                     </button>
                     <span className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">Save JD for future sessions?</span>
                   </>

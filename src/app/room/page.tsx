@@ -14,7 +14,6 @@ import ProfileModal, { formatProfileContext } from "@/components/ProfileModal";
 import CustomDropdown from "@/components/CustomDropdown";
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
-import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
 import NeuralLoading from "@/components/NeuralLoading";
 import { PremiumWelcome } from "@/components/PremiumWelcome";
 
@@ -1490,12 +1489,21 @@ export default function RoomPage() {
 
 
 
-      {/* Status bar */}
-      {status === "recording" && (
-        <div className="px-4 pb-2">
-          <div className="text-center py-1.5 rounded-full text-xs font-semibold border bg-red-500/10 border-red-500/20 text-red-500 animate-pulse">
-            🔴 Recording...
-          </div>
+      {/* Floating Status Indicator */}
+      {(status !== "idle" || liveTranscript) && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 w-auto px-5 py-2 rounded-full flex items-center gap-2.5 animate-in fade-in slide-in-from-top-4 duration-500 status-glow" style={{ background: 'var(--panel-bg)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+          {status === "generating" ? (
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 wave-dot" />
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 wave-dot" />
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 wave-dot" />
+            </div>
+          ) : (
+            <div className={`w-2 h-2 rounded-full ${status === "recording" ? "bg-red-400 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" : "bg-emerald-400 animate-ping"}`} />
+          )}
+          <p className="text-[10px] font-bold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-dim)' }}>
+            {status === "recording" ? "Recording..." : status === "generating" ? "Thinking this through..." : "Ready"}
+          </p>
         </div>
       )}
 
@@ -1847,32 +1855,35 @@ export default function RoomPage() {
           <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </button>
 
-        <InteractiveHoverButton
+        {/* Premium Circular Mic Button */}
+        <button
           onClick={status === "generating" ? stopGeneration : handleMicButton}
           disabled={!micReady}
-          className={`
-            no-drag flex-initial w-auto min-w-[120px] h-12 sm:h-14 rounded-xl sm:rounded-3xl flex items-center justify-center transition-all duration-500 active:scale-95 overflow-hidden group
-            ${status === "recording"
-              ? "bg-red-500 text-white shadow-[0_0_50px_rgba(239,68,68,0.4)]"
+          className={`no-drag relative w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-95 ${
+            status === "recording" ? "mic-pulse" : "mic-breathe"
+          }`}
+          style={{
+            background: status === "recording"
+              ? 'linear-gradient(135deg, #ef4444, #dc2626)'
               : status === "generating"
-                ? "bg-amber-500 text-white shadow-[0_0_50px_rgba(245,158,11,0.4)]"
-                : "bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 animate-gradient text-white shadow-[0_20px_40px_rgba(99,102,241,0.3)]"
-            }
-          `}
+                ? 'linear-gradient(135deg, #f59e0b, #d97706)'
+                : 'linear-gradient(135deg, #6366f1, #a855f7)',
+            border: status === "recording" ? '2px solid rgba(239,68,68,0.5)' : '2px solid rgba(99,102,241,0.3)'
+          }}
         >
-          <div className="flex items-center gap-2">
+          {status === "recording" && (
+            <div className="absolute -inset-2 rounded-full border-2 border-transparent" style={{ background: 'linear-gradient(0deg, rgba(239,68,68,0.3), transparent 60%)', WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)', WebkitMaskComposite: 'xor', maskComposite: 'exclude', padding: '2px' }} />
+          )}
+          <div className="relative z-10">
             {status === "recording" ? (
-              <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+              <div className="w-4 h-4 bg-white rounded-sm animate-pulse" />
             ) : status === "generating" ? (
-              <div className="w-3 h-3 bg-white rounded-sm animate-spin" />
+              <div className="w-4 h-4 bg-white rounded-sm animate-spin" />
             ) : (
-              <Mic className="w-4 h-4" />
+              <Mic className="w-6 h-6 text-white" />
             )}
-            <span>
-              {status === "recording" ? "Recording" : status === "generating" ? "Stop" : "Analysis"}
-            </span>
           </div>
-        </InteractiveHoverButton>
+        </button>
 
         {/* Button 4: Screen Recording */}
         <button
@@ -2057,9 +2068,9 @@ export default function RoomPage() {
                         await (window as any).electronAPI.setUniversalShortcuts(newVal);
                       }
                     }}
-                    className={`w-12 h-6 rounded-full transition-all relative ${universalShortcuts ? "bg-indigo-600" : "bg-gray-600/30"}`}
+                    className={`w-9 h-5 rounded-full transition-all relative ${universalShortcuts ? "bg-indigo-600" : "bg-gray-600/30"}`}
                   >
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${universalShortcuts ? "left-7" : "left-1"}`} />
+                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-md transition-all ${universalShortcuts ? "left-5" : "left-1"}`} />
                   </button>
                 </div>
                 {universalShortcuts && (
@@ -2108,9 +2119,9 @@ export default function RoomPage() {
                         console.error("Error saving reading guide preference:", err);
                       }
                     }}
-                    className={`w-12 h-6 rounded-full transition-all relative ${showReadingGuide ? "bg-indigo-600" : "bg-gray-600/30"}`}
+                    className={`w-9 h-5 rounded-full transition-all relative ${showReadingGuide ? "bg-indigo-600" : "bg-gray-600/30"}`}
                   >
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${showReadingGuide ? "left-7" : "left-1"}`} />
+                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-md transition-all ${showReadingGuide ? "left-5" : "left-1"}`} />
                   </button>
                 </div>
               </div>
