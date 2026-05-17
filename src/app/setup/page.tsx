@@ -156,8 +156,11 @@ export default function SetupPage() {
       setIsRefining(true);
       setStatusText("✨ Chintu Ji is structuring your profile...");
 
-      // Save JD to Supabase if toggle is ON
-      if (saveJd) {
+      // Save JD to Supabase:
+      // Free users: always auto-save (one-time, API enforces limit)
+      // Pro/Elite: save only if toggle is ON
+      const shouldSaveJd = userPlan === "free" ? !isJdLocked : saveJd;
+      if (shouldSaveJd) {
         try {
           await fetch("/api/profile", {
             method: "POST",
@@ -187,8 +190,9 @@ export default function SetupPage() {
     } else {
       setStatusText("🎯 Synchronizing with neural network...");
 
-      // Save JD to Supabase if toggle is ON (for electron/desktop too)
-      if (saveJd) {
+      // Save JD to Supabase (same logic as above)
+      const shouldSaveJd2 = userPlan === "free" ? !isJdLocked : saveJd;
+      if (shouldSaveJd2) {
         try {
           await fetch("/api/profile", {
             method: "POST",
@@ -208,8 +212,9 @@ export default function SetupPage() {
   const handleSkipAndStart = () => {
     // Since we are in Electron (guarded by the check above), we proceed directly with setup.
 
-    // Save JD to Supabase if toggle is ON
-    if (saveJd) {
+    // Save JD to Supabase (same plan-aware logic)
+    const shouldSaveJdSkip = userPlan === "free" ? !isJdLocked : saveJd;
+    if (shouldSaveJdSkip) {
       fetch("/api/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -349,7 +354,7 @@ export default function SetupPage() {
               />
 
               <div className="flex items-center gap-2 mt-3 px-1">
-                {!isJdLocked && (
+                {!isJdLocked && userPlan !== "free" && (
                   <>
                     <button
                       onClick={() => setSaveJd(!saveJd)}
