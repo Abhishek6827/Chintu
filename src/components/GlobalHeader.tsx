@@ -194,17 +194,30 @@ export default function GlobalHeader() {
             </span>
           </div>
 
+          {isSignedIn && userCredits === null && (
+            <div className="flex items-center gap-1.5 min-[400px]:gap-3 py-1">
+              <div className="w-12 h-6 rounded-xl bg-white/5 animate-pulse" />
+              <div className="w-10 h-6 rounded-lg bg-white/5 animate-pulse" />
+            </div>
+          )}
+
           {isSignedIn && userCredits !== null && (
-            <div className="flex items-center gap-1 min-[400px]:gap-3">
+            <div className="flex items-center gap-1 min-[400px]:gap-3 animate-in fade-in duration-300">
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
                 <div className="flex items-center gap-1">
-                  <Zap className="w-2 h-2 text-indigo-500 fill-indigo-500 inline" />
+                  <Zap className="w-2.5 h-2.5 text-amber-500 fill-amber-500 inline shrink-0" />
                   <span className="text-[10px] font-black text-[var(--text-main)]">{userCredits}</span>
                 </div>
               </div>
-              <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${userPlan === 'free' ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white'}`}>
-                {userPlan}
-              </div>
+              <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border ${
+                userPlan === 'elite'
+                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                  : userPlan === 'pro'
+                  ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                  : 'bg-white/5 text-white/40 border-white/10'
+              }`}>
+                {userPlan === 'free' ? 'Starter' : userPlan}
+              </span>
               {userPlan === 'free' && (
                 <button
                   onClick={handleUpgrade}

@@ -124,28 +124,41 @@ export default function WebHeader() {
             </Link>
           ) : (
             <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
-                {userPlan !== 'free' && (
-                  <>
-                    <AnimatedThemeToggler
-                      theme={currentTheme}
-                      onToggle={toggleTheme}
-                      className="bg-[var(--bg-app)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)] shadow-sm"
-                    />
-                    <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
-                  </>
-                )}
-                <div className="flex flex-col items-end">
-                  <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Energy Sync</span>
-                  <span className="text-[11px] font-black text-indigo-400 tracking-tight flex items-center gap-1">
-                    <Zap className="w-2.5 h-2.5 fill-indigo-400" /> {userCredits ?? '--'}
+              {userCredits === null ? (
+                <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
+                  <div className="w-12 h-6 rounded-full bg-white/5 animate-pulse" />
+                  <div className="w-10 h-6 rounded-lg bg-white/5 animate-pulse" />
+                </div>
+              ) : (
+                <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm animate-in fade-in duration-300">
+                  {userPlan !== 'free' && (
+                    <>
+                      <AnimatedThemeToggler
+                        theme={currentTheme}
+                        onToggle={toggleTheme}
+                        className="bg-[var(--bg-app)] border-[var(--glass-border)] text-[var(--text-dim)] hover:text-[var(--text-main)] shadow-sm"
+                      />
+                      <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
+                    </>
+                  )}
+                  <div className="flex flex-col items-end">
+                    <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Energy Sync</span>
+                    <span className="text-[11px] font-black text-indigo-400 tracking-tight flex items-center gap-1">
+                      <Zap className="w-2.5 h-2.5 fill-indigo-400" /> {userCredits}
+                    </span>
+                  </div>
+                  <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
+                  <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 border ${
+                    userPlan === 'elite'
+                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                      : userPlan === 'pro'
+                      ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                      : 'bg-white/5 text-white/40 border-white/10'
+                  }`}>
+                    {userPlan === 'free' ? 'Starter' : userPlan}
                   </span>
                 </div>
-                <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
-                <div className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 ${userPlan === 'free' ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white'}`}>
-                  {userPlan || 'free'}
-                </div>
-              </div>
+              )}
               {userPlan !== 'free' && userPlan !== '' ? (
                 <button
                   onClick={() => {
