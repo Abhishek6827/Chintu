@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Check, Sparkles, Crown, Moon, Sun, Mic } from "lucide-react";
+import { Check, Sparkles, Crown, Moon, Sun, Mic, Loader2 } from "lucide-react";
 
 
 import { useUser } from "@clerk/nextjs";
@@ -1870,35 +1870,89 @@ export default function RoomPage() {
           <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </button>
 
-        {/* Premium Circular Mic Button */}
-        <button
-          onClick={status === "generating" ? stopGeneration : handleMicButton}
-          disabled={!micReady}
-          className={`no-drag relative w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-95 ${
-            status === "recording" ? "mic-pulse" : "mic-breathe"
-          }`}
-          style={{
-            background: status === "recording"
-              ? 'linear-gradient(135deg, #ef4444, #dc2626)'
-              : status === "generating"
-                ? 'linear-gradient(135deg, #f59e0b, #d97706)'
-                : 'linear-gradient(135deg, #6366f1, #a855f7)',
-            border: status === "recording" ? '2px solid rgba(239,68,68,0.5)' : '2px solid rgba(99,102,241,0.3)'
-          }}
-        >
-          {status === "recording" && (
-            <div className="absolute -inset-2 rounded-full border-2 border-transparent" style={{ background: 'linear-gradient(0deg, rgba(239,68,68,0.3), transparent 60%)', WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)', WebkitMaskComposite: 'xor', maskComposite: 'exclude', padding: '2px' }} />
-          )}
-          <div className="relative z-10">
-            {status === "recording" ? (
-              <div className="w-4 h-4 bg-white rounded-sm animate-pulse" />
-            ) : status === "generating" ? (
-              <div className="w-4 h-4 bg-white rounded-sm animate-spin" />
-            ) : (
-              <Mic className="w-6 h-6 text-white" />
-            )}
+        {/* Premium Voice Mic Button */}
+        <div className="relative w-[60px] h-[60px] flex-shrink-0">
+          {/* Ambient outer glow */}
+          <div
+            className="absolute inset-[-4px] rounded-full animate-pulse pointer-events-none transition-opacity duration-300"
+            style={{
+              background: status === "recording"
+                ? 'radial-gradient(circle, rgba(239,68,68,0.30) 0%, rgba(220,38,38,0.10) 50%, transparent 70%)'
+                : status === "generating"
+                  ? 'radial-gradient(circle, rgba(245,158,11,0.25) 0%, rgba(217,119,6,0.08) 50%, transparent 70%)'
+                  : 'radial-gradient(circle, rgba(0,150,255,0.25) 0%, rgba(180,0,255,0.08) 50%, transparent 70%)',
+              filter: 'blur(10px)',
+              opacity: status === "recording" ? 0.6 : status === "generating" ? 0.5 : 0.4,
+            }}
+          />
+
+          {/* Gradient border ring */}
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              padding: '1.5px',
+              background: 'linear-gradient(135deg, #00e5ff, #0080ff, #b020ff, #ff2da0)',
+            }}
+          >
+            <div className="w-full h-full rounded-full" style={{ background: '#0d0d10' }} />
           </div>
-        </button>
+
+          <button
+            onClick={status === "generating" ? stopGeneration : handleMicButton}
+            disabled={!micReady}
+            className="no-drag absolute inset-[1.5px] rounded-full flex items-center justify-center transition-all duration-300 active:scale-95 overflow-hidden"
+            style={{
+              backgroundImage: status === "recording"
+                ? 'linear-gradient(135deg, rgba(239,68,68,0.35) 0%, rgba(220,38,38,0.15) 20%, rgba(13,13,18,0.90) 40%, rgba(10,10,14,1) 60%, rgba(220,38,38,0.20) 80%, rgba(239,68,68,0.30) 100%)'
+                : status === "generating"
+                  ? 'linear-gradient(135deg, rgba(245,158,11,0.30) 0%, rgba(217,119,6,0.12) 20%, rgba(13,13,18,0.90) 40%, rgba(10,10,14,1) 60%, rgba(217,119,6,0.15) 80%, rgba(245,158,11,0.25) 100%)'
+                  : 'linear-gradient(135deg, rgba(0,200,255,0.35) 0%, rgba(0,100,220,0.20) 20%, rgba(12,13,20,0.90) 40%, rgba(10,10,16,1) 60%, rgba(0,100,220,0.18) 80%, rgba(0,180,255,0.30) 100%)',
+              backgroundSize: '400% 400%',
+              animation: 'gradient-flow 4s ease infinite',
+              boxShadow: status === "recording"
+                ? 'inset 0 1px 0.5px rgba(255,255,255,0.04), 0 0 24px rgba(239,68,68,0.25)'
+                : status === "generating"
+                  ? 'inset 0 1px 0.5px rgba(255,255,255,0.04), 0 0 20px rgba(245,158,11,0.20)'
+                  : 'inset 0 1px 0.5px rgba(255,255,255,0.06), 0 4px 20px rgba(0,0,0,0.5)',
+            }}
+          >
+            {/* Rotating shine sweep */}
+            <div
+              className="absolute inset-0 rounded-full pointer-events-none"
+              style={{
+                background: status === "recording"
+                  ? 'conic-gradient(from 0deg, transparent 0%, rgba(239,68,68,0.25) 15%, rgba(255,100,100,0.35) 30%, transparent 45%)'
+                  : status === "generating"
+                    ? 'conic-gradient(from 0deg, transparent 0%, rgba(245,158,11,0.22) 15%, rgba(255,200,100,0.30) 30%, transparent 45%)'
+                    : 'conic-gradient(from 0deg, transparent 0%, rgba(0,200,255,0.25) 15%, rgba(100,180,255,0.35) 30%, transparent 45%)',
+                animation: 'conic-rotate 3s linear infinite',
+              }}
+            />
+
+            {/* Recording / Generating pulse rings */}
+            {status === "recording" && (
+              <>
+                <div className="absolute inset-[-3px] rounded-full mic-pulse pointer-events-none" style={{ border: '1.5px solid rgba(239,68,68,0.4)' }} />
+                <div className="absolute inset-0 rounded-full pointer-events-none" style={{ boxShadow: 'inset 0 0 12px rgba(239,68,68,0.15)' }} />
+              </>
+            )}
+            {status === "generating" && (
+              <div className="absolute inset-[-3px] rounded-full pointer-events-none animate-ping opacity-30" style={{ border: '1.5px solid rgba(245,158,11,0.5)' }} />
+            )}
+
+            <div className="relative z-10 flex items-center justify-center">
+              {status === "generating" ? (
+                <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'rgba(255,255,255,0.92)' }} />
+              ) : (
+                <Mic
+                  className="w-[22px] h-[22px]"
+                  style={{ color: 'rgba(255,255,255,0.92)' }}
+                  strokeWidth={1.5}
+                />
+              )}
+            </div>
+          </button>
+        </div>
 
         {/* Button 4: Screen Recording */}
         <button
