@@ -15,8 +15,10 @@ interface SubscriptionData {
   email: string | null;
   updated_at: string | null;
   profile_data?: {
-    payment_amount?: string;
+    payment_amount?: number | string;
     payment_type?: string;
+    last_payment_at?: string;
+    last_frequency?: string;
     [key: string]: any;
   } | null;
 }
@@ -256,8 +258,13 @@ export default function SubscriptionPage() {
                       { label: "Account", value: data.email || user?.primaryEmailAddress?.emailAddress || "N/A" },
                       { label: "Billed To", value: data.full_name || user?.fullName || "N/A" },
                       { label: "Payment ID", value: data.razorpay_payment_id || "N/A", isMono: true },
-                      { label: "Amount Paid", value: paymentDetails?.amount ? `₹${paymentDetails.amount.toLocaleString()}` : (data.profile_data?.payment_amount || "N/A") },
-                      { label: "Method", value: paymentDetails?.method ? paymentDetails.method : (data.profile_data?.payment_type || "N/A"), isBadge: true, color: "emerald" },
+                      { label: "Amount Paid", value: (() => {
+                        const amount = paymentDetails?.amount ?? data.profile_data?.payment_amount;
+                        if (amount == null) return "N/A";
+                        const num = typeof amount === "string" ? Number(amount.replace(/[^0-9.]/g, "")) : amount;
+                        return `₹${num.toLocaleString()}`;
+                      })() },
+                      { label: "Method", value: (paymentDetails?.method || data.profile_data?.payment_type || "N/A"), isBadge: true, color: "emerald" },
                       { label: "Billing Cycle", value: getBillingCycle(data.updated_at, data.subscription_expires_at), isBadge: true, color: "indigo" },
                       { label: "Invoice Date", value: formatDate(paymentDetails?.createdAt || data.profile_data?.last_payment_at || data.updated_at) }
                     ].map((item, idx) => (

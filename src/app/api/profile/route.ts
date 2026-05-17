@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 import { createAdminClient } from "@/utils/supabase/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
+import Razorpay from "razorpay";
 
 export async function POST(req: Request) {
   try {
@@ -176,6 +177,53 @@ export async function GET() {
           } else if (refillError) {
             console.error("[Free Refill] Failed:", refillError.message);
           }
+        }
+      }
+
+      // Re-sync Razorpay payment details if cached data is missing
+      const pd = data.profile_data as any;
+      if (data.razorpay_payment_id && (!pd?.payment_amount || !pd?.payment_type)) {
+        try {
+          const razorpay = new Razorpay({
+            key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
+            key_secret: process.env.RAZORPAY_KEY_SECRET || "",
+          });
+          const payment = await razorpay.payments.fetch(data.razorpay_payment_id);
+          if (payment) {
+            const amountINR = Number(payment.amount) / 100;
+            let method = payment.method || "razorpay";
+            if (payment.method === "upi" && payment.vpa) {
+              method = "UPI";
+            } else if (payment.method === "card" && payment.card) {
+              method = `${payment.card.network || ""} ${payment.card.type || ""}`.trim().toUpperCase() || "CARD";
+            } else if (payment.method) {
+              method = payment.method.toUpperCase();
+            }
+            const updatedProfileData = {
+              ...(pd || {}),
+              payment_amount: amountINR,
+              payment_type: method,
+              last_payment_at: payment.created_at ? new Date(payment.created_at * 1000).toISOString() : new Date().toISOString(),
+            };
+            const { data: updatedProfile, error: syncError } = await supabaseAdmin
+              .from("profiles")
+              .update({
+                profile_data: updatedProfileData,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("email", email)
+              .select()
+              .single();
+            if (!syncError && updatedProfile) {
+              data = updatedProfile;
+              data.current_jd = data.current_jd || data.profile_data?.saved_jd || "";
+              console.log("[Profile] Re-synced Razorpay payment data:", data.razorpay_payment_id);
+            } else if (syncError) {
+              console.error("[Profile] Payment re-sync failed:", syncError.message);
+            }
+          }
+        } catch (rzErr: any) {
+          console.error("[Profile] Razorpay re-sync error:", rzErr?.message || rzErr);
         }
       }
     }
