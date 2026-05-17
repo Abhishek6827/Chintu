@@ -2197,28 +2197,6 @@ export default function RoomPage() {
 
 
 
-              {/* Profile Vault */}
-              <div
-                className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 rounded-2xl border border-indigo-500/20"
-                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
-              >
-                <button
-                  onClick={() => {
-                    setShowSettings(false);
-                    setShowProfile(true);
-                  }}
-                  className="w-full flex items-center justify-between group"
-                >
-                  <div>
-                    <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-indigo-400 uppercase tracking-widest mb-1">AI Profile</h4>
-                    <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">Manage your experience & skills</p>
-                  </div>
-                  <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center group-hover:bg-indigo-500/20 transition-all">
-                    <Sparkles className="w-4 h-4 text-indigo-400" />
-                  </div>
-                </button>
-              </div>
-
               {/* History Section */}
               {userPlan !== "free" && (
                 <div

@@ -52,13 +52,10 @@ export default function SyncedUserButton() {
             labelIcon={<CreditCard className="w-4 h-4" />} 
             onClick={handleManageSubscription} 
           />
-          <UserButton.Action
-            label="My AI Profile"
-            labelIcon={<Sparkles className="w-4 h-4" />}
-            onClick={() => {
-              // Delay to let Clerk menu close first, then open our modal
-              setTimeout(() => setShowProfileModal(true), 50);
-            }}
+          <UserButton.Action 
+            label="My AI Profile" 
+            labelIcon={<Sparkles className="w-4 h-4" />} 
+            onClick={() => setShowProfileModal(true)} 
           />
           <UserButton.Action 
             label="Support" 
