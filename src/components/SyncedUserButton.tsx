@@ -18,7 +18,8 @@ export default function SyncedUserButton() {
       const res = await fetch("/api/manage-subscription");
       const data = await res.json();
       if (data.url) {
-        if (isElectron) {
+        const isAppUrl = data.url.includes(window.location.hostname);
+        if (isElectron && !isAppUrl) {
           (window as any).electronAPI.openExternal(data.url);
         } else {
           window.location.href = data.url;

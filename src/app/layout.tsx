@@ -197,7 +197,6 @@ import GlobalHeader from "@/components/GlobalHeader";
 import WebHeader from "@/components/WebHeader";
 import GlobalFooter from "@/components/GlobalFooter";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { ChintuChatbotWidget } from "@/components/chintu-chatbot";
 
 export default function RootLayout({
   children,
@@ -246,7 +245,6 @@ export default function RootLayout({
           </main>
           <UpdateNotification />
           <SpeedInsights />
-          <ChintuChatbotWidget />
         </body>
       </html>
     </ClerkProvider>
