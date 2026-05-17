@@ -674,22 +674,28 @@ Rules:
 
     if (!stream) throw finalError || new Error("All API keys failed for selected model.");
 
-    // ─── Deduct Credit (2 credits for screenshot) ──────────────
+    // ─── Deduct Credit & Log History (2 credits for screenshot) ──────────────
     if (profile) {
+      const { data: latestProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("profile_data")
+        .eq("email", email)
+        .single();
+
+      const existingHistory = (latestProfile?.profile_data as any)?.credit_history || [];
       const newHistoryEntry = {
         type: "deduction",
         amount: 2,
         description: "Visual Analysis (Screenshot)",
         timestamp: new Date().toISOString()
       };
-      const existingHistory = (profile.profile_data as any)?.credit_history || [];
 
       await supabaseAdmin
         .from("profiles")
         .update({
           credits: currentCredits - 2,
           profile_data: {
-            ...(profile.profile_data as any || {}),
+            ...(latestProfile?.profile_data as any || {}),
             credit_history: [newHistoryEntry, ...existingHistory].slice(0, 50)
           }
         })

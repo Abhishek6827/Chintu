@@ -230,6 +230,28 @@ export default function SetupPage() {
     <div className="flex flex-col min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] overflow-x-hidden overflow-y-auto relative">
       {userPlan !== "free" && <Meteors number={30} />}
 
+      {/* Floating profile bar in top right */}
+      {isSignedIn && user && (
+        <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
+            <span className={`text-[8px] font-black uppercase tracking-widest ${
+              userPlan === "elite" ? "text-amber-500" : userPlan === "pro" ? "text-indigo-500" : "text-[var(--text-dim)]"
+            }`}>
+              {userPlan === "free" ? "Starter" : userPlan}
+            </span>
+          </div>
+          <div className="w-8 h-8 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center overflow-hidden active:scale-95 transition-transform">
+            {user.imageUrl ? (
+              <img src={user.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-[10px] font-bold text-[var(--text-dim)]">
+                {user.firstName?.[0]?.toUpperCase() || "?"}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
 
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12 overflow-y-auto">

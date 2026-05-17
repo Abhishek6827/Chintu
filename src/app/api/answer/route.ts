@@ -308,17 +308,7 @@ export async function POST(req: NextRequest) {
       }, { status: 402 });
     }
 
-    // ─── Deduct 1 Credit Upfront ─────────────────────────────
-    const { error: deductError } = await supabaseAdmin
-      .from("profiles")
-      .update({ credits: currentCredits - 1 })
-      .eq("email", email);
-
-    if (deductError) {
-      console.error("[/api/answer] Credit deduction failed:", deductError.message);
-      // We continue anyway so the user doesn't get blocked by a DB lag, 
-      // but in production you might want to handle this strictly.
-    }
+    // Credit deduction + history logging moved to end of request
 
     const apiKeys = [
       process.env.GROQ_API_KEY,
@@ -510,22 +500,28 @@ Rules:
       throw lastError || new Error("All AI models are currently busy. Please try again.");
     }
 
-    // ─── Deduct Credit (1 credit for text/voice) ──────────────
+    // ─── Deduct Credit & Log History ──────────────
     if (profile) {
+      const { data: latestProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("profile_data")
+        .eq("email", email)
+        .single();
+
+      const existingHistory = (latestProfile?.profile_data as any)?.credit_history || [];
       const newHistoryEntry = {
         type: "deduction",
         amount: 1,
         description: "Interview Response (Text/Voice)",
         timestamp: new Date().toISOString()
       };
-      const existingHistory = (profile.profile_data as any)?.credit_history || [];
 
       await supabaseAdmin
         .from("profiles")
         .update({
           credits: (currentCredits || 1) - 1,
           profile_data: {
-            ...(profile.profile_data as any || {}),
+            ...(latestProfile?.profile_data as any || {}),
             credit_history: [newHistoryEntry, ...existingHistory].slice(0, 50)
           }
         })
