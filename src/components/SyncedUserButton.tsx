@@ -5,11 +5,22 @@ import { CreditCard, Sparkles, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ProfileModal from "./ProfileModal";
 
+function getIsElectron() {
+  return typeof window !== "undefined" && !!(window as any).electronAPI;
+}
+
+function openInBrowser(url: string) {
+  if (getIsElectron()) {
+    (window as any).electronAPI.openExternal(url);
+  } else {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+}
+
 export default function SyncedUserButton() {
   const { isSignedIn } = useUser();
   const router = useRouter();
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
   if (!isSignedIn) return null;
 
@@ -18,11 +29,7 @@ export default function SyncedUserButton() {
       const res = await fetch("/api/manage-subscription");
       const data = await res.json();
       if (data.url) {
-        if (isElectron) {
-          (window as any).electronAPI.openExternal(data.url);
-        } else {
-          window.location.href = data.url;
-        }
+        openInBrowser(data.url);
       } else {
         alert(data.error || "Failed to load subscription portal.");
       }

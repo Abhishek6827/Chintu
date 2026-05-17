@@ -541,6 +541,10 @@ ipcMain.on("renderer-log", (event, { msg, level }) => {
 
 ipcMain.on("open-external", (event, url) => {
   console.log(`[Main] IPC open-external: ${url}`);
+  if (!url || typeof url !== "string" || (!url.startsWith("http://") && !url.startsWith("https://"))) {
+    console.error(`[Main] Invalid URL rejected: ${url}`);
+    return;
+  }
   require('electron').shell.openExternal(url);
 });
 
