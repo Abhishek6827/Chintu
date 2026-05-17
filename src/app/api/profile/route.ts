@@ -52,6 +52,15 @@ export async function POST(req: Request) {
       }
     });
 
+    // Deep-merge incoming profile_data with existing so clients can't accidentally
+    // wipe nested fields like payment_amount, payment_type, credit_history, etc.
+    if (updateData.profile_data && existing?.profile_data) {
+      updateData.profile_data = {
+        ...existing.profile_data,
+        ...updateData.profile_data
+      };
+    }
+
     if (current_jd !== undefined) {
       updateData.profile_data = {
         ...(updateData.profile_data || existing?.profile_data || {}),

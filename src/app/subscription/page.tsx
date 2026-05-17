@@ -259,7 +259,7 @@ export default function SubscriptionPage() {
                       { label: "Amount Paid", value: paymentDetails?.amount ? `₹${paymentDetails.amount.toLocaleString()}` : (data.profile_data?.payment_amount || "N/A") },
                       { label: "Method", value: paymentDetails?.method ? paymentDetails.method : (data.profile_data?.payment_type || "N/A"), isBadge: true, color: "emerald" },
                       { label: "Billing Cycle", value: getBillingCycle(data.updated_at, data.subscription_expires_at), isBadge: true, color: "indigo" },
-                      { label: "Invoice Date", value: formatDate(data.updated_at) }
+                      { label: "Invoice Date", value: formatDate(data.profile_data?.last_payment_at || data.updated_at) }
                     ].map((item, idx) => (
                       <div key={idx} className="flex items-center justify-between px-6 py-3.5">
                         <span className="text-[12px] font-medium text-[var(--text-dim)]">{item.label}</span>
