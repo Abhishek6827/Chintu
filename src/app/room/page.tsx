@@ -301,7 +301,22 @@ export default function RoomPage() {
       const params = new URLSearchParams(window.location.search);
       const jdFromUrl = params.get("jd");
       const jdFromSession = sessionStorage.getItem("jobDescription");
-      const localJd = jdFromUrl || jdFromSession || "";
+      let localJd = jdFromUrl || jdFromSession || "";
+
+      // If no local JD, try fetching from Supabase before redirecting away
+      if (!localJd) {
+        try {
+          const profileRes = await fetch("/api/profile");
+          if (profileRes.ok) {
+            const { profile: p } = await profileRes.json();
+            if (p?.current_jd) {
+              localJd = p.current_jd;
+            }
+          }
+        } catch (err) {
+          console.warn("[Room] Failed to fetch JD from Supabase:", err);
+        }
+      }
 
       if (!localJd) {
         router.push("/");
