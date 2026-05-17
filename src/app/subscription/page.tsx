@@ -27,6 +27,7 @@ export default function SubscriptionPage() {
   const [data, setData] = useState<SubscriptionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [paymentDetails, setPaymentDetails] = useState<{ amount?: number; currency?: string; method?: string } | null>(null);
+  const [visibleCount, setVisibleCount] = useState(10);
 
   const isElectron = typeof window !== "undefined" && (!!(window as any).electronAPI || navigator.userAgent.toLowerCase().includes("electron"));
 
@@ -283,52 +284,74 @@ export default function SubscriptionPage() {
 
               {/* Credit History Section */}
               <section>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-[11px] font-bold text-[var(--text-dim)] uppercase tracking-[0.15em]">Credit Activity Log</h3>
-                  <span className="text-[9px] font-bold text-[var(--text-dim)] opacity-40 uppercase">Last 50 Events</span>
-                </div>
-                <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--panel-bg)] overflow-hidden shadow-sm">
-                  <div className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-500/20 scrollbar-track-transparent">
-                    {data.profile_data?.credit_history && (data.profile_data.credit_history as any[]).length > 0 ? (
-                      <div className="divide-y divide-[var(--glass-border)]">
-                        {(data.profile_data.credit_history as any[]).map((entry, idx) => (
-                          <div key={idx} className="px-6 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
-                            <div className="flex items-center gap-4">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center border ${
-                                entry.type === 'addition' ? 'bg-emerald-500/5 border-emerald-500/10 text-emerald-400' : 'bg-red-500/5 border-red-500/10 text-red-400'
-                              }`}>
-                                {entry.type === 'addition' ? (
-                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                                ) : (
-                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" /></svg>
-                                )}
-                              </div>
-                              <div>
-                                <p className="text-[12px] font-bold text-[var(--text-main)] opacity-90">{entry.description}</p>
-                                <p className="text-[10px] font-medium text-[var(--text-dim)] opacity-40">{formatDate(entry.timestamp)}</p>
-                              </div>
+                {(() => {
+                  const creditHistory = (data.profile_data?.credit_history as any[]) || [];
+                  const displayedHistory = creditHistory.slice(0, visibleCount);
+                  const isUnderFifty = creditHistory.length < 50;
+
+                  return (
+                    <>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-[11px] font-bold text-[var(--text-dim)] uppercase tracking-[0.15em]">Credit Activity Log</h3>
+                        <span className="text-[9px] font-bold text-[var(--text-dim)] opacity-40 uppercase">
+                          {isUnderFifty ? `Total: ${creditHistory.length} Entries` : "Last 50 Events"}
+                        </span>
+                      </div>
+                      <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--panel-bg)] overflow-hidden shadow-sm">
+                        <div className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-500/20 scrollbar-track-transparent">
+                          {displayedHistory.length > 0 ? (
+                            <div className="divide-y divide-[var(--glass-border)]">
+                              {displayedHistory.map((entry, idx) => (
+                                <div key={idx} className="px-6 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+                                  <div className="flex items-center gap-4">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border ${
+                                      entry.type === 'addition' ? 'bg-emerald-500/5 border-emerald-500/10 text-emerald-400' : 'bg-red-500/5 border-red-500/10 text-red-400'
+                                    }`}>
+                                      {entry.type === 'addition' ? (
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                                      ) : (
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" /></svg>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <p className="text-[12px] font-bold text-[var(--text-main)] opacity-90">{entry.description}</p>
+                                      <p className="text-[10px] font-medium text-[var(--text-dim)] opacity-40">{formatDate(entry.timestamp)}</p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className={`text-[13px] font-black ${entry.type === 'addition' ? 'text-emerald-400' : 'text-red-400'}`}>
+                                      {entry.type === 'addition' ? '+' : '-'}{entry.amount}
+                                    </p>
+                                    {entry.transaction_id && (
+                                      <p className="text-[8px] font-mono text-[var(--text-dim)] opacity-30 uppercase tracking-tighter">ID: {entry.transaction_id.slice(-8)}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                            <div className="text-right">
-                              <p className={`text-[13px] font-black ${entry.type === 'addition' ? 'text-emerald-400' : 'text-red-400'}`}>
-                                {entry.type === 'addition' ? '+' : '-'}{entry.amount}
-                              </p>
-                              {entry.transaction_id && (
-                                <p className="text-[8px] font-mono text-[var(--text-dim)] opacity-30 uppercase tracking-tighter">ID: {entry.transaction_id.slice(-8)}</p>
-                              )}
+                          ) : (
+                            <div className="py-12 flex flex-col items-center justify-center opacity-30 grayscale">
+                              <svg className="w-8 h-8 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                              </svg>
+                              <p className="text-[11px] font-bold uppercase tracking-widest text-center">No Activity Detected<br/><span className="text-[9px]">Transactions will appear here</span></p>
                             </div>
+                          )}
+                        </div>
+                        {creditHistory.length > visibleCount && visibleCount < 50 && (
+                          <div className="flex justify-center p-4 border-t border-[var(--glass-border)] bg-[var(--bg-app)]/50">
+                            <button
+                              onClick={() => setVisibleCount(Math.min(50, creditHistory.length))}
+                              className="px-4 py-2 rounded-lg bg-[var(--text-main)] text-[var(--bg-app)] hover:opacity-90 active:scale-[0.98] text-[10px] font-bold uppercase tracking-wider transition-all"
+                            >
+                              View More
+                            </button>
                           </div>
-                        ))}
+                        )}
                       </div>
-                    ) : (
-                      <div className="py-12 flex flex-col items-center justify-center opacity-30 grayscale">
-                        <svg className="w-8 h-8 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        <p className="text-[11px] font-bold uppercase tracking-widest text-center">No Activity Detected<br/><span className="text-[9px]">Transactions will appear here</span></p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                    </>
+                  );
+                })()}
               </section>
               
               <p className="mt-6 text-center md:text-left text-[10px] text-[var(--text-dim)] opacity-50 font-medium leading-relaxed">
