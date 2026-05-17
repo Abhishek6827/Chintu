@@ -149,6 +149,7 @@ export default function GlobalFooter() {
                 alt="Chintu Ji logo"
                 width={32}
                 height={32}
+                className="rounded-full"
               />
               <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)] dark:text-white">
                 Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">AI</span>

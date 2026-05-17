@@ -184,7 +184,7 @@ export default function GlobalHeader() {
               <Image
                 src="/icon-sm.png"
                 alt="Chintu"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain rounded-full"
                 width={32}
                 height={32}
               />

@@ -64,7 +64,7 @@ export default function WebHeader() {
             <Image
               src="/icon-sm.png"
               alt="Chintu Ji Logo"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain rounded-full"
               width={32}
               height={32}
             />

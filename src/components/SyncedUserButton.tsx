@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { CreditCard, Sparkles, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -67,7 +68,10 @@ export default function SyncedUserButton() {
       
 
       
-      {showProfileModal && <ProfileModal onClose={() => setShowProfileModal(false)} />}
+      {showProfileModal && typeof document !== "undefined" && createPortal(
+        <ProfileModal onClose={() => setShowProfileModal(false)} />,
+        document.body
+      )}
     </div>
   );
 }

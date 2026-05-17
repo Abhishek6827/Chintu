@@ -24,34 +24,13 @@ export default function Page() {
         <div className="absolute w-[400px] h-[400px] border-[1px] border-indigo-300 rounded-full animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite_1s]" />
       </div>
 
-      <div className="absolute top-4 right-4 z-50 flex items-center gap-2 no-drag" style={{ WebkitAppRegion: 'no-drag' } as any}>
-        <button 
-          onClick={() => (window as any).electronAPI?.minimize()}
-          className="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-200 shadow-sm"
-        >
-          ─
-        </button>
-      </div>
-
-      <div className="absolute top-4 left-4 z-50 no-drag" style={{ WebkitAppRegion: 'no-drag' } as any}>
-        <button 
-          onClick={() => window.location.href = "/"}
-          className="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-200 shadow-sm"
-          title="Back to Home"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
-        </button>
-      </div>
-
       <div className="flex-1 flex flex-col items-center justify-start py-8 sm:py-12 pb-20 px-4 sm:px-6 no-drag relative z-10" style={{ WebkitAppRegion: 'no-drag' } as any}>
         <div className="w-full max-w-[440px] flex flex-col items-center">
           {/* Logo Section */}
           <div className="text-center mb-8 relative">
             <div className="w-20 h-20 mx-auto mb-4 drop-shadow-2xl relative">
               <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 animate-pulse rounded-full" />
-              <Image src="/icon-sm.png" alt="Chintu" className="w-full h-full object-contain relative z-10" width={40} height={40} />
+              <Image src="/icon-sm.png" alt="Chintu" className="w-full h-full object-contain relative z-10 rounded-full" width={40} height={40} />
             </div>
             <h1 className="text-2xl font-black tracking-tight uppercase text-gray-900">Chintu</h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1 text-center">Join the AI Revolution</p>
