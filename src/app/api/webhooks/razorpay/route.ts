@@ -213,7 +213,7 @@ export async function POST(req: Request) {
       hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
     });
 
-    await supabaseAdmin.from("profiles").update({
+    await supabaseAdmin.from("profiles").upsert({
       display_id: targetProfile?.display_id || `CHINTU-RAZORPAY-${new Date().toLocaleDateString("en-GB", { timeZone: "Asia/Kolkata" }).replace(/\//g, "-")}-${new Date().toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit" }).replace(":", "")}`,
       email: finalEmail,
       full_name: fullName || targetProfile?.full_name,
@@ -226,7 +226,7 @@ export async function POST(req: Request) {
       profile_data: {
         ...(targetProfile?.profile_data || {}),
         payment_amount: amountINR,
-        payment_type: "razorpay",
+        payment_type: paymentMethodDisplay,
         last_payment_id: payment.id,
         last_gateway: "razorpay",
         last_payment_at: new Date().toISOString(),

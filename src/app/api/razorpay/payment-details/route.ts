@@ -34,6 +34,7 @@ export async function GET(req: Request) {
       currency: payment.currency,
       method: payment.method,
       status: payment.status,
+      createdAt: payment.created_at ? new Date(payment.created_at * 1000).toISOString() : null,
     });
   } catch (error: any) {
     console.error("Razorpay payment details fetch error:", error);

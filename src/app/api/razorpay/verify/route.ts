@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
         email: userEmail,
         profile_data: {
           ...(targetProfile?.profile_data || {}),
-          payment_amount: `${planInfo.price}`,
+          payment_amount: Number(payment.amount) / 100,
           payment_type: paymentTypeDisplay,
           last_payment_id: razorpay_payment_id,
           last_gateway: "razorpay",
