@@ -211,7 +211,8 @@ export async function POST(req: NextRequest) {
 💎 <b>New Plan:</b> ${planInfo.plan.toUpperCase()} (${planInfo.frequency})
 ⚡ <b>Old Credits:</b> ${existingCredits}
 ⚡ <b>New Credits:</b> ${totalCredits}
-📅 <b>Expiry:</b> <code>${newExpiry.toLocaleDateString('en-IN')}</code>
+� <b>Subscription Start:</b> <code>${new Date(subscriptionStartsAt).toLocaleDateString('en-IN')}</code>
+�📅 <b>Expiry:</b> <code>${newExpiry.toLocaleDateString('en-IN')}</code>
 --------------------------
 ✅ <b>Status:</b> SUCCESSFUL
 🆔 <b>Payment ID:</b> <code>${razorpay_payment_id}</code>
@@ -233,7 +234,8 @@ export async function POST(req: NextRequest) {
             `₹${(Number(payment.amount) / 100).toLocaleString()}`,
             eventTime,
             process.env.NEXT_PUBLIC_APP_URL || 'https://getchintu.com',
-            newExpiry.toLocaleDateString('en-IN')
+            newExpiry.toLocaleDateString('en-IN'),
+            new Date(subscriptionStartsAt).toLocaleDateString('en-IN')
           ),
         });
         console.log(`[/api/razorpay/verify] Payment email sent to ${userEmail}`);

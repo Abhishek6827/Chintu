@@ -140,6 +140,7 @@ function buildTelegramMessage({
   name,
   email,
   dateTime,
+  startDate,
   oldPlan,
   newPlan,
   amount,
@@ -160,6 +161,7 @@ function buildTelegramMessage({
   name: string;
   email: string;
   dateTime: string;
+  startDate?: string;
   oldPlan: string;
   newPlan: string;
   amount: string;
@@ -181,7 +183,8 @@ function buildTelegramMessage({
     `👤 <b>Name:</b> ${name}\n` +
     `📧 <b>Email:</b> <code>${email}</code>\n` +
     `📅 <b>Date & Time:</b> <code>${dateTime}</code>\n` +
-    `📊 <b>Plan:</b> <b>${oldPlan.toUpperCase()} → ${newPlan.toUpperCase()}</b>\n` +
+    `� <b>Subscription Start:</b> <code>${startDate || "—"}</code>\n` +
+    `�📊 <b>Plan:</b> <b>${oldPlan.toUpperCase()} → ${newPlan.toUpperCase()}</b>\n` +
     `💰 <b>Total Amount:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
     `💳 <b>Payment Method:</b> ${paymentMethod}\n\n` +
     `💎 <b>Plan Price:</b> <b>${planPrice}</b>\n` +
@@ -236,7 +239,7 @@ export async function POST(req: Request) {
     if (!email) return null;
     const { data } = await supabaseAdmin
       .from("profiles")
-      .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
+      .select("id, plan, email, credits, subscription_starts_at, subscription_expires_at, profile_data, display_id")
       .eq("email", email)
       .maybeSingle();
     return data;
@@ -246,7 +249,7 @@ export async function POST(req: Request) {
   async function findProfileBySubscription(subscriptionId: string, email?: string | null) {
     const { data } = await supabaseAdmin
       .from("profiles")
-      .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
+      .select("id, plan, email, credits, subscription_starts_at, subscription_expires_at, profile_data, display_id")
       .eq("stripe_subscription_id", subscriptionId)
       .maybeSingle();
     if (data) return data;
@@ -259,7 +262,7 @@ export async function POST(req: Request) {
     if (email) {
       const { data: byEmail } = await supabaseAdmin
         .from("profiles")
-        .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
+        .select("id, plan, email, credits, subscription_starts_at, subscription_expires_at, profile_data, display_id")
         .eq("email", email)
         .maybeSingle();
       if (byEmail) return byEmail;
@@ -272,7 +275,7 @@ export async function POST(req: Request) {
       if (userId) {
         const { data: byUserId } = await supabaseAdmin
           .from("profiles")
-          .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
+          .select("id, plan, email, credits, subscription_starts_at, subscription_expires_at, profile_data, display_id")
           .eq("id", userId)
           .maybeSingle();
         if (byUserId) return byUserId;
@@ -382,6 +385,9 @@ export async function POST(req: Request) {
     const newCredits = oldCredits + addedCredits;
     const newExpiry = stackExpiry(profile.subscription_expires_at, addedDays);
 
+    const now = new Date();
+    const subscriptionStartsAt = profile.subscription_starts_at || now.toISOString();
+
     // Payment method details
     let paymentMethodDisplay = "Card";
     try {
@@ -438,6 +444,7 @@ export async function POST(req: Request) {
         display_id: profile.display_id || generateDisplayId(),
         plan,
         credits: newCredits,
+        subscription_starts_at: subscriptionStartsAt,
         subscription_expires_at: newExpiry.toISOString(),
         stripe_customer_id: session.customer as string,
         stripe_subscription_id: session.subscription as string,
@@ -496,6 +503,7 @@ export async function POST(req: Request) {
         newCredits,
         addedCredits,
         addedDays,
+        startDate: new Date(subscriptionStartsAt).toLocaleDateString("en-IN"),
         expiryDate: newExpiry.toLocaleDateString("en-IN"),
         transactionId,
       })
@@ -516,7 +524,8 @@ export async function POST(req: Request) {
             price,
             eventTime,
             process.env.NEXT_PUBLIC_APP_URL || "https://getchintu.com",
-            newExpiry.toLocaleDateString("en-IN")
+            newExpiry.toLocaleDateString("en-IN"),
+            new Date(subscriptionStartsAt).toLocaleDateString("en-IN")
           ),
         });
       } catch (emailErr) {
@@ -573,6 +582,9 @@ export async function POST(req: Request) {
     const newCredits = oldCredits + addedCredits;
     const newExpiry = stackExpiry(profile.subscription_expires_at, addedDays);
 
+    const now = new Date();
+    const subscriptionStartsAt = profile.subscription_starts_at || now.toISOString();
+
     // ⚠️ KEY FIX: Always use catalog price (unitTotal × qty) for display,
     // NOT invoice.amount_paid which is a Stripe proration (partial charge for mid-cycle changes).
     // This ensures Telegram shows "$9.18" not "$14.47".
@@ -601,6 +613,7 @@ export async function POST(req: Request) {
         display_id: profile.display_id || generateDisplayId(),
         plan: planInfo.plan,
         credits: newCredits,
+        subscription_starts_at: subscriptionStartsAt,
         subscription_expires_at: newExpiry.toISOString(),
         full_name: customerName,
         updated_at: new Date().toISOString(),
@@ -643,6 +656,7 @@ export async function POST(req: Request) {
         newCredits,
         addedCredits,
         addedDays,
+        startDate: new Date(subscriptionStartsAt).toLocaleDateString("en-IN"),
         expiryDate: newExpiry.toLocaleDateString("en-IN"),
         transactionId,
       })
@@ -663,7 +677,8 @@ export async function POST(req: Request) {
             planInfo.price,
             eventTime,
             process.env.NEXT_PUBLIC_APP_URL || "https://getchintu.com",
-            newExpiry.toLocaleDateString("en-IN")
+            newExpiry.toLocaleDateString("en-IN"),
+            new Date(subscriptionStartsAt).toLocaleDateString("en-IN")
           ),
         });
       } catch (emailErr) {
@@ -747,6 +762,9 @@ export async function POST(req: Request) {
         newCredits: profile.credits || 0,
         addedCredits: 0,
         addedDays: 0,
+        startDate: profile.subscription_starts_at
+          ? new Date(profile.subscription_starts_at).toLocaleDateString("en-IN")
+          : "—",
         expiryDate: profile.subscription_expires_at
           ? new Date(profile.subscription_expires_at).toLocaleDateString("en-IN")
           : "—",
@@ -765,7 +783,7 @@ export async function POST(req: Request) {
 
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("id, email, plan")
+      .select("id, email, plan, subscription_starts_at")
       .eq("stripe_subscription_id", subscription.id)
       .maybeSingle();
 
@@ -820,6 +838,9 @@ export async function POST(req: Request) {
         newCredits: 10,
         addedCredits: 0,
         addedDays: 0,
+        startDate: profile?.subscription_starts_at
+          ? new Date(profile.subscription_starts_at).toLocaleDateString("en-IN")
+          : "—",
         expiryDate: "—",
         transactionId: subscription.id,
         extraNote: "Downgraded to FREE. Consider sending a re-engagement offer.",
@@ -836,7 +857,7 @@ export async function POST(req: Request) {
 
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("id, email, plan")
+      .select("id, email, plan, subscription_starts_at")
       .eq("stripe_customer_id", customer.id)
       .maybeSingle();
 
@@ -874,6 +895,9 @@ export async function POST(req: Request) {
         newCredits: 10,
         addedCredits: 0,
         addedDays: 0,
+        startDate: profile?.subscription_starts_at
+          ? new Date(profile.subscription_starts_at).toLocaleDateString("en-IN")
+          : "—",
         expiryDate: "—",
         transactionId: customer.id,
         extraNote: "Stripe records wiped, downgraded to FREE.",

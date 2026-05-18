@@ -11,6 +11,7 @@ function buildTelegramMessage({
   name,
   email,
   dateTime,
+  startDate,
   oldPlan,
   newPlan,
   amount,
@@ -31,6 +32,7 @@ function buildTelegramMessage({
   name: string;
   email: string;
   dateTime: string;
+  startDate?: string;
   oldPlan: string;
   newPlan: string;
   amount: string;
@@ -52,7 +54,8 @@ function buildTelegramMessage({
     `👤 <b>Name:</b> ${name}\n` +
     `📧 <b>Email:</b> <code>${email}</code>\n` +
     `📅 <b>Date & Time:</b> <code>${dateTime}</code>\n` +
-    `📊 <b>Plan:</b> <b>${oldPlan.toUpperCase()} → ${newPlan.toUpperCase()}</b>\n` +
+    `� <b>Subscription Start:</b> <code>${startDate || "—"}</code>\n` +
+    `�📊 <b>Plan:</b> <b>${oldPlan.toUpperCase()} → ${newPlan.toUpperCase()}</b>\n` +
     `💰 <b>Total Amount:</b> <b>${amount}</b> (Qty: ${quantity})\n` +
     `💳 <b>Payment Method:</b> ${paymentMethod}\n\n` +
     `💎 <b>Plan Price:</b> <b>${planPrice}</b>\n` +
@@ -107,7 +110,7 @@ export async function POST(req: Request) {
     const supabaseAdmin = createAdminClient();
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("id, full_name, email, plan, credits, display_id, subscription_expires_at, profile_data")
+      .select("id, full_name, email, plan, credits, display_id, subscription_starts_at, subscription_expires_at, profile_data")
       .eq("email", initialEmail)
       .maybeSingle();
 
@@ -135,7 +138,7 @@ export async function POST(req: Request) {
     if (!targetProfile && email !== "N/A") {
       const { data: profileByEmail } = await supabaseAdmin
         .from("profiles")
-        .select("id, plan, email, credits, subscription_expires_at, profile_data, display_id")
+        .select("id, plan, email, credits, subscription_starts_at, subscription_expires_at, profile_data, display_id")
         .eq("email", email)
         .maybeSingle();
       targetProfile = profileByEmail;
@@ -271,16 +274,7 @@ export async function POST(req: Request) {
         newCredits: totalCredits,
         addedCredits: purchasedCredits,
         addedDays: purchasedDays,
-
-
-
-
-
-
-
-
-
-
+        startDate: new Date(subscriptionStartsAt).toLocaleDateString("en-IN"),
         expiryDate: newExpiry.toLocaleDateString("en-IN"),
         transactionId: payment.id,
         extraNote: "Razorpay Secure fulfillment verified.",
@@ -305,7 +299,8 @@ export async function POST(req: Request) {
             `₹${amountINR}`,
             eventTime,
             process.env.NEXT_PUBLIC_APP_URL || "https://getchintu.com",
-            newExpiry.toLocaleDateString("en-IN")
+            newExpiry.toLocaleDateString("en-IN"),
+            new Date(subscriptionStartsAt).toLocaleDateString("en-IN")
           ),
         });
       } catch (emailErr) {
