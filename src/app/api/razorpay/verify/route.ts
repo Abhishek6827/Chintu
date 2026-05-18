@@ -104,6 +104,10 @@ export async function POST(req: NextRequest) {
     let currentExpiry = baseExpiryStr ? new Date(baseExpiryStr) : now;
     if (currentExpiry < now) currentExpiry = now;
 
+    // subscription_starts_at: new start if expired or missing, otherwise keep existing
+    const isNewStart = !profile?.subscription_starts_at || (baseExpiryStr && new Date(baseExpiryStr) <= now);
+    const subscriptionStartsAt = isNewStart ? now.toISOString() : profile?.subscription_starts_at;
+
     const isDowngrade = (profile?.plan === 'elite' || baseCredits > 1000) && planInfo.plan === 'pro';
     const existingCredits = baseCredits;
     const totalCredits = existingCredits + purchasedCredits;
@@ -155,6 +159,7 @@ export async function POST(req: NextRequest) {
         id: userId,
         plan: planInfo.plan,
         credits: totalCredits,
+        subscription_starts_at: subscriptionStartsAt,
         subscription_expires_at: newExpiry.toISOString(),
         payment_provider: "razorpay",
         razorpay_payment_id: razorpay_payment_id,

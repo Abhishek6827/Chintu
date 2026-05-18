@@ -9,6 +9,7 @@ interface SubscriptionData {
   plan: string;
   credits: number;
   subscription_expires_at: string | null;
+  subscription_starts_at: string | null;
   payment_provider: string | null;
   razorpay_payment_id: string | null;
   full_name: string | null;
@@ -20,6 +21,7 @@ interface SubscriptionData {
     last_payment_at?: string;
     last_frequency?: string;
     free_credits_refill_at?: string;
+    subscription_starts_at?: string;
     [key: string]: any;
   } | null;
 }
@@ -276,6 +278,7 @@ export default function SubscriptionPage() {
                       })() },
                       { label: "Method", value: (paymentDetails?.method || data.profile_data?.payment_type || "N/A"), isBadge: true, color: "emerald" },
                       { label: "Billing Cycle", value: getBillingCycle(data.updated_at, data.subscription_expires_at), isBadge: true, color: "indigo" },
+                      { label: "Subscription Start", value: formatDate(data.subscription_starts_at) },
                       { label: "Invoice Date", value: formatDate(paymentDetails?.createdAt || data.profile_data?.last_payment_at || data.updated_at) }
                     ].map((item, idx) => (
                       <div key={idx} className="flex items-center justify-between px-6 py-3.5">

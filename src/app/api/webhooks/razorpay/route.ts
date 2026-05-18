@@ -142,6 +142,11 @@ export async function POST(req: Request) {
     }
     let currentExpiry = targetProfile?.subscription_expires_at ? new Date(targetProfile.subscription_expires_at) : now;
     if (currentExpiry < now) currentExpiry = now;
+
+    // subscription_starts_at: new start if expired or missing, otherwise keep existing
+    const isNewStart = !targetProfile?.subscription_starts_at || (targetProfile?.subscription_expires_at && new Date(targetProfile.subscription_expires_at) <= now);
+    const subscriptionStartsAt = isNewStart ? now.toISOString() : targetProfile?.subscription_starts_at;
+
     const newExpiry = new Date(currentExpiry.getTime() + purchasedDays * 24 * 60 * 60 * 1000);
     const oldCredits = targetProfile?.credits || 0;
     const totalCredits = oldCredits + purchasedCredits;
@@ -219,6 +224,7 @@ export async function POST(req: Request) {
       full_name: fullName || targetProfile?.full_name,
       plan: planInfo.plan,
       credits: totalCredits,
+      subscription_starts_at: subscriptionStartsAt,
       subscription_expires_at: newExpiry.toISOString(),
       payment_provider: "razorpay",
       razorpay_payment_id: payment.id,

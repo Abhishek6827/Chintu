@@ -135,6 +135,8 @@ export async function GET() {
           credits: 10,
           plan: 'free',
           updated_at: now.toISOString(),
+          subscription_starts_at: now.toISOString(),
+          subscription_expires_at: nextRefill,
           profile_data: {
             free_credits_refill_at: nextRefill
           }
@@ -152,21 +154,88 @@ export async function GET() {
     if (data) {
       data.current_jd = data.current_jd || data.profile_data?.saved_jd || "";
 
+      // BACKFILL: Existing users created before subscription_starts_at existed
+      if (!data.subscription_starts_at || !data.subscription_expires_at) {
+        const now = new Date();
+        const pd = data.profile_data as any;
+        let startAt = data.subscription_starts_at;
+        let expireAt = data.subscription_expires_at;
+
+        if (!startAt) {
+          if (pd?.free_credits_refill_at) {
+            // Free user with old refill tracking — backfill from refill date
+            const refill = new Date(pd.free_credits_refill_at);
+            startAt = new Date(refill.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+          } else if (expireAt) {
+            // Paid user — infer start from expiry and frequency
+            const freq = pd?.last_frequency;
+            const days = freq === 'Annual' ? 365 : 30;
+            const expiry = new Date(expireAt);
+            startAt = new Date(expiry.getTime() - days * 24 * 60 * 60 * 1000).toISOString();
+          } else if (data.created_at) {
+            // Real data fallback: use account creation date
+            startAt = new Date(data.created_at).toISOString();
+          } else {
+            startAt = now.toISOString();
+          }
+        }
+
+        if (!expireAt) {
+          if (pd?.free_credits_refill_at) {
+            expireAt = pd.free_credits_refill_at;
+          } else if (startAt && startAt !== now.toISOString()) {
+            // If we inferred a real start date, derive expiry from it
+            expireAt = new Date(new Date(startAt).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+          } else {
+            expireAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+          }
+        }
+
+        try {
+          const { data: backfilled } = await supabaseAdmin
+            .from("profiles")
+            .update({
+              subscription_starts_at: startAt,
+              subscription_expires_at: expireAt,
+              updated_at: now.toISOString(),
+            })
+            .eq("email", email)
+            .select()
+            .single();
+          if (backfilled) {
+            data.subscription_starts_at = startAt;
+            data.subscription_expires_at = expireAt;
+            console.log(`[Backfill] subscription_starts_at for ${email}`);
+          }
+        } catch (err: any) {
+          console.error("[Backfill] Failed:", err.message);
+        }
+      }
+
       // Monthly free credits refill for free users
       const userPlan = (data.plan || "free").toLowerCase();
       if (userPlan === "free") {
         const now = new Date();
-        const refillAt = data.profile_data?.free_credits_refill_at;
-        if (!refillAt || new Date(refillAt) <= now) {
-          const nextRefill = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        const cycleExpired = !data.subscription_expires_at || new Date(data.subscription_expires_at) <= now;
+
+        if (cycleExpired) {
+          const nextExpiry = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+          // Determine if user was active during the last cycle
+          const cycleStart = data.subscription_starts_at ? new Date(data.subscription_starts_at) : null;
+          const lastSignIn = userObj.lastSignInAt ? new Date(userObj.lastSignInAt) : null;
+          const wasActive = lastSignIn && cycleStart && lastSignIn >= cycleStart;
+
           const { data: updatedProfile, error: refillError } = await supabaseAdmin
             .from("profiles")
             .update({
               credits: 10,
+              subscription_starts_at: now.toISOString(),
+              subscription_expires_at: nextExpiry,
               updated_at: now.toISOString(),
               profile_data: {
                 ...(data.profile_data || {}),
-                free_credits_refill_at: nextRefill
+                free_credits_refill_at: nextExpiry
               }
             })
             .eq("email", email)
@@ -177,7 +246,10 @@ export async function GET() {
             data = updatedProfile;
             data.current_jd = data.current_jd || data.profile_data?.saved_jd || "";
 
-            // Send monthly free credits refill email
+            const actionLabel = wasActive ? "Active refill" : "Welcome back";
+            console.log(`[Free Refill] ${actionLabel} for ${email}`);
+
+            // Send monthly free credits refill / welcome back email
             try {
               const resend = new Resend(process.env.RESEND_API_KEY);
               const userName = data.full_name || email?.split("@")[0] || "Candidate";
@@ -185,11 +257,11 @@ export async function GET() {
               await resend.emails.send({
                 from: "Chintu Ji <welcome@getchintu.com>",
                 to: email,
-                subject: "CHINTU: Monthly Credits Refilled 🎉",
+                subject: wasActive ? "CHINTU: Monthly Credits Refilled 🎉" : "CHINTU: Welcome Back — Credits Restocked 🎉",
                 html: getFreeCreditsEmailHtml(
                   userName,
                   10,
-                  new Date(nextRefill).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),
+                  new Date(nextExpiry).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),
                   appUrl
                 ),
               });

@@ -12,7 +12,7 @@ import { useThemeToggle } from "@/hooks/useThemeToggle";
 import SyncedUserButton from "@/components/SyncedUserButton";
 
 export default function WebHeader() {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, user, isLoaded } = useUser();
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
@@ -118,7 +118,12 @@ export default function WebHeader() {
             </Link>
           </motion.div>
           
-          {!isSignedIn ? (
+          {!isLoaded ? (
+            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
+              <div className="w-5 h-5 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin" />
+              <span className="text-[9px] font-black text-[var(--text-dim)] uppercase tracking-widest hidden sm:inline">Loading...</span>
+            </div>
+          ) : !isSignedIn ? (
             <Link href="/sign-up" className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl shadow-lg shadow-indigo-500/40 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
               Get Started <ArrowRight className="w-3 h-3" />
             </Link>
@@ -126,8 +131,8 @@ export default function WebHeader() {
             <div className="flex items-center gap-4">
               {userCredits === null ? (
                 <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
-                  <div className="w-12 h-6 rounded-full bg-white/5 animate-pulse" />
-                  <div className="w-10 h-6 rounded-lg bg-white/5 animate-pulse" />
+                  <div className="w-12 h-6 rounded-full bg-indigo-500/10 animate-pulse" />
+                  <div className="w-10 h-6 rounded-lg bg-indigo-500/10 animate-pulse" />
                 </div>
               ) : (
                 <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm animate-in fade-in duration-300">

@@ -194,10 +194,17 @@ export default function GlobalHeader() {
             </span>
           </div>
 
-          {isSignedIn && userCredits === null && (
+          {!isLoaded && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
+              <div className="w-4 h-4 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin" />
+              <span className="text-[9px] font-black text-[var(--text-dim)] uppercase tracking-widest hidden min-[400px]:inline">Loading...</span>
+            </div>
+          )}
+
+          {isLoaded && isSignedIn && userCredits === null && (
             <div className="flex items-center gap-1.5 min-[400px]:gap-3 py-1">
-              <div className="w-12 h-6 rounded-xl bg-white/5 animate-pulse" />
-              <div className="w-10 h-6 rounded-lg bg-white/5 animate-pulse" />
+              <div className="w-12 h-6 rounded-xl bg-indigo-500/10 animate-pulse" />
+              <div className="w-10 h-6 rounded-lg bg-indigo-500/10 animate-pulse" />
             </div>
           )}
 
