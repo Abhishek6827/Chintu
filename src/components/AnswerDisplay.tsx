@@ -27,7 +27,6 @@ interface AnswerDisplayProps {
   fontSize?: number;
   isLightMode?: boolean;
   onUndo?: (id: string, question: string) => void;
-  showReadingGuide?: boolean;
   userPlan?: string | null;
 }
 
@@ -42,7 +41,7 @@ const parseAnswer = (text: string) => {
   return { think, main, isThinking };
 };
 
-export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = false, onUndo, showReadingGuide = false, userPlan = null }: AnswerDisplayProps) {
+export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = false, onUndo, userPlan = null }: AnswerDisplayProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
 
@@ -252,7 +251,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-indigo-500/50 via-purple-500/20 to-transparent" />
 
-                <div className={`markdown-answer ${showReadingGuide && idx === answers.length - 1 ? 'reading-guide-active' : ''}`} style={{ fontSize: `clamp(6px, calc(${fontSize / 14} * 1rem), 20px)` }}>
+                <div className="markdown-answer" style={{ fontSize: `clamp(6px, calc(${fontSize / 14} * 1rem), 20px)` }}>
                   {(() => {
                     if (entry.isStreaming && !entry.answer) {
                       return (

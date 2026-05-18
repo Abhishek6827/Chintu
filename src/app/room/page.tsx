@@ -176,7 +176,6 @@ export default function RoomPage() {
   const [history, setHistory] = useState<HistorySession[]>([]);
   const [showClearHistoryConfirm, setShowClearHistoryConfirm] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
-  const [showReadingGuide, setShowReadingGuide] = useState(false);
   const [isBackgroundRefining, setIsBackgroundRefining] = useState(false);
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
@@ -335,11 +334,6 @@ export default function RoomPage() {
             // Set History
             if (profile.history && Array.isArray(profile.history)) {
               setHistory(profile.history);
-            }
-
-            // Set Reading Guide (from profile_data.preferences)
-            if (profile.profile_data?.preferences?.reading_guide !== undefined) {
-              setShowReadingGuide(profile.profile_data.preferences.reading_guide);
             }
 
             const plan = (profile.plan || 'free').toLowerCase();
@@ -1736,7 +1730,6 @@ export default function RoomPage() {
           fontSize={fontSize}
           isLightMode={isLightMode}
           onUndo={handleUndo}
-          showReadingGuide={showReadingGuide}
           userPlan={userPlan}
         />
         <div ref={chatEndRef} />
@@ -2147,52 +2140,6 @@ export default function RoomPage() {
                     ⚠️ Space & Enter will be BLOCKED in other apps while this is ON.
                   </p>
                 )}
-              </div>
-
-
-
-              {/* Reading Guide Toggle */}
-
-              <div
-                className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
-                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Reading Focus</h4>
-                    <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">Highlight text as it arrives</p>
-                  </div>
-                  <button
-                    onClick={async () => {
-                      const newVal = !showReadingGuide;
-                      setShowReadingGuide(newVal);
-
-                      // Save to Supabase preferences
-                      try {
-                        const res = await fetch("/api/profile");
-                        const { profile } = await res.json();
-                        const updatedData = {
-                          ...(profile?.profile_data || {}),
-                          preferences: {
-                            ...(profile?.profile_data?.preferences || {}),
-                            reading_guide: newVal
-                          }
-                        };
-
-                        await fetch('/api/profile', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ profile_data: updatedData })
-                        });
-                      } catch (err) {
-                        console.error("Error saving reading guide preference:", err);
-                      }
-                    }}
-                    className={`w-9 h-5 rounded-full transition-all relative ${showReadingGuide ? "bg-indigo-600" : "bg-gray-600/30"}`}
-                  >
-                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-md transition-all ${showReadingGuide ? "left-5" : "left-1"}`} />
-                  </button>
-                </div>
               </div>
 
 
