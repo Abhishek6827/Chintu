@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 
 import { Sparkles } from "lucide-react";
+import OnboardingModal from "./OnboardingModal";
 
 const isElectron = typeof window !== "undefined" && !!(window as any).electronAPI;
 
@@ -69,6 +70,7 @@ export default function ProfileModal({
   const [editMode, setEditMode] = useState(false);
   const [editJson, setEditJson] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   // JD Management State
   const [isEditingJd, setIsEditingJd] = useState(false);
@@ -165,6 +167,7 @@ export default function ProfileModal({
   };
 
   const handleEdit = () => {
+    if (userPlan === "free") return;
     setEditJson(JSON.stringify(profile, null, 2));
     setEditMode(true);
   };
@@ -475,9 +478,7 @@ export default function ProfileModal({
                 </button>
                 <button
                   onClick={() => {
-                    // Trigger onboarding event that GlobalHeader listens to
-                    window.dispatchEvent(new CustomEvent('chintu-open-guide'));
-                    onClose();
+                    setShowGuide(true);
                   }}
                   className="flex items-center justify-center gap-2 py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-[var(--glass-border)]"
                 >
@@ -492,7 +493,7 @@ export default function ProfileModal({
               <button
                 onClick={handleEdit}
                 disabled={userPlan === "free"}
-                className={`flex-1 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-[var(--glass-border)] ${userPlan === "free" ? "bg-white/5 text-[var(--text-dim)]/30 cursor-not-allowed" : "bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)]"}`}
+                className={`flex-1 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-[var(--glass-border)] ${userPlan === "free" ? "bg-gray-100/50 text-gray-300 cursor-not-allowed" : "bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] active:scale-95"}`}
               >
                 ✏️ Edit
               </button>
@@ -604,6 +605,7 @@ export default function ProfileModal({
           </div>
         </div>
       )}
+      {showGuide && <OnboardingModal isOpen={showGuide} onClose={() => setShowGuide(false)} />}
     </div>
   );
 }

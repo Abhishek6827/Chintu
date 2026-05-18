@@ -263,7 +263,7 @@ export default function SetupPage() {
               <Image
                 src="/icon-sm.png"
                 alt="Chintu"
-                className="w-full h-full object-contain relative z-10"
+                className="w-full h-full object-contain relative z-10 rounded-full"
                 width={80}
                 height={80}
               />

@@ -218,3 +218,71 @@ export const getPaymentEmailHtml = (
 </body>
 </html>
 `;
+
+export const getFreeCreditsEmailHtml = (
+  name: string,
+  credits: number,
+  nextRefill: string,
+  appUrl: string
+) => `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8f9fa; font-family: 'Inter', sans-serif;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8f9fa; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border-radius: 32px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.05); border: 1px solid #f1f3f5;">
+          <tr>
+            <td style="padding: 40px 40px 30px 40px; text-align: center;">
+              <img src="https://www.getchintu.com/icon.png" alt="Chintu Ji" width="60" height="60" style="margin-bottom: 20px;">
+              <h1 style="margin: 0; font-size: 28px; font-weight: 900; color: #1a1a1c; letter-spacing: -0.02em; text-transform: uppercase;">Credits Refilled.</h1>
+              <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: 700; color: #10b981; text-transform: uppercase; letter-spacing: 0.2em;">Monthly Starter Bonus Active</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0 40px 40px 40px;">
+              <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #4b5563; text-align: center;">
+                Hey <b>${name}</b>, your monthly free credits have been topped up. Stay active and keep crushing those assessments.
+              </p>
+              <div style="background-color: #f8f9fa; border-radius: 24px; padding: 30px; border: 1px solid #f1f3f5; margin-bottom: 32px;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="padding-bottom: 15px;">
+                      <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Credits Added:</span>
+                      <div style="font-size: 24px; font-weight: 900; color: #10b981;">+${credits}</div>
+                    </td>
+                    <td style="padding-bottom: 15px; text-align: right;">
+                      <span style="font-size: 10px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">Next Refill:</span>
+                      <div style="font-size: 14px; font-weight: 700; color: #1a1a1c;">${nextRefill}</div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div style="text-align: center;">
+                <a href="${appUrl}/setup" style="display: inline-block; padding: 14px 32px; background-color: #1a1a1c; color: #ffffff; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; text-decoration: none; border-radius: 12px;">Launch Dashboard</a>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px; background-color: #fcfcfd; border-top: 1px solid #f1f3f5; text-align: center;">
+              <p style="margin: 0 0 15px 0; font-size: 11px; color: #9ca3af; line-height: 1.5;">
+                You are receiving this because you have an active Chintu Ji Starter plan.<br>
+                Chintu Ji, 123 Tech Avenue, Innovation District, CA 94105
+              </p>
+              <p style="margin: 0; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em;">
+                © 2026 Chintu Ji Ecosystem
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;

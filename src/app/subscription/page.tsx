@@ -19,6 +19,7 @@ interface SubscriptionData {
     payment_type?: string;
     last_payment_at?: string;
     last_frequency?: string;
+    free_credits_refill_at?: string;
     [key: string]: any;
   } | null;
 }
@@ -135,11 +136,16 @@ export default function SubscriptionPage() {
 
   const plan = (data.plan || "free").toLowerCase();
   const planStyle = getPlanColor(plan);
-  const daysLeft = getDaysRemaining(data.subscription_expires_at);
-  const isExpired = daysLeft === 0 && data.subscription_expires_at;
-  const expiryPercent = data.subscription_expires_at
-    ? Math.min(100, Math.max(0, (daysLeft / 365) * 100))
-    : 0;
+  const freeRefillDate = data.profile_data?.free_credits_refill_at;
+  const daysLeft = plan === "free"
+    ? getDaysRemaining(freeRefillDate || null)
+    : getDaysRemaining(data.subscription_expires_at);
+  const isExpired = daysLeft === 0 && !!(data.subscription_expires_at || freeRefillDate);
+  const expiryPercent = plan === "free" && freeRefillDate
+    ? Math.min(100, Math.max(0, (daysLeft / 30) * 100))
+    : data.subscription_expires_at
+      ? Math.min(100, Math.max(0, (daysLeft / 365) * 100))
+      : 0;
 
   return (
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] relative overflow-hidden transition-colors duration-300" style={{ WebkitAppRegion: "drag" } as any}>
@@ -200,11 +206,15 @@ export default function SubscriptionPage() {
                     </div>
                   </div>
 
-                  {data.subscription_expires_at && (
+                  {(data.subscription_expires_at || freeRefillDate) && (
                     <div className="space-y-2">
                       <div className="flex justify-between text-[10px] font-medium text-[var(--text-dim)] opacity-60">
                         <span>Period</span>
-                        <span>Expires {formatDate(data.subscription_expires_at)}</span>
+                        <span>
+                          {plan === "free"
+                            ? `Next Refill ${formatDate(freeRefillDate || null)}`
+                            : `Expires ${formatDate(data.subscription_expires_at)}`}
+                        </span>
                       </div>
                       <div className="w-full h-1 bg-[var(--glass-bg)] rounded-full overflow-hidden">
                         <div

@@ -268,7 +268,7 @@ export default function LandingPage() {
               </div>
 
               {/* Title */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black tracking-tighter text-[var(--text-main)] mb-6 leading-[0.85] uppercase">
+              <h1 className="text-[2.5rem] sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black tracking-tight sm:tracking-tighter text-[var(--text-main)] mb-5 sm:mb-6 leading-[0.95] sm:leading-[0.85] uppercase">
                 Destroy Every <br />
                 <span className="relative inline-block">
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">Assessment.</span>
@@ -282,7 +282,7 @@ export default function LandingPage() {
               </h1>
 
               {/* Subtitle */}
-              <p className="text-xs sm:text-sm md:text-base text-[var(--text-dim)] mb-6 sm:mb-8 leading-relaxed font-bold uppercase tracking-widest max-w-xl">
+              <p className="text-sm sm:text-sm md:text-base text-[var(--text-dim)] mb-5 sm:mb-8 leading-relaxed font-bold uppercase tracking-wide sm:tracking-widest max-w-xl">
                 Interviews, Global Exams, MCQs, or Technical Tests. Capture any problem. Get the perfect solution. Instantly.
               </p>
 
@@ -302,18 +302,18 @@ export default function LandingPage() {
                         router.push(isElectron ? "/setup" : "/download");
                       }, 500);
                     }}
-                    className="relative group overflow-hidden px-7 sm:px-9 py-3.5 sm:py-4 bg-indigo-600 text-white font-black uppercase tracking-[0.25em] text-[10px] sm:text-[11px] rounded-xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-3"
+                    className="relative group overflow-hidden px-5 sm:px-9 py-3 sm:py-4 bg-indigo-600 text-white font-black uppercase tracking-[0.25em] text-[10px] sm:text-[11px] rounded-xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3"
                   >
-                    Access Dashboard <Zap className="w-4 h-4 fill-current" />
+                    Access Dashboard <Zap className="w-3.5 sm:w-4 h-3.5 sm:h-4 fill-current" />
                   </button>
                 ) : (
-                  <Link href="/sign-up" className="relative group overflow-hidden px-7 sm:px-9 py-3.5 sm:py-4 bg-indigo-600 text-white font-black uppercase tracking-[0.25em] text-[10px] sm:text-[11px] rounded-xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-3">
-                    Join the Revolution <ArrowRight className="w-4 h-4" />
+                  <Link href="/sign-up" className="relative group overflow-hidden px-5 sm:px-9 py-3 sm:py-4 bg-indigo-600 text-white font-black uppercase tracking-[0.25em] text-[10px] sm:text-[11px] rounded-xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3">
+                    Join the Revolution <ArrowRight className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                   </Link>
                 )}
                 <InteractiveHoverButton
                   onClick={() => router.push("/pricing")}
-                  className="px-7 sm:px-9 py-3.5 sm:py-4 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-[var(--text-dim)] hover:text-indigo-600 dark:text-indigo-400 bg-[var(--panel-bg)] sm:max-w-[260px]"
+                  className="px-5 sm:px-9 py-3 sm:py-4 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-[var(--text-dim)] hover:text-indigo-600 dark:text-indigo-400 bg-[var(--panel-bg)] sm:max-w-[260px]"
                 >
                   View Access Tiers
                 </InteractiveHoverButton>
@@ -321,15 +321,11 @@ export default function LandingPage() {
 
               {/* Trust Indicators */}
               <div className="flex items-center gap-4 mb-8">
-                <div
-                  className="flex items-center -space-x-2"
-                  style={{ perspective: '600px', transformStyle: 'preserve-3d', transform: 'rotateY(-12deg) rotateX(5deg)' }}
-                >
-                  {[1, 2, 3, 4].map((i, idx) => (
+                <div className="flex items-center -space-x-2">
+                  {[1, 2, 3, 4].map((i) => (
                     <div
                       key={i}
-                      className="w-8 h-8 rounded-full border-2 border-[var(--bg-app)] bg-[var(--panel-bg)] overflow-hidden shadow-xl"
-                      style={{ transform: `translateZ(${idx * 12}px)`, transformStyle: 'preserve-3d' }}
+                      className="w-7 sm:w-8 h-7 sm:h-8 rounded-full border-2 border-[var(--bg-app)] bg-[var(--panel-bg)] overflow-hidden shadow-xl"
                     >
                       <Image
                         src={`https://i.pravatar.cc/100?img=${i + 10}`}
@@ -342,21 +338,18 @@ export default function LandingPage() {
                       />
                     </div>
                   ))}
-                  <div
-                    className="w-8 h-8 rounded-full border-2 border-[var(--bg-app)] bg-indigo-600 flex items-center justify-center text-[8px] font-black text-white shadow-xl"
-                    style={{ transform: 'translateZ(60px)', transformStyle: 'preserve-3d' }}
-                  >
+                  <div className="w-7 sm:w-8 h-7 sm:h-8 rounded-full border-2 border-[var(--bg-app)] bg-indigo-600 flex items-center justify-center text-[7px] sm:text-[8px] font-black text-white shadow-xl">
                     +10k
                   </div>
                 </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-0.5">
                     {[1, 2, 3, 4, 5].map(i => (
-                      <Star key={i} className="w-3 h-3 text-amber-600 dark:text-amber-400 fill-amber-400" />
+                      <Star key={i} className="w-2.5 sm:w-3 h-2.5 sm:h-3 text-amber-600 dark:text-amber-400 fill-amber-400" />
                     ))}
-                    <span className="text-[10px] font-black text-[var(--text-main)] ml-1.5">4.9</span>
+                    <span className="text-[9px] sm:text-[10px] font-black text-[var(--text-main)] ml-1">4.9</span>
                   </div>
-                  <span className="text-[8px] font-black text-[var(--text-dim)] uppercase tracking-widest">Rated #1 by 10k+ Pros</span>
+                  <span className="text-[7px] sm:text-[8px] font-black text-[var(--text-dim)] uppercase tracking-widest">Rated #1 by 10k+ Pros</span>
                 </div>
               </div>
 

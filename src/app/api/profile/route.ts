@@ -4,6 +4,8 @@ export const revalidate = 0;
 import { createAdminClient } from "@/utils/supabase/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import Razorpay from "razorpay";
+import { Resend } from "resend";
+import { getFreeCreditsEmailHtml } from "@/utils/email-templates";
 
 export async function POST(req: Request) {
   try {
@@ -174,6 +176,27 @@ export async function GET() {
           if (!refillError && updatedProfile) {
             data = updatedProfile;
             data.current_jd = data.current_jd || data.profile_data?.saved_jd || "";
+
+            // Send monthly free credits refill email
+            try {
+              const resend = new Resend(process.env.RESEND_API_KEY);
+              const userName = data.full_name || email?.split("@")[0] || "Candidate";
+              const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.getchintu.com";
+              await resend.emails.send({
+                from: "Chintu Ji <welcome@getchintu.com>",
+                to: email,
+                subject: "CHINTU: Monthly Credits Refilled 🎉",
+                html: getFreeCreditsEmailHtml(
+                  userName,
+                  10,
+                  new Date(nextRefill).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),
+                  appUrl
+                ),
+              });
+              console.log(`[Free Refill] Email sent to ${email}`);
+            } catch (emailErr: any) {
+              console.error("[Free Refill] Email failed:", emailErr.message);
+            }
           } else if (refillError) {
             console.error("[Free Refill] Failed:", refillError.message);
           }
