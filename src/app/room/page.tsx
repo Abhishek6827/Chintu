@@ -117,6 +117,7 @@ export default function RoomPage() {
   const [showSettings, setShowSettings] = useState(false);
 
   const [showUnhidePrompt, setShowUnhidePrompt] = useState(false);
+  const [showDisableAntiDetectionPrompt, setShowDisableAntiDetectionPrompt] = useState(false);
 
   const [inputText, setInputText] = useState("");
   const [mounted, setMounted] = useState(false);
@@ -126,6 +127,7 @@ export default function RoomPage() {
   const [selectedModel, setSelectedModel] = useState<ModelKey>("llama-3.3-70b");
   const selectedModelRef = useRef<ModelKey>("llama-3.3-70b");
   const [universalShortcuts, setUniversalShortcuts] = useState(false);
+  const [antiDetection, setAntiDetection] = useState(true);
   const [userPlan, setUserPlan] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const { currentTheme, toggleTheme } = useThemeToggle();
@@ -1252,9 +1254,9 @@ export default function RoomPage() {
 
   useEffect(() => {
     if (isElectron && (window as any).electronAPI?.setFocusable) {
-      (window as any).electronAPI.setFocusable(true);
+      (window as any).electronAPI.setFocusable(!antiDetection);
     }
-  }, []);
+  }, [antiDetection]);
 
   useEffect(() => {
     return () => {
@@ -2142,6 +2144,41 @@ export default function RoomPage() {
                 )}
               </div>
 
+              {/* Anti-Detection Click Toggle */}
+              <div
+                className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
+                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1 flex items-center gap-2">
+                      Anti-Detection Click
+                      <span className="bg-emerald-500/20 text-emerald-400 text-[8px] font-black uppercase px-1.5 py-0.5 rounded tracking-widest">SAFE</span>
+                    </h4>
+                    <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
+                      Click inside Chintu without browser focus loss
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (antiDetection) {
+                        setShowDisableAntiDetectionPrompt(true);
+                      } else {
+                        setAntiDetection(true);
+                      }
+                    }}
+                    className={`w-9 h-5 rounded-full transition-all relative ${antiDetection ? "bg-emerald-600" : "bg-gray-600/30"}`}
+                  >
+                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-md transition-all ${antiDetection ? "left-5" : "left-1"}`} />
+                  </button>
+                </div>
+                {antiDetection && (
+                  <p className="mt-2 text-[8px] text-emerald-400 font-bold uppercase tracking-widest leading-relaxed animate-pulse">
+                    ✔ Anti-Blur Active. Click and scroll are safe. Keyboard typing in Chintu is disabled.
+                  </p>
+                )}
+              </div>
+
 
 
               {/* History Section */}
@@ -2289,6 +2326,43 @@ export default function RoomPage() {
                   className="w-full py-3 bg-white/5 hover:bg-white/10 text-white/60 font-medium rounded-xl transition-all"
                 >
                   Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Disable Anti-Detection Click Prompt (Shocking/Animated) */}
+      {showDisableAntiDetectionPrompt && (
+        <div className="absolute inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-sm bg-[var(--panel-bg)] animate-in fade-in duration-300">
+          <div className="unhide-prompt-card w-full max-w-xs bg-gradient-to-br from-yellow-400 via-amber-500 to-red-600 p-[2px] rounded-3xl shadow-[0_0_50px_rgba(245,158,11,0.4)] animate-in zoom-in-95 duration-300">
+            <div className="bg-gray-900 rounded-[22px] p-6 text-center">
+              <div className="w-16 h-16 bg-amber-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <svg className="w-10 h-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-black text-white mb-2 tracking-tight uppercase">Disable Safe Click?</h3>
+              <p className="text-gray-400 text-xs mb-6 leading-relaxed">
+                Disabling this will allow clicking inside Chintu to trigger <span className="text-amber-400 font-bold underline">Exam Window / Tab Change</span> warnings on the website!<br/><br/>
+                <span className="text-gray-300 font-semibold">Note:</span> Only disable Safe Click if you explicitly need to <span className="text-indigo-400 font-bold">Type</span> inside Chintu using your keyboard.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    setAntiDetection(false);
+                    setShowDisableAntiDetectionPrompt(false);
+                  }}
+                  className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-white font-bold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-amber-500/20"
+                >
+                  YES, DISABLE IT
+                </button>
+                <button
+                  onClick={() => setShowDisableAntiDetectionPrompt(false)}
+                  className="w-full py-3 bg-white/5 hover:bg-white/10 text-white/60 font-medium rounded-xl transition-all"
+                >
+                  Keep Protected
                 </button>
               </div>
             </div>
