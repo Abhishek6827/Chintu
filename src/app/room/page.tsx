@@ -118,6 +118,7 @@ export default function RoomPage() {
 
   const [showUnhidePrompt, setShowUnhidePrompt] = useState(false);
   const [showDisableAntiDetectionPrompt, setShowDisableAntiDetectionPrompt] = useState(false);
+  const [showEnableUniversalShortcutsPrompt, setShowEnableUniversalShortcutsPrompt] = useState(false);
 
   const [inputText, setInputText] = useState("");
   const [mounted, setMounted] = useState(false);
@@ -2126,10 +2127,13 @@ export default function RoomPage() {
                         openPricingExternal();
                         return;
                       }
-                      const newVal = !universalShortcuts;
-                      setUniversalShortcuts(newVal);
-                      if (isElectron) {
-                        await (window as any).electronAPI.setUniversalShortcuts(newVal);
+                      if (universalShortcuts) {
+                        setUniversalShortcuts(false);
+                        if (isElectron) {
+                          await (window as any).electronAPI.setUniversalShortcuts(false);
+                        }
+                      } else {
+                        setShowEnableUniversalShortcutsPrompt(true);
                       }
                     }}
                     className={`w-9 h-5 rounded-full transition-all relative ${universalShortcuts ? "bg-indigo-600" : "bg-gray-600/30"}`}
@@ -2363,6 +2367,46 @@ export default function RoomPage() {
                   className="w-full py-3 bg-white/5 hover:bg-white/10 text-white/60 font-medium rounded-xl transition-all"
                 >
                   Keep Protected
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Enable Universal Shortcuts Prompt (Shocking/Animated) */}
+      {showEnableUniversalShortcutsPrompt && (
+        <div className="absolute inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-sm bg-[var(--panel-bg)] animate-in fade-in duration-300">
+          <div className="unhide-prompt-card w-full max-w-xs bg-gradient-to-br from-red-500 via-orange-500 to-yellow-600 p-[2px] rounded-3xl shadow-[0_0_50px_rgba(239,68,68,0.4)] animate-in zoom-in-95 duration-300">
+            <div className="bg-gray-900 rounded-[22px] p-6 text-center">
+              <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-black text-white mb-2 tracking-tight uppercase">Enable Universal Keys?</h3>
+              <p className="text-gray-400 text-xs mb-6 leading-relaxed">
+                Activating this will <span className="text-red-400 font-bold underline">globally block Space & Enter</span> in all other applications (including your browser and code editor)!<br/><br/>
+                Chintu intercepts these keys to trigger recording & screenshot capture.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={async () => {
+                    setUniversalShortcuts(true);
+                    if (isElectron) {
+                      await (window as any).electronAPI.setUniversalShortcuts(true);
+                    }
+                    setShowEnableUniversalShortcutsPrompt(false);
+                  }}
+                  className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-red-600/20"
+                >
+                  YES, ENABLE KEYS
+                </button>
+                <button
+                  onClick={() => setShowEnableUniversalShortcutsPrompt(false)}
+                  className="w-full py-3 bg-white/5 hover:bg-white/10 text-white/60 font-medium rounded-xl transition-all"
+                >
+                  Cancel
                 </button>
               </div>
             </div>
