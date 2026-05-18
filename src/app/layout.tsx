@@ -88,6 +88,11 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  icons: {
+    icon: "/icon-sm.png",
+    shortcut: "/icon-sm.png",
+    apple: "/icon.png",
+  },
 };
 
 export const viewport: Viewport = {
