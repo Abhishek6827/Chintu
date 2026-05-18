@@ -138,7 +138,9 @@ export default function SubscriptionPage() {
 
   const plan = (data.plan || "free").toLowerCase();
   const planStyle = getPlanColor(plan);
-  const freeRefillDate = data.profile_data?.free_credits_refill_at;
+  // For free users, use the top-level subscription_expires_at (refill date)
+  // Falls back to profile_data.free_credits_refill_at for legacy data
+  const freeRefillDate = data.subscription_expires_at || data.profile_data?.free_credits_refill_at;
   const daysLeft = plan === "free"
     ? getDaysRemaining(freeRefillDate || null)
     : getDaysRemaining(data.subscription_expires_at);
@@ -265,22 +267,31 @@ export default function SubscriptionPage() {
                 <h3 className="text-[11px] font-bold text-[var(--text-dim)] uppercase tracking-[0.15em] mb-4">Payment Details</h3>
                 <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] overflow-hidden">
                   <div className="divide-y divide-[var(--glass-border)]">
-                    {[
-                      { label: "Gateway", value: data.payment_provider || "N/A", isBadge: true, color: "blue" },
-                      { label: "Account", value: data.email || user?.primaryEmailAddress?.emailAddress || "N/A" },
-                      { label: "Billed To", value: data.full_name || user?.fullName || "N/A" },
-                      { label: "Payment ID", value: data.razorpay_payment_id || "N/A", isMono: true },
-                      { label: "Amount Paid", value: (() => {
-                        const amount = paymentDetails?.amount ?? data.profile_data?.payment_amount;
-                        if (amount == null) return "N/A";
-                        const num = typeof amount === "string" ? Number(amount.replace(/[^0-9.]/g, "")) : amount;
-                        return `₹${num.toLocaleString()}`;
-                      })() },
-                      { label: "Method", value: (paymentDetails?.method || data.profile_data?.payment_type || "N/A"), isBadge: true, color: "emerald" },
-                      { label: "Billing Cycle", value: getBillingCycle(data.updated_at, data.subscription_expires_at), isBadge: true, color: "indigo" },
-                      { label: "Subscription Start", value: formatDate(data.subscription_starts_at) },
-                      { label: "Invoice Date", value: formatDate(paymentDetails?.createdAt || data.profile_data?.last_payment_at || data.updated_at) }
-                    ].map((item, idx) => (
+                    {[...(
+                      plan === "free"
+                        ? [
+                          { label: "Account", value: data.email || user?.primaryEmailAddress?.emailAddress || "N/A" },
+                          { label: "Billed To", value: data.full_name || user?.fullName || "N/A" },
+                          { label: "Billing Cycle", value: "30 Days (Free Refill)" },
+                          { label: "Subscription Start", value: formatDate(data.subscription_starts_at) },
+                        ]
+                        : [
+                          { label: "Gateway", value: data.payment_provider || "N/A", isBadge: true, color: "blue" },
+                          { label: "Account", value: data.email || user?.primaryEmailAddress?.emailAddress || "N/A" },
+                          { label: "Billed To", value: data.full_name || user?.fullName || "N/A" },
+                          { label: "Payment ID", value: data.razorpay_payment_id || "N/A", isMono: true },
+                          { label: "Amount Paid", value: (() => {
+                            const amount = paymentDetails?.amount ?? data.profile_data?.payment_amount;
+                            if (amount == null) return "N/A";
+                            const num = typeof amount === "string" ? Number(amount.replace(/[^0-9.]/g, "")) : amount;
+                            return `₹${num.toLocaleString()}`;
+                          })() },
+                          { label: "Method", value: (paymentDetails?.method || data.profile_data?.payment_type || "N/A"), isBadge: true, color: "emerald" },
+                          { label: "Billing Cycle", value: getBillingCycle(data.updated_at, data.subscription_expires_at), isBadge: true, color: "indigo" },
+                          { label: "Subscription Start", value: formatDate(data.subscription_starts_at) },
+                          { label: "Invoice Date", value: formatDate(paymentDetails?.createdAt || data.profile_data?.last_payment_at || data.updated_at) },
+                        ]
+                    )].map((item, idx) => (
                       <div key={idx} className="flex items-center justify-between px-6 py-3.5">
                         <span className="text-[12px] font-medium text-[var(--text-dim)]">{item.label}</span>
                         {item.isBadge ? (

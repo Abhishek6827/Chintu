@@ -119,9 +119,9 @@ export default function WebHeader() {
           </motion.div>
           
           {!isLoaded ? (
-            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
-              <div className="w-5 h-5 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin" />
-              <span className="text-[9px] font-black text-[var(--text-dim)] uppercase tracking-widest hidden sm:inline">Loading...</span>
+            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-indigo-600 text-white border border-indigo-500 shadow-lg shadow-indigo-500/30">
+              <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">Loading...</span>
             </div>
           ) : !isSignedIn ? (
             <Link href="/sign-up" className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl shadow-lg shadow-indigo-500/40 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
@@ -131,8 +131,8 @@ export default function WebHeader() {
             <div className="flex items-center gap-4">
               {userCredits === null ? (
                 <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
-                  <div className="w-12 h-6 rounded-full bg-indigo-500/10 animate-pulse" />
-                  <div className="w-10 h-6 rounded-lg bg-indigo-500/10 animate-pulse" />
+                  <div className="w-5 h-5 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin" />
+                  <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Syncing...</span>
                 </div>
               ) : (
                 <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm animate-in fade-in duration-300">
@@ -153,12 +153,12 @@ export default function WebHeader() {
                     </span>
                   </div>
                   <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
-                  <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 border ${
+                  <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest shadow-lg border ${
                     userPlan === 'elite'
-                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-amber-500/20'
                       : userPlan === 'pro'
-                      ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                      : 'bg-white/5 text-white/40 border-white/10'
+                      ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 shadow-indigo-500/20'
+                      : 'bg-slate-500/10 text-slate-500 border-slate-500/20 shadow-slate-500/10'
                   }`}>
                     {userPlan === 'free' ? 'Starter' : userPlan}
                   </span>

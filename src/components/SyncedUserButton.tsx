@@ -26,17 +26,24 @@ export default function SyncedUserButton() {
   if (!isSignedIn) return null;
 
   const handleManageSubscription = async () => {
+    // On web, always navigate to the subscription page which handles all cases
+    if (!getIsElectron()) {
+      router.push("/subscription");
+      return;
+    }
+
+    // For Electron: try to get external portal URL (Stripe), fallback to subscription page
     try {
       const res = await fetch("/api/manage-subscription");
       const data = await res.json();
       if (data.url) {
         openInBrowser(data.url);
       } else {
-        alert(data.error || "Failed to load subscription portal.");
+        router.push("/subscription");
       }
     } catch (err) {
       console.error(err);
-      alert("Error loading subscription portal.");
+      router.push("/subscription");
     }
   };
 
