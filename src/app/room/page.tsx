@@ -1867,10 +1867,10 @@ export default function RoomPage() {
         </button>
 
         {/* Premium Voice Mic Button */}
-        <div className="relative w-[60px] h-[60px] flex-shrink-0">
+        <div className="relative w-11 h-11 sm:w-14 sm:h-14 md:w-[60px] md:h-[60px] flex-shrink-0">
           {/* Ambient outer glow */}
           <div
-            className="absolute inset-[-4px] rounded-full animate-pulse pointer-events-none transition-opacity duration-300"
+            className="absolute inset-[-3px] sm:inset-[-4px] rounded-full animate-pulse pointer-events-none transition-opacity duration-300"
             style={{
               background: status === "recording"
                 ? 'radial-gradient(circle, rgba(239,68,68,0.30) 0%, rgba(220,38,38,0.10) 50%, transparent 70%)'
@@ -1896,7 +1896,7 @@ export default function RoomPage() {
           <button
             onClick={status === "generating" ? stopGeneration : handleMicButton}
             disabled={!micReady}
-            className="no-drag absolute inset-[1.5px] rounded-full flex items-center justify-center transition-all duration-300 active:scale-95 overflow-hidden"
+            className="no-drag absolute inset-[1px] sm:inset-[1.5px] rounded-full flex items-center justify-center transition-all duration-300 active:scale-95 overflow-hidden"
             style={{
               backgroundImage: status === "recording"
                 ? 'linear-gradient(135deg, rgba(239,68,68,0.35) 0%, rgba(220,38,38,0.15) 20%, rgba(13,13,18,0.90) 40%, rgba(10,10,14,1) 60%, rgba(220,38,38,0.20) 80%, rgba(239,68,68,0.30) 100%)'
@@ -1928,20 +1928,20 @@ export default function RoomPage() {
             {/* Recording / Generating pulse rings */}
             {status === "recording" && (
               <>
-                <div className="absolute inset-[-3px] rounded-full mic-pulse pointer-events-none" style={{ border: '1.5px solid rgba(239,68,68,0.4)' }} />
+                <div className="absolute inset-[-2px] sm:inset-[-3px] rounded-full mic-pulse pointer-events-none" style={{ border: '1.5px solid rgba(239,68,68,0.4)' }} />
                 <div className="absolute inset-0 rounded-full pointer-events-none" style={{ boxShadow: 'inset 0 0 12px rgba(239,68,68,0.15)' }} />
               </>
             )}
             {status === "generating" && (
-              <div className="absolute inset-[-3px] rounded-full pointer-events-none animate-ping opacity-30" style={{ border: '1.5px solid rgba(245,158,11,0.5)' }} />
+              <div className="absolute inset-[-2px] sm:inset-[-3px] rounded-full pointer-events-none animate-ping opacity-30" style={{ border: '1.5px solid rgba(245,158,11,0.5)' }} />
             )}
 
             <div className="relative z-10 flex items-center justify-center">
               {status === "generating" ? (
-                <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'rgba(255,255,255,0.92)' }} />
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" style={{ color: 'rgba(255,255,255,0.92)' }} />
               ) : (
                 <Mic
-                  className="w-[22px] h-[22px]"
+                  className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]"
                   style={{ color: 'rgba(255,255,255,0.92)' }}
                   strokeWidth={1.5}
                 />

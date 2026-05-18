@@ -166,7 +166,7 @@ export default function GlobalHeader() {
   return (
     <>
       <div className="drag-region flex items-center justify-between px-2 min-[400px]:px-3 h-12 shrink-0 relative z-[100] w-full bg-[var(--bg-app)] border-b border-[var(--glass-border)] shadow-sm overflow-hidden">
-        <div className="flex items-center gap-1.5 min-[400px]:gap-3 no-drag">
+        <div className="flex items-center gap-1 min-[300px]:gap-1.5 min-[400px]:gap-3 no-drag">
 
           <div
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
@@ -180,7 +180,7 @@ export default function GlobalHeader() {
               }
             }}
           >
-            <div className="flex items-center justify-center w-8 h-8 hover:scale-110 transition-transform">
+            <div className="flex items-center justify-center w-7 h-7 min-[300px]:w-8 min-[300px]:h-8 hover:scale-110 transition-transform">
               <Image
                 src="/icon-sm.png"
                 alt="Chintu"
@@ -209,14 +209,14 @@ export default function GlobalHeader() {
           )}
 
           {isSignedIn && userCredits !== null && (
-            <div className="flex items-center gap-1 min-[400px]:gap-3 animate-in fade-in duration-300">
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
+            <div className="flex items-center gap-1 min-[300px]:gap-1.5 min-[400px]:gap-3 animate-in fade-in duration-300">
+              <div className="flex items-center gap-1 px-1.5 py-1 min-[300px]:px-2.5 min-[300px]:py-1.5 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
                 <div className="flex items-center gap-1">
-                  <Zap className="w-2.5 h-2.5 text-amber-500 fill-amber-500 inline shrink-0" />
-                  <span className="text-[10px] font-black text-[var(--text-main)]">{userCredits}</span>
+                  <Zap className="w-2 h-2 min-[300px]:w-2.5 min-[300px]:h-2.5 text-amber-500 fill-amber-500 inline shrink-0" />
+                  <span className="text-[9px] min-[300px]:text-[10px] font-black text-[var(--text-main)]">{userCredits}</span>
                 </div>
               </div>
-              <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border ${
+              <span className={`px-1.5 py-0.5 min-[300px]:px-2 min-[300px]:py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border hidden min-[300px]:inline-block ${
                 userPlan === 'elite'
                   ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                   : userPlan === 'pro'
@@ -238,7 +238,7 @@ export default function GlobalHeader() {
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 min-[450px]:gap-3 no-drag">
+        <div className="flex items-center gap-1 min-[300px]:gap-1.5 min-[450px]:gap-3 no-drag">
           {isScreenRecording && (
             <div className="flex items-center gap-1 min-[450px]:gap-1.5 px-1.5 min-[450px]:px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20 min-[400px]:mr-1 animate-pulse">
               <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />
@@ -250,7 +250,7 @@ export default function GlobalHeader() {
               <button
                 onClick={handleGhostToggle}
                 className={`
-                  w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90
+                  w-7 h-7 min-[300px]:w-8 min-[300px]:h-8 rounded-full flex items-center justify-center transition-all active:scale-90 shrink-0
                   ${isStealthMode
                     ? "bg-orange-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.4)]"
                     : "bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)]"
@@ -260,11 +260,11 @@ export default function GlobalHeader() {
                 title={isStealthMode ? "Exit Ghost Mode" : "Enter Ghost Mode"}
               >
                 {isStealthMode ? (
-                  <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg aria-hidden="true" className="w-3 h-3 min-[300px]:w-3.5 min-[300px]:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
                   </svg>
                 ) : (
-                  <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg aria-hidden="true" className="w-3 h-3 min-[300px]:w-3.5 min-[300px]:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -273,16 +273,16 @@ export default function GlobalHeader() {
               <button
                 onClick={handleMinimize}
                 aria-label="Minimize Window"
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
+                className="w-7 h-7 min-[300px]:w-8 min-[300px]:h-8 rounded-full flex items-center justify-center bg-[var(--input-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90 shrink-0"
               >
-                <Minus aria-hidden="true" className="w-3.5 h-3.5" />
+                <Minus aria-hidden="true" className="w-3 min-[300px]:w-3.5 min-[300px]:h-3.5" />
               </button>
             </>
           )}
 
           {isSignedIn && (
             <>
-              <div className="flex items-center ml-1 no-drag scale-105 hover:scale-110 transition-transform">
+              <div className="flex items-center ml-0.5 min-[300px]:ml-1 no-drag scale-95 min-[300px]:scale-105 hover:scale-110 transition-transform shrink-0">
                 <SyncedUserButton />
               </div>
             </>
