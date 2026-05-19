@@ -16,12 +16,6 @@ const ConfirmationMessage = dynamic(() => import('@/components/animata/feature-c
 import { useThemeToggle } from "@/hooks/useThemeToggle";
 const SyncedUserButton = dynamic(() => import('@/components/SyncedUserButton'), { ssr: false });
 // import { StripeCheckoutButton } from "@/components/StripeCheckoutButton";
-
-
-
-
-
-
 const PLANS = [
   {
     id: "free",
@@ -51,6 +45,7 @@ const PLANS = [
       "Theme Toggle",
       "Screen Recording",
       "Universal Shortcuts",
+      "Resume Tailoring",
     ],
     cta: "Included",
     disabled: true,

@@ -240,36 +240,36 @@ export default function ProfileModal({
 
   return (
     <div className="fixed inset-0 settings-overlay z-[9999] flex items-center justify-center p-2 sm:p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
-      <div className="settings-panel w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 bg-[var(--panel-bg)] backdrop-filter blur(32px) border border-[var(--glass-border)] rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.3)]" onClick={e => e.stopPropagation()}>
+      <div className="settings-panel w-full max-w-md max-h-[90vh] overflow-y-auto p-3 sm:p-6 bg-[var(--panel-bg)] backdrop-filter blur(32px) border border-[var(--glass-border)] rounded-2xl sm:rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.3)]" onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
-            <h2 className="text-xl font-black text-[var(--text-main)] uppercase tracking-tight">
+            <h2 className="text-base sm:text-xl font-black text-[var(--text-main)] uppercase tracking-tight">
               {profile ? "👤 Your Profile" : "👤 Setup Profile"}
             </h2>
-            <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.2em] mt-1">Personalized Intelligence</p>
+            <p className="text-[9px] sm:text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.2em] mt-0.5 sm:mt-1">Personalized Intelligence</p>
           </div>
-          <button onClick={onClose} className="w-10 h-10 rounded-2xl bg-[var(--glass-bg)] text-[var(--text-dim)] flex items-center justify-center hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          <button onClick={onClose} className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--glass-bg)] text-[var(--text-dim)] flex items-center justify-center hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs px-4 py-3 rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-top-2">
-            <span className="font-bold">{error}</span>
-            <button onClick={() => setError("")} className="ml-2 text-red-500/40 hover:text-red-400 transition-colors">✕</button>
+          <div className="mb-3 sm:mb-4 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] sm:text-xs px-2 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+            <span className="font-bold truncate">{error}</span>
+            <button onClick={() => setError("")} className="ml-2 text-red-500/40 hover:text-red-400 transition-colors shrink-0">✕</button>
           </div>
         )}
 
         {/* No profile — show paste area */}
         {!profile && !editMode && (
-          <div className="space-y-4 animate-in fade-in duration-500">
-            <p className="text-xs text-[var(--text-dim)] leading-relaxed font-medium">Paste your resume, LinkedIn summary, or a brief bio. Our AI will structure it into your profile.</p>
+          <div className="space-y-3 sm:space-y-4 animate-in fade-in duration-500">
+            <p className="text-[10px] sm:text-xs text-[var(--text-dim)] leading-relaxed font-medium">Paste your resume, LinkedIn summary, or a brief bio. Our AI will structure it into your profile.</p>
             <textarea
               value={rawText}
               onChange={e => setRawText(e.target.value)}
               placeholder="Experience, projects, skills... Paste it all here."
-              className="w-full h-48 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-sm text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all resize-none font-medium"
+              className="w-full h-32 sm:h-48 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl sm:rounded-2xl px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all resize-none font-medium"
             />
             <button
               onClick={handleRefine}
@@ -286,17 +286,17 @@ export default function ProfileModal({
 
         {/* Edit mode */}
         {editMode && (
-          <div className="space-y-4 animate-in fade-in">
-            <div className="flex bg-[var(--input-bg)] p-1 rounded-xl">
+          <div className="space-y-3 sm:space-y-4 animate-in fade-in">
+            <div className="flex bg-[var(--input-bg)] p-1 rounded-lg sm:rounded-xl">
               <button
                 onClick={() => setEditJson("")}
-                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${!editJson.startsWith('{') ? 'bg-[var(--glass-bg)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-dim)] hover:text-[var(--text-main)]'}`}
+                className={`flex-1 py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-md sm:rounded-lg transition-all ${!editJson.startsWith('{') ? 'bg-[var(--glass-bg)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-dim)] hover:text-[var(--text-main)]'}`}
               >
                 Free Text
               </button>
               <button
                 onClick={() => setEditJson(JSON.stringify(profile, null, 2))}
-                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${editJson.startsWith('{') ? 'bg-[var(--glass-bg)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-dim)] hover:text-[var(--text-main)]'}`}
+                className={`flex-1 py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-md sm:rounded-lg transition-all ${editJson.startsWith('{') ? 'bg-[var(--glass-bg)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-dim)] hover:text-[var(--text-main)]'}`}
               >
                 JSON
               </button>
@@ -306,57 +306,57 @@ export default function ProfileModal({
               value={editJson.startsWith('{') ? editJson : rawText}
               onChange={e => editJson.startsWith('{') ? setEditJson(e.target.value) : setRawText(e.target.value)}
               placeholder={editJson.startsWith('{') ? "Edit JSON directly..." : "Paste new experience, skills, etc. AI will merge it."}
-              className={`w-full h-80 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all resize-none ${editJson.startsWith('{') ? 'font-mono text-[var(--text-main)]' : 'text-[var(--text-main)] font-medium'}`}
+              className={`w-full h-48 sm:h-80 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl sm:rounded-2xl px-2 sm:px-4 py-2 sm:py-3 text-[10px] sm:text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all resize-none ${editJson.startsWith('{') ? 'font-mono text-[var(--text-main)]' : 'text-[var(--text-main)] font-medium'}`}
             />
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <button
                 onClick={editJson.startsWith('{') ? handleSaveEdit : handleRefine}
                 disabled={(!editJson.startsWith('{') && !rawText.trim()) || isRefining}
-                className="flex-1 py-3.5 bg-teal-600 hover:bg-teal-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-teal-600/20 active:scale-95 disabled:opacity-50"
+                className="flex-1 py-2.5 sm:py-3.5 bg-teal-600 hover:bg-teal-500 text-white rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-teal-600/20 active:scale-95 disabled:opacity-50"
               >
                 {isRefining ? "Optimizing..." : "Save Changes"}
               </button>
-              <button onClick={() => setEditMode(false)} className="flex-1 py-3.5 bg-[var(--glass-bg)] hover:bg-black/10 text-[var(--text-dim)] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-[var(--glass-border)]">Cancel</button>
+              <button onClick={() => setEditMode(false)} className="flex-1 py-2.5 sm:py-3.5 bg-[var(--glass-bg)] hover:bg-black/10 text-[var(--text-dim)] rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-[var(--glass-border)]">Cancel</button>
             </div>
           </div>
         )}
 
         {/* Profile display */}
         {profile && !editMode && (
-          <div className="space-y-6 animate-in fade-in duration-500">
+          <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-500">
             {/* Name & Title */}
-            <div className="bg-gradient-to-br from-white/10 to-transparent rounded-2xl px-5 py-4 border border-[var(--glass-border)]">
-              <h3 className="text-xl font-black text-[var(--text-main)] uppercase tracking-tight leading-none mb-1">{profile.name || "—"}</h3>
-              {profile.title && <p className="text-xs text-teal-400 font-black uppercase tracking-widest mb-2">{profile.title}</p>}
-              {profile.summary && <p className="text-xs text-[var(--text-dim)] leading-relaxed font-medium">{profile.summary}</p>}
+            <div className="bg-gradient-to-br from-white/10 to-transparent rounded-xl sm:rounded-2xl px-3 sm:px-5 py-2.5 sm:py-4 border border-[var(--glass-border)]">
+              <h3 className="text-base sm:text-xl font-black text-[var(--text-main)] uppercase tracking-tight leading-none mb-0.5 sm:mb-1">{profile.name || "—"}</h3>
+              {profile.title && <p className="text-[10px] sm:text-xs text-teal-400 font-black uppercase tracking-widest mb-1 sm:mb-2">{profile.title}</p>}
+              {profile.summary && <p className="text-[10px] sm:text-xs text-[var(--text-dim)] leading-relaxed font-medium">{profile.summary}</p>}
             </div>
 
             {/* Job Description Subsection */}
-            <div className="space-y-2 pt-2">
+            <div className="space-y-1.5 sm:space-y-2 pt-1 sm:pt-2">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">📝 Job Description</p>
+                <p className="text-[9px] sm:text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">📝 Job Description</p>
                 {userPlan !== "free" && savedJd && !isEditingJd && (
-                  <div className="flex gap-2">
-                    <button onClick={() => setIsEditingJd(true)} className="text-[9px] font-black text-teal-400 hover:text-teal-600 uppercase tracking-widest">Edit</button>
-                    <button onClick={handleDeleteJd} className="text-[9px] font-black text-red-400 hover:text-red-600 uppercase tracking-widest">Delete</button>
+                  <div className="flex gap-1.5 sm:gap-2">
+                    <button onClick={() => setIsEditingJd(true)} className="text-[8px] sm:text-[9px] font-black text-teal-400 hover:text-teal-600 uppercase tracking-widest">Edit</button>
+                    <button onClick={handleDeleteJd} className="text-[8px] sm:text-[9px] font-black text-red-400 hover:text-red-600 uppercase tracking-widest">Delete</button>
                   </div>
                 )}
               </div>
 
-              <div className="bg-[var(--input-bg)] rounded-2xl p-4 border border-[var(--glass-border)] group relative">
+              <div className="bg-[var(--input-bg)] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 border border-[var(--glass-border)] group relative">
                 {isEditingJd ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     <textarea
                       value={jdText}
                       onChange={e => setJdText(e.target.value)}
-                      className="w-full h-32 bg-black/20 border border-[var(--glass-border)] rounded-xl p-3 text-xs text-[var(--text-main)] focus:outline-none focus:ring-1 focus:ring-teal-500/50 resize-none font-medium"
+                      className="w-full h-24 sm:h-32 bg-black/20 border border-[var(--glass-border)] rounded-lg sm:rounded-xl p-2 sm:p-3 text-[10px] sm:text-xs text-[var(--text-main)] focus:outline-none focus:ring-1 focus:ring-teal-500/50 resize-none font-medium"
                       placeholder="Paste Job Description..."
                     />
                     <div className="flex gap-2">
                       <button
                         onClick={handleSaveJd}
                         disabled={isSavingJd}
-                        className="flex-1 py-2 bg-teal-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-teal-500 transition-all disabled:opacity-50"
+                        className="flex-1 py-1.5 sm:py-2 bg-teal-600 text-white rounded-md sm:rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest hover:bg-teal-500 transition-all disabled:opacity-50"
                       >
                         {isSavingJd ? "Saving..." : "Save JD"}
                       </button>
@@ -365,14 +365,14 @@ export default function ProfileModal({
                           setIsEditingJd(false);
                           setJdText(savedJd);
                         }}
-                        className="px-4 py-2 bg-white/5 text-[var(--text-dim)] rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/5 text-[var(--text-dim)] rounded-md sm:rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
                       >
                         Cancel
                       </button>
                     </div>
                   </div>
                 ) : savedJd ? (
-                  <p className="text-xs text-[var(--text-dim)] leading-relaxed font-medium line-clamp-4">
+                  <p className="text-[10px] sm:text-xs text-[var(--text-dim)] leading-relaxed font-medium line-clamp-4">
                     {savedJd}
                   </p>
                 ) : (
@@ -382,8 +382,8 @@ export default function ProfileModal({
                 )}
 
                 {userPlan === "free" && savedJd && (
-                  <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px] rounded-2xl">
-                    <p className="text-[9px] font-black text-teal-400 uppercase tracking-widest bg-black/80 px-3 py-1.5 rounded-lg border border-teal-500/30">
+                  <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px] rounded-xl sm:rounded-2xl">
+                    <p className="text-[8px] sm:text-[9px] font-black text-teal-400 uppercase tracking-widest bg-black/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg border border-teal-500/30">
                       Starter Limit: One-time fill
                     </p>
                   </div>
@@ -391,7 +391,7 @@ export default function ProfileModal({
               </div>
 
               {userPlan === "free" && (
-                <p className="text-[8px] font-bold text-[var(--text-dim)]/40 uppercase tracking-widest mt-1 ml-1 leading-relaxed">
+                <p className="text-[7px] sm:text-[8px] font-bold text-[var(--text-dim)]/40 uppercase tracking-widest mt-1 ml-1 leading-relaxed">
                   Upgrade to Pro to edit or delete your Job Description.
                 </p>
               )}
@@ -399,14 +399,14 @@ export default function ProfileModal({
 
             {/* Experience */}
             {profile.experience?.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">💼 Experience</p>
+              <div className="space-y-1.5 sm:space-y-2">
+                <p className="text-[9px] sm:text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">💼 Experience</p>
                 {profile.experience.map((exp, i) => (
-                  <div key={i} className="bg-[var(--input-bg)] rounded-2xl px-4 py-3 border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] transition-colors group">
-                    <p className="text-sm font-bold text-[var(--text-main)]">{exp.role}</p>
-                    <p className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-widest mt-0.5">{exp.company} • {exp.duration}</p>
+                  <div key={i} className="bg-[var(--input-bg)] rounded-xl sm:rounded-2xl px-2.5 sm:px-4 py-2 sm:py-3 border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] transition-colors group">
+                    <p className="text-xs sm:text-sm font-bold text-[var(--text-main)]">{exp.role}</p>
+                    <p className="text-[9px] sm:text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-widest mt-0.5">{exp.company} • {exp.duration}</p>
                     {exp.highlights?.map((h, j) => (
-                      <p key={j} className="text-xs text-[var(--text-dim)] mt-1 leading-relaxed">• {h}</p>
+                      <p key={j} className="text-[10px] sm:text-xs text-[var(--text-dim)] mt-1 leading-relaxed">• {h}</p>
                     ))}
                   </div>
                 ))}
@@ -415,12 +415,12 @@ export default function ProfileModal({
 
             {/* Projects */}
             {profile.projects?.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">🚀 Projects</p>
+              <div className="space-y-1.5 sm:space-y-2">
+                <p className="text-[9px] sm:text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">🚀 Projects</p>
                 {profile.projects.map((pr, i) => (
-                  <div key={i} className="bg-[var(--input-bg)] rounded-2xl px-4 py-3 border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] transition-colors">
-                    <p className="text-sm font-bold text-[var(--text-main)]">{pr.name}</p>
-                    <p className="text-xs text-[var(--text-dim)] mt-0.5 mb-2">{pr.description}</p>
+                  <div key={i} className="bg-[var(--input-bg)] rounded-xl sm:rounded-2xl px-2.5 sm:px-4 py-2 sm:py-3 border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] transition-colors">
+                    <p className="text-xs sm:text-sm font-bold text-[var(--text-main)]">{pr.name}</p>
+                    <p className="text-[10px] sm:text-xs text-[var(--text-dim)] mt-0.5 mb-1 sm:mb-2">{pr.description}</p>
                     {pr.tech?.length > 0 && <div className="flex flex-wrap">{pr.tech.map((t, j) => <SkillTag key={j} text={t} />)}</div>}
                   </div>
                 ))}
@@ -429,9 +429,9 @@ export default function ProfileModal({
 
             {/* Skills */}
             {profile.skills && (
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">Skills</p>
-                <div className="bg-[var(--input-bg)] rounded-2xl px-4 py-4 border border-[var(--glass-border)]">
+              <div className="space-y-1.5 sm:space-y-2">
+                <p className="text-[9px] sm:text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">Skills</p>
+                <div className="bg-[var(--input-bg)] rounded-xl sm:rounded-2xl px-2.5 sm:px-4 py-2.5 sm:py-4 border border-[var(--glass-border)]">
                   {[
                     profile.skills.languages,
                     profile.skills.frameworks,
@@ -450,63 +450,63 @@ export default function ProfileModal({
 
             {/* Education */}
             {profile.education?.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">🎓 Education</p>
+              <div className="space-y-1.5 sm:space-y-2">
+                <p className="text-[9px] sm:text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">🎓 Education</p>
                 {profile.education.map((ed, i) => (
-                  <div key={i} className="bg-[var(--input-bg)] rounded-2xl px-4 py-3 border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] transition-colors">
-                    <p className="text-sm font-bold text-[var(--text-main)]">{ed.degree}</p>
-                    <p className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-widest mt-0.5">{ed.institution} • {ed.year}</p>
+                  <div key={i} className="bg-[var(--input-bg)] rounded-xl sm:rounded-2xl px-2.5 sm:px-4 py-2 sm:py-3 border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] transition-colors">
+                    <p className="text-xs sm:text-sm font-bold text-[var(--text-main)]">{ed.degree}</p>
+                    <p className="text-[9px] sm:text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-widest mt-0.5">{ed.institution} • {ed.year}</p>
                   </div>
                 ))}
               </div>
             )}
 
             {/* Support & Guide Section */}
-            <div className="pt-4 border-t border-[var(--glass-border)] space-y-3">
-              <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">Support & Guide</p>
-              <div className="grid grid-cols-2 gap-3">
+            <div className="pt-2.5 sm:pt-4 border-t border-[var(--glass-border)] space-y-2 sm:space-y-3">
+              <p className="text-[9px] sm:text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">Support & Guide</p>
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <button
                   onClick={() => {
                     const supportUrl = "https://www.getchintu.com/support";
                     if (isElectron) (window as any).electronAPI.openExternal(supportUrl);
                     else window.open(supportUrl, "_blank");
                   }}
-                  className="flex items-center justify-center gap-2 py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-[var(--glass-border)]"
+                  className="flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all border border-[var(--glass-border)]"
                 >
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                  <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                   Support
                 </button>
                 <button
                   onClick={() => {
                     setShowGuide(true);
                   }}
-                  className="flex items-center justify-center gap-2 py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-[var(--glass-border)]"
+                  className="flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all border border-[var(--glass-border)]"
                 >
-                  <Sparkles className="w-3 h-3" />
-                  Operation Guide
+                  <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                  Guide
                 </button>
               </div>
             </div>
 
             {/* Action buttons */}
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-2 sm:gap-3 pt-1 sm:pt-2">
               <button
                 onClick={handleEdit}
                 disabled={userPlan === "free"}
-                className={`flex-1 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-[var(--glass-border)] ${userPlan === "free" ? "bg-gray-100/50 text-gray-300 cursor-not-allowed" : "bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] active:scale-95"}`}
+                className={`flex-1 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all border border-[var(--glass-border)] ${userPlan === "free" ? "bg-gray-100/50 text-gray-300 cursor-not-allowed" : "bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] active:scale-95"}`}
               >
                 ✏️ Edit
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={userPlan === "free"}
-                className={`flex-1 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-red-500/10 ${userPlan === "free" ? "bg-red-500/5 text-red-500/20 cursor-not-allowed" : "bg-red-500/10 hover:bg-red-500/20 text-red-400"}`}
+                className={`flex-1 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-red-500/10 ${userPlan === "free" ? "bg-red-500/5 text-red-500/20 cursor-not-allowed" : "bg-red-500/10 hover:bg-red-500/20 text-red-400"}`}
               >
-                🗑 Clear Profile
+                🗑 Clear
               </button>
             </div>
             {userPlan === "free" && (
-              <div className="mt-4 bg-teal-600/10 border border-teal-600/20 rounded-2xl p-4 text-center">
+              <div className="mt-3 sm:mt-4 bg-teal-600/10 border border-teal-600/20 rounded-xl sm:rounded-2xl p-2.5 sm:p-4 text-center">
                 <p className="text-[10px] font-black text-teal-400 uppercase tracking-widest mb-2 leading-relaxed">Unlock editing & more features</p>
                 <button
                   onClick={async () => {

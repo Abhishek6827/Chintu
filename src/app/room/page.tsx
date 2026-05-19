@@ -1476,23 +1476,23 @@ export default function RoomPage() {
 
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed top-12 left-4 right-4 z-[9999] animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="fixed top-10 sm:top-12 left-2 sm:left-4 right-2 sm:right-4 z-[9999] animate-in fade-in slide-in-from-top-4 duration-500">
           <div className={`
-            rounded-2xl px-4 py-3 shadow-2xl backdrop-blur-xl border flex items-center justify-between gap-3
+            rounded-xl sm:rounded-2xl px-2 sm:px-4 py-2 sm:py-3 shadow-2xl backdrop-blur-xl border flex items-center justify-between gap-2 sm:gap-3
             ${toast.type === 'success'
               ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
               : 'bg-teal-500/10 border-teal-500/20 text-teal-400'}
           `}>
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${toast.type === 'success' ? 'bg-emerald-500/20' : 'bg-teal-500/20'}`}>
-                {toast.type === 'success' ? <Check className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 ${toast.type === 'success' ? 'bg-emerald-500/20' : 'bg-teal-500/20'}`}>
+                {toast.type === 'success' ? <Check className="w-3 h-3 sm:w-4 sm:h-4" /> : <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />}
               </div>
-              <p className="text-[10px] font-bold leading-tight truncate">
+              <p className="text-[9px] sm:text-[10px] font-bold leading-tight truncate">
                 {toast.message}
               </p>
             </div>
-            <button onClick={() => setToast(null)} className="opacity-50 hover:opacity-100 transition-opacity">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            <button onClick={() => setToast(null)} className="opacity-50 hover:opacity-100 transition-opacity shrink-0">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
         </div>
@@ -1503,7 +1503,7 @@ export default function RoomPage() {
 
       {/* Floating Status Indicator */}
       {(status !== "idle" || liveTranscript) && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 w-auto px-5 py-2 rounded-full flex items-center gap-2.5 animate-in fade-in slide-in-from-top-4 duration-500 status-glow" style={{ background: 'var(--panel-bg)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+        <div className="absolute top-12 sm:top-16 left-1/2 -translate-x-1/2 z-40 w-auto px-3 sm:px-5 py-1.5 sm:py-2 rounded-full flex items-center gap-2 sm:gap-2.5 animate-in fade-in slide-in-from-top-4 duration-500 status-glow" style={{ background: 'var(--panel-bg)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
           {status === "generating" ? (
             <div className="flex items-center gap-1">
               <div className="w-1.5 h-1.5 rounded-full bg-teal-400 wave-dot" />
@@ -1513,8 +1513,8 @@ export default function RoomPage() {
           ) : (
             <div className={`w-2 h-2 rounded-full ${status === "recording" ? "bg-red-400 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" : "bg-emerald-400 animate-ping"}`} />
           )}
-          <p className="text-[10px] font-bold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-dim)' }}>
-            {status === "recording" ? "Recording..." : status === "generating" ? "Thinking this through..." : "Ready"}
+          <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-dim)' }}>
+            {status === "recording" ? "Recording..." : status === "generating" ? "Thinking..." : "Ready"}
           </p>
         </div>
       )}
@@ -1523,8 +1523,8 @@ export default function RoomPage() {
 
       {/* Live transcript */}
       {status === "recording" && liveTranscript && (
-        <div className="px-4 pb-2">
-          <div className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-2 text-[var(--text-dim)] text-sm italic">
+        <div className="px-2 sm:px-4 pb-2">
+          <div className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-lg sm:rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 text-[var(--text-dim)] text-[11px] sm:text-sm italic">
             &quot;{liveTranscript}&quot;
           </div>
         </div>
@@ -1532,15 +1532,15 @@ export default function RoomPage() {
 
       {/* AI Speech bubbles */}
       {aiSpeechBubbles.length > 0 && (
-        <div className="px-4 pb-2">
-          <div className="ai-speech-container rounded-xl px-4 py-2">
-            <div className="flex items-center gap-1.5 mb-1">
-              <svg className="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 24 24">
+        <div className="px-2 sm:px-4 pb-2">
+          <div className="ai-speech-container rounded-lg sm:rounded-xl px-2 sm:px-4 py-1.5 sm:py-2">
+            <div className="flex items-center gap-1.5 mb-0.5 sm:mb-1">
+              <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
               </svg>
-              <span className="text-[0.625rem] text-cyan-400 font-semibold uppercase tracking-wider">Chintu Expert</span>
+              <span className="text-[10px] sm:text-[0.625rem] text-cyan-400 font-semibold uppercase tracking-wider">Chintu Expert</span>
             </div>
-            <p className="text-[0.8125rem] text-[var(--text-main)] opacity-90 leading-relaxed">
+            <p className="text-[11px] sm:text-[0.8125rem] text-[var(--text-main)] opacity-90 leading-relaxed">
               {aiSpeechBubbles[aiSpeechBubbles.length - 1]}
             </p>
           </div>
@@ -1549,14 +1549,14 @@ export default function RoomPage() {
 
       {/* Vision history indicator */}
       {visionConversationHistory.length > 0 && (
-        <div className="px-4 pb-1">
-          <div className="flex items-center justify-between bg-cyan-500/10 border border-cyan-500/20 rounded-xl px-3 py-1.5">
-            <span className="text-[0.625rem] text-cyan-400 font-medium">
-              📸 {visionConversationHistory.length / 2} previous screenshot exchange{visionConversationHistory.length / 2 > 1 ? "s" : ""} in memory
+        <div className="px-2 sm:px-4 pb-1">
+          <div className="flex items-center justify-between bg-cyan-500/10 border border-cyan-500/20 rounded-lg sm:rounded-xl px-2 sm:px-3 py-1 sm:py-1.5">
+            <span className="text-[10px] sm:text-[0.625rem] text-cyan-400 font-medium">
+              📸 {visionConversationHistory.length / 2} exchange{visionConversationHistory.length / 2 > 1 ? "s" : ""}
             </span>
             <button
               onClick={() => setVisionConversationHistory([])}
-              className="text-[0.625rem] text-cyan-400/60 hover:text-cyan-400 transition-colors"
+              className="text-[10px] sm:text-[0.625rem] text-cyan-400/60 hover:text-cyan-400 transition-colors"
             >
               Clear
             </button>
@@ -1566,14 +1566,18 @@ export default function RoomPage() {
 
       {/* Auto-update notification */}
       {updateStatus && (
-        <div className="px-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
-          <div className={`rounded-xl px-4 py-3 text-xs flex items-center justify-between border ${updateStatus.status === "error"
+        <div className="px-2 sm:px-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className={`rounded-lg sm:rounded-xl px-2 sm:px-4 py-2 sm:py-3 text-[10px] sm:text-xs flex items-center justify-between border ${updateStatus.status === "error"
             ? "bg-red-500/10 border-red-500/20 text-red-600"
             : updateStatus.status === "checking"
               ? "bg-teal-500/10 border-teal-500/20 text-teal-600"
-              : updateStatus.status === "up-to-date"
-                ? "bg-green-500/10 border-green-500/20 text-green-600"
-                : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"
+              : updateStatus.status === "downloading"
+                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"
+                : updateStatus.status === "ready"
+                  ? "bg-amber-500/10 border-amber-500/20 text-amber-600"
+                  : updateStatus.status === "up-to-date"
+                    ? "bg-teal-500/10 border-teal-500/20 text-teal-600"
+                    : "bg-gray-500/10 border-gray-500/20 text-gray-600"
             }`}>
             {updateStatus.status === "checking" ? (
               <span className="flex items-center gap-2">
@@ -1671,58 +1675,58 @@ export default function RoomPage() {
 
       {/* Background Profile Refining Indicator */}
       {isBackgroundRefining && (
-        <div className="px-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
-          <div className="bg-teal-500/10 border border-teal-500/20 text-teal-600 rounded-xl px-4 py-3 text-xs flex items-center justify-between shadow-[0_0_15px_rgba(20,184,166,0.15)]">
-            <div className="flex items-center gap-3">
-              <div className="flex gap-1">
+        <div className="px-2 sm:px-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="bg-teal-500/10 border border-teal-500/20 text-teal-600 rounded-lg sm:rounded-xl px-2 sm:px-4 py-2 sm:py-3 text-[10px] sm:text-xs flex items-center justify-between shadow-[0_0_15px_rgba(20,184,166,0.15)]">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="flex gap-1 shrink-0">
                 <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: "0ms" }}></div>
                 <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
                 <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "300ms" }}></div>
               </div>
-              <span className="font-bold tracking-tight">Chintu Ji is optimizing your profile in the background...</span>
+              <span className="font-bold tracking-tight truncate">Optimizing profile...</span>
             </div>
-            <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Almost Done</span>
+            <span className="text-[8px] sm:text-[10px] uppercase font-black tracking-widest opacity-60 shrink-0">Almost Done</span>
           </div>
         </div>
       )}
 
       {/* Payment Processing Indicator */}
       {isPaymentProcessing && (
-        <div className="px-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
-          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-xl px-4 py-3 text-xs flex items-center justify-between shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-            <div className="flex items-center gap-3">
-              <div className="w-4 h-4 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
-              <span className="font-bold tracking-tight">Verifying your payment and unlocking premium features...</span>
+        <div className="px-2 sm:px-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-lg sm:rounded-xl px-2 sm:px-4 py-2 sm:py-3 text-[10px] sm:text-xs flex items-center justify-between shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin shrink-0" />
+              <span className="font-bold tracking-tight truncate">Verifying payment...</span>
             </div>
-            <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Security Check</span>
+            <span className="text-[8px] sm:text-[10px] uppercase font-black tracking-widest opacity-60 shrink-0">Security Check</span>
           </div>
         </div>
       )}
 
       {/* Payment Success Screen */}
       {showSuccessScreen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-6 animate-in fade-in duration-500">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-6 animate-in fade-in duration-500">
           <div className="w-full max-w-sm">
             <PremiumWelcome plan={userPlan} />
-            <p className="text-center text-white/40 text-[10px] font-black uppercase tracking-[0.2em] mt-6 animate-pulse">Initializing Premium Protocols...</p>
+            <p className="text-center text-white/40 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] mt-4 sm:mt-6 animate-pulse">Initializing Premium Protocols...</p>
           </div>
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <div className="px-4 pb-2">
+        <div className="px-2 sm:px-4 pb-2">
           <div className={`
-            rounded-xl px-4 py-2 text-xs flex items-center justify-between border
+            rounded-lg sm:rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs flex items-center justify-between border
             ${isLightMode
               ? "bg-red-50 text-red-600 border-red-200"
               : "bg-red-500/20 text-red-200 border-red-500/30"}
           `}>
-            <span>{error}</span>
+            <span className="truncate">{error}</span>
             <button onClick={() => {
               setError(null);
               if (isElectron) (window as any).electronAPI.log(`User cleared error: ${error}`);
-            }} className={`${isLightMode ? "text-red-400" : "text-red-300"} ml-2 hover:scale-110 transition-transform`}>✕</button>
+            }} className={`${isLightMode ? "text-red-400" : "text-red-300"} ml-2 hover:scale-110 transition-transform shrink-0`}>✕</button>
           </div>
         </div>
       )}
@@ -1741,22 +1745,21 @@ export default function RoomPage() {
       {/* Screenshot preview strip */}
       {capturedScreenshots.length > 0 && (
         <div className="px-2 sm:px-4 pb-2 shrink-0">
-          <div className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-cyan-300 text-xs font-medium">📸 {capturedScreenshots.length}/20 screenshot{capturedScreenshots.length > 1 ? "s" : ""}</span>
+          <div className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl sm:rounded-2xl p-2 sm:p-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+              <span className="text-cyan-300 text-[10px] sm:text-xs font-medium">📸 {capturedScreenshots.length}/20</span>
               <div className="flex-1" />
               <button
                 onClick={sendScreenshots}
                 disabled={status !== "idle"}
-                className="text-white text-xs px-3 py-1 rounded-lg bg-cyan-600/80 font-medium disabled:opacity-50"
+                className="text-white text-[10px] sm:text-xs px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-cyan-600/80 font-medium disabled:opacity-50"
               >
                 Analyze
               </button>
             </div>
-            <div className="flex gap-2 overflow-x-auto">
+            <div className="flex gap-1.5 sm:gap-2 overflow-x-auto">
               {capturedScreenshots.map((img, i) => (
-                <div key={i} className="relative shrink-0 w-24 h-16 rounded-lg overflow-hidden border border-white/10">
-                  <Image src={img} alt={`Screenshot ${i + 1}`} fill unoptimized className="object-cover" />
+                <div key={i} className="relative shrink-0 w-16 h-10 sm:w-24 sm:h-16 rounded-md sm:rounded-lg overflow-hidden border border-white/10">
                   <button
                     onClick={() => removeScreenshot(i)}
                     className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 rounded-full text-white text-[0.5rem] flex items-center justify-center"
@@ -1772,14 +1775,21 @@ export default function RoomPage() {
 
       {/* Text Input Row */}
       <div className="px-2 sm:px-4 pb-2 shrink-0">
-        <div className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-2xl focus-within:border-teal-400/50 focus-within:bg-[var(--glass-bg)] transition-all">
+        <div className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-xl sm:rounded-2xl focus-within:border-teal-400/50 focus-within:bg-[var(--glass-bg)] transition-all">
           {/* Inline selectors row */}
-          <div className="flex items-center gap-2 px-2 pt-2 flex-wrap">
+          <div className="flex items-center gap-1 sm:gap-2 px-1.5 sm:px-2 pt-1.5 sm:pt-2 flex-wrap">
             <CustomDropdown
-              options={MODELS.map(m => ({
-                ...m,
-                locked: userPlan === 'free' && m.key !== 'llama-3.3-70b'
-              }))}
+              options={MODELS.map(m => {
+                const isFree = userPlan === 'free' || userPlan === null;
+                const isPro = userPlan === 'pro';
+                let locked = false;
+                if (isFree) {
+                  locked = m.key !== 'llama-3.3-70b';
+                } else if (isPro) {
+                  locked = m.key === 'qwen3.6';
+                }
+                return { ...m, locked };
+              })}
               value={selectedModel}
               onChange={(val) => {
                 setSelectedModel(val as ModelKey);
@@ -1815,17 +1825,17 @@ export default function RoomPage() {
                   }
                 }
               }}
-              placeholder={capturedScreenshots.length > 0 ? "Add context (optional) then press Enter..." : "Ask a question or type..."}
-              className="w-full bg-transparent px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder-[var(--text-dim)] focus:outline-none pr-10 sm:pr-12 resize-none"
+              placeholder={capturedScreenshots.length > 0 ? "Add context (optional)..." : "Ask or type..."}
+              className="w-full bg-transparent px-2 sm:px-4 py-1.5 sm:py-2.5 text-[10px] sm:text-sm text-[var(--text-main)] placeholder-[var(--text-dim)] focus:outline-none pr-8 sm:pr-12 resize-none"
               rows={inputText.split('\n').length > 1 ? Math.min(inputText.split('\n').length, 5) : 1}
               disabled={status !== "idle"}
             />
             <button
               onClick={capturedScreenshots.length > 0 ? sendScreenshots : handleSendText}
               disabled={(capturedScreenshots.length === 0 && !inputText.trim()) || status !== "idle"}
-              className="absolute right-1.5 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg sm:rounded-xl bg-teal-500/80 text-white disabled:opacity-50"
+              className="absolute right-1 sm:right-2 w-5 h-5 sm:w-8 sm:h-8 flex items-center justify-center rounded-md sm:rounded-xl bg-teal-500/80 text-white disabled:opacity-50"
             >
-              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-2.5 h-2.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.125A59.769 59.769 0 0121.485 12 59.768 59.768 0 013.27 20.875L5.999 12Zm0 0h7.5" />
               </svg>
             </button>
@@ -1841,9 +1851,9 @@ export default function RoomPage() {
 
           <button
             onClick={() => setShowSettings(true)}
-            className="no-drag w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
+            className="no-drag w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-2xl flex items-center justify-center bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-main)] transition-all active:scale-90"
           >
-            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
           </button>
         </div>
 
@@ -1861,23 +1871,23 @@ export default function RoomPage() {
             setInputText("");
             setLiveTranscript("");
           }}
-          className="no-drag w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-red-500/20 hover:text-red-400 transition-all active:scale-90"
+          className="no-drag w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-2xl flex items-center justify-center bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-red-500/20 hover:text-red-400 transition-all active:scale-90"
         >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </button>
 
         {/* Premium Voice Mic Button */}
-        <div className="relative w-11 h-11 sm:w-14 sm:h-14 md:w-[60px] md:h-[60px] flex-shrink-0">
+        <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 flex-shrink-0">
           {/* Ambient outer glow */}
           <div
-            className="absolute inset-[-3px] sm:inset-[-4px] rounded-full animate-pulse pointer-events-none transition-opacity duration-300"
+            className="absolute inset-[-2px] sm:inset-[-3px] md:inset-[-4px] rounded-full animate-pulse pointer-events-none transition-opacity duration-300"
             style={{
               background: status === "recording"
                 ? 'radial-gradient(circle, rgba(239,68,68,0.30) 0%, rgba(220,38,38,0.10) 50%, transparent 70%)'
                 : status === "generating"
                   ? 'radial-gradient(circle, rgba(245,158,11,0.25) 0%, rgba(217,119,6,0.08) 50%, transparent 70%)'
                   : 'radial-gradient(circle, rgba(0,150,255,0.25) 0%, rgba(180,0,255,0.08) 50%, transparent 70%)',
-              filter: 'blur(10px)',
+              filter: 'blur(8px)',
               opacity: status === "recording" ? 0.6 : status === "generating" ? 0.5 : 0.4,
             }}
           />
@@ -1896,7 +1906,7 @@ export default function RoomPage() {
           <button
             onClick={status === "generating" ? stopGeneration : handleMicButton}
             disabled={!micReady}
-            className="no-drag absolute inset-[1px] sm:inset-[1.5px] rounded-full flex items-center justify-center transition-all duration-300 active:scale-95 overflow-hidden"
+            className="no-drag absolute inset-[1px] rounded-full flex items-center justify-center transition-all duration-300 active:scale-95 overflow-hidden"
             style={{
               backgroundImage: status === "recording"
                 ? 'linear-gradient(135deg, rgba(239,68,68,0.35) 0%, rgba(220,38,38,0.15) 20%, rgba(13,13,18,0.90) 40%, rgba(10,10,14,1) 60%, rgba(220,38,38,0.20) 80%, rgba(239,68,68,0.30) 100%)'
@@ -1928,12 +1938,12 @@ export default function RoomPage() {
             {/* Recording / Generating pulse rings */}
             {status === "recording" && (
               <>
-                <div className="absolute inset-[-2px] sm:inset-[-3px] rounded-full mic-pulse pointer-events-none" style={{ border: '1.5px solid rgba(239,68,68,0.4)' }} />
+                <div className="absolute inset-[-1px] sm:inset-[-2px] rounded-full mic-pulse pointer-events-none" style={{ border: '1.5px solid rgba(239,68,68,0.4)' }} />
                 <div className="absolute inset-0 rounded-full pointer-events-none" style={{ boxShadow: 'inset 0 0 12px rgba(239,68,68,0.15)' }} />
               </>
             )}
             {status === "generating" && (
-              <div className="absolute inset-[-2px] sm:inset-[-3px] rounded-full pointer-events-none animate-ping opacity-30" style={{ border: '1.5px solid rgba(245,158,11,0.5)' }} />
+              <div className="absolute inset-[-1px] sm:inset-[-2px] rounded-full pointer-events-none animate-ping opacity-30" style={{ border: '1.5px solid rgba(245,158,11,0.5)' }} />
             )}
 
             <div className="relative z-10 flex items-center justify-center">
@@ -1941,7 +1951,7 @@ export default function RoomPage() {
                 <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" style={{ color: 'rgba(255,255,255,0.92)' }} />
               ) : (
                 <Mic
-                  className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]"
+                  className="w-4 h-4 sm:w-[22px] sm:h-[22px]"
                   style={{ color: 'rgba(255,255,255,0.92)' }}
                   strokeWidth={1.5}
                 />
@@ -1961,7 +1971,7 @@ export default function RoomPage() {
             else startScreenRecording();
           }}
           className={`
-            no-drag w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all active:scale-90 relative
+            no-drag w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-2xl flex items-center justify-center transition-all active:scale-90 relative
             ${isScreenRecording
               ? "bg-red-500 text-white shadow-[0_0_30px_rgba(239,68,68,0.4)]"
               : "bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)]"
@@ -1975,7 +1985,7 @@ export default function RoomPage() {
             </div>
           ) : (
             <>
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
               </svg>
               {userPlan !== 'elite' && (
@@ -1993,14 +2003,14 @@ export default function RoomPage() {
             onClick={captureScreenshot}
             disabled={isCapturing || status === "generating"}
             className={`
-              no-drag w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center relative transition-all active:scale-90
+              no-drag w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-2xl flex items-center justify-center relative transition-all active:scale-90
               ${capturedScreenshots.length > 0
                 ? "bg-teal-500 text-white shadow-[0_0_30px_rgba(20,184,166,0.4)]"
                 : "bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)]"
               }
             `}
           >
-            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>
+            <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>
             {capturedScreenshots.length > 0 && (
               <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white text-teal-600 text-[10px] font-black rounded-full flex items-center justify-center shadow-lg">
                 {capturedScreenshots.length}
@@ -2016,15 +2026,15 @@ export default function RoomPage() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowSettings(false)}>
+        <div className="absolute inset-0 settings-overlay z-50 flex items-center justify-center p-2 sm:p-4 md:p-6" onClick={() => setShowSettings(false)}>
           <div
             className="settings-panel w-full relative"
             style={{
               maxWidth: 'clamp(140px, 95vw, 400px)',
-              padding: 'clamp(10px, 4vw, 24px)',
+              padding: 'clamp(8px, 3vw, 24px)',
               display: 'flex',
               flexDirection: 'column',
-              gap: 'clamp(10px, 4vw, 24px)'
+              gap: 'clamp(8px, 3vw, 24px)'
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -2042,22 +2052,22 @@ export default function RoomPage() {
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(6px, 2vh, 24px)' }}>
               {/* Theme Toggle */}
               <div
                 className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
-                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+                style={{ padding: 'clamp(6px, 2vw, 20px)' }}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-1.5 mb-0.5">
                       {isLightMode ? <Sun className="w-3 h-3 text-amber-500" /> : <Moon className="w-3 h-3 text-teal-400" />}
-                      <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest">Theme</h4>
+                      <h4 style={{ fontSize: 'clamp(5px, 1.2vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest">Theme</h4>
                       {userPlan === 'free' && (
-                        <span className="bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase px-1.5 py-0.5 rounded tracking-widest">PRO</span>
+                        <span className="bg-amber-500/20 text-amber-500 text-[7px] font-black uppercase px-1 py-0.5 rounded tracking-widest">PRO</span>
                       )}
                     </div>
-                    <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">Toggle dark/light mode</p>
+                    <p style={{ fontSize: 'clamp(6px, 1.2vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">Toggle dark/light mode</p>
                   </div>
                   <AnimatedThemeToggler
                     theme={isLightMode ? "light" : "dark"}
@@ -2076,16 +2086,16 @@ export default function RoomPage() {
               {/* Space Mode */}
               <div
                 className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
-                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+                style={{ padding: 'clamp(6px, 2vw, 20px)' }}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest">Input Strategy</h4>
-                  <div className="flex bg-[var(--input-bg)] rounded-xl p-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 style={{ fontSize: 'clamp(5px, 1.2vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest">Input Strategy</h4>
+                  <div className="flex bg-[var(--input-bg)] rounded-xl p-0.5">
                     <button
                       onClick={() => setSpaceMode("hold")}
                       className={`rounded-lg font-black uppercase tracking-widest transition-all ${spaceMode === "hold" ? "bg-[var(--text-main)] text-[var(--panel-bg)]" : "text-[var(--text-dim)]"
                         }`}
-                      style={{ fontSize: 'clamp(6px, 1.2vw, 9px)', padding: 'clamp(4px, 1vw, 10px) clamp(6px, 1.5vw, 16px)' }}
+                      style={{ fontSize: 'clamp(5px, 1vw, 9px)', padding: 'clamp(3px, 0.8vw, 10px) clamp(5px, 1.2vw, 16px)' }}
                     >
                       Hold
                     </button>
@@ -2093,13 +2103,13 @@ export default function RoomPage() {
                       onClick={() => setSpaceMode("toggle")}
                       className={`rounded-lg font-black uppercase tracking-widest transition-all ${spaceMode === "toggle" ? "bg-[var(--text-main)] text-[var(--panel-bg)]" : "text-[var(--text-dim)]"
                         }`}
-                      style={{ fontSize: 'clamp(6px, 1.2vw, 9px)', padding: 'clamp(4px, 1vw, 10px) clamp(6px, 1.5vw, 16px)' }}
+                      style={{ fontSize: 'clamp(5px, 1vw, 9px)', padding: 'clamp(3px, 0.8vw, 10px) clamp(5px, 1.2vw, 16px)' }}
                     >
                       Toggle
                     </button>
                   </div>
                 </div>
-                <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
+                <p style={{ fontSize: 'clamp(5px, 1.2vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
                   {spaceMode === "hold" ? "Hold space to speak, release to send" : "Tap space to start/stop recording"}
                 </p>
               </div>
@@ -2107,17 +2117,17 @@ export default function RoomPage() {
               {/* Universal Shortcuts Toggle */}
               <div
                 className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
-                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+                style={{ padding: 'clamp(6px, 2vw, 20px)' }}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <h4 style={{ fontSize: 'clamp(5px, 1.2vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-0.5 flex items-center gap-1.5">
                       Universal Keys
                       {userPlan !== 'elite' && (
-                        <span className="bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase px-1.5 py-0.5 rounded tracking-widest">ELITE</span>
+                        <span className="bg-amber-500/20 text-amber-500 text-[7px] font-black uppercase px-1 py-0.5 rounded tracking-widest">ELITE</span>
                       )}
                     </h4>
-                    <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
+                    <p style={{ fontSize: 'clamp(6px, 1.2vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
                       Use Space/Enter even in other apps
                     </p>
                   </div>
@@ -2136,13 +2146,14 @@ export default function RoomPage() {
                         setShowEnableUniversalShortcutsPrompt(true);
                       }
                     }}
-                    className={`w-9 h-5 rounded-full transition-all relative ${universalShortcuts ? "bg-teal-600" : "bg-gray-600/30"}`}
+                    className={`rounded-full transition-all relative ${universalShortcuts ? "bg-teal-600" : "bg-gray-600/30"}`}
+                    style={{ width: 'clamp(28px, 8vw, 36px)', height: 'clamp(16px, 4vw, 20px)' }}
                   >
-                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-md transition-all ${universalShortcuts ? "left-5" : "left-1"}`} />
+                    <div className={`absolute top-0.5 bg-white rounded-full shadow-md transition-all ${universalShortcuts ? "left-[calc(100%-14px)]" : "left-0.5"}`} style={{ width: 'clamp(10px, 3vw, 14px)', height: 'clamp(10px, 3vw, 14px)' }} />
                   </button>
                 </div>
                 {universalShortcuts && (
-                  <p className="mt-2 text-[8px] text-amber-400 font-bold uppercase tracking-widest leading-relaxed">
+                  <p className="mt-1.5 text-[7px] text-amber-400 font-bold uppercase tracking-widest leading-relaxed">
                     ⚠️ Space & Enter will be BLOCKED in other apps while this is ON.
                   </p>
                 )}
@@ -2151,15 +2162,15 @@ export default function RoomPage() {
               {/* Anti-Detection Click Toggle */}
               <div
                 className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)]"
-                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+                style={{ padding: 'clamp(6px, 2vw, 20px)' }}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <h4 style={{ fontSize: 'clamp(5px, 1.2vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-0.5 flex items-center gap-1.5">
                       Anti-Detection Click
-                      <span className="bg-emerald-500/20 text-emerald-400 text-[8px] font-black uppercase px-1.5 py-0.5 rounded tracking-widest">SAFE</span>
+                      <span className="bg-emerald-500/20 text-emerald-400 text-[7px] font-black uppercase px-1 py-0.5 rounded tracking-widest">SAFE</span>
                     </h4>
-                    <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
+                    <p style={{ fontSize: 'clamp(6px, 1.2vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
                       Click inside Chintu without browser focus loss
                     </p>
                   </div>
@@ -2171,14 +2182,15 @@ export default function RoomPage() {
                         setAntiDetection(true);
                       }
                     }}
-                    className={`w-9 h-5 rounded-full transition-all relative ${antiDetection ? "bg-emerald-600" : "bg-gray-600/30"}`}
+                    className={`rounded-full transition-all relative ${antiDetection ? "bg-emerald-600" : "bg-gray-600/30"}`}
+                    style={{ width: 'clamp(28px, 8vw, 36px)', height: 'clamp(16px, 4vw, 20px)' }}
                   >
-                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-md transition-all ${antiDetection ? "left-5" : "left-1"}`} />
+                    <div className={`absolute top-0.5 bg-white rounded-full shadow-md transition-all ${antiDetection ? "left-[calc(100%-14px)]" : "left-0.5"}`} style={{ width: 'clamp(10px, 3vw, 14px)', height: 'clamp(10px, 3vw, 14px)' }} />
                   </button>
                 </div>
                 {antiDetection && (
-                  <p className="mt-2 text-[8px] text-emerald-400 font-bold uppercase tracking-widest leading-relaxed animate-pulse">
-                    ✔ Anti-Blur Active. Click and scroll are safe. Keyboard typing in Chintu is disabled.
+                  <p className="mt-1.5 text-[7px] text-emerald-400 font-bold uppercase tracking-widest leading-relaxed animate-pulse">
+                    ✔ Anti-Blur Active. Click and scroll are safe.
                   </p>
                 )}
               </div>
@@ -2189,12 +2201,12 @@ export default function RoomPage() {
               {userPlan !== "free" && (
                 <div
                   className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)]"
-                  style={{ padding: 'clamp(8px, 3vw, 20px)', display: 'flex', flexDirection: 'column', gap: 'clamp(8px, 2vw, 16px)' }}
+                  style={{ padding: 'clamp(6px, 2vw, 20px)', display: 'flex', flexDirection: 'column', gap: 'clamp(6px, 1.5vw, 16px)' }}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">History</h4>
-                      <p style={{ fontSize: 'clamp(8px, 2vw, 12px)' }} className="font-bold text-[var(--text-main)] uppercase tracking-tight">{history.length} Sessions</p>
+                      <h4 style={{ fontSize: 'clamp(5px, 1.2vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-0.5">History</h4>
+                      <p style={{ fontSize: 'clamp(7px, 1.5vw, 12px)' }} className="font-bold text-[var(--text-main)] uppercase tracking-tight">{history.length} Sessions</p>
                     </div>
                     <div className="flex gap-1.5">
                       <button
@@ -2264,13 +2276,13 @@ export default function RoomPage() {
               {/* Update Section */}
               <div
                 className="bg-[var(--input-bg)] rounded-2xl border border-[var(--glass-border)]"
-                style={{ padding: 'clamp(8px, 3vw, 20px)' }}
+                style={{ padding: 'clamp(6px, 2vw, 20px)' }}
               >
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1">Software</h4>
-                    <p style={{ fontSize: 'clamp(8px, 2vw, 12px)' }} className="font-bold text-[var(--text-main)] uppercase tracking-tight">v{appVersion || "1.0.0"}</p>
+                    <h4 style={{ fontSize: 'clamp(5px, 1.2vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-0.5">Software</h4>
+                    <p style={{ fontSize: 'clamp(7px, 1.5vw, 12px)' }} className="font-bold text-[var(--text-main)] uppercase tracking-tight">v{appVersion || "1.0.0"}</p>
                   </div>
                   <button
                     onClick={() => {
@@ -2280,7 +2292,7 @@ export default function RoomPage() {
                       (window as any).electronAPI?.checkForUpdates();
                     }}
                     className="bg-[var(--text-main)] text-[var(--panel-bg)] rounded-xl font-black uppercase tracking-widest transition-all active:scale-95"
-                    style={{ fontSize: 'clamp(6px, 1.5vw, 10px)', padding: 'clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 20px)' }}
+                    style={{ fontSize: 'clamp(5px, 1.2vw, 10px)', padding: 'clamp(4px, 1.2vw, 12px) clamp(6px, 1.5vw, 20px)' }}
                   >
                     Check
                   </button>
@@ -2288,8 +2300,8 @@ export default function RoomPage() {
               </div>
             </div>
 
-            <div className="pt-4 text-center">
-              <p className="text-[9px] font-black text-[var(--text-dim)] opacity-50 uppercase tracking-[0.3em]">
+            <div className="pt-2 sm:pt-4 text-center">
+              <p style={{ fontSize: 'clamp(6px, 1vw, 9px)' }} className="font-black text-[var(--text-dim)] opacity-50 uppercase tracking-[0.3em]">
                 Secure Mode Active • Invisible to Screen Sharing
               </p>
             </div>
@@ -2306,28 +2318,28 @@ export default function RoomPage() {
       )}
       {/* Unhide Prompt (Shocking/Animated) */}
       {showUnhidePrompt && (
-        <div className="absolute inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-sm bg-[var(--panel-bg)] animate-in fade-in duration-300">
-          <div className="unhide-prompt-card w-full max-w-xs bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 p-[2px] rounded-3xl shadow-[0_0_50px_rgba(249,115,22,0.4)] animate-in zoom-in-95 duration-300">
-            <div className="bg-gray-900 rounded-[22px] p-6 text-center">
-              <div className="w-16 h-16 bg-orange-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-bounce">
-                <svg className="w-10 h-10 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <div className="absolute inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 backdrop-blur-sm bg-[var(--panel-bg)] animate-in fade-in duration-300">
+          <div className="unhide-prompt-card w-full max-w-xs bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 p-[1.5px] sm:p-[2px] rounded-2xl sm:rounded-3xl shadow-[0_0_50px_rgba(249,115,22,0.4)] animate-in zoom-in-95 duration-300">
+            <div className="bg-gray-900 rounded-[14px] sm:rounded-[22px] p-4 sm:p-6 text-center">
+              <div className="w-10 h-10 sm:w-16 sm:h-16 bg-orange-500/20 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-4 animate-bounce">
+                <svg className="w-6 h-6 sm:w-10 sm:h-10 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-black text-white mb-2 tracking-tight uppercase">Exit Ghost Mode?</h3>
-              <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+              <h3 className="text-sm sm:text-xl font-black text-white mb-1 sm:mb-2 tracking-tight uppercase">Exit Ghost Mode?</h3>
+              <p className="text-gray-400 text-[10px] sm:text-sm mb-4 sm:mb-6 leading-relaxed">
                 App will become <span className="text-orange-400 font-bold uppercase underline">visible</span> to screen recording tools. Proceed with caution!
               </p>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2 sm:gap-3">
                 <button
                   onClick={confirmUnhide}
-                  className="w-full py-3 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-orange-500/20"
+                  className="w-full py-2.5 sm:py-3 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-lg sm:rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-orange-500/20"
                 >
                   YES, UNHIDE IT
                 </button>
                 <button
                   onClick={() => setShowUnhidePrompt(false)}
-                  className="w-full py-3 bg-white/5 hover:bg-white/10 text-white/60 font-medium rounded-xl transition-all"
+                  className="w-full py-2.5 sm:py-3 bg-white/5 hover:bg-white/10 text-white/60 font-medium rounded-lg sm:rounded-xl transition-all"
                 >
                   Cancel
                 </button>
@@ -2339,32 +2351,32 @@ export default function RoomPage() {
 
       {/* Disable Anti-Detection Click Prompt (Shocking/Animated) */}
       {showDisableAntiDetectionPrompt && (
-        <div className="absolute inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-sm bg-[var(--panel-bg)] animate-in fade-in duration-300">
-          <div className="unhide-prompt-card w-full max-w-xs bg-gradient-to-br from-yellow-400 via-amber-500 to-red-600 p-[2px] rounded-3xl shadow-[0_0_50px_rgba(245,158,11,0.4)] animate-in zoom-in-95 duration-300">
-            <div className="bg-gray-900 rounded-[22px] p-6 text-center">
-              <div className="w-16 h-16 bg-amber-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-bounce">
-                <svg className="w-10 h-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <div className="absolute inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 backdrop-blur-sm bg-[var(--panel-bg)] animate-in fade-in duration-300">
+          <div className="unhide-prompt-card w-full max-w-xs bg-gradient-to-br from-yellow-400 via-amber-500 to-red-600 p-[1.5px] sm:p-[2px] rounded-2xl sm:rounded-3xl shadow-[0_0_50px_rgba(245,158,11,0.4)] animate-in zoom-in-95 duration-300">
+            <div className="bg-gray-900 rounded-[14px] sm:rounded-[22px] p-4 sm:p-6 text-center">
+              <div className="w-10 h-10 sm:w-16 sm:h-16 bg-amber-500/20 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-4 animate-bounce">
+                <svg className="w-6 h-6 sm:w-10 sm:h-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-black text-white mb-2 tracking-tight uppercase">Disable Safe Click?</h3>
-              <p className="text-gray-400 text-xs mb-6 leading-relaxed">
-                Disabling this will allow clicking inside Chintu to trigger <span className="text-amber-400 font-bold underline">Exam Window / Tab Change</span> warnings on the website!<br/><br/>
-                <span className="text-gray-300 font-semibold">Note:</span> Only disable Safe Click if you explicitly need to <span className="text-teal-400 font-bold">Type</span> inside Chintu using your keyboard.
+              <h3 className="text-sm sm:text-xl font-black text-white mb-1 sm:mb-2 tracking-tight uppercase">Disable Safe Click?</h3>
+              <p className="text-gray-400 text-[10px] sm:text-xs mb-4 sm:mb-6 leading-relaxed">
+                Disabling this will allow clicking inside Chintu to trigger <span className="text-amber-400 font-bold underline">Exam Window / Tab Change</span> warnings!<br/><br/>
+                <span className="text-gray-300 font-semibold">Note:</span> Only disable if you need to <span className="text-teal-400 font-bold">Type</span> inside Chintu.
               </p>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2 sm:gap-3">
                 <button
                   onClick={() => {
                     setAntiDetection(false);
                     setShowDisableAntiDetectionPrompt(false);
                   }}
-                  className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-white font-bold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-amber-500/20"
+                  className="w-full py-2.5 sm:py-3 bg-amber-500 hover:bg-amber-400 text-white font-bold rounded-lg sm:rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-amber-500/20"
                 >
                   YES, DISABLE IT
                 </button>
                 <button
                   onClick={() => setShowDisableAntiDetectionPrompt(false)}
-                  className="w-full py-3 bg-white/5 hover:bg-white/10 text-white/60 font-medium rounded-xl transition-all"
+                  className="w-full py-2.5 sm:py-3 bg-white/5 hover:bg-white/10 text-white/60 font-medium rounded-lg sm:rounded-xl transition-all"
                 >
                   Keep Protected
                 </button>
@@ -2376,20 +2388,20 @@ export default function RoomPage() {
 
       {/* Enable Universal Shortcuts Prompt (Shocking/Animated) */}
       {showEnableUniversalShortcutsPrompt && (
-        <div className="absolute inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-sm bg-[var(--panel-bg)] animate-in fade-in duration-300">
-          <div className="unhide-prompt-card w-full max-w-xs bg-gradient-to-br from-red-500 via-orange-500 to-yellow-600 p-[2px] rounded-3xl shadow-[0_0_50px_rgba(239,68,68,0.4)] animate-in zoom-in-95 duration-300">
-            <div className="bg-gray-900 rounded-[22px] p-6 text-center">
-              <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-bounce">
-                <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <div className="absolute inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 backdrop-blur-sm bg-[var(--panel-bg)] animate-in fade-in duration-300">
+          <div className="unhide-prompt-card w-full max-w-xs bg-gradient-to-br from-red-500 via-orange-500 to-yellow-600 p-[1.5px] sm:p-[2px] rounded-2xl sm:rounded-3xl shadow-[0_0_50px_rgba(239,68,68,0.4)] animate-in zoom-in-95 duration-300">
+            <div className="bg-gray-900 rounded-[14px] sm:rounded-[22px] p-4 sm:p-6 text-center">
+              <div className="w-10 h-10 sm:w-16 sm:h-16 bg-red-500/20 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-4 animate-bounce">
+                <svg className="w-6 h-6 sm:w-10 sm:h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-black text-white mb-2 tracking-tight uppercase">Enable Universal Keys?</h3>
-              <p className="text-gray-400 text-xs mb-6 leading-relaxed">
-                Activating this will <span className="text-red-400 font-bold underline">globally block Space & Enter</span> in all other applications (including your browser and code editor)!<br/><br/>
-                Chintu intercepts these keys to trigger recording & screenshot capture.
+              <h3 className="text-sm sm:text-xl font-black text-white mb-1 sm:mb-2 tracking-tight uppercase">Enable Universal Keys?</h3>
+              <p className="text-gray-400 text-[10px] sm:text-xs mb-4 sm:mb-6 leading-relaxed">
+                This will <span className="text-red-400 font-bold underline">globally block Space & Enter</span> in all other apps!<br/><br/>
+                Chintu intercepts these keys for recording & screenshots.
               </p>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2 sm:gap-3">
                 <button
                   onClick={async () => {
                     setUniversalShortcuts(true);
@@ -2398,13 +2410,13 @@ export default function RoomPage() {
                     }
                     setShowEnableUniversalShortcutsPrompt(false);
                   }}
-                  className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-red-600/20"
+                  className="w-full py-2.5 sm:py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg sm:rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-red-600/20"
                 >
                   YES, ENABLE KEYS
                 </button>
                 <button
                   onClick={() => setShowEnableUniversalShortcutsPrompt(false)}
-                  className="w-full py-3 bg-white/5 hover:bg-white/10 text-white/60 font-medium rounded-xl transition-all"
+                  className="w-full py-2.5 sm:py-3 bg-white/5 hover:bg-white/10 text-white/60 font-medium rounded-lg sm:rounded-xl transition-all"
                 >
                   Cancel
                 </button>
@@ -2418,18 +2430,18 @@ export default function RoomPage() {
       {isElectron && (
         <div className={`floating-side-controls no-drag relative group/side ${userPlan === 'free' ? 'cursor-pointer' : ''}`} onClick={() => { if (userPlan === 'free') openPricingExternal(); }}>
           {userPlan === null && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] rounded-2xl">
-              <Loader2 className="w-4 h-4 text-teal-400 animate-spin" />
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] rounded-xl sm:rounded-2xl">
+              <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 text-teal-400 animate-spin" />
             </div>
           )}
           {userPlan === 'free' && (
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-2xl opacity-0 group-hover/side:opacity-100 transition-opacity p-2 text-center">
-              <Crown className="w-4 h-4 text-amber-400 mb-1" />
-              <span className="text-[8px] font-black uppercase text-white tracking-widest leading-tight">Pro<br />Features</span>
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-xl sm:rounded-2xl opacity-0 group-hover/side:opacity-100 transition-opacity p-1.5 sm:p-2 text-center">
+              <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-amber-400 mb-0.5 sm:mb-1" />
+              <span className="text-[6px] sm:text-[8px] font-black uppercase text-white tracking-widest leading-tight">Pro<br />Features</span>
             </div>
           )}
           <div className={`side-control-group ${userPlan === 'free' || userPlan === null ? 'opacity-40 grayscale blur-[1px]' : ''}`}>
-            <span className="side-control-label">🔍</span>
+            <span className="side-control-label text-[8px] sm:text-[10px]">🔍</span>
             <input
               type="range"
               min="10"
@@ -2439,10 +2451,10 @@ export default function RoomPage() {
               className="side-slider"
               disabled={userPlan === 'free' || userPlan === null}
             />
-            <span className="side-control-value">{Math.round(windowOpacity * 100)}</span>
+            <span className="side-control-value text-[8px] sm:text-[10px]">{Math.round(windowOpacity * 100)}</span>
           </div>
           <div className={`side-control-group ${userPlan === 'free' || userPlan === null ? 'opacity-40 grayscale blur-[1px]' : ''}`}>
-            <span className="side-control-label">Aa</span>
+            <span className="side-control-label text-[8px] sm:text-[10px]">Aa</span>
             <input
               type="range"
               min="6"
@@ -2452,35 +2464,35 @@ export default function RoomPage() {
               className="side-slider"
               disabled={userPlan === 'free' || userPlan === null}
             />
-            <span className="side-control-value">{fontSize}</span>
+            <span className="side-control-value text-[8px] sm:text-[10px]">{fontSize}</span>
           </div>
         </div>
       )}
 
       {/* Clear History Confirmation Modal */}
       {showClearHistoryConfirm && (
-        <div className="absolute inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-md bg-black/40 animate-in fade-in duration-300">
-          <div className="w-full max-w-xs bg-gradient-to-br from-red-500 via-rose-600 to-pink-700 p-[1.5px] rounded-[32px] shadow-[0_20px_50px_rgba(225,29,72,0.3)] animate-in zoom-in-95 duration-300">
-            <div className="bg-[var(--panel-bg)] backdrop-blur-2xl rounded-[30px] p-6 text-center">
-              <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
-                <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div className="absolute inset-0 z-[110] flex items-center justify-center p-3 sm:p-6 backdrop-blur-md bg-black/40 animate-in fade-in duration-300">
+          <div className="w-full max-w-xs bg-gradient-to-br from-red-500 via-rose-600 to-pink-700 p-[1.5px] rounded-2xl sm:rounded-[32px] shadow-[0_20px_50px_rgba(225,29,72,0.3)] animate-in zoom-in-95 duration-300">
+            <div className="bg-[var(--panel-bg)] backdrop-blur-2xl rounded-[14px] sm:rounded-[30px] p-4 sm:p-6 text-center">
+              <div className="w-10 h-10 sm:w-16 sm:h-16 bg-red-500/10 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-4 border border-red-500/20">
+                <svg className="w-5 h-5 sm:w-8 sm:h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </div>
-              <h3 className="text-lg font-black text-[var(--text-main)] mb-2 uppercase tracking-tight">Wipe History?</h3>
-              <p className="text-[var(--text-dim)] text-xs mb-6 leading-relaxed font-medium">
+              <h3 className="text-sm sm:text-lg font-black text-[var(--text-main)] mb-1 sm:mb-2 uppercase tracking-tight">Wipe History?</h3>
+              <p className="text-[var(--text-dim)] text-[10px] sm:text-xs mb-4 sm:mb-6 leading-relaxed font-medium">
                 This will permanently delete <span className="text-red-500 font-bold underline">{history.length}</span> conversation sessions. This action cannot be undone.
               </p>
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2 sm:gap-2.5">
                 <button
                   onClick={clearHistory}
-                  className="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-red-600/20"
+                  className="w-full py-2.5 sm:py-3.5 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[9px] sm:text-[10px] tracking-[0.2em] rounded-xl sm:rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-red-600/20"
                 >
                   Delete Everything
                 </button>
                 <button
                   onClick={() => setShowClearHistoryConfirm(false)}
-                  className="w-full py-3.5 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl transition-all border border-[var(--glass-border)]"
+                  className="w-full py-2.5 sm:py-3.5 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] font-black uppercase text-[9px] sm:text-[10px] tracking-[0.2em] rounded-xl sm:rounded-2xl transition-all border border-[var(--glass-border)]"
                 >
                   Cancel
                 </button>
@@ -2492,28 +2504,28 @@ export default function RoomPage() {
 
       {/* Single Session Delete Confirmation */}
       {sessionToDelete && (
-        <div className="absolute inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-md bg-black/40 animate-in fade-in duration-300">
-          <div className="w-full max-w-xs bg-gradient-to-br from-orange-500 via-red-500 to-rose-600 p-[1.5px] rounded-[32px] shadow-[0_20px_50px_rgba(244,63,94,0.3)] animate-in zoom-in-95 duration-300">
-            <div className="bg-[var(--panel-bg)] backdrop-blur-2xl rounded-[30px] p-6 text-center">
-              <div className="w-14 h-14 bg-orange-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-orange-500/20">
-                <svg className="w-7 h-7 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div className="absolute inset-0 z-[110] flex items-center justify-center p-3 sm:p-6 backdrop-blur-md bg-black/40 animate-in fade-in duration-300">
+          <div className="w-full max-w-xs bg-gradient-to-br from-orange-500 via-red-500 to-rose-600 p-[1.5px] rounded-2xl sm:rounded-[32px] shadow-[0_20px_50px_rgba(244,63,94,0.3)] animate-in zoom-in-95 duration-300">
+            <div className="bg-[var(--panel-bg)] backdrop-blur-2xl rounded-[14px] sm:rounded-[30px] p-4 sm:p-6 text-center">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 bg-orange-500/10 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-4 border border-orange-500/20">
+                <svg className="w-5 h-5 sm:w-7 sm:h-7 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </div>
-              <h3 className="text-base font-black text-[var(--text-main)] mb-2 uppercase tracking-tight">Delete Session?</h3>
-              <p className="text-[var(--text-dim)] text-[10px] mb-6 leading-relaxed font-bold uppercase tracking-wide">
+              <h3 className="text-sm sm:text-base font-black text-[var(--text-main)] mb-1 sm:mb-2 uppercase tracking-tight">Delete Session?</h3>
+              <p className="text-[var(--text-dim)] text-[9px] sm:text-[10px] mb-4 sm:mb-6 leading-relaxed font-bold uppercase tracking-wide">
                 &quot;{history.find(s => s.id === sessionToDelete)?.title || "This session"}&quot;
               </p>
-              <div className="flex gap-2.5">
+              <div className="flex gap-2 sm:gap-2.5">
                 <button
                   onClick={() => setSessionToDelete(null)}
-                  className="flex-1 py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] font-black uppercase text-[9px] tracking-widest rounded-xl transition-all border border-[var(--glass-border)]"
+                  className="flex-1 py-2.5 sm:py-3 bg-[var(--input-bg)] hover:bg-[var(--glass-bg)] text-[var(--text-dim)] font-black uppercase text-[8px] sm:text-[9px] tracking-widest rounded-lg sm:rounded-xl transition-all border border-[var(--glass-border)]"
                 >
                   No
                 </button>
                 <button
                   onClick={() => deleteSession(sessionToDelete)}
-                  className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 shadow-lg shadow-red-600/20"
+                  className="flex-1 py-2.5 sm:py-3 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[8px] sm:text-[9px] tracking-widest rounded-lg sm:rounded-xl transition-all active:scale-95 shadow-lg shadow-red-600/20"
                 >
                   Yes, Delete
                 </button>

@@ -615,6 +615,27 @@ input[type="range"]::-moz-range-thumb {
   font-weight: 700;
 }
 
+/* Compact mode for very small PIP windows */
+@media (max-width: 360px), (max-height: 400px) {
+  .custom-dropdown-trigger {
+    padding: 4px 6px;
+    font-size: 9px;
+    border-radius: 8px;
+  }
+  .custom-dropdown-menu {
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .custom-dropdown-item {
+    padding: 5px 8px;
+    font-size: 9px;
+    border-radius: 6px;
+  }
+  .custom-dropdown-scroll {
+    max-height: 140px;
+  }
+}
+
 .dark-mode .custom-dropdown-menu {
   background: rgba(15, 15, 25, 0.95);
   border-color: rgba(255, 255, 255, 0.08);
