@@ -275,6 +275,7 @@ export type PricingPlan = {
   blurb: string;
   monthly: number;
   yearly: number;
+  oldMonthly?: number;
   icon: any;
   accent: string;
   highlighted?: boolean;
@@ -290,7 +291,7 @@ export const pricingPlans: PricingPlan[] = [
     monthly: 0,
     yearly: 0,
     icon: Rocket,
-    accent: "from-slate-400 to-slate-500",
+    accent: "from-gray-700 to-gray-900",
     cta: "Start Free",
     href: "/sign-up",
     features: [
@@ -305,8 +306,9 @@ export const pricingPlans: PricingPlan[] = [
   {
     name: "Professional",
     blurb: "Best for active interviewees",
-    monthly: 29,
-    yearly: 9,
+    monthly: 9,
+    yearly: 89,
+    oldMonthly: 29,
     icon: Gem,
     accent: "from-teal-500 to-teal-500",
     highlighted: true,
@@ -325,8 +327,9 @@ export const pricingPlans: PricingPlan[] = [
   {
     name: "Elite",
     blurb: "Unrestricted career growth.",
-    monthly: 79,
-    yearly: 29,
+    monthly: 29,
+    yearly: 279,
+    oldMonthly: 79,
     icon: Crown,
     accent: "from-amber-400 via-rose-500 to-teal-500",
     cta: "Unlock Elite",
@@ -350,7 +353,7 @@ export const creatorTiers = [
     reward: "$5",
     perVideo: "per video",
     icon: Share2,
-    accent: "from-slate-400 to-slate-500",
+    accent: "from-gray-700 to-gray-900",
   },
   {
     label: "Creator",

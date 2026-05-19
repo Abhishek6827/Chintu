@@ -1434,7 +1434,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-7 items-stretch">
               {pricingPlans.map((plan, i) => {
                 const price = pricingMode === "monthly" ? plan.monthly : plan.yearly;
-                const showStrike = pricingMode === "yearly" && plan.monthly > plan.yearly;
+                const showStrike = pricingMode === "yearly" && plan.oldMonthly != null && plan.oldMonthly > plan.monthly;
                 return (
                   <motion.div
                     key={plan.name}
@@ -1479,19 +1479,19 @@ export default function LandingPage() {
                           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                           className="flex items-baseline gap-1.5"
                         >
-                          <span className="text-[var(--text-dim)] text-2xl sm:text-3xl font-black">₹</span>
+                          <span className="text-[var(--text-dim)] text-2xl sm:text-3xl font-black">$</span>
                           <span className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter text-[var(--text-main)] leading-none">
-                            {price.toLocaleString("en-IN")}
+                            {price.toLocaleString("en-US")}
                           </span>
                           <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-dim)] ml-1">
-                            {price === 0 ? "" : "/ mo"}
+                            {price === 0 ? "" : pricingMode === "monthly" ? "/ mo" : "/ yr"}
                           </span>
                         </motion.div>
                       </AnimatePresence>
                       {showStrike && (
                         <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-[var(--text-dim)]">
-                          <span className="line-through opacity-60">₹{plan.monthly.toLocaleString("en-IN")}</span>{" "}
-                          <span className="text-emerald-500">save {Math.round((1 - plan.yearly / plan.monthly) * 100)}%</span>
+                          <span className="line-through opacity-60">${plan.oldMonthly?.toLocaleString("en-US")}/mo</span>{" "}
+                          <span className="text-emerald-500">save {Math.round((1 - plan.monthly / (plan.oldMonthly || 1)) * 100)}%</span>
                         </p>
                       )}
                       {!showStrike && pricingMode === "yearly" && plan.yearly === 0 && (
@@ -1501,7 +1501,7 @@ export default function LandingPage() {
                       )}
                       {pricingMode === "yearly" && plan.yearly > 0 && (
                         <p className="mt-1 text-[9px] font-black uppercase tracking-[0.25em] text-[var(--text-dim)]">
-                          Billed annually
+                          Billed annually at ${plan.yearly.toLocaleString("en-US")}
                         </p>
                       )}
                     </div>
