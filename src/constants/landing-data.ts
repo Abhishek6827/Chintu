@@ -1,5 +1,5 @@
 ﻿import {
-  Download, Video, Sparkles, UserCheck, Code, Users, MessageSquare, Gift, Gem, Crown, Share2, Rocket, Play, FileText,
+  Download, Video, Sparkles, UserCheck, Code, Users, MessageSquare, Gem, Crown, Share2, Rocket, Play, FileText,
 } from "lucide-react";
 import { type FaqItem, type CompareRow } from '@/components/LandingEnhancements';
 
@@ -289,7 +289,7 @@ export const pricingPlans: PricingPlan[] = [
     blurb: "Explore Chintu Ji's capabilities",
     monthly: 0,
     yearly: 0,
-    icon: Gift,
+    icon: Rocket,
     accent: "from-slate-400 to-slate-500",
     cta: "Start Free",
     href: "/sign-up",
