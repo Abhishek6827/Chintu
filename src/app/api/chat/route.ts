@@ -91,9 +91,9 @@ HOW TO USE THE APP (Step by Step)
 ═══════════════════════════════════════
 PRICING PLANS
 ═══════════════════════════════════════
-• **Starter (Free)** — 10 credits/month (resets monthly), 1 profile & 1 resume upload, Standard Engine only, Basic responses, Community support
-• **Professional ($29/month or $9/year)** — 100 credits/month, Unlimited profiles & JDs, All premium engines unlocked, All response types, Stealth session recording, Font size & opacity sliders
-• **Elite ($79/month or $29/year)** — 500 credits/month, Unlimited profiles & JDs, All Pro features, Dedicated support, AI fine-tuning, Early access
+• **Starter (Free)** — 10 credits/month (resets monthly), 1 profile (create once, no edit), 1 job description (save once, no edit), Standard Engine only, Small & Balanced response types, Light theme only, Community support
+• **Professional ($9/month or $89/year)** — 100 credits/month, Unlimited profiles + full editing, Unlimited job descriptions + full editing, All premium engines (Pro, Coding, Titan), All response types (Detailed, Coding), Conversation history (last 5 sessions), Theme toggle (Light/Dark), Font size & opacity sliders
+• **Elite ($29/month or $279/year)** — 500 credits/month (5x Pro), Turbo Engine (Elite only), Screen recording, Universal shortcuts, Everything in Pro, Dedicated support, AI fine-tuning, Early access
 
 ═══════════════════════════════════════
 POLICIES

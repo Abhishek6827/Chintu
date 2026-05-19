@@ -1953,7 +1953,7 @@ export default function RoomPage() {
         {/* Button 4: Screen Recording */}
         <button
           onClick={() => {
-            if (userPlan === 'free') {
+            if (userPlan !== 'elite') {
               openPricingExternal();
               return;
             }
@@ -1966,7 +1966,7 @@ export default function RoomPage() {
               ? "bg-red-500 text-white shadow-[0_0_30px_rgba(239,68,68,0.4)]"
               : "bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)]"
             }
-            ${userPlan === 'free' ? 'opacity-50' : ''}
+            ${userPlan !== 'elite' ? 'opacity-50' : ''}
           `}
         >
           {isScreenRecording ? (
@@ -1978,7 +1978,7 @@ export default function RoomPage() {
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
               </svg>
-              {userPlan === 'free' && (
+              {userPlan !== 'elite' && (
                 <div className="absolute -top-1 -right-1 bg-amber-500 rounded-full p-0.5 shadow-lg border border-white/20">
                   <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" /></svg>
                 </div>
@@ -2113,8 +2113,8 @@ export default function RoomPage() {
                   <div>
                     <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest mb-1 flex items-center gap-2">
                       Universal Keys
-                      {userPlan === 'free' && (
-                        <span className="bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase px-1.5 py-0.5 rounded tracking-widest">PRO</span>
+                      {userPlan !== 'elite' && (
+                        <span className="bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase px-1.5 py-0.5 rounded tracking-widest">ELITE</span>
                       )}
                     </h4>
                     <p style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }} className="text-[var(--text-dim)] leading-relaxed uppercase font-bold tracking-tight">
@@ -2123,7 +2123,7 @@ export default function RoomPage() {
                   </div>
                   <button
                     onClick={async () => {
-                      if (userPlan === 'free') {
+                      if (userPlan !== 'elite') {
                         openPricingExternal();
                         return;
                       }

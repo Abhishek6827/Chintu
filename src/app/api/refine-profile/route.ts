@@ -7,6 +7,11 @@ import { createAdminClient } from "@/utils/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const apiKeys = [
       process.env.GROQ_API_KEY,
       process.env.GROQ_API_KEY_2,
@@ -24,6 +29,23 @@ export async function POST(req: NextRequest) {
 
     if (!rawText || !rawText.trim()) {
       return NextResponse.json({ error: "No text provided" }, { status: 400 });
+    }
+
+    // ─── Plan Gating: Free users cannot re-refine if they already have a profile ─────────────────
+    const supabase = createAdminClient();
+    const client = await clerkClient();
+    const userObj = await client.users.getUser(userId);
+    const email = userObj.emailAddresses[0]?.emailAddress;
+
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("plan, profile_data, raw_profile")
+      .eq("email", email)
+      .maybeSingle();
+
+    const userPlan = (existing?.plan || "free").toLowerCase();
+    if (userPlan === "free" && (existing?.profile_data || existing?.raw_profile)) {
+      return NextResponse.json({ error: "Starter plan is limited to 1 profile. Upgrade to Pro for unlimited updates.", code: "UPGRADE_REQUIRED" }, { status: 403 });
     }
 
     const systemPrompt = `You are an expert resume/profile analyst. The user will paste raw text — likely from a resume, LinkedIn, or a rough self-description.

@@ -21,7 +21,6 @@ const MarqueeReviews = dynamic(() => import('@/components/MarqueeReviews').then(
 const TextReveal = dynamic(() => import('@/components/magicui/text-reveal').then(mod => mod.TextReveal), { ssr: false });
 const Meteors = dynamic(() => import('@/components/magicui/meteors').then(mod => mod.Meteors), { ssr: false });
 
-const InteractiveHoverButton = dynamic(() => import('@/components/magicui/interactive-hover-button').then(mod => mod.InteractiveHoverButton), { ssr: false });
 const CardSpread = dynamic(() => import('@/components/animata/card/card-spread'), { ssr: false });
 
 
@@ -311,12 +310,13 @@ export default function LandingPage() {
                     Join the Revolution <ArrowRight className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                   </Link>
                 )}
-                <InteractiveHoverButton
+                <button
                   onClick={() => router.push("/pricing")}
-                  className="px-5 sm:px-9 py-2 sm:py-2.5 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-[var(--text-dim)] hover:text-teal-600 dark:text-teal-400 bg-[var(--panel-bg)] w-auto sm:max-w-[260px]"
+                  className="relative group overflow-hidden px-5 sm:px-9 py-2 sm:py-2.5 border border-teal-500/20 bg-[var(--panel-bg)] text-[var(--text-dim)] hover:text-teal-600 dark:text-teal-400 font-black uppercase tracking-[0.25em] text-[10px] sm:text-[11px] rounded-xl hover:border-teal-500/50 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
+                  <span className="w-2 h-2 rounded-full bg-teal-500 inline-block" />
                   View Access Tiers
-                </InteractiveHoverButton>
+                </button>
               </div>
 
               {/* Trust Indicators */}

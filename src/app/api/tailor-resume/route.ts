@@ -39,9 +39,14 @@ export async function POST(req: NextRequest) {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("credits, email, profile_data")
+      .select("credits, email, profile_data, plan")
       .eq("email", email)
       .maybeSingle();
+
+    const userPlan = (profile?.plan || "free").toLowerCase();
+    if (userPlan === "free") {
+      return NextResponse.json({ error: "Resume Builder is a premium feature. Upgrade to Pro or Elite to unlock AI resume tailoring.", code: "UPGRADE_REQUIRED" }, { status: 402 });
+    }
 
     if (!profile || (profile.credits || 0) < 5) {
       return NextResponse.json({ error: "Insufficient credits. Resume Builder requires 5 credits. Please upgrade your plan." }, { status: 403 });
