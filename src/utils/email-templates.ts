@@ -1,4 +1,4 @@
-export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
+﻿export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,7 +16,7 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
             <td style="padding: 40px 40px 30px 40px; text-align: center;">
               <img src="https://www.getchintu.com/icon.png" alt="Chintu Ji" width="60" height="60" style="margin-bottom: 20px;">
               <h1 style="margin: 0; font-size: 28px; font-weight: 900; color: #1a1a1c; letter-spacing: -0.02em; text-transform: uppercase;">Identity Verified.</h1>
-              <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.2em;">Welcome to the Ecosystem</p>
+              <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: 700; color: #14b8a6; text-transform: uppercase; letter-spacing: 0.2em;">Welcome to the Ecosystem</p>
             </td>
           </tr>
           
@@ -49,7 +49,7 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tr>
                     <td width="24" style="vertical-align: top; padding-bottom: 12px;">
-                      <div style="width: 16px; height: 16px; background-color: #6366f1; border-radius: 4px;"></div>
+                      <div style="width: 16px; height: 16px; background-color: #14b8a6; border-radius: 4px;"></div>
                     </td>
                     <td style="padding-bottom: 12px; font-size: 14px; color: #4b5563; line-height: 1.4;">
                       <b>Feed the Engine:</b> Complete your profile with your resume and JD to enable high-context response synthesis.
@@ -57,7 +57,7 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
                   </tr>
                   <tr>
                     <td width="24" style="vertical-align: top; padding-bottom: 12px;">
-                      <div style="width: 16px; height: 16px; background-color: #6366f1; border-radius: 4px;"></div>
+                      <div style="width: 16px; height: 16px; background-color: #14b8a6; border-radius: 4px;"></div>
                     </td>
                     <td style="padding-bottom: 12px; font-size: 14px; color: #4b5563; line-height: 1.4;">
                       <b>Activate Stealth:</b> Launch the Protected Overlay during your live sessions for real-time tactical guidance.
@@ -76,7 +76,7 @@ export const getWelcomeEmailHtml = (displayId: string, appUrl: string) => `
           <tr>
             <td style="padding: 30px; background-color: #fcfcfd; border-top: 1px solid #f1f3f5; text-align: center;">
               <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: 500; color: #6b7280;">
-                Questions or issues? Contact our strategy team at <a href="mailto:contact@getchintu.com" style="color: #6366f1; text-decoration: none;">contact@getchintu.com</a>
+                Questions or issues? Contact our strategy team at <a href="mailto:contact@getchintu.com" style="color: #14b8a6; text-decoration: none;">contact@getchintu.com</a>
               </p>
               <p style="margin: 0 0 15px 0; font-size: 11px; color: #9ca3af; line-height: 1.5;">
                 You are receiving this email because you recently created an account at Chintu Ji.<br>
@@ -123,7 +123,7 @@ export const getPaymentEmailHtml = (
             <td style="padding: 40px 40px 30px 40px; text-align: center;">
               <img src="https://www.getchintu.com/icon.png" alt="Chintu Ji" width="60" height="60" style="margin-bottom: 20px;">
               <h1 style="margin: 0; font-size: 28px; font-weight: 900; color: #1a1a1c; letter-spacing: -0.02em; text-transform: uppercase;">CHINTU: MISSION CONTROL</h1>
-              <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.2em;">TACTICAL UPGRADE VERIFIED</p>
+              <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: 700; color: #14b8a6; text-transform: uppercase; letter-spacing: 0.2em;">TACTICAL UPGRADE VERIFIED</p>
             </td>
           </tr>
           
@@ -182,7 +182,7 @@ export const getPaymentEmailHtml = (
                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tr>
                     <td width="24" style="vertical-align: top; padding-bottom: 12px;">
-                      <div style="width: 16px; height: 16px; background-color: #6366f1; border-radius: 4px;"></div>
+                      <div style="width: 16px; height: 16px; background-color: #14b8a6; border-radius: 4px;"></div>
                     </td>
                     <td style="padding-bottom: 12px; font-size: 14px; color: #4b5563; line-height: 1.4;">
                       <b>Elite Strategic Engines:</b> Access to our highest-fidelity reasoning and specialized coding logic.
@@ -190,7 +190,7 @@ export const getPaymentEmailHtml = (
                   </tr>
                   <tr>
                     <td width="24" style="vertical-align: top; padding-bottom: 12px;">
-                      <div style="width: 16px; height: 16px; background-color: #6366f1; border-radius: 4px;"></div>
+                      <div style="width: 16px; height: 16px; background-color: #14b8a6; border-radius: 4px;"></div>
                     </td>
                     <td style="padding-bottom: 12px; font-size: 14px; color: #4b5563; line-height: 1.4;">
                       <b>Stealth Operation:</b> High-speed visual analysis and stealth session tracking are now active.
@@ -209,7 +209,7 @@ export const getPaymentEmailHtml = (
           <tr>
             <td style="padding: 30px; background-color: #fcfcfd; border-top: 1px solid #f1f3f5; text-align: center;">
               <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: 500; color: #6b7280;">
-                Billing questions? Contact our support team at <a href="mailto:billing@getchintu.com" style="color: #6366f1; text-decoration: none;">contact@getchintu.com</a>
+                Billing questions? Contact our support team at <a href="mailto:billing@getchintu.com" style="color: #14b8a6; text-decoration: none;">contact@getchintu.com</a>
               </p>
               <p style="margin: 0 0 15px 0; font-size: 11px; color: #9ca3af; line-height: 1.5;">
                 You are receiving this receipt because of a recent transaction on your Chintu Ji account.<br>

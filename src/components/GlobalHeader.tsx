@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -190,12 +190,12 @@ export default function GlobalHeader() {
               />
             </div>
             <span className="text-sm font-black tracking-tighter uppercase text-[var(--text-main)] ml-2 hidden min-[400px]:inline">
-              Chintu <span className="text-indigo-500">AI</span>
+              Chintu <span className="text-teal-500">AI</span>
             </span>
           </div>
 
           {!isLoaded && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-600 text-white border border-indigo-500 shadow-lg shadow-indigo-500/30">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-teal-600 text-white border border-teal-500 shadow-lg shadow-teal-500/30">
               <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
               <span className="text-[9px] font-black uppercase tracking-widest hidden min-[400px]:inline">Loading...</span>
             </div>
@@ -203,8 +203,8 @@ export default function GlobalHeader() {
 
           {isLoaded && isSignedIn && userCredits === null && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
-              <div className="w-4 h-4 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin" />
-              <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest hidden min-[400px]:inline">Syncing...</span>
+              <div className="w-4 h-4 rounded-full border-2 border-teal-500/30 border-t-teal-500 animate-spin" />
+              <span className="text-[9px] font-black text-teal-400 uppercase tracking-widest hidden min-[400px]:inline">Syncing...</span>
             </div>
           )}
 
@@ -220,7 +220,7 @@ export default function GlobalHeader() {
                 userPlan === 'elite'
                   ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                   : userPlan === 'pro'
-                  ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                  ? 'bg-teal-500/10 text-teal-400 border-teal-500/20'
                   : 'bg-slate-500/10 text-slate-500 border-slate-500/20'
               }`}>
                 {userPlan === 'free' ? 'Starter' : userPlan}
@@ -228,7 +228,7 @@ export default function GlobalHeader() {
               {userPlan === 'free' && (
                 <button
                   onClick={handleUpgrade}
-                  className="px-2 min-[450px]:px-4 py-1.5 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center justify-center"
+                  className="px-2 min-[450px]:px-4 py-1.5 bg-teal-600 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-teal-500 transition-all shadow-lg shadow-teal-500/20 active:scale-95 flex items-center justify-center"
                 >
                   <Zap className="w-3 h-3 min-[450px]:mr-1.5 fill-current" />
                   <span className="hidden min-[450px]:inline">Upgrade</span>

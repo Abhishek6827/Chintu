@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
@@ -61,7 +61,7 @@ const PLANS = [
     period: "/month",
     credits: 100,
     badge: "⚡",
-    color: "indigo",
+    color: "teal",
     popular: true,
     features: [
       "100 Credits / month per unit",
@@ -118,7 +118,7 @@ const ENGINE_DETAILS = [
     name: "Pro Engine",
     desc: "Superior reasoning and logic. Best for behavioral questions and complex system design.",
     plans: ["Pro", "Elite"],
-    icon: <Shield className="w-4 h-4 text-indigo-400" />
+    icon: <Shield className="w-4 h-4 text-teal-400" />
   },
   {
     name: "Coding Specialist",
@@ -130,7 +130,7 @@ const ENGINE_DETAILS = [
     name: "Titan Engine",
     desc: "Massive intelligence for niche domains. High-fidelity knowledge across all tech stacks.",
     plans: ["Pro", "Elite"],
-    icon: <Trophy className="w-4 h-4 text-purple-400" />
+    icon: <Trophy className="w-4 h-4 text-teal-400" />
   },
   {
     name: "Turbo Engine",
@@ -394,7 +394,7 @@ export default function PricingPage() {
           email: user.primaryEmailAddress?.emailAddress || "",
         },
         theme: {
-          color: "#4f46e5",
+          color: "#0d9488",
         },
         modal: {
           ondismiss: function () {
@@ -435,7 +435,7 @@ export default function PricingPage() {
                 opacity: [0.3, 0.5, 0.3],
               }}
               transition={{ duration: 4, repeat: Infinity }}
-              className="absolute top-1/4 -left-20 w-96 h-96 bg-indigo-600/20 blur-[120px] rounded-full"
+              className="absolute top-1/4 -left-20 w-96 h-96 bg-teal-600/20 blur-[120px] rounded-full"
             />
             <motion.div
               animate={{
@@ -443,7 +443,7 @@ export default function PricingPage() {
                 opacity: [0.2, 0.4, 0.2],
               }}
               transition={{ duration: 5, repeat: Infinity, delay: 1 }}
-              className="absolute bottom-1/4 -right-20 w-96 h-96 bg-purple-600/20 blur-[120px] rounded-full"
+              className="absolute bottom-1/4 -right-20 w-96 h-96 bg-teal-600/20 blur-[120px] rounded-full"
             />
 
             <motion.div
@@ -502,7 +502,7 @@ export default function PricingPage() {
                   repeat: Infinity,
                   delay: Math.random() * 2
                 }}
-                className="absolute w-1 h-1 bg-indigo-400 rounded-full"
+                className="absolute w-1 h-1 bg-teal-400 rounded-full"
               />
             ))}
           </motion.div>
@@ -512,9 +512,9 @@ export default function PricingPage() {
       {loading && (
         <div className="fixed inset-0 z-[100] bg-[var(--bg-app)]/90 backdrop-blur-xl flex flex-col items-center justify-center animate-in fade-in duration-500">
           <div className="relative mb-8">
-            <div className="w-20 h-20 border-4 border-[var(--glass-border)] border-t-indigo-600 rounded-full animate-spin" />
+            <div className="w-20 h-20 border-4 border-[var(--glass-border)] border-t-teal-600 rounded-full animate-spin" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <Shield className="w-6 h-6 text-indigo-600 animate-pulse" />
+              <Shield className="w-6 h-6 text-teal-600 animate-pulse" />
             </div>
           </div>
           <h2 className="text-xl font-black tracking-tighter mb-2 uppercase text-[var(--text-main)]">Securing Connection...</h2>
@@ -522,9 +522,9 @@ export default function PricingPage() {
       )}
 
 
-      <div className="flex-1 pb-16 selection:bg-indigo-500/20">
+      <div className="flex-1 pb-16 selection:bg-teal-500/20">
         <div className="text-center px-4 pt-12 pb-8">
-          <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-3 border border-indigo-500/20">
+          <div className="inline-flex items-center gap-2 bg-teal-500/10 text-teal-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-3 border border-teal-500/20">
             <Sparkles className="w-3 h-3 animate-pulse" /> Premium Access
           </div>
           <div className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-6 border border-emerald-500/20">
@@ -554,7 +554,7 @@ export default function PricingPage() {
           <div className="flex items-center justify-center gap-4">
             <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${billingCycle === "monthly" ? "text-[var(--text-main)]" : "text-[var(--text-dim)]"}`}>Monthly</span>
             <button onClick={() => setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")} className="w-12 h-6 bg-[var(--glass-bg)] rounded-full relative p-1 transition-colors">
-              <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300 transform ${billingCycle === "annual" ? "translate-x-6 bg-indigo-500" : "translate-x-0"}`} />
+              <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300 transform ${billingCycle === "annual" ? "translate-x-6 bg-teal-500" : "translate-x-0"}`} />
             </button>
             <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${billingCycle === "annual" ? "text-[var(--text-main)]" : "text-[var(--text-dim)]"}`}>
               Annual <span className="text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1 border border-emerald-500/20">SAVE UP TO 75%</span>
@@ -562,7 +562,7 @@ export default function PricingPage() {
           </div>
 
           <div className="mt-8 inline-flex items-center gap-2 bg-[var(--panel-bg)] border border-[var(--glass-border)] px-4 py-2 rounded-xl group/tooltip relative cursor-help">
-            <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
+            <HelpCircle className="w-3.5 h-3.5 text-teal-400" />
             <span className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest">Credit System Explained</span>
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white p-3 rounded-xl text-[9px] font-bold leading-relaxed opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl z-[60]">
               <div className="flex justify-between border-b border-white/10 pb-1.5 mb-1.5">
@@ -591,7 +591,7 @@ export default function PricingPage() {
             const totalCredits = plan.id === "free" ? plan.credits : plan.credits * q;
 
             return (
-              <div key={plan.id} className={`group relative flex flex-col bg-[var(--panel-bg)] rounded-[2rem] border-2 transition-all duration-300 ${plan.popular ? "border-indigo-500 shadow-xl shadow-indigo-500/10 scale-105 z-10" : "border-[var(--glass-border)] shadow-sm"} p-6 sm:p-8`}>
+              <div key={plan.id} className={`group relative flex flex-col bg-[var(--panel-bg)] rounded-[2rem] border-2 transition-all duration-300 ${plan.popular ? "border-teal-500 shadow-xl shadow-teal-500/10 scale-105 z-10" : "border-[var(--glass-border)] shadow-sm"} p-6 sm:p-8`}>
 
                 {plan.id === 'elite' && (
                   <div className="absolute inset-0 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
@@ -600,14 +600,14 @@ export default function PricingPage() {
                 )}
                 {plan.popular && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="bg-indigo-600 text-white text-[8px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-full">Most Preferred</span>
+                    <span className="bg-teal-600 text-white text-[8px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-full">Most Preferred</span>
                   </div>
                 )}
 
                 <div className="mb-6">
                   <span className="text-3xl mb-2 block">{plan.badge}</span>
                   <h3 className="text-lg font-black text-[var(--text-main)] uppercase tracking-tight">{plan.name}</h3>
-                  <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest mt-1">{totalCredits} Credits/mo</p>
+                  <p className="text-teal-400 text-[10px] font-black uppercase tracking-widest mt-1">{totalCredits} Credits/mo</p>
 
                   <div className="mt-4 flex flex-col gap-1">
                     {/* Row 1: Old Prices (Strike-through) */}
@@ -637,7 +637,7 @@ export default function PricingPage() {
                       </span>
                     </div>
 
-                    <div className="inline-flex items-center gap-1.5 bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-md w-fit border border-indigo-500/20">
+                    <div className="inline-flex items-center gap-1.5 bg-teal-500/10 text-teal-400 px-2 py-0.5 rounded-md w-fit border border-teal-500/20">
                       <span className="text-[7px] font-black uppercase tracking-widest">+ Gateway Charges at Checkout</span>
                     </div>
                   </div>
@@ -649,7 +649,7 @@ export default function PricingPage() {
                 <ul className="space-y-3 mb-8 flex-1">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-[11px] font-bold text-[var(--text-dim)]">
-                      <Check className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${plan.color === 'emerald' ? 'text-emerald-400' : plan.color === 'indigo' ? 'text-indigo-400' : 'text-amber-400'}`} />
+                      <Check className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${plan.color === 'emerald' ? 'text-emerald-400' : plan.color === 'teal' ? 'text-teal-400' : 'text-amber-400'}`} />
                       {feature}
                     </li>
                   ))}
@@ -658,7 +658,7 @@ export default function PricingPage() {
                 <InteractiveHoverButton
                   onClick={() => handleSubscribe(plan)}
                   disabled={plan.id === 'free' || loading === plan.id}
-                  className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${currentPlan === plan.id ? "bg-[var(--glass-bg)] text-[var(--text-dim)] border border-[var(--glass-border)]" : plan.popular ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-[var(--text-main)] text-[var(--bg-app)]"}`}
+                  className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${currentPlan === plan.id ? "bg-[var(--glass-bg)] text-[var(--text-dim)] border border-[var(--glass-border)]" : plan.popular ? "bg-teal-600 text-white shadow-lg shadow-teal-500/20" : "bg-[var(--text-main)] text-[var(--bg-app)]"}`}
                 >
                   {loading === plan.id
                     ? "Connecting..."
@@ -689,15 +689,15 @@ export default function PricingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Engines Column */}
             <div className="space-y-6">
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-400 flex items-center gap-2 mb-8">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" /> Neural Engines
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-teal-400 flex items-center gap-2 mb-8">
+                <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" /> Neural Engines
               </h3>
               <div className="space-y-4">
                 {ENGINE_DETAILS.map((engine, i) => (
-                  <div key={i} className="bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl p-5 hover:border-indigo-500/30 transition-all group">
+                  <div key={i} className="bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl p-5 hover:border-teal-500/30 transition-all group">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-indigo-500/10 group-hover:border-indigo-500/20 transition-all">
+                        <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-teal-500/10 group-hover:border-teal-500/20 transition-all">
                           {engine.icon}
                         </div>
                         <div>
@@ -756,7 +756,7 @@ export default function PricingPage() {
           <div className="max-w-xs">
             <div className="flex items-center gap-2 mb-4">
               <Image src="/icon-sm.png" alt="Chintu" width={24} height={24} />
-              <span className="text-sm font-black tracking-tighter uppercase text-[var(--text-main)]">Chintu <span className="text-indigo-500">SaaS</span></span>
+              <span className="text-sm font-black tracking-tighter uppercase text-[var(--text-main)]">Chintu <span className="text-teal-500">SaaS</span></span>
             </div>
             <p className="text-[11px] text-[var(--text-dim)] font-bold leading-relaxed uppercase tracking-wider">
               Empowering candidates with real-time strategic intelligence. Master every interview with confidence.
@@ -767,9 +767,9 @@ export default function PricingPage() {
             <div>
               <h4 className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-[0.2em] mb-4 text-center sm:text-left">Support</h4>
               <ul className="space-y-2 text-center sm:text-left">
-                <li><a href="mailto:contact@getchintu.com" className="text-[10px] text-[var(--text-dim)] hover:text-indigo-400 font-bold uppercase transition-colors">Contact Us</a></li>
-                <li><Link href="/support" className="text-[10px] text-[var(--text-dim)] hover:text-indigo-400 font-bold uppercase transition-colors">Help Center</Link></li>
-                <li><Link href="/terms" className="text-[10px] text-[var(--text-dim)] hover:text-indigo-400 font-bold uppercase transition-colors">Terms of Service</Link></li>
+                <li><a href="mailto:contact@getchintu.com" className="text-[10px] text-[var(--text-dim)] hover:text-teal-400 font-bold uppercase transition-colors">Contact Us</a></li>
+                <li><Link href="/support" className="text-[10px] text-[var(--text-dim)] hover:text-teal-400 font-bold uppercase transition-colors">Help Center</Link></li>
+                <li><Link href="/terms" className="text-[10px] text-[var(--text-dim)] hover:text-teal-400 font-bold uppercase transition-colors">Terms of Service</Link></li>
               </ul>
             </div>
             <div className="flex flex-col items-center sm:items-end">
@@ -809,7 +809,7 @@ export default function PricingPage() {
               {/* Left Section: Order Summary (Stripe-like) */}
               <div className="w-full md:w-[40%] bg-[var(--panel-bg)] p-5 md:p-8 pb-10 md:pb-8 border-b md:border-b-0 md:border-r border-[var(--glass-border)] flex flex-col relative">
                 {/* Background Glow */}
-                <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
+                <div className="absolute -top-24 -left-24 w-64 h-64 bg-teal-500/10 blur-[80px] rounded-full pointer-events-none" />
 
                 <button
                   onClick={() => setShowPaymentModal(false)}
@@ -823,7 +823,7 @@ export default function PricingPage() {
                   <div className="w-8 h-8 flex items-center justify-center">
                     <Image src="/icon-sm.png" alt="Chintu" width={20} height={20} />
                   </div>
-                  <span className="text-xs font-black tracking-tighter uppercase text-[var(--text-main)]">Chintu <span className="text-indigo-500">SaaS</span></span>
+                  <span className="text-xs font-black tracking-tighter uppercase text-[var(--text-main)]">Chintu <span className="text-teal-500">SaaS</span></span>
                 </div>
 
                 <div className="mb-auto relative z-10">
@@ -856,7 +856,7 @@ export default function PricingPage() {
                   </div>
                   <div className="flex justify-between text-base font-black text-[var(--text-main)] uppercase pt-4 border-t border-[var(--glass-border)] mt-2">
                     <span>Total Due</span>
-                    <span className="text-indigo-500 tracking-tighter text-xl md:text-2xl">${(((billingCycle === 'monthly' ? selectedPlanForPayment?.monthlyPrice : selectedPlanForPayment?.annualPrice) * quantity) * 1.02).toFixed(2)}</span>
+                    <span className="text-teal-500 tracking-tighter text-xl md:text-2xl">${(((billingCycle === 'monthly' ? selectedPlanForPayment?.monthlyPrice : selectedPlanForPayment?.annualPrice) * quantity) * 1.02).toFixed(2)}</span>
                   </div>
                 </div>
               </div>

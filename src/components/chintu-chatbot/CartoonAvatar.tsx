@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
@@ -29,26 +29,26 @@ export default function CartoonAvatar({ size = 'sm' }: CartoonAvatarProps) {
         <defs>
           {/* Soft shadow */}
           <filter id="s" x="-20%" y="-10%" width="140%" height="130%">
-            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor="#6366f1" floodOpacity="0.25" />
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor="#14b8a6" floodOpacity="0.25" />
           </filter>
 
           {/* Body gradient - 3D shaded */}
           <radialGradient id="b" cx="30%" cy="30%" r="70%">
-            <stop offset="0%" stopColor="#a78bfa" />
-            <stop offset="60%" stopColor="#6366f1" />
+            <stop offset="0%" stopColor="#5eead4" />
+            <stop offset="60%" stopColor="#14b8a6" />
             <stop offset="100%" stopColor="#312e81" />
           </radialGradient>
 
           {/* Head sphere gradient */}
           <radialGradient id="h" cx="35%" cy="30%" r="65%">
             <stop offset="0%" stopColor="#ddd6fe" />
-            <stop offset="40%" stopColor="#8b5cf6" />
+            <stop offset="40%" stopColor="#2dd4bf" />
             <stop offset="100%" stopColor="#4c1d95" />
           </radialGradient>
 
           {/* Ear gradient */}
           <linearGradient id="e" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#a78bfa" />
+            <stop offset="0%" stopColor="#5eead4" />
             <stop offset="100%" stopColor="#4338ca" />
           </linearGradient>
         </defs>

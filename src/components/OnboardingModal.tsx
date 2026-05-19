@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { X, Mic, Image as ImageIcon, Zap, Target, MousePointer2, ShieldCheck, Sparkles, Monitor } from "lucide-react";
@@ -15,7 +15,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
     {
       title: "Step 1: Intelligence Setup",
       desc: "Go to your Profile and feed Chintu your Resume and the Job Description. This allows our engines to tailor every answer specifically to your background and the target role.",
-      icon: <Target className="w-5 h-5 text-indigo-400" />,
+      icon: <Target className="w-5 h-5 text-teal-400" />,
     },
     {
       title: "Step 2: Audio Synthesis",
@@ -30,7 +30,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
     {
       title: "Step 4: Select Your Engine",
       desc: "Switch between Intelligence Engines based on the round. Use 'Coding Specialist' for technical rounds and 'Pro Engine' for behavioral or complex strategic questions.",
-      icon: <Zap className="w-5 h-5 text-purple-400" />,
+      icon: <Zap className="w-5 h-5 text-teal-400" />,
     },
   ];
 
@@ -41,8 +41,8 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         {/* Header */}
         <div className="flex items-center justify-between p-8 border-b border-[var(--glass-border)] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-indigo-500" />
+            <div className="w-10 h-10 rounded-2xl bg-teal-600/20 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-teal-500" />
             </div>
             <div>
               <h2 className="text-xl font-black text-[var(--text-main)] tracking-tight leading-none uppercase">Mission Briefing</h2>
@@ -62,7 +62,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
           
           <section className="mb-12">
             <h3 className="text-sm font-black text-[var(--text-main)] uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-              <Monitor className="w-4 h-4 text-indigo-400" /> The Concept
+              <Monitor className="w-4 h-4 text-teal-400" /> The Concept
             </h3>
             <p className="text-[var(--text-dim)] text-sm leading-relaxed font-medium">
               Chintu is your silent strategic partner during high-stakes interviews. It lives discreetly on your screen, listens to the conversation, and provides real-time tactical guidance, perfect answers, and complex code solutions without the interviewer ever knowing.
@@ -90,12 +90,12 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
             </div>
           </section>
 
-          <section className="p-6 rounded-3xl bg-indigo-600/10 border border-indigo-600/20">
+          <section className="p-6 rounded-3xl bg-teal-600/10 border border-teal-600/20">
             <div className="flex items-center gap-3 mb-3">
-              <ShieldCheck className="w-5 h-5 text-indigo-400" />
-              <h4 className="text-sm font-black text-indigo-500 uppercase tracking-widest">Privacy & Stealth</h4>
+              <ShieldCheck className="w-5 h-5 text-teal-400" />
+              <h4 className="text-sm font-black text-teal-500 uppercase tracking-widest">Privacy & Stealth</h4>
             </div>
-            <p className="text-[11px] text-indigo-600 font-medium italic leading-relaxed">
+            <p className="text-[11px] text-teal-600 font-medium italic leading-relaxed">
               Chintu is designed for absolute stealth. Use the <strong>Minimize</strong> button to keep it out of sight, and the <strong>Opacity</strong> slider to blend it into your background. It does not record or save your audio beyond the current session.
             </p>
           </section>
@@ -105,7 +105,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         <div className="p-8 border-t border-[var(--glass-border)] bg-[var(--input-bg)] shrink-0">
           <button 
             onClick={onClose}
-            className="w-full py-4 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-600/20 hover:bg-indigo-500 active:scale-95 transition-all"
+            className="w-full py-4 bg-teal-600 text-white rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-teal-600/20 hover:bg-teal-500 active:scale-95 transition-all"
           >
             I&apos;m Ready to Win
           </button>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 
@@ -269,13 +269,13 @@ export default function ProfileModal({
               value={rawText}
               onChange={e => setRawText(e.target.value)}
               placeholder="Experience, projects, skills... Paste it all here."
-              className="w-full h-48 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-sm text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all resize-none font-medium"
+              className="w-full h-48 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-sm text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all resize-none font-medium"
             />
             <button
               onClick={handleRefine}
               disabled={!rawText.trim() || isRefining}
               className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${rawText.trim() && !isRefining
-                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-[var(--text-main)] shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.01]"
+                ? "bg-gradient-to-r from-teal-600 to-teal-600 text-[var(--text-main)] shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 hover:scale-[1.01]"
                 : "bg-[var(--glass-bg)] text-[var(--text-dim)] cursor-not-allowed"
                 }`}
             >
@@ -306,13 +306,13 @@ export default function ProfileModal({
               value={editJson.startsWith('{') ? editJson : rawText}
               onChange={e => editJson.startsWith('{') ? setEditJson(e.target.value) : setRawText(e.target.value)}
               placeholder={editJson.startsWith('{') ? "Edit JSON directly..." : "Paste new experience, skills, etc. AI will merge it."}
-              className={`w-full h-80 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all resize-none ${editJson.startsWith('{') ? 'font-mono text-[var(--text-main)]' : 'text-[var(--text-main)] font-medium'}`}
+              className={`w-full h-80 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all resize-none ${editJson.startsWith('{') ? 'font-mono text-[var(--text-main)]' : 'text-[var(--text-main)] font-medium'}`}
             />
             <div className="flex gap-3">
               <button
                 onClick={editJson.startsWith('{') ? handleSaveEdit : handleRefine}
                 disabled={(!editJson.startsWith('{') && !rawText.trim()) || isRefining}
-                className="flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20 active:scale-95 disabled:opacity-50"
+                className="flex-1 py-3.5 bg-teal-600 hover:bg-teal-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-teal-600/20 active:scale-95 disabled:opacity-50"
               >
                 {isRefining ? "Optimizing..." : "Save Changes"}
               </button>
@@ -327,7 +327,7 @@ export default function ProfileModal({
             {/* Name & Title */}
             <div className="bg-gradient-to-br from-white/10 to-transparent rounded-2xl px-5 py-4 border border-[var(--glass-border)]">
               <h3 className="text-xl font-black text-[var(--text-main)] uppercase tracking-tight leading-none mb-1">{profile.name || "—"}</h3>
-              {profile.title && <p className="text-xs text-indigo-400 font-black uppercase tracking-widest mb-2">{profile.title}</p>}
+              {profile.title && <p className="text-xs text-teal-400 font-black uppercase tracking-widest mb-2">{profile.title}</p>}
               {profile.summary && <p className="text-xs text-[var(--text-dim)] leading-relaxed font-medium">{profile.summary}</p>}
             </div>
 
@@ -337,7 +337,7 @@ export default function ProfileModal({
                 <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">📝 Job Description</p>
                 {userPlan !== "free" && savedJd && !isEditingJd && (
                   <div className="flex gap-2">
-                    <button onClick={() => setIsEditingJd(true)} className="text-[9px] font-black text-indigo-400 hover:text-indigo-600 uppercase tracking-widest">Edit</button>
+                    <button onClick={() => setIsEditingJd(true)} className="text-[9px] font-black text-teal-400 hover:text-teal-600 uppercase tracking-widest">Edit</button>
                     <button onClick={handleDeleteJd} className="text-[9px] font-black text-red-400 hover:text-red-600 uppercase tracking-widest">Delete</button>
                   </div>
                 )}
@@ -349,14 +349,14 @@ export default function ProfileModal({
                     <textarea
                       value={jdText}
                       onChange={e => setJdText(e.target.value)}
-                      className="w-full h-32 bg-black/20 border border-[var(--glass-border)] rounded-xl p-3 text-xs text-[var(--text-main)] focus:outline-none focus:ring-1 focus:ring-indigo-500/50 resize-none font-medium"
+                      className="w-full h-32 bg-black/20 border border-[var(--glass-border)] rounded-xl p-3 text-xs text-[var(--text-main)] focus:outline-none focus:ring-1 focus:ring-teal-500/50 resize-none font-medium"
                       placeholder="Paste Job Description..."
                     />
                     <div className="flex gap-2">
                       <button
                         onClick={handleSaveJd}
                         disabled={isSavingJd}
-                        className="flex-1 py-2 bg-indigo-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-indigo-500 transition-all disabled:opacity-50"
+                        className="flex-1 py-2 bg-teal-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-teal-500 transition-all disabled:opacity-50"
                       >
                         {isSavingJd ? "Saving..." : "Save JD"}
                       </button>
@@ -383,7 +383,7 @@ export default function ProfileModal({
 
                 {userPlan === "free" && savedJd && (
                   <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px] rounded-2xl">
-                    <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest bg-black/80 px-3 py-1.5 rounded-lg border border-indigo-500/30">
+                    <p className="text-[9px] font-black text-teal-400 uppercase tracking-widest bg-black/80 px-3 py-1.5 rounded-lg border border-teal-500/30">
                       Starter Limit: One-time fill
                     </p>
                   </div>
@@ -506,8 +506,8 @@ export default function ProfileModal({
               </button>
             </div>
             {userPlan === "free" && (
-              <div className="mt-4 bg-indigo-600/10 border border-indigo-600/20 rounded-2xl p-4 text-center">
-                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 leading-relaxed">Unlock editing & more features</p>
+              <div className="mt-4 bg-teal-600/10 border border-teal-600/20 rounded-2xl p-4 text-center">
+                <p className="text-[10px] font-black text-teal-400 uppercase tracking-widest mb-2 leading-relaxed">Unlock editing & more features</p>
                 <button
                   onClick={async () => {
                     const pricingUrl = "https://www.getchintu.com/pricing";
@@ -529,7 +529,7 @@ export default function ProfileModal({
                       window.open(pricingUrl, "_blank");
                     }
                   }}
-                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-indigo-600/20"
+                  className="w-full py-2.5 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-teal-600/20"
                 >
                   Upgrade Now →
                 </button>
@@ -543,19 +543,19 @@ export default function ProfileModal({
       {(isRefining || isBackgroundRefining) && (
         <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--bg-app)] backdrop-blur-2xl" onClick={e => e.stopPropagation()}>
           <div className="relative flex items-center justify-center w-32 h-32 mb-8">
-            <div className="absolute inset-0 rounded-full border-[3px] border-indigo-500/30 animate-[spin_3s_linear_infinite]"></div>
-            <div className="absolute inset-2 rounded-full border-[3px] border-t-purple-500 border-purple-500/20 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
+            <div className="absolute inset-0 rounded-full border-[3px] border-teal-500/30 animate-[spin_3s_linear_infinite]"></div>
+            <div className="absolute inset-2 rounded-full border-[3px] border-t-teal-500 border-teal-500/20 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
             <div className="absolute inset-4 rounded-full border-[3px] border-b-cyan-500 border-cyan-500/20 animate-[spin_2s_linear_infinite]"></div>
             <div className="absolute inset-0 flex items-center justify-center text-4xl animate-pulse">
               ✨
             </div>
           </div>
-          <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 animate-pulse tracking-wide mb-3 text-center px-4">
+          <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-teal-500 to-cyan-500 animate-pulse tracking-wide mb-3 text-center px-4">
             Chintu Ji is structuring your profile...
           </h2>
           <div className="flex gap-1.5 items-center">
-            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "0ms" }}></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: "0ms" }}></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
             <div className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "300ms" }}></div>
           </div>
           <p className="mt-8 text-xs text-[var(--text-dim)] font-medium tracking-[0.2em] uppercase text-center max-w-xs leading-relaxed">

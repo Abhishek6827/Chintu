@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
@@ -53,7 +53,7 @@ export default function WebHeader() {
   if (!mounted || isElectron || pathname === '/resume-preview') return null;
 
   return (
-    <nav role="navigation" aria-label="Main site navigation" className="sticky top-0 z-[100] bg-[var(--bg-app)] dark:bg-[#0a0a12]/90 backdrop-blur-3xl border-b border-[var(--glass-border)] px-6 py-4 shadow-xl shadow-indigo-500/5">
+    <nav role="navigation" aria-label="Main site navigation" className="sticky top-0 z-[100] bg-[var(--bg-app)] dark:bg-[#0a0a12]/90 backdrop-blur-3xl border-b border-[var(--glass-border)] px-6 py-4 shadow-xl shadow-teal-500/5">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link
           href="/"
@@ -70,7 +70,7 @@ export default function WebHeader() {
             />
           </div>
           <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)] dark:text-white">
-            Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Ji</span>
+            Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-teal-500">Ji</span>
           </span>
         </Link>
 
@@ -83,56 +83,56 @@ export default function WebHeader() {
           >
             <Link
               href="/#power-tools"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/80 hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/80 hover:text-teal-400 transition-colors relative group"
             >
               Features
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-500 group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/#compare"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/80 hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/80 hover:text-teal-400 transition-colors relative group"
             >
               Compare
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-500 group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/pricing"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/80 hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/80 hover:text-teal-400 transition-colors relative group"
             >
               Pricing
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-500 group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/blog"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/80 hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/80 hover:text-teal-400 transition-colors relative group"
             >
               Blog
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-500 group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/faq"
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-400 transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] dark:text-white/60 hover:text-teal-400 transition-colors relative group"
             >
               FAQ
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-500 group-hover:w-full transition-all duration-300" />
             </Link>
           </motion.div>
           
           {!isLoaded ? (
-            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-indigo-600 text-white border border-indigo-500 shadow-lg shadow-indigo-500/30">
+            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-teal-600 text-white border border-teal-500 shadow-lg shadow-teal-500/30">
               <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
               <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">Loading...</span>
             </div>
           ) : !isSignedIn ? (
-            <Link href="/sign-up" className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl shadow-lg shadow-indigo-500/40 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+            <Link href="/sign-up" className="relative group overflow-hidden bg-teal-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl shadow-lg shadow-teal-500/40 hover:bg-teal-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
               Get Started <ArrowRight className="w-3 h-3" />
             </Link>
           ) : (
             <div className="flex items-center gap-4">
               {userCredits === null ? (
                 <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm">
-                  <div className="w-5 h-5 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin" />
-                  <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Syncing...</span>
+                  <div className="w-5 h-5 rounded-full border-2 border-teal-500/30 border-t-teal-500 animate-spin" />
+                  <span className="text-[9px] font-black text-teal-400 uppercase tracking-widest">Syncing...</span>
                 </div>
               ) : (
                 <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm animate-in fade-in duration-300">
@@ -147,9 +147,9 @@ export default function WebHeader() {
                     </>
                   )}
                   <div className="flex flex-col items-end">
-                    <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Energy Sync</span>
-                    <span className="text-[11px] font-black text-indigo-400 tracking-tight flex items-center gap-1">
-                      <Zap className="w-2.5 h-2.5 fill-indigo-400" /> {userCredits}
+                    <span className="text-[7px] font-black text-teal-400 uppercase tracking-widest">Energy Sync</span>
+                    <span className="text-[11px] font-black text-teal-400 tracking-tight flex items-center gap-1">
+                      <Zap className="w-2.5 h-2.5 fill-teal-400" /> {userCredits}
                     </span>
                   </div>
                   <div className="h-6 w-[1px] bg-[var(--glass-border)] mx-0.5" />
@@ -157,7 +157,7 @@ export default function WebHeader() {
                     userPlan === 'elite'
                       ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-amber-500/20'
                       : userPlan === 'pro'
-                      ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 shadow-indigo-500/20'
+                      ? 'bg-teal-500/10 text-teal-400 border-teal-500/20 shadow-teal-500/20'
                       : 'bg-slate-500/10 text-slate-500 border-slate-500/20 shadow-slate-500/10'
                   }`}>
                     {userPlan === 'free' ? 'Starter' : userPlan}
@@ -171,16 +171,16 @@ export default function WebHeader() {
                     window.location.href = deepLink;
                     setTimeout(() => router.push("/setup"), 500);
                   }}
-                  className="relative group overflow-hidden bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-indigo-400 text-[9px] font-black uppercase tracking-[0.2em] px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl hover:border-indigo-500 hover:bg-indigo-500/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                  className="relative group overflow-hidden bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-teal-400 text-[9px] font-black uppercase tracking-[0.2em] px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl hover:border-teal-500 hover:bg-teal-500/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                 >
                   <span className="hidden sm:inline">Enter The App</span>
                   <span className="sm:hidden">Open</span>
-                  <Sparkles className="w-3 h-3 fill-indigo-400" />
+                  <Sparkles className="w-3 h-3 fill-teal-400" />
                 </button>
               ) : (
                 <Link
                   href="/pricing"
-                  className="relative group overflow-hidden bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-4 sm:px-8 py-3 sm:py-3.5 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                  className="relative group overflow-hidden bg-teal-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-4 sm:px-8 py-3 sm:py-3.5 rounded-xl shadow-lg shadow-teal-500/20 hover:bg-teal-500 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                 >
                   <span className="hidden sm:inline">Upgrade Plan</span>
                   <span className="sm:hidden">Upgrade</span>

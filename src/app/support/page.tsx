@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
@@ -55,12 +55,12 @@ export default function SupportPage() {
   if (!isLoaded) return <div className="min-h-screen bg-[var(--bg-app)]" />;
 
   return (
-    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-indigo-500/20 flex flex-col relative overflow-x-hidden" style={{ WebkitAppRegion: 'drag' } as any}>
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-teal-500/20 flex flex-col relative overflow-x-hidden" style={{ WebkitAppRegion: 'drag' } as any}>
       {/* Background Ambience */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         {isPremium && <Meteors number={12} />}
-        <div className="absolute top-[-5%] right-[-5%] w-[40%] h-[40%] bg-indigo-500/[0.05] blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-5%] left-[-5%] w-[40%] h-[40%] bg-purple-500/[0.05] blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-[-5%] right-[-5%] w-[40%] h-[40%] bg-teal-500/[0.05] blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-5%] left-[-5%] w-[40%] h-[40%] bg-teal-500/[0.05] blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
 
@@ -73,8 +73,8 @@ export default function SupportPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
           >
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-indigo-500/5 shadow-xl border border-indigo-500/20">
-              <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-500" />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-teal-500/10 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-teal-500/5 shadow-xl border border-teal-500/20">
+              <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-teal-500" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--text-main)] mb-2 uppercase px-2">How can we help?</h1>
             <div className="flex items-center justify-center gap-2 text-[var(--text-dim)]">
@@ -99,7 +99,7 @@ export default function SupportPage() {
               <div className="text-center">
                 <button
                   onClick={() => setSent(false)}
-                  className="px-6 sm:px-8 py-3 sm:py-3.5 bg-[var(--panel-bg)] text-indigo-500 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] rounded-xl sm:rounded-2xl border border-[var(--glass-border)] hover:border-indigo-500/50 transition-all active:scale-95"
+                  className="px-6 sm:px-8 py-3 sm:py-3.5 bg-[var(--panel-bg)] text-teal-500 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] rounded-xl sm:rounded-2xl border border-[var(--glass-border)] hover:border-teal-500/50 transition-all active:scale-95"
                 >
                   Send New Message
                 </button>
@@ -120,7 +120,7 @@ export default function SupportPage() {
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="e.g. Billing, Technical, Feedback..."
-                  className="w-full bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-xl sm:rounded-2xl px-4 py-3 sm:px-5 sm:py-4 text-xs sm:text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all placeholder:text-[var(--text-dim)] shadow-sm font-medium text-[var(--text-main)]"
+                  className="w-full bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-xl sm:rounded-2xl px-4 py-3 sm:px-5 sm:py-4 text-xs sm:text-sm focus:outline-none focus:border-teal-500/50 focus:ring-4 focus:ring-teal-500/5 transition-all placeholder:text-[var(--text-dim)] shadow-sm font-medium text-[var(--text-main)]"
                 />
               </div>
 
@@ -131,7 +131,7 @@ export default function SupportPage() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Describe your issue or question in detail..."
-                  className="w-full h-36 sm:h-48 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-xs sm:text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none placeholder:text-[var(--text-dim)] shadow-sm font-medium leading-relaxed text-[var(--text-main)]"
+                  className="w-full h-36 sm:h-48 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-xs sm:text-sm focus:outline-none focus:border-teal-500/50 focus:ring-4 focus:ring-teal-500/5 transition-all resize-none placeholder:text-[var(--text-dim)] shadow-sm font-medium leading-relaxed text-[var(--text-main)]"
                 />
               </div>
 
@@ -140,7 +140,7 @@ export default function SupportPage() {
                 onClick={handleSubmit}
                 disabled={!message.trim() || sending}
                 className={`w-full py-4 sm:py-5 rounded-[1.5rem] sm:rounded-[2rem] text-[11px] sm:text-[12px] font-black uppercase tracking-[0.25em] sm:tracking-[0.3em] transition-all flex items-center justify-center gap-2 sm:gap-3 ${message.trim() && !sending
-                    ? "bg-indigo-600 text-white shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95"
+                    ? "bg-teal-600 text-white shadow-2xl shadow-teal-500/40 hover:bg-teal-500 hover:scale-[1.02] active:scale-95"
                     : "bg-[var(--panel-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] cursor-not-allowed"
                   }`}
               >

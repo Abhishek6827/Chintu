@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useEffect, useCallback, useState } from "react";
 
@@ -266,7 +266,7 @@ export default function PipWindow({
       {!isPip && (
         <button
           onClick={togglePip}
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-lg font-bold shadow-2xl shadow-violet-500/40 hover:from-violet-500 hover:to-indigo-500 transition-all hover:scale-105 flex items-center gap-3"
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-8 py-4 rounded-2xl bg-gradient-to-r from-teal-600 to-teal-600 text-white text-lg font-bold shadow-2xl shadow-teal-500/40 hover:from-teal-500 hover:to-teal-500 transition-all hover:scale-105 flex items-center gap-3"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />

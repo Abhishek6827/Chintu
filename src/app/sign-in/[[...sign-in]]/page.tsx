@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { SignIn, useAuth, useSignIn } from "@clerk/nextjs";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -74,8 +74,8 @@ export default function Page() {
 
       {/* Background Pulse Animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none no-drag flex items-center justify-center opacity-30">
-        <div className="w-[600px] h-[600px] border-[1px] border-indigo-200 rounded-full animate-[ping_4s_cubic-bezier(0,0,0.2,1)_infinite]" />
-        <div className="absolute w-[400px] h-[400px] border-[1px] border-indigo-300 rounded-full animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite_1s]" />
+        <div className="w-[600px] h-[600px] border-[1px] border-teal-200 rounded-full animate-[ping_4s_cubic-bezier(0,0,0.2,1)_infinite]" />
+        <div className="absolute w-[400px] h-[400px] border-[1px] border-teal-300 rounded-full animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite_1s]" />
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-start py-8 sm:py-12 pb-20 px-4 sm:px-6 no-drag relative z-10 overflow-y-auto">
@@ -83,14 +83,14 @@ export default function Page() {
           {/* Logo Section */}
           <div className="text-center mb-8 relative">
             <div className="w-20 h-20 mx-auto mb-4 drop-shadow-2xl relative">
-              <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 animate-pulse rounded-full" />
+              <div className="absolute inset-0 bg-teal-500 blur-xl opacity-20 animate-pulse rounded-full" />
               <Image src="/icon-sm.png" alt="Chintu" className="w-full h-full object-contain relative z-10 rounded-full" width={40} height={40} />
             </div>
             <h1 className="text-2xl font-black tracking-tight uppercase text-gray-900">Chintu</h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">AI Interview Assistant</p>
-            <div className="mt-4 inline-flex items-center gap-2 bg-indigo-50 py-1.5 px-3 rounded-full border border-indigo-100">
-              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
-              <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest">
+            <div className="mt-4 inline-flex items-center gap-2 bg-teal-50 py-1.5 px-3 rounded-full border border-teal-100">
+              <span className="w-2 h-2 rounded-full bg-teal-500 animate-ping" />
+              <p className="text-[9px] font-black text-teal-600 uppercase tracking-widest">
                 {redirecting ? "Redirecting..." : "Secure Login Portal"}
               </p>
             </div>
@@ -110,16 +110,16 @@ export default function Page() {
                 elements: {
                   rootBox: "w-full flex justify-center",
                   cardBox: "w-full shadow-none border-none bg-transparent",
-                  card: "bg-white rounded-[32px] border border-gray-200 shadow-2xl shadow-indigo-500/5 w-full transition-all duration-500 hover:shadow-indigo-500/10",
+                  card: "bg-white rounded-[32px] border border-gray-200 shadow-2xl shadow-teal-500/5 w-full transition-all duration-500 hover:shadow-teal-500/10",
                   header: "!hidden",
                   badge: "!hidden",
                   developmentBadge: "!hidden",
                   headerTitle: "!hidden",
                   headerSubtitle: "!hidden",
-                  socialButtonsBlockButton: "border-gray-200 hover:bg-indigo-50 text-gray-700 font-bold h-12 transition-all relative",
-                  formButtonPrimary: "bg-indigo-600 hover:bg-indigo-500 text-sm font-bold uppercase tracking-widest h-12 transition-all",
-                  footerActionLink: "text-indigo-600 hover:text-indigo-500 font-black",
-                  formFieldInput: "h-12 rounded-xl border-gray-200 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium",
+                  socialButtonsBlockButton: "border-gray-200 hover:bg-teal-50 text-gray-700 font-bold h-12 transition-all relative",
+                  formButtonPrimary: "bg-teal-600 hover:bg-teal-500 text-sm font-bold uppercase tracking-widest h-12 transition-all",
+                  footerActionLink: "text-teal-600 hover:text-teal-500 font-black",
+                  formFieldInput: "h-12 rounded-xl border-gray-200 focus:ring-teal-500/20 focus:border-teal-500 font-medium",
                   dividerText: "text-[10px] font-black text-gray-400 uppercase tracking-widest",
                   dividerRow: "before:bg-gray-100 after:bg-gray-100",
                   footer: "bg-gray-50/50 border-t border-gray-100 p-6 rounded-b-[32px]",
@@ -143,7 +143,7 @@ export default function Page() {
       {/* Loading Overlay when redirecting */}
       {redirecting && (
         <div className="fixed inset-0 z-[100] bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300">
-          <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-4" />
+          <div className="w-16 h-16 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin mb-4" />
           <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">Authentication Confirmed</h2>
           <p className="text-[10px] font-bold text-gray-400 uppercase mt-2">Redirecting to Dashboard...</p>
         </div>

@@ -1,4 +1,4 @@
-import {
+﻿import {
   Download, Video, Sparkles, UserCheck, Code, Users, MessageSquare, Gift, Gem, Crown, Share2, Rocket, Play, FileText,
 } from "lucide-react";
 import { type FaqItem, type CompareRow } from '@/components/LandingEnhancements';
@@ -9,7 +9,7 @@ export const showcaseSlides = [
     category: "Secure Access",
     title: "Encrypted Login Portal",
     description: "Enterprise-grade authentication with Google, GitHub OAuth and encrypted email — your data, your control.",
-    accent: "from-indigo-500 to-blue-500",
+    accent: "from-teal-500 to-blue-500",
     badge: "Secure Auth",
   },
   {
@@ -17,7 +17,7 @@ export const showcaseSlides = [
     category: "Profile Setup",
     title: "Personalized Intelligence",
     description: "Drop a resume, LinkedIn summary or short bio — Chintu structures it into a tactical profile that powers every answer.",
-    accent: "from-purple-500 to-pink-500",
+    accent: "from-teal-500 to-pink-500",
     badge: "AI Profiling",
   },
   {
@@ -33,7 +33,7 @@ export const showcaseSlides = [
     category: "Bug Detection",
     title: "Surgical Code Diagnostics",
     description: "Line-by-line bug analysis identifying logic errors, type mismatches and runtime crashes with clear, actionable explanations.",
-    accent: "from-indigo-500 to-purple-500",
+    accent: "from-teal-500 to-teal-500",
     badge: "Code Intelligence",
   },
   {
@@ -41,7 +41,7 @@ export const showcaseSlides = [
     category: "Platform Sync",
     title: "Universal Interview Overlay",
     description: "Floating overlay works seamlessly with micro1, HireVue and every global proctored or live interview platform.",
-    accent: "from-blue-500 to-indigo-500",
+    accent: "from-blue-500 to-teal-500",
     badge: "Cross-Platform",
   },
   {
@@ -65,7 +65,7 @@ export const showcaseSlides = [
     category: "Root Cause Engine",
     title: "Scout + Turbo Debugging",
     description: "Deep multi-model code reasoning that pinpoints the root cause, explains why it broke and produces a verified fix.",
-    accent: "from-violet-500 to-fuchsia-500",
+    accent: "from-teal-500 to-fuchsia-500",
     badge: "Scout + Turbo",
   },
   {
@@ -178,7 +178,7 @@ export const howItWorksSteps = [
   {
     num: "01",
     icon: Download,
-    accent: "from-indigo-500 to-blue-500",
+    accent: "from-teal-500 to-blue-500",
     tag: "Step One",
     title: "Sign Up. Install. Log In.",
     desc: "Create a free account, download the stealth overlay for Windows / macOS, and you are ready in under 60 seconds. No credit card, no fuss.",
@@ -186,7 +186,7 @@ export const howItWorksSteps = [
   {
     num: "02",
     icon: Video,
-    accent: "from-purple-500 to-pink-500",
+    accent: "from-teal-500 to-pink-500",
     tag: "Step Two",
     title: "Join Your Interview.",
     desc: "Jump onto any platform — Zoom, Meet, Teams, HireVue, anything. Chintu Ji stays invisible to screen-share, recording and proctoring.",
@@ -248,7 +248,7 @@ export const powerTools = [
       "Unlimited retries, private by default",
       "Weekly progress report",
     ],
-    accent: "from-indigo-500 via-purple-500 to-pink-500",
+    accent: "from-teal-500 via-teal-500 to-pink-500",
     cta: "Start Practising",
     href: "/dashboard",
   },
@@ -264,7 +264,7 @@ export const powerTools = [
       "Designer-grade templates",
       "One-click PDF export",
     ],
-    accent: "from-cyan-400 via-blue-500 to-indigo-500",
+    accent: "from-cyan-400 via-blue-500 to-teal-500",
     cta: "Build My Resume",
     href: "/dashboard",
   },
@@ -308,7 +308,7 @@ export const pricingPlans: PricingPlan[] = [
     monthly: 29,
     yearly: 9,
     icon: Gem,
-    accent: "from-indigo-500 to-purple-500",
+    accent: "from-teal-500 to-teal-500",
     highlighted: true,
     cta: "Upgrade to Pro",
     href: "/pricing",
@@ -328,7 +328,7 @@ export const pricingPlans: PricingPlan[] = [
     monthly: 79,
     yearly: 29,
     icon: Crown,
-    accent: "from-amber-400 via-rose-500 to-purple-500",
+    accent: "from-amber-400 via-rose-500 to-teal-500",
     cta: "Unlock Elite",
     href: "/pricing",
     features: [
@@ -358,7 +358,7 @@ export const creatorTiers = [
     reward: "$25",
     perVideo: "per video",
     icon: Rocket,
-    accent: "from-indigo-500 to-purple-500",
+    accent: "from-teal-500 to-teal-500",
     highlighted: true,
   },
   {

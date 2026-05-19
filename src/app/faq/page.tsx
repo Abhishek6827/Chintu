@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -101,12 +101,12 @@ export default function FAQPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-indigo-500/20 flex flex-col relative overflow-x-hidden">
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-teal-500/20 flex flex-col relative overflow-x-hidden">
       {/* Background Elements */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <Meteors number={20} />
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-200/20 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-200/20 blur-[120px] rounded-full animate-pulse [animation-delay:700ms]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-teal-200/20 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-teal-200/20 blur-[120px] rounded-full animate-pulse [animation-delay:700ms]" />
       </div>
 
       <main className="relative z-10 flex-1">
@@ -118,12 +118,12 @@ export default function FAQPage() {
             transition={{ duration: 0.6 }}
             className="max-w-4xl mx-auto"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6">
-              <HelpCircle className="w-4 h-4 text-indigo-400" />
-              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Help Center</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal-500/10 border border-teal-500/20 rounded-full mb-6">
+              <HelpCircle className="w-4 h-4 text-teal-400" />
+              <span className="text-[10px] font-black text-teal-400 uppercase tracking-[0.3em]">Help Center</span>
             </div>
             <h1 className="text-5xl sm:text-6xl font-black tracking-tighter uppercase leading-[0.9] mb-6">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Frequently</span> Asked Questions
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-teal-500">Frequently</span> Asked Questions
             </h1>
             <p className="text-lg sm:text-xl text-[var(--text-dim)] font-bold uppercase tracking-widest max-w-2xl mx-auto">
               Everything you need to know about Chintu Ji
@@ -148,7 +148,7 @@ export default function FAQPage() {
                   className="w-full px-6 py-5 flex items-center justify-between hover:bg-[var(--glass-bg)] transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-400">
+                    <div className="p-2 bg-teal-500/10 rounded-xl text-teal-400">
                       {category.icon}
                     </div>
                     <span className="text-sm font-black uppercase tracking-widest text-[var(--text-main)]">
@@ -229,9 +229,9 @@ export default function FAQPage() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="max-w-4xl mx-auto text-center bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-[3rem] p-12 sm:p-16"
+            className="max-w-4xl mx-auto text-center bg-gradient-to-br from-teal-500/10 to-teal-500/10 border border-teal-500/20 rounded-[3rem] p-12 sm:p-16"
           >
-            <HelpCircle className="w-12 h-12 text-indigo-400 mx-auto mb-6 animate-pulse" />
+            <HelpCircle className="w-12 h-12 text-teal-400 mx-auto mb-6 animate-pulse" />
             <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter mb-4 text-[var(--text-main)]">
               Still Have Questions?
             </h2>
@@ -241,13 +241,13 @@ export default function FAQPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/support"
-                className="inline-flex items-center gap-3 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.2em] px-10 py-5 rounded-2xl shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 hover:scale-105 active:scale-95 transition-all"
+                className="inline-flex items-center gap-3 bg-teal-600 text-white text-[11px] font-black uppercase tracking-[0.2em] px-10 py-5 rounded-2xl shadow-2xl shadow-teal-500/40 hover:bg-teal-500 hover:scale-105 active:scale-95 transition-all"
               >
                 Contact Support <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/pricing"
-                className="inline-flex items-center gap-3 bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-indigo-400 text-[11px] font-black uppercase tracking-[0.2em] px-10 py-5 rounded-2xl hover:border-indigo-500 hover:bg-indigo-500/10 hover:scale-105 active:scale-95 transition-all"
+                className="inline-flex items-center gap-3 bg-[var(--panel-bg)] border-2 border-[var(--glass-border)] text-teal-400 text-[11px] font-black uppercase tracking-[0.2em] px-10 py-5 rounded-2xl hover:border-teal-500 hover:bg-teal-500/10 hover:scale-105 active:scale-95 transition-all"
               >
                 View Plans <Zap className="w-4 h-4" />
               </Link>

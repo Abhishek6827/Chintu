@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 import { Marquee } from "@/components/ui/marquee";
 import Image from "next/image";
 import { AvatarCircles } from "@/components/ui/avatar-circles";
@@ -113,8 +113,8 @@ export function MarqueeReviews() {
   return (
     <section className="py-24 relative flex w-full flex-col items-center justify-center overflow-hidden border-t border-[var(--glass-border)]">
       <div className="reveal text-center mb-16 px-6">
-        <h2 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.5em] mb-4">Wall of Dominance</h2>
-        <p className="text-3xl font-black tracking-tight text-[var(--text-main)] uppercase">Real Feedback. <span className="text-indigo-600">Real Offers.</span></p>
+        <h2 className="text-[10px] font-black text-teal-500 uppercase tracking-[0.5em] mb-4">Wall of Dominance</h2>
+        <p className="text-3xl font-black tracking-tight text-[var(--text-main)] uppercase">Real Feedback. <span className="text-teal-600">Real Offers.</span></p>
 
         <div className="mt-8 flex flex-col items-center gap-4">
           <AvatarCircles

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from 'react';
 import { Send, CheckCircle2, Loader2 } from 'lucide-react';
@@ -54,7 +54,7 @@ export default function ContactForm() {
         <div className="text-center">
           <button
             onClick={() => setStatus('idle')}
-            className="px-8 py-3.5 bg-[var(--panel-bg)] text-indigo-500 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border border-[var(--glass-border)] hover:border-indigo-500/50 transition-all active:scale-95"
+            className="px-8 py-3.5 bg-[var(--panel-bg)] text-teal-500 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border border-[var(--glass-border)] hover:border-teal-500/50 transition-all active:scale-95"
           >
             Send another message
           </button>
@@ -80,7 +80,7 @@ export default function ContactForm() {
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="Protected User"
-            className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+            className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
           />
         </div>
         <div className="space-y-2">
@@ -91,7 +91,7 @@ export default function ContactForm() {
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             placeholder="contact@getchintu.com"
-            className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+            className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
           />
         </div>
       </div>
@@ -104,14 +104,14 @@ export default function ContactForm() {
           value={formData.message}
           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
           placeholder="How can we help your interview strategy?"
-          className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+          className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all resize-none"
         />
       </div>
 
       <button
         type="submit"
         disabled={status === 'loading'}
-        className="w-full bg-indigo-600 text-white font-black uppercase tracking-[0.2em] text-[11px] py-5 rounded-2xl shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+        className="w-full bg-teal-600 text-white font-black uppercase tracking-[0.2em] text-[11px] py-5 rounded-2xl shadow-xl shadow-teal-500/20 hover:bg-teal-500 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
       >
         {status === 'loading' ? (
           <Loader2 className="w-4 h-4 animate-spin" />

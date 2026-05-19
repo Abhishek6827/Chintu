@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -152,7 +152,7 @@ export default function GlobalFooter() {
                 className="rounded-full"
               />
               <span className="text-xl font-black tracking-tighter uppercase text-[var(--text-main)] dark:text-white">
-                Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">AI</span>
+                Chintu <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-teal-500 to-cyan-400">AI</span>
               </span>
             </Link>
 
@@ -165,7 +165,7 @@ export default function GlobalFooter() {
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-[8px] font-black text-emerald-500 uppercase tracking-[0.25em]">
                 <Shield className="w-2.5 h-2.5" /> 7-Day Refund
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-indigo-500/20 bg-indigo-500/5 text-[8px] font-black text-indigo-500 uppercase tracking-[0.25em]">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-teal-500/20 bg-teal-500/5 text-[8px] font-black text-teal-500 uppercase tracking-[0.25em]">
                 <Zap className="w-2.5 h-2.5" /> &lt;200ms
               </span>
             </div>
@@ -179,7 +179,7 @@ export default function GlobalFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`Chintu Ji on ${s.label}`}
-                  className="w-8 h-8 rounded-full border border-[var(--glass-border)] bg-[var(--panel-bg)] text-[var(--text-dim)] hover:text-indigo-500 hover:border-indigo-500/40 hover:scale-110 active:scale-95 transition-all flex items-center justify-center"
+                  className="w-8 h-8 rounded-full border border-[var(--glass-border)] bg-[var(--panel-bg)] text-[var(--text-dim)] hover:text-teal-500 hover:border-teal-500/40 hover:scale-110 active:scale-95 transition-all flex items-center justify-center"
                 >
                   {s.svg}
                 </a>
@@ -207,7 +207,7 @@ export default function GlobalFooter() {
                       {l.external ? (
                         <a
                           href={l.href}
-                          className="text-[10px] text-[var(--text-dim)] hover:text-indigo-500 font-black uppercase tracking-widest transition-colors inline-flex items-center gap-1.5"
+                          className="text-[10px] text-[var(--text-dim)] hover:text-teal-500 font-black uppercase tracking-widest transition-colors inline-flex items-center gap-1.5"
                         >
                           {l.label === "Contact" && <Mail className="w-2.5 h-2.5" />}
                           {l.label}
@@ -215,7 +215,7 @@ export default function GlobalFooter() {
                       ) : (
                         <Link
                           href={l.href}
-                          className="text-[10px] text-[var(--text-dim)] dark:text-white/60 hover:text-indigo-500 font-black uppercase tracking-widest transition-colors"
+                          className="text-[10px] text-[var(--text-dim)] dark:text-white/60 hover:text-teal-500 font-black uppercase tracking-widest transition-colors"
                         >
                           {l.label}
                         </Link>
@@ -254,10 +254,10 @@ export default function GlobalFooter() {
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
               Global Status: Optimal
             </span>
-            <Link href="/privacy" className="text-[9px] text-[var(--text-dim)] hover:text-indigo-500 font-black uppercase tracking-[0.2em] transition-colors">
+            <Link href="/privacy" className="text-[9px] text-[var(--text-dim)] hover:text-teal-500 font-black uppercase tracking-[0.2em] transition-colors">
               Privacy
             </Link>
-            <Link href="/terms" className="text-[9px] text-[var(--text-dim)] hover:text-indigo-500 font-black uppercase tracking-[0.2em] transition-colors">
+            <Link href="/terms" className="text-[9px] text-[var(--text-dim)] hover:text-teal-500 font-black uppercase tracking-[0.2em] transition-colors">
               Terms
             </Link>
           </div>

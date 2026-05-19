@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -81,7 +81,7 @@ export default function ChintuChatbotWidget() {
                           : ''
                       }`}
           style={{
-            filter: isOpen ? 'none' : 'drop-shadow(0 8px 16px rgba(99,102,241,0.35))',
+            filter: isOpen ? 'none' : 'drop-shadow(0 8px 16px rgba(20,184,166,0.35))',
           }}
         >
           {/* Icon */}

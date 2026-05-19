@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -51,8 +51,8 @@ export const ScrollProgressBar: React.FC = () => {
       style={{
         width,
         background:
-          "linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #06b6d4 100%)",
-        boxShadow: "0 0 12px rgba(99,102,241,0.6)",
+          "linear-gradient(90deg, #14b8a6 0%, #2dd4bf 50%, #06b6d4 100%)",
+        boxShadow: "0 0 12px rgba(20,184,166,0.6)",
       }}
     />
   );
@@ -129,7 +129,7 @@ export const FaqAccordion: React.FC<{ items: FaqItem[] }> = ({ items }) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.25 }}
             transition={{ duration: 0.55, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-            className="border border-[var(--glass-border)] rounded-2xl overflow-hidden bg-[var(--panel-bg)] backdrop-blur-xl hover:border-indigo-500/40 transition-colors"
+            className="border border-[var(--glass-border)] rounded-2xl overflow-hidden bg-[var(--panel-bg)] backdrop-blur-xl hover:border-teal-500/40 transition-colors"
           >
             <button
               onClick={() => setOpenIdx(open ? null : i)}
@@ -143,7 +143,7 @@ export const FaqAccordion: React.FC<{ items: FaqItem[] }> = ({ items }) => {
               <motion.span
                 animate={{ rotate: open ? 45 : 0 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400"
+                className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-600 dark:text-teal-400"
               >
                 <Plus className="w-3.5 h-3.5" />
               </motion.span>
@@ -207,7 +207,7 @@ const Cell: React.FC<{ value: CompareCell; highlight?: boolean }> = ({
   }
   return (
     <span
-      className={`block text-center text-[10px] sm:text-[11px] font-black uppercase tracking-widest ${highlight ? "text-indigo-500" : "text-[var(--text-dim)]"
+      className={`block text-center text-[10px] sm:text-[11px] font-black uppercase tracking-widest ${highlight ? "text-teal-500" : "text-[var(--text-dim)]"
         }`}
     >
       {value}
@@ -221,13 +221,13 @@ export const ComparisonTable: React.FC<{
   competitorBName?: string;
 }> = ({ rows, competitorAName = "Competitor A", competitorBName = "Competitor B" }) => {
   return (
-    <div className="rounded-[2rem] border border-[var(--glass-border)] bg-[var(--panel-bg)] overflow-hidden backdrop-blur-xl shadow-[0_30px_80px_-30px_rgba(79,70,229,0.25)]">
+    <div className="rounded-[2rem] border border-[var(--glass-border)] bg-[var(--panel-bg)] overflow-hidden backdrop-blur-xl shadow-[0_30px_80px_-30px_rgba(13,148,136,0.25)]">
       {/* Header row */}
       <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] sm:grid-cols-[1.6fr_1fr_1fr_1fr] gap-2 sm:gap-4 px-4 sm:px-8 py-4 sm:py-5 border-b border-[var(--glass-border)] bg-[var(--bg-app)]/60">
         <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.25em] text-[var(--text-dim)]">
           Feature
         </span>
-        <span className="text-center text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">
+        <span className="text-center text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-teal-500 to-cyan-400">
           Chintu Ji
         </span>
         <span className="text-center text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">
@@ -248,12 +248,12 @@ export const ComparisonTable: React.FC<{
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.5, delay: i * 0.04, ease: [0.22, 1, 0.36, 1] }}
             className={`grid grid-cols-[1.4fr_1fr_1fr_1fr] sm:grid-cols-[1.6fr_1fr_1fr_1fr] gap-2 sm:gap-4 px-4 sm:px-8 py-3 sm:py-4 items-center ${i !== rows.length - 1 ? "border-b border-[var(--glass-border)]" : ""
-              } hover:bg-indigo-500/5 transition-colors`}
+              } hover:bg-teal-500/5 transition-colors`}
           >
             <span className="text-[10px] sm:text-[12px] font-black uppercase tracking-tight text-[var(--text-main)]">
               {row.feature}
             </span>
-            <div className="bg-indigo-500/5 rounded-xl py-1.5 sm:py-2">
+            <div className="bg-teal-500/5 rounded-xl py-1.5 sm:py-2">
               <Cell value={row.chintu} highlight />
             </div>
             <Cell value={row.compA} />

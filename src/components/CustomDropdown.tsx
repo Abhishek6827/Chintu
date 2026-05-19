@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, Shield } from "lucide-react";
@@ -77,7 +77,7 @@ export default function CustomDropdown({
                     {option.name}
                     {option.locked && <Shield className="w-3 h-3 text-amber-500" />}
                    </span>
-                   {option.key === value && !option.locked && <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]" />}
+                   {option.key === value && !option.locked && <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.8)]" />}
                 </div>
               </button>
             ))}

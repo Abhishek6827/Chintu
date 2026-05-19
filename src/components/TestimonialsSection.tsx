@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 import { motion } from "framer-motion";
 
@@ -315,10 +315,10 @@ export function TestimonialsSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
         >
-          <h2 className="text-xs font-black text-indigo-500 uppercase tracking-[0.5em] mb-4">Success Stories</h2>
+          <h2 className="text-xs font-black text-teal-500 uppercase tracking-[0.5em] mb-4">Success Stories</h2>
           <p className="text-4xl sm:text-5xl font-black tracking-tight text-[var(--text-main)] uppercase leading-[0.9]">
             Trusted by Elites <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">at Top Tier Tech.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-teal-500">at Top Tier Tech.</span>
           </p>
         </motion.div>
         <motion.div

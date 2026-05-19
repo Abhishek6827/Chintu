@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
@@ -115,7 +115,7 @@ export default function SubscriptionPage() {
   const getPlanColor = (plan: string) => {
     switch (plan?.toLowerCase()) {
       case "elite": return { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/20", glow: "shadow-amber-500/10" };
-      case "pro": return { bg: "bg-indigo-500/10", text: "text-indigo-400", border: "border-indigo-500/20", glow: "shadow-indigo-500/10" };
+      case "pro": return { bg: "bg-teal-500/10", text: "text-teal-400", border: "border-teal-500/20", glow: "shadow-teal-500/10" };
       default: return { bg: "bg-gray-500/10", text: "text-gray-400", border: "border-gray-500/20", glow: "shadow-gray-500/10" };
     }
   };
@@ -123,7 +123,7 @@ export default function SubscriptionPage() {
   if (loading || !isLoaded) {
     return (
       <div className="min-h-screen bg-[var(--bg-app)] flex items-center justify-center transition-colors duration-300">
-        <div className="w-5 h-5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-teal-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -157,8 +157,8 @@ export default function SubscriptionPage() {
       {plan !== "free" && (
         <div className="fixed inset-0 pointer-events-none z-0">
           <Meteors number={20} />
-          <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/5 blur-[120px] rounded-full animate-pulse" />
-          <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-500/5 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-teal-500/5 blur-[120px] rounded-full animate-pulse" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-teal-500/5 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
       )}
 
@@ -287,7 +287,7 @@ export default function SubscriptionPage() {
                             return `₹${num.toLocaleString()}`;
                           })() },
                           { label: "Method", value: (paymentDetails?.method || data.profile_data?.payment_type || "N/A"), isBadge: true, color: "emerald" },
-                          { label: "Billing Cycle", value: getBillingCycle(data.updated_at, data.subscription_expires_at), isBadge: true, color: "indigo" },
+                          { label: "Billing Cycle", value: getBillingCycle(data.updated_at, data.subscription_expires_at), isBadge: true, color: "teal" },
                           { label: "Subscription Start", value: formatDate(data.subscription_starts_at) },
                           { label: "Invoice Date", value: formatDate(paymentDetails?.createdAt || data.profile_data?.last_payment_at || data.updated_at) },
                         ]
@@ -298,7 +298,7 @@ export default function SubscriptionPage() {
                           <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
                             item.color === 'blue' ? 'bg-blue-500/5 text-blue-400 border-blue-500/10' : 
                             item.color === 'emerald' ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/10' : 
-                            'bg-indigo-500/5 text-indigo-400 border-indigo-500/10'
+                            'bg-teal-500/5 text-teal-400 border-teal-500/10'
                           }`}>
                             {item.value}
                           </span>
@@ -329,7 +329,7 @@ export default function SubscriptionPage() {
                         </span>
                       </div>
                       <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--panel-bg)] overflow-hidden shadow-sm">
-                        <div className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-500/20 scrollbar-track-transparent">
+                        <div className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-teal-500/20 scrollbar-track-transparent">
                           {displayedHistory.length > 0 ? (
                             <div className="divide-y divide-[var(--glass-border)]">
                               {displayedHistory.map((entry, idx) => (

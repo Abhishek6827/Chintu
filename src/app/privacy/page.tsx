@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect } from 'react';
 import { Lock, EyeOff, Server, FileCheck, Sparkles } from 'lucide-react';
@@ -22,13 +22,13 @@ export default function PrivacyPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-indigo-500/20 flex flex-col relative overflow-x-hidden">
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] selection:bg-teal-500/20 flex flex-col relative overflow-x-hidden">
       
       {/* Background Orbs */}
       <div className="fixed inset-0 pointer-events-none z-0">
         {isPremium && <Meteors number={12} />}
-        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-200/20 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-200/20 blur-[120px] rounded-full animate-pulse [animation-delay:700ms]" />
+        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-200/20 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-teal-200/20 blur-[120px] rounded-full animate-pulse [animation-delay:700ms]" />
       </div>
 
 
@@ -39,18 +39,18 @@ export default function PrivacyPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-8">
-            <Sparkles className="w-3 h-3 text-indigo-400 animate-pulse" />
-            <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Security Standards v2.0</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-500/10 border border-teal-500/20 rounded-full mb-8">
+            <Sparkles className="w-3 h-3 text-teal-400 animate-pulse" />
+            <span className="text-[9px] font-black text-teal-400 uppercase tracking-widest">Security Standards v2.0</span>
           </div>
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tighter text-[var(--text-main)] mb-8 uppercase leading-[0.9]">Privacy is our <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Core Protocol.</span></h1>
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tighter text-[var(--text-main)] mb-8 uppercase leading-[0.9]">Privacy is our <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-teal-500">Core Protocol.</span></h1>
           <p className="text-[11px] text-[var(--text-dim)] font-black uppercase tracking-[0.2em] leading-relaxed">System Integrity Verified • Updated: April 30, 2026</p>
         </motion.div>
 
         <div className="space-y-32">
           <section className="reveal transition-all duration-1000">
             <div className="flex items-center gap-5 mb-8">
-              <div className="w-14 h-14 bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-xl shadow-indigo-500/5 rounded-[1.5rem] flex items-center justify-center text-indigo-500">
+              <div className="w-14 h-14 bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-xl shadow-teal-500/5 rounded-[1.5rem] flex items-center justify-center text-teal-500">
                 <Lock className="w-6 h-6" />
               </div>
               <h2 className="text-xl font-black uppercase tracking-tight text-[var(--text-main)]">Zero-Log Visual Pipeline</h2>
@@ -64,7 +64,7 @@ export default function PrivacyPage() {
 
           <section className="reveal transition-all duration-1000 delay-200">
             <div className="flex items-center gap-5 mb-8">
-              <div className="w-14 h-14 bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-xl shadow-purple-500/5 rounded-[1.5rem] flex items-center justify-center text-purple-500">
+              <div className="w-14 h-14 bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-xl shadow-teal-500/5 rounded-[1.5rem] flex items-center justify-center text-teal-500">
                 <EyeOff className="w-6 h-6" />
               </div>
               <h2 className="text-xl font-black uppercase tracking-tight text-[var(--text-main)]">Stealth Encryption</h2>
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
             </div>
           </section>
 
-          <section className="reveal transition-all duration-1000 delay-400 bg-[var(--panel-bg)] p-10 sm:p-14 rounded-[4rem] border border-[var(--glass-border)] shadow-2xl shadow-indigo-500/5">
+          <section className="reveal transition-all duration-1000 delay-400 bg-[var(--panel-bg)] p-10 sm:p-14 rounded-[4rem] border border-[var(--glass-border)] shadow-2xl shadow-teal-500/5">
             <div className="flex items-center gap-5 mb-10">
               <div className="w-14 h-14 bg-emerald-500/10 rounded-[1.5rem] flex items-center justify-center text-emerald-500">
                 <Server className="w-6 h-6" />
@@ -114,7 +114,7 @@ export default function PrivacyPage() {
 
         <div className="reveal mt-32 pt-16 border-t border-[var(--glass-border)] text-center transition-all duration-1000 delay-700">
            <p className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-[0.4em] mb-6">Security Inquiries?</p>
-           <a href="mailto:contact@getchintu.com" className="inline-block bg-[var(--panel-bg)] border border-[var(--glass-border)] px-8 py-4 rounded-2xl text-indigo-500 font-black uppercase tracking-widest text-[11px] hover:border-indigo-500/50 transition-all shadow-sm">
+           <a href="mailto:contact@getchintu.com" className="inline-block bg-[var(--panel-bg)] border border-[var(--glass-border)] px-8 py-4 rounded-2xl text-teal-500 font-black uppercase tracking-widest text-[11px] hover:border-teal-500/50 transition-all shadow-sm">
              Contact Data Protection Officer
            </a>
         </div>

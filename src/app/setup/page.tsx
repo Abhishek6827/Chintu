@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -235,7 +235,7 @@ export default function SetupPage() {
         <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-1 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] shadow-sm">
             <span className={`text-[8px] font-black uppercase tracking-widest ${
-              userPlan === "elite" ? "text-amber-500" : userPlan === "pro" ? "text-indigo-500" : "text-[var(--text-dim)]"
+              userPlan === "elite" ? "text-amber-500" : userPlan === "pro" ? "text-teal-500" : "text-[var(--text-dim)]"
             }`}>
               {userPlan === "free" ? "Starter" : userPlan}
             </span>
@@ -259,7 +259,7 @@ export default function SetupPage() {
           {/* Logo Section */}
           <div className="text-center mb-8">
             <div className="w-20 h-20 mx-auto mb-6 bg-[var(--panel-bg)] rounded-[2rem] border border-[var(--glass-border)] shadow-xl flex items-center justify-center p-3 relative overflow-hidden group hover:scale-105 transition-transform">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <Image
                 src="/icon-sm.png"
                 alt="Chintu"
@@ -271,9 +271,9 @@ export default function SetupPage() {
             <h1 className="text-3xl font-black tracking-tight uppercase text-[var(--text-main)] leading-none">Chintu</h1>
             <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.4em] mt-2 text-center">AI Interview Assistant</p>
             {showJdOnly && (
-              <div className="mt-6 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 animate-in fade-in slide-in-from-top-2">
-                <p className="text-xs font-bold text-indigo-400">Welcome back!</p>
-                <p className="text-[10px] text-indigo-400/70 font-bold uppercase tracking-wider mt-1">Enter your Job Description to continue.</p>
+              <div className="mt-6 bg-teal-500/10 border border-teal-500/20 rounded-2xl p-4 animate-in fade-in slide-in-from-top-2">
+                <p className="text-xs font-bold text-teal-400">Welcome back!</p>
+                <p className="text-[10px] text-teal-400/70 font-bold uppercase tracking-wider mt-1">Enter your Job Description to continue.</p>
               </div>
             )}
           </div>
@@ -304,7 +304,7 @@ export default function SetupPage() {
                   value={aboutMe}
                   onChange={(e) => setAboutMe(e.target.value)}
                   placeholder="Paste your resume or tell about your experience..."
-                  className="w-full h-32 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none placeholder:text-[var(--text-dim)] shadow-sm text-[var(--text-main)]"
+                  className="w-full h-32 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all resize-none placeholder:text-[var(--text-dim)] shadow-sm text-[var(--text-main)]"
                 />
               </div>
             ) : (
@@ -323,7 +323,7 @@ export default function SetupPage() {
                   </div>
                   <div className="pt-2 border-t border-emerald-500/10">
                     <p className="text-[8px] font-bold text-emerald-400/60 uppercase tracking-widest leading-relaxed">
-                      Starter plan limited to one-time profile. <button onClick={() => router.push("/pricing")} className="text-indigo-400 underline">Upgrade</button> to edit.
+                      Starter plan limited to one-time profile. <button onClick={() => router.push("/pricing")} className="text-teal-400 underline">Upgrade</button> to edit.
                     </p>
                   </div>
                 </div>
@@ -356,13 +356,13 @@ export default function SetupPage() {
                 {userPlan !== "free" && jd && (
                   <button
                     onClick={() => setJd("")}
-                    className="text-[9px] font-black text-indigo-400 hover:text-indigo-600 uppercase tracking-widest"
+                    className="text-[9px] font-black text-teal-400 hover:text-teal-600 uppercase tracking-widest"
                   >
                     Clear
                   </button>
                 )}
                 {isJdLocked && (
-                  <span className="text-[8px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100 flex items-center gap-1">
+                  <span className="text-[8px] font-black text-teal-500 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100 flex items-center gap-1">
                     🔒 STARTER LIMIT
                   </span>
                 )}
@@ -372,7 +372,7 @@ export default function SetupPage() {
                 onChange={(e) => setJd(e.target.value)}
                 readOnly={isJdLocked}
                 placeholder={isJdLocked ? "Upgrade to Pro to change Job Description" : "Paste the job description you are interviewing for..."}
-                className={`w-full h-40 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none placeholder:text-[var(--text-dim)] shadow-sm text-[var(--text-main)] ${isJdLocked ? "opacity-60 cursor-not-allowed bg-[var(--glass-bg)]" : ""}`}
+                className={`w-full h-40 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all resize-none placeholder:text-[var(--text-dim)] shadow-sm text-[var(--text-main)] ${isJdLocked ? "opacity-60 cursor-not-allowed bg-[var(--glass-bg)]" : ""}`}
               />
 
               <div className="flex items-center gap-2 mt-3 px-1">
@@ -380,7 +380,7 @@ export default function SetupPage() {
                   <>
                     <button
                       onClick={() => setSaveJd(!saveJd)}
-                      className={`w-9 h-5 rounded-full transition-all relative ${saveJd ? 'bg-indigo-600' : 'bg-[var(--glass-border)]'}`}
+                      className={`w-9 h-5 rounded-full transition-all relative ${saveJd ? 'bg-teal-600' : 'bg-[var(--glass-border)]'}`}
                     >
                       <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${saveJd ? 'left-5' : 'left-1'}`} />
                     </button>
@@ -392,7 +392,7 @@ export default function SetupPage() {
               {isJdLocked && (
                 <button
                   onClick={() => router.push("/pricing")}
-                  className="w-full py-2 text-[8px] font-black text-indigo-600 uppercase tracking-widest hover:bg-indigo-50 rounded-lg transition-colors"
+                  className="w-full py-2 text-[8px] font-black text-teal-600 uppercase tracking-widest hover:bg-teal-50 rounded-lg transition-colors"
                 >
                   ✨ Unlock Unlimited JDs with Pro
                 </button>
@@ -407,7 +407,7 @@ export default function SetupPage() {
                 className={`
                   w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative overflow-hidden group
                   ${jd.trim() && (hasProfile || aboutMe.trim()) && !isRefining
-                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30"
+                    ? "bg-teal-600 text-white shadow-xl shadow-teal-500/30"
                     : "bg-[var(--panel-bg)] text-[var(--text-dim)] border border-[var(--glass-border)] cursor-not-allowed"
                   }
                 `}
@@ -419,10 +419,10 @@ export default function SetupPage() {
               {isRefining && (
                 <button
                   onClick={handleSkipAndStart}
-                  className="w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 active:scale-95 border border-indigo-500/20 shadow-sm"
+                  className="w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 text-teal-400 bg-teal-500/10 hover:bg-teal-500/20 active:scale-95 border border-teal-500/20 shadow-sm"
                 >
                   Skip & Start Interview
-                  <p className="text-[8px] font-medium text-indigo-400 mt-0.5 tracking-normal normal-case">Profile will refine in background</p>
+                  <p className="text-[8px] font-medium text-teal-400 mt-0.5 tracking-normal normal-case">Profile will refine in background</p>
                 </button>
               )}
             </div>
@@ -447,7 +447,7 @@ export default function SetupPage() {
         <div className="fixed inset-0 z-[110] flex flex-col items-center justify-center bg-[var(--bg-app)] animate-in fade-in zoom-in duration-500">
           <div className="max-w-sm w-full px-8 text-center">
             <div className="relative w-32 h-32 mx-auto mb-10">
-              <div className="absolute inset-0 bg-indigo-500/10 rounded-[2.5rem] animate-pulse" />
+              <div className="absolute inset-0 bg-teal-500/10 rounded-[2.5rem] animate-pulse" />
               <div className="absolute inset-4 bg-[var(--panel-bg)] rounded-[2rem] shadow-xl flex items-center justify-center border border-[var(--glass-border)] overflow-hidden">
                 <Image
                   src="/icon-sm.png"
@@ -469,7 +469,7 @@ export default function SetupPage() {
             <div className="space-y-3">
               <button
                 onClick={() => window.location.href = "chintu://open"}
-                className="w-full py-4 bg-indigo-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all"
+                className="w-full py-4 bg-teal-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-teal-500/20 hover:bg-teal-500 hover:scale-[1.02] active:scale-95 transition-all"
               >
                 Launch Desktop App
               </button>
@@ -486,7 +486,7 @@ export default function SetupPage() {
 
             <button
               onClick={() => setShowAppPrompt(false)}
-              className="mt-12 text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest hover:text-indigo-400 transition-colors"
+              className="mt-12 text-[10px] font-black text-[var(--text-dim)] uppercase tracking-widest hover:text-teal-400 transition-colors"
             >
               Return to Setup
             </button>

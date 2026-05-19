@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,13 +17,13 @@ export const InteractiveHoverButton = React.forwardRef<
     <button
       ref={ref}
       className={cn(
-        "group relative w-full cursor-pointer overflow-hidden rounded-xl border border-indigo-500/20 bg-background p-2 px-6 text-center transition-all duration-300 hover:border-indigo-500/50",
+        "group relative w-full cursor-pointer overflow-hidden rounded-xl border border-teal-500/20 bg-background p-2 px-6 text-center transition-all duration-300 hover:border-teal-500/50",
         className,
       )}
       {...props}
     >
       <div className="flex items-center justify-center gap-2">
-        <div className="h-2 w-2 rounded-full bg-indigo-500 transition-all duration-300 group-hover:scale-[100.8]"></div>
+        <div className="h-2 w-2 rounded-full bg-teal-500 transition-all duration-300 group-hover:scale-[100.8]"></div>
         <span className="inline-block transition-all duration-300 group-hover:translate-x-12 group-hover:opacity-0">
           {children}
         </span>

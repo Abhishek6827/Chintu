@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -1441,7 +1441,7 @@ export default function RoomPage() {
     return (
       <div className="h-screen bg-[var(--bg-app)] flex flex-col items-center justify-center p-8 text-center">
         <div className="max-w-md">
-          <div className="w-20 h-20 bg-indigo-500/10 border border-indigo-500/20 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-xl">
+          <div className="w-20 h-20 bg-teal-500/10 border border-teal-500/20 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-xl">
             <Image src="/icon-sm.png" alt="Chintu" width={40} height={40} />
           </div>
           <h1 className="text-3xl font-black tracking-tighter text-[var(--text-main)] mb-4 uppercase">Desktop Exclusive.</h1>
@@ -1449,7 +1449,7 @@ export default function RoomPage() {
             The Chintu Room is a strategic environment designed exclusively for our Desktop Application. Please launch Chintu on your computer to access live synthesis and stealth mode.
           </p>
           <div className="flex flex-col gap-4">
-            <a href="https://www.getchintu.com/download" className="bg-indigo-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 transition-all">Download Chintu</a>
+            <a href="https://www.getchintu.com/download" className="bg-teal-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-teal-500/20 hover:bg-teal-500 transition-all">Download Chintu</a>
             <button onClick={() => router.push('/')} className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest hover:text-[var(--text-main)] transition-colors">Return to Home</button>
           </div>
         </div>
@@ -1467,8 +1467,8 @@ export default function RoomPage() {
     <div className="app-container" style={{ '--app-opacity': windowOpacity } as React.CSSProperties}>
       {/* Neural Mesh Background */}
       <div className="neural-mesh">
-        <div className="mesh-orb w-[400px] h-[400px] bg-indigo-600/30 -top-20 -left-20 animate-pulse" />
-        <div className="mesh-orb w-[300px] h-[300px] bg-purple-600/20 bottom-10 right-10 animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="mesh-orb w-[400px] h-[400px] bg-teal-600/30 -top-20 -left-20 animate-pulse" />
+        <div className="mesh-orb w-[300px] h-[300px] bg-teal-600/20 bottom-10 right-10 animate-pulse" style={{ animationDelay: '2s' }} />
         <div className="mesh-orb w-[250px] h-[250px] bg-blue-600/20 top-1/2 left-1/3" style={{ animationDelay: '5s' }} />
       </div>
 
@@ -1481,10 +1481,10 @@ export default function RoomPage() {
             rounded-2xl px-4 py-3 shadow-2xl backdrop-blur-xl border flex items-center justify-between gap-3
             ${toast.type === 'success'
               ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-              : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'}
+              : 'bg-teal-500/10 border-teal-500/20 text-teal-400'}
           `}>
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${toast.type === 'success' ? 'bg-emerald-500/20' : 'bg-indigo-500/20'}`}>
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${toast.type === 'success' ? 'bg-emerald-500/20' : 'bg-teal-500/20'}`}>
                 {toast.type === 'success' ? <Check className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
               </div>
               <p className="text-[10px] font-bold leading-tight truncate">
@@ -1506,9 +1506,9 @@ export default function RoomPage() {
         <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 w-auto px-5 py-2 rounded-full flex items-center gap-2.5 animate-in fade-in slide-in-from-top-4 duration-500 status-glow" style={{ background: 'var(--panel-bg)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
           {status === "generating" ? (
             <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 wave-dot" />
-              <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 wave-dot" />
-              <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 wave-dot" />
+              <div className="w-1.5 h-1.5 rounded-full bg-teal-400 wave-dot" />
+              <div className="w-1.5 h-1.5 rounded-full bg-teal-400 wave-dot" />
+              <div className="w-1.5 h-1.5 rounded-full bg-teal-400 wave-dot" />
             </div>
           ) : (
             <div className={`w-2 h-2 rounded-full ${status === "recording" ? "bg-red-400 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" : "bg-emerald-400 animate-ping"}`} />
@@ -1570,14 +1570,14 @@ export default function RoomPage() {
           <div className={`rounded-xl px-4 py-3 text-xs flex items-center justify-between border ${updateStatus.status === "error"
             ? "bg-red-500/10 border-red-500/20 text-red-600"
             : updateStatus.status === "checking"
-              ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-600"
+              ? "bg-teal-500/10 border-teal-500/20 text-teal-600"
               : updateStatus.status === "up-to-date"
                 ? "bg-green-500/10 border-green-500/20 text-green-600"
                 : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"
             }`}>
             {updateStatus.status === "checking" ? (
               <span className="flex items-center gap-2">
-                <svg className="animate-spin h-4 w-4 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin h-4 w-4 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -1672,11 +1672,11 @@ export default function RoomPage() {
       {/* Background Profile Refining Indicator */}
       {isBackgroundRefining && (
         <div className="px-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
-          <div className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 rounded-xl px-4 py-3 text-xs flex items-center justify-between shadow-[0_0_15px_rgba(99,102,241,0.15)]">
+          <div className="bg-teal-500/10 border border-teal-500/20 text-teal-600 rounded-xl px-4 py-3 text-xs flex items-center justify-between shadow-[0_0_15px_rgba(20,184,166,0.15)]">
             <div className="flex items-center gap-3">
               <div className="flex gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: "150ms" }}></div>
                 <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "300ms" }}></div>
               </div>
               <span className="font-bold tracking-tight">Chintu Ji is optimizing your profile in the background...</span>
@@ -1772,7 +1772,7 @@ export default function RoomPage() {
 
       {/* Text Input Row */}
       <div className="px-2 sm:px-4 pb-2 shrink-0">
-        <div className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-2xl focus-within:border-indigo-400/50 focus-within:bg-[var(--glass-bg)] transition-all">
+        <div className="bg-[var(--input-bg)] border border-[var(--glass-border)] rounded-2xl focus-within:border-teal-400/50 focus-within:bg-[var(--glass-bg)] transition-all">
           {/* Inline selectors row */}
           <div className="flex items-center gap-2 px-2 pt-2 flex-wrap">
             <CustomDropdown
@@ -1823,7 +1823,7 @@ export default function RoomPage() {
             <button
               onClick={capturedScreenshots.length > 0 ? sendScreenshots : handleSendText}
               disabled={(capturedScreenshots.length === 0 && !inputText.trim()) || status !== "idle"}
-              className="absolute right-1.5 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg sm:rounded-xl bg-indigo-500/80 text-white disabled:opacity-50"
+              className="absolute right-1.5 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg sm:rounded-xl bg-teal-500/80 text-white disabled:opacity-50"
             >
               <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.125A59.769 59.769 0 0121.485 12 59.768 59.768 0 013.27 20.875L5.999 12Zm0 0h7.5" />
@@ -1995,14 +1995,14 @@ export default function RoomPage() {
             className={`
               no-drag w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center relative transition-all active:scale-90
               ${capturedScreenshots.length > 0
-                ? "bg-indigo-500 text-white shadow-[0_0_30px_rgba(99,102,241,0.4)]"
+                ? "bg-teal-500 text-white shadow-[0_0_30px_rgba(20,184,166,0.4)]"
                 : "bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--text-dim)] hover:bg-[var(--glass-bg)]"
               }
             `}
           >
             <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>
             {capturedScreenshots.length > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white text-indigo-600 text-[10px] font-black rounded-full flex items-center justify-center shadow-lg">
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white text-teal-600 text-[10px] font-black rounded-full flex items-center justify-center shadow-lg">
                 {capturedScreenshots.length}
               </span>
             )}
@@ -2051,7 +2051,7 @@ export default function RoomPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      {isLightMode ? <Sun className="w-3 h-3 text-amber-500" /> : <Moon className="w-3 h-3 text-indigo-400" />}
+                      {isLightMode ? <Sun className="w-3 h-3 text-amber-500" /> : <Moon className="w-3 h-3 text-teal-400" />}
                       <h4 style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-widest">Theme</h4>
                       {userPlan === 'free' && (
                         <span className="bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase px-1.5 py-0.5 rounded tracking-widest">PRO</span>
@@ -2136,7 +2136,7 @@ export default function RoomPage() {
                         setShowEnableUniversalShortcutsPrompt(true);
                       }
                     }}
-                    className={`w-9 h-5 rounded-full transition-all relative ${universalShortcuts ? "bg-indigo-600" : "bg-gray-600/30"}`}
+                    className={`w-9 h-5 rounded-full transition-all relative ${universalShortcuts ? "bg-teal-600" : "bg-gray-600/30"}`}
                   >
                     <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-md transition-all ${universalShortcuts ? "left-5" : "left-1"}`} />
                   </button>
@@ -2199,7 +2199,7 @@ export default function RoomPage() {
                     <div className="flex gap-1.5">
                       <button
                         onClick={exportHistory}
-                        className="rounded-xl bg-[var(--glass-bg)] text-[var(--text-main)] flex items-center justify-center hover:bg-indigo-500/20 transition-all border border-[var(--glass-border)]"
+                        className="rounded-xl bg-[var(--glass-bg)] text-[var(--text-main)] flex items-center justify-center hover:bg-teal-500/20 transition-all border border-[var(--glass-border)]"
                         style={{ width: 'clamp(24px, 6vw, 40px)', height: 'clamp(24px, 6vw, 40px)' }}
                         title="Export History"
                       >
@@ -2234,7 +2234,7 @@ export default function RoomPage() {
                             setChatConversationHistory([]);
                             setShowSettings(false);
                           }}
-                          className="w-full text-left rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] hover:border-indigo-500/50 transition-all group flex items-center justify-between"
+                          className="w-full text-left rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] hover:border-teal-500/50 transition-all group flex items-center justify-between"
                           style={{ padding: 'clamp(6px, 1.5vw, 12px)' }}
                         >
                           <div className="flex-1 min-w-0 pr-2">
@@ -2350,7 +2350,7 @@ export default function RoomPage() {
               <h3 className="text-xl font-black text-white mb-2 tracking-tight uppercase">Disable Safe Click?</h3>
               <p className="text-gray-400 text-xs mb-6 leading-relaxed">
                 Disabling this will allow clicking inside Chintu to trigger <span className="text-amber-400 font-bold underline">Exam Window / Tab Change</span> warnings on the website!<br/><br/>
-                <span className="text-gray-300 font-semibold">Note:</span> Only disable Safe Click if you explicitly need to <span className="text-indigo-400 font-bold">Type</span> inside Chintu using your keyboard.
+                <span className="text-gray-300 font-semibold">Note:</span> Only disable Safe Click if you explicitly need to <span className="text-teal-400 font-bold">Type</span> inside Chintu using your keyboard.
               </p>
               <div className="flex flex-col gap-3">
                 <button
@@ -2417,13 +2417,18 @@ export default function RoomPage() {
       {/* Floating side controls */}
       {isElectron && (
         <div className={`floating-side-controls no-drag relative group/side ${userPlan === 'free' ? 'cursor-pointer' : ''}`} onClick={() => { if (userPlan === 'free') openPricingExternal(); }}>
+          {userPlan === null && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] rounded-2xl">
+              <Loader2 className="w-4 h-4 text-teal-400 animate-spin" />
+            </div>
+          )}
           {userPlan === 'free' && (
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-2xl opacity-0 group-hover/side:opacity-100 transition-opacity p-2 text-center">
               <Crown className="w-4 h-4 text-amber-400 mb-1" />
               <span className="text-[8px] font-black uppercase text-white tracking-widest leading-tight">Pro<br />Features</span>
             </div>
           )}
-          <div className={`side-control-group ${userPlan === 'free' ? 'opacity-40 grayscale blur-[1px]' : ''}`}>
+          <div className={`side-control-group ${userPlan === 'free' || userPlan === null ? 'opacity-40 grayscale blur-[1px]' : ''}`}>
             <span className="side-control-label">🔍</span>
             <input
               type="range"
@@ -2432,11 +2437,11 @@ export default function RoomPage() {
               value={Math.round(windowOpacity * 100)}
               onChange={(e) => handleOpacityChange(parseInt(e.target.value) / 100)}
               className="side-slider"
-              disabled={userPlan === 'free'}
+              disabled={userPlan === 'free' || userPlan === null}
             />
             <span className="side-control-value">{Math.round(windowOpacity * 100)}</span>
           </div>
-          <div className={`side-control-group ${userPlan === 'free' ? 'opacity-40 grayscale blur-[1px]' : ''}`}>
+          <div className={`side-control-group ${userPlan === 'free' || userPlan === null ? 'opacity-40 grayscale blur-[1px]' : ''}`}>
             <span className="side-control-label">Aa</span>
             <input
               type="range"
@@ -2445,7 +2450,7 @@ export default function RoomPage() {
               value={fontSize}
               onChange={(e) => setFontSize(parseInt(e.target.value))}
               className="side-slider"
-              disabled={userPlan === 'free'}
+              disabled={userPlan === 'free' || userPlan === null}
             />
             <span className="side-control-value">{fontSize}</span>
           </div>

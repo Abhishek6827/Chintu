@@ -1,4 +1,4 @@
-
+﻿
 
 @tailwind base;
 @tailwind components;
@@ -12,8 +12,8 @@
   --glass-bg: rgba(0, 0, 0, calc(0.02 * var(--app-opacity, 1)));
   --glass-border: rgba(0, 0, 0, calc(0.08 * var(--app-opacity, 1)));
   --bubble-bg: rgba(255, 255, 255, calc(0.9 * var(--app-opacity, 1)));
-  --accent: #4f46e5;
-  --accent-glow: rgba(79, 70, 229, calc(0.2 * var(--app-opacity, 1)));
+  --accent: #0d9488;
+  --accent-glow: rgba(13, 148, 136, calc(0.2 * var(--app-opacity, 1)));
   --panel-bg: rgba(255, 255, 255, calc(0.95 * var(--app-opacity, 1)));
   --input-bg: rgba(0, 0, 0, calc(0.04 * var(--app-opacity, 1)));
   --bg-app: rgba(245, 247, 250, var(--app-opacity, 1));
@@ -27,8 +27,8 @@
   --glass-bg: rgba(255, 255, 255, calc(0.03 * var(--app-opacity, 1)));
   --glass-border: rgba(255, 255, 255, calc(0.08 * var(--app-opacity, 1)));
   --bubble-bg: rgba(255, 255, 255, calc(0.04 * var(--app-opacity, 1)));
-  --accent: #818cf8;
-  --accent-glow: rgba(129, 140, 248, calc(0.5 * var(--app-opacity, 1)));
+  --accent: #2dd4bf;
+  --accent-glow: rgba(45, 212, 191, calc(0.5 * var(--app-opacity, 1)));
   --panel-bg: rgba(10, 10, 18, calc(0.8 * var(--app-opacity, 1)));
   --input-bg: rgba(255, 255, 255, calc(0.05 * var(--app-opacity, 1)));
   --bg-app: rgba(10, 10, 18, var(--app-opacity, 1));
@@ -360,8 +360,8 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .chat-bubble-streaming {
-  border-color: rgba(129, 140, 248, 0.4);
-  box-shadow: 0 0 40px rgba(129, 140, 248, 0.1);
+  border-color: rgba(45, 212, 191, 0.4);
+  box-shadow: 0 0 40px rgba(45, 212, 191, 0.1);
 }
 
 /* Markdown answer rendering */
@@ -432,7 +432,7 @@ input[type="range"]::-moz-range-thumb {
 
 .side-control-value {
   font-size: 8px;
-  color: #818cf8;
+  color: #2dd4bf;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
 }
@@ -467,10 +467,10 @@ input[type="range"]::-moz-range-thumb {
 
 /* AI Speech bubble container */
 .ai-speech-container {
-  background: linear-gradient(135deg, rgba(129, 140, 248, 0.15), rgba(129, 140, 248, 0.05));
-  border: 1px solid rgba(129, 140, 248, 0.2);
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.15), rgba(45, 212, 191, 0.05));
+  border: 1px solid rgba(45, 212, 191, 0.2);
   backdrop-filter: blur(calc(12px * var(--app-opacity, 1)));
-  box-shadow: 0 8px 32px rgba(129, 140, 248, 0.1);
+  box-shadow: 0 8px 32px rgba(45, 212, 191, 0.1);
 }
 
 /* Shimmer animation */
@@ -484,8 +484,8 @@ input[type="range"]::-moz-range-thumb {
 }
 
 @keyframes mic-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.4); }
-  50% { box-shadow: 0 0 0 20px rgba(129, 140, 248, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.4); }
+  50% { box-shadow: 0 0 0 20px rgba(45, 212, 191, 0); }
 }
 
 .mic-recording {
@@ -546,8 +546,8 @@ input[type="range"]::-moz-range-thumb {
 .custom-dropdown-trigger:hover,
 .custom-dropdown-trigger.active {
   background: var(--glass-bg);
-  border-color: rgba(129, 140, 248, 0.4);
-  box-shadow: 0 0 20px rgba(129, 140, 248, 0.15);
+  border-color: rgba(45, 212, 191, 0.4);
+  box-shadow: 0 0 20px rgba(45, 212, 191, 0.15);
 }
 
 .custom-dropdown-trigger.active {
@@ -563,7 +563,7 @@ input[type="range"]::-moz-range-thumb {
   border: 1px solid var(--glass-border);
   border-radius: 16px;
   backdrop-filter: blur(40px);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(129, 140, 248, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(45, 212, 191, 0.1);
   overflow: hidden;
   padding: 6px;
   transform-origin: bottom;
@@ -610,7 +610,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .custom-dropdown-item.selected {
-  background: rgba(129, 140, 248, 0.15);
+  background: rgba(45, 212, 191, 0.15);
   color: var(--accent);
   font-weight: 700;
 }
@@ -625,7 +625,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .dark-mode .custom-dropdown-item.selected {
-  background: rgba(129, 140, 248, 0.15);
+  background: rgba(45, 212, 191, 0.15);
 }
 
 
@@ -694,13 +694,13 @@ input[type="range"]::-moz-range-thumb {
   left: 0;
   width: 100%;
   height: 100%;
-  color: #4f46e5;
+  color: #0d9488;
   animation: water-fill-move 4s ease-in-out infinite;
   z-index: 2;
 }
 
 .dark-mode .water-text-fill {
-  color: #818cf8;
+  color: #2dd4bf;
 }
 
 .water-text-fill-secondary {
@@ -709,7 +709,7 @@ input[type="range"]::-moz-range-thumb {
   left: 0;
   width: 100%;
   height: 100%;
-  color: #6366f1;
+  color: #14b8a6;
   opacity: 0.5;
   animation: water-fill-move 4s ease-in-out infinite;
   animation-delay: -2s;
@@ -799,8 +799,8 @@ input[type="range"]::-moz-range-thumb {
 
 /* ── Premium Voice UI animations ───────────────── */
 @keyframes mic-breathe {
-  0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.45), 0 0 60px rgba(99, 102, 241, 0.18); }
-  50%      { box-shadow: 0 0 32px rgba(99, 102, 241, 0.65), 0 0 90px rgba(168, 85, 247, 0.28); }
+  0%, 100% { box-shadow: 0 0 20px rgba(20, 184, 166, 0.45), 0 0 60px rgba(20, 184, 166, 0.18); }
+  50%      { box-shadow: 0 0 32px rgba(20, 184, 166, 0.65), 0 0 90px rgba(20, 184, 166, 0.28); }
 }
 .mic-breathe { animation: mic-breathe 3s ease-in-out infinite; }
 

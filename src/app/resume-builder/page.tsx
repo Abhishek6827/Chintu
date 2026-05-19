@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -150,7 +150,7 @@ export default function ResumeBuilderPage() {
   if (!isLoaded || !isSignedIn) {
     return (
       <div className="min-h-screen bg-[var(--bg-app)] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -172,7 +172,7 @@ export default function ResumeBuilderPage() {
             >
               <div className="space-y-4">
                 <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none">
-                  AI Resume <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400">Architect.</span>
+                  AI Resume <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-teal-500 to-cyan-400">Architect.</span>
                 </h1>
                 <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest text-xs md:text-sm">
                   Choose your path to a perfect ATS-optimized resume.
@@ -183,14 +183,14 @@ export default function ResumeBuilderPage() {
                 {/* Enhance Path */}
                 <button
                   onClick={() => { setFlow("enhance"); setState("input"); }}
-                  className="group relative p-8 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-[2.5rem] text-left hover:border-indigo-500/50 transition-all hover:scale-[1.02] overflow-hidden"
+                  className="group relative p-8 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-[2.5rem] text-left hover:border-teal-500/50 transition-all hover:scale-[1.02] overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <Sparkles className="w-24 h-24 text-indigo-500" />
+                    <Sparkles className="w-24 h-24 text-teal-500" />
                   </div>
                   <div className="relative z-10 space-y-4">
-                    <div className="w-14 h-14 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center">
-                      <FileUp className="w-7 h-7 text-indigo-500" />
+                    <div className="w-14 h-14 rounded-2xl bg-teal-600/10 border border-teal-500/20 flex items-center justify-center">
+                      <FileUp className="w-7 h-7 text-teal-500" />
                     </div>
                     <div>
                       <h3 className="text-2xl font-black uppercase tracking-tight mb-2">Enhance Current</h3>
@@ -198,7 +198,7 @@ export default function ResumeBuilderPage() {
                         Upload your existing resume and a JD. Our AI will tailor every bullet point to match the specific role.
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-400 pt-4">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-teal-400 pt-4">
                       Get Started <ChevronRight className="w-3 h-3" />
                     </div>
                   </div>
@@ -207,14 +207,14 @@ export default function ResumeBuilderPage() {
                 {/* New Path */}
                 <button
                   onClick={() => { setFlow("new"); setState("input"); }}
-                  className="group relative p-8 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-[2.5rem] text-left hover:border-purple-500/50 transition-all hover:scale-[1.02] overflow-hidden"
+                  className="group relative p-8 bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-[2.5rem] text-left hover:border-teal-500/50 transition-all hover:scale-[1.02] overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <Layout className="w-24 h-24 text-purple-500" />
+                    <Layout className="w-24 h-24 text-teal-500" />
                   </div>
                   <div className="relative z-10 space-y-4">
-                    <div className="w-14 h-14 rounded-2xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center">
-                      <Zap className="w-7 h-7 text-purple-500" />
+                    <div className="w-14 h-14 rounded-2xl bg-teal-600/10 border border-teal-500/20 flex items-center justify-center">
+                      <Zap className="w-7 h-7 text-teal-500" />
                     </div>
                     <div>
                       <h3 className="text-2xl font-black uppercase tracking-tight mb-2">Build From Scratch</h3>
@@ -222,7 +222,7 @@ export default function ResumeBuilderPage() {
                         No resume? No problem. Input your details and a JD, and we&apos;ll craft a premium resume from the ground up.
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-purple-400 pt-4">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-teal-400 pt-4">
                       Choose Templates <ChevronRight className="w-3 h-3" />
                     </div>
                   </div>
@@ -264,7 +264,7 @@ export default function ResumeBuilderPage() {
                       value={resumeText}
                       onChange={(e) => setResumeText(e.target.value)}
                       placeholder={flow === "enhance" ? "Paste your current resume content here..." : "Describe your experience, skills, and projects in plain text. AI will structure it."}
-                      className="w-full h-80 bg-[var(--bg-app)] border border-[var(--glass-border)] rounded-2xl p-5 text-sm text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all resize-none font-medium placeholder:text-[var(--text-dim)]/50"
+                      className="w-full h-80 bg-[var(--bg-app)] border border-[var(--glass-border)] rounded-2xl p-5 text-sm text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all resize-none font-medium placeholder:text-[var(--text-dim)]/50"
                     />
 
                     {flow === "enhance" && (
@@ -300,7 +300,7 @@ export default function ResumeBuilderPage() {
                       value={jdText}
                       onChange={(e) => setJdText(e.target.value)}
                       placeholder="Paste the Job Description (JD) you are targeting. AI will optimize your resume for these specific requirements."
-                      className="w-full h-80 bg-[var(--bg-app)] border border-[var(--glass-border)] rounded-2xl p-5 text-sm text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-purple-500/30 transition-all resize-none font-medium placeholder:text-[var(--text-dim)]/50"
+                      className="w-full h-80 bg-[var(--bg-app)] border border-[var(--glass-border)] rounded-2xl p-5 text-sm text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all resize-none font-medium placeholder:text-[var(--text-dim)]/50"
                     />
 
                     <div className="mt-6">
@@ -308,7 +308,7 @@ export default function ResumeBuilderPage() {
                         onClick={handleStartTailoring}
                         disabled={!resumeText.trim() || !jdText.trim() || isProcessing}
                         className={`w-full py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 active:scale-[0.98] ${resumeText.trim() && jdText.trim() && !isProcessing
-                          ? "bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/40 hover:scale-[1.01]"
+                          ? "bg-gradient-to-r from-teal-600 via-teal-600 to-pink-600 text-white shadow-xl shadow-teal-600/20 hover:shadow-teal-600/40 hover:scale-[1.01]"
                           : "bg-[var(--glass-bg)] text-[var(--text-dim)] cursor-not-allowed opacity-50"
                           }`}
                       >
@@ -332,15 +332,15 @@ export default function ResumeBuilderPage() {
               className="flex flex-col items-center justify-center py-24 space-y-8"
             >
               <div className="relative flex items-center justify-center w-40 h-40">
-                <div className="absolute inset-0 rounded-full border-[3px] border-indigo-500/30 animate-[spin_3s_linear_infinite]"></div>
-                <div className="absolute inset-2 rounded-full border-[3px] border-t-purple-500 border-purple-500/20 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
+                <div className="absolute inset-0 rounded-full border-[3px] border-teal-500/30 animate-[spin_3s_linear_infinite]"></div>
+                <div className="absolute inset-2 rounded-full border-[3px] border-t-teal-500 border-teal-500/20 animate-[spin_1.5s_ease-in-out_infinite_reverse]"></div>
                 <div className="absolute inset-4 rounded-full border-[3px] border-b-cyan-500 border-cyan-500/20 animate-[spin_2s_linear_infinite]"></div>
                 <div className="absolute inset-0 flex items-center justify-center text-5xl animate-pulse">
                   📄
                 </div>
               </div>
               <div className="text-center space-y-3">
-                <h2 className="text-3xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 animate-pulse">
+                <h2 className="text-3xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-teal-500 to-cyan-500 animate-pulse">
                   Chintu Ji is Tailoring Your Success...
                 </h2>
                 <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">
@@ -372,9 +372,9 @@ export default function ResumeBuilderPage() {
 
                 {/* ATS Score Dashboard */}
                 {tailoredProfile.atsScore !== undefined && (
-                  <div className="bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-3xl p-6 space-y-4 shadow-xl shadow-indigo-600/5">
+                  <div className="bg-[var(--panel-bg)] border border-[var(--glass-border)] rounded-3xl p-6 space-y-4 shadow-xl shadow-teal-600/5">
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Neural ATS Score</p>
+                      <p className="text-[10px] font-black text-teal-400 uppercase tracking-[0.2em]">Neural ATS Score</p>
                       <div className="flex items-center gap-2">
                         <span className={`text-2xl font-black ${tailoredProfile.atsScore >= 80 ? 'text-emerald-500' : tailoredProfile.atsScore >= 60 ? 'text-amber-500' : 'text-red-500'}`}>
                           {tailoredProfile.atsScore}%
@@ -394,7 +394,7 @@ export default function ResumeBuilderPage() {
                         <ul className="space-y-1.5">
                           {tailoredProfile.atsFeedback.map((f, i) => (
                             <li key={i} className="text-[9px] font-medium text-[var(--text-main)] flex items-start gap-2">
-                              <span className="w-1 h-1 rounded-full bg-indigo-500 mt-1.5 shrink-0" />
+                              <span className="w-1 h-1 rounded-full bg-teal-500 mt-1.5 shrink-0" />
                               {f}
                             </li>
                           ))}
@@ -414,13 +414,13 @@ export default function ResumeBuilderPage() {
                       key={tpl.id}
                       onClick={() => setSelectedTemplate(tpl.id)}
                       className={`w-full p-6 text-left rounded-3xl border transition-all ${selectedTemplate === tpl.id
-                        ? "bg-indigo-600/10 border-indigo-600/50 shadow-lg shadow-indigo-600/10"
-                        : "bg-[var(--panel-bg)] border-[var(--glass-border)] hover:border-indigo-500/30"
+                        ? "bg-teal-600/10 border-teal-600/50 shadow-lg shadow-teal-600/10"
+                        : "bg-[var(--panel-bg)] border-[var(--glass-border)] hover:border-teal-500/30"
                         }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-black uppercase tracking-tight">{tpl.name}</span>
-                        {selectedTemplate === tpl.id && <Check className="w-4 h-4 text-indigo-500" />}
+                        {selectedTemplate === tpl.id && <Check className="w-4 h-4 text-teal-500" />}
                       </div>
                       <p className="text-[10px] text-[var(--text-dim)] font-bold uppercase tracking-widest">{tpl.desc}</p>
                     </button>
@@ -433,7 +433,7 @@ export default function ResumeBuilderPage() {
                   <div className="grid gap-3">
                     <button
                       onClick={downloadTex}
-                      className="flex items-center justify-center gap-3 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
+                      className="flex items-center justify-center gap-3 py-4 bg-teal-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-teal-500 transition-all shadow-lg shadow-teal-600/20 active:scale-95"
                     >
                       <FileCode className="w-4 h-4" /> Download .TEX
                     </button>
@@ -444,7 +444,7 @@ export default function ResumeBuilderPage() {
                       <Printer className="w-4 h-4" /> Download PDF
                     </button>
                   </div>
-                  <p className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em] text-center px-4 leading-relaxed bg-indigo-500/5 py-3 rounded-xl border border-indigo-500/10">
+                  <p className="text-[9px] font-black text-teal-400 uppercase tracking-[0.2em] text-center px-4 leading-relaxed bg-teal-500/5 py-3 rounded-xl border border-teal-500/10">
                     ✨ Final high-fidelity PDF is generated via LaTeX for maximum ATS compatibility.
                   </p>
                 </div>
@@ -455,7 +455,7 @@ export default function ResumeBuilderPage() {
                 <div className="sticky top-24 space-y-4">
                   <div className="flex items-center justify-between px-2">
                     <div className="space-y-1">
-                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Live Interactive Preview</p>
+                      <p className="text-[10px] font-black text-teal-400 uppercase tracking-[0.3em]">Live Interactive Preview</p>
                       <p className="text-[8px] font-bold text-amber-500/80 uppercase tracking-widest flex items-center gap-1">
                         <Zap className="w-2.5 h-2.5" /> Final ATS-Optimized formatting applied during download
                       </p>
@@ -474,18 +474,18 @@ export default function ResumeBuilderPage() {
                           {tailoredProfile.title}
                         </p>
                         <div className={`flex ${selectedTemplate === 'minimal' ? 'justify-start' : 'justify-center'} gap-2 text-[8px] text-gray-400 font-bold`}>
-                          <a href={`mailto:${tailoredProfile.contact?.email || user?.emailAddresses[0]?.emailAddress}`} className="hover:text-indigo-500 transition-colors">
+                          <a href={`mailto:${tailoredProfile.contact?.email || user?.emailAddresses[0]?.emailAddress}`} className="hover:text-teal-500 transition-colors">
                             {tailoredProfile.contact?.email || user?.emailAddresses[0]?.emailAddress}
                           </a>
                           <span>|</span>
                           {tailoredProfile.contact?.linkedin ? (
-                            <a href={tailoredProfile.contact.linkedin.startsWith('http') ? tailoredProfile.contact.linkedin : `https://${tailoredProfile.contact.linkedin}`} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-500 transition-colors uppercase">
+                            <a href={tailoredProfile.contact.linkedin.startsWith('http') ? tailoredProfile.contact.linkedin : `https://${tailoredProfile.contact.linkedin}`} target="_blank" rel="noopener noreferrer" className="hover:text-teal-500 transition-colors uppercase">
                               LinkedIn
                             </a>
                           ) : <span className="uppercase">LinkedIn</span>}
                           <span>|</span>
                           {tailoredProfile.contact?.github ? (
-                            <a href={tailoredProfile.contact.github.startsWith('http') ? tailoredProfile.contact.github : `https://${tailoredProfile.contact.github}`} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-500 transition-colors uppercase">
+                            <a href={tailoredProfile.contact.github.startsWith('http') ? tailoredProfile.contact.github : `https://${tailoredProfile.contact.github}`} target="_blank" rel="noopener noreferrer" className="hover:text-teal-500 transition-colors uppercase">
                               GitHub
                             </a>
                           ) : <span className="uppercase">GitHub</span>}
@@ -590,8 +590,8 @@ export default function ResumeBuilderPage() {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Background Glow */}
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/20 blur-[80px] rounded-full" />
-              <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-500/20 blur-[80px] rounded-full" />
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-teal-500/20 blur-[80px] rounded-full" />
+              <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-teal-500/20 blur-[80px] rounded-full" />
 
               <button
                 onClick={() => setShowUpgradeModal(false)}
@@ -601,13 +601,13 @@ export default function ResumeBuilderPage() {
               </button>
 
               <div className="relative z-10 text-center space-y-6">
-                <div className="w-20 h-20 mx-auto rounded-[2rem] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-xl shadow-indigo-500/20">
+                <div className="w-20 h-20 mx-auto rounded-[2rem] bg-gradient-to-br from-teal-500 via-teal-500 to-pink-500 flex items-center justify-center shadow-xl shadow-teal-500/20">
                   <Zap className="w-10 h-10 text-white fill-white" />
                 </div>
 
                 <div className="space-y-2">
                   <h2 className="text-3xl font-black uppercase tracking-tighter leading-none">
-                    Upgrade <span className="text-indigo-500">Required.</span>
+                    Upgrade <span className="text-teal-500">Required.</span>
                   </h2>
                   <p className="text-[10px] font-black text-[var(--text-dim)] uppercase tracking-[0.2em]">
                     Premium Neural Engineering
@@ -621,7 +621,7 @@ export default function ResumeBuilderPage() {
                 <div className="pt-4 space-y-3">
                   <button
                     onClick={() => router.push("/pricing")}
-                    className="w-full py-4 bg-indigo-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-indigo-500/20 hover:bg-indigo-500 hover:scale-[1.02] active:scale-95 transition-all"
+                    className="w-full py-4 bg-teal-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-teal-500/20 hover:bg-teal-500 hover:scale-[1.02] active:scale-95 transition-all"
                   >
                     View Pricing & Plans
                   </button>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -234,10 +234,10 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
               {/* Header Info */}
               <div className="flex items-center gap-2 mb-3 ml-2">
                 <div
-                  className="rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center"
+                  className="rounded-xl bg-teal-500/20 border border-teal-500/30 flex items-center justify-center"
                   style={{ width: 'clamp(18px, 3vh, 28px)', height: 'clamp(18px, 3vh, 28px)' }}
                 >
-                  <Sparkles style={{ width: 'clamp(10px, 1.8vh, 16px)', height: 'clamp(10px, 1.8vh, 16px)' }} className="text-indigo-400" />
+                  <Sparkles style={{ width: 'clamp(10px, 1.8vh, 16px)', height: 'clamp(10px, 1.8vh, 16px)' }} className="text-teal-400" />
                 </div>
                 <span style={{ fontSize: 'clamp(6px, 1.5vw, 10px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-[0.3em]">Chintu Response</span>
               </div>
@@ -249,7 +249,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                   padding: 'clamp(16px, 4vh, 32px) clamp(16px, 4vw, 32px)'
                 }}
               >
-                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-indigo-500/50 via-purple-500/20 to-transparent" />
+                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-teal-500/50 via-teal-500/20 to-transparent" />
 
                 <div className="markdown-answer" style={{ fontSize: `clamp(6px, calc(${fontSize / 14} * 1rem), 20px)` }}>
                   {(() => {
@@ -267,7 +267,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                           <div className="mb-6 overflow-hidden rounded-3xl border border-[var(--glass-border)] bg-[var(--panel-bg)]">
                             <details className="group" open={isThinking}>
                               <summary
-                                className="cursor-pointer bg-[var(--glass-bg)] text-indigo-300 font-black uppercase tracking-[0.3em] hover:bg-[var(--input-bg)] transition-all flex items-center gap-4 select-none"
+                                className="cursor-pointer bg-[var(--glass-bg)] text-teal-300 font-black uppercase tracking-[0.3em] hover:bg-[var(--input-bg)] transition-all flex items-center gap-4 select-none"
                                 style={{
                                   padding: 'clamp(10px, 2vh, 16px) clamp(12px, 2.5vw, 20px)',
                                   fontSize: 'clamp(8px, 1.2vh, 10px)'
@@ -334,7 +334,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                                 </div>
                               ) : (
                                 <code
-                                  className={`${className || ""} ${isLightMode ? "text-indigo-700 bg-indigo-50" : "text-indigo-300 bg-[var(--glass-bg)]"} px-2 py-0.5 rounded-md font-mono border border-[var(--glass-border)]`}
+                                  className={`${className || ""} ${isLightMode ? "text-teal-700 bg-teal-50" : "text-teal-300 bg-[var(--glass-bg)]"} px-2 py-0.5 rounded-md font-mono border border-[var(--glass-border)]`}
                                   style={{ fontSize: `calc(${Math.max(6, fontSize - 1) / 14} * 1rem)` }}
                                   {...rest}
                                 >
@@ -367,7 +367,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                               );
                             },
                             thead({ children }) {
-                              return <thead className={`${isLightMode ? 'bg-indigo-50/50 text-indigo-700' : 'bg-[var(--glass-bg)] text-indigo-400'} font-black uppercase tracking-widest border-b border-[var(--glass-border)]`} style={{ fontSize: `calc(${Math.max(6, fontSize - 4) / 14} * 1rem)` }}>{children}</thead>;
+                              return <thead className={`${isLightMode ? 'bg-teal-50/50 text-teal-700' : 'bg-[var(--glass-bg)] text-teal-400'} font-black uppercase tracking-widest border-b border-[var(--glass-border)]`} style={{ fontSize: `calc(${Math.max(6, fontSize - 4) / 14} * 1rem)` }}>{children}</thead>;
                             },
                             th({ children }) {
                               return <th className="px-3 py-2 font-black whitespace-nowrap">{children}</th>;
@@ -380,7 +380,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                           {main}
                         </ReactMarkdown>
                         {entry.isStreaming && !isThinking && (
-                          <span className="inline-block w-2.5 h-5 bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.8)] ml-2 animate-pulse rounded-sm" />
+                          <span className="inline-block w-2.5 h-5 bg-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.8)] ml-2 animate-pulse rounded-sm" />
                         )}
                       </>
                     );
@@ -398,7 +398,7 @@ export default function AnswerDisplay({ answers, fontSize = 14, isLightMode = fa
                   <div className="flex gap-2">
                     {entry.model && (
                       <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--input-bg)] border border-[var(--glass-border)]">
-                        <Cpu style={{ width: 'clamp(10px, 1.4vh, 12px)', height: 'clamp(10px, 1.4vh, 12px)' }} className="text-indigo-400" />
+                        <Cpu style={{ width: 'clamp(10px, 1.4vh, 12px)', height: 'clamp(10px, 1.4vh, 12px)' }} className="text-teal-400" />
                         <span style={{ fontSize: 'clamp(7px, 1vh, 9px)' }} className="font-black text-[var(--text-dim)] uppercase tracking-[0.2em]">{getSafeModelName(entry.model)}</span>
                       </div>
                     )}
