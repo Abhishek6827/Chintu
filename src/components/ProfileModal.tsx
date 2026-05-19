@@ -274,7 +274,7 @@ export default function ProfileModal({
             <button
               onClick={handleRefine}
               disabled={!rawText.trim() || isRefining}
-              className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${rawText.trim() && !isRefining
+              className={`w-full py-2.5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${rawText.trim() && !isRefining
                 ? "bg-gradient-to-r from-teal-600 to-teal-600 text-[var(--text-main)] shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 hover:scale-[1.01]"
                 : "bg-[var(--glass-bg)] text-[var(--text-dim)] cursor-not-allowed"
                 }`}

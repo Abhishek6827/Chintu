@@ -78,6 +78,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'karat.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
       }
     ],
   },

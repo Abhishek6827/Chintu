@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Check, Sparkles, Minus, Shield, Plus, HelpCircle, Trophy, Crown, ArrowRight, MessageSquare, FileText, Layout, Code, Smartphone } from "lucide-react";
+import { Check, Sparkles, Minus, Shield, Plus, HelpCircle, Trophy, Crown, ArrowRight, MessageSquare, FileText, Layout, Code, Smartphone, Leaf, Zap } from "lucide-react";
 import dynamic from 'next/dynamic';
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -605,7 +605,11 @@ export default function PricingPage() {
                 )}
 
                 <div className="mb-6">
-                  <span className="text-3xl mb-2 block">{plan.badge}</span>
+                  <span className="mb-2 block">
+                    {plan.id === 'free' ? <Leaf className="w-8 h-8 text-emerald-400" /> :
+                     plan.id === 'pro' ? <Zap className="w-8 h-8 text-teal-400" /> :
+                     <Crown className="w-8 h-8 text-amber-400" />}
+                  </span>
                   <h3 className="text-lg font-black text-[var(--text-main)] uppercase tracking-tight">{plan.name}</h3>
                   <p className="text-teal-400 text-[10px] font-black uppercase tracking-widest mt-1">{totalCredits} Credits/mo</p>
 

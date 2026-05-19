@@ -1449,7 +1449,7 @@ export default function RoomPage() {
             The Chintu Room is a strategic environment designed exclusively for our Desktop Application. Please launch Chintu on your computer to access live synthesis and stealth mode.
           </p>
           <div className="flex flex-col gap-4">
-            <a href="https://www.getchintu.com/download" className="bg-teal-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-teal-500/20 hover:bg-teal-500 transition-all">Download Chintu</a>
+            <a href="https://www.getchintu.com/download" className="bg-teal-600 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-teal-500/20 hover:bg-teal-500 transition-all">Download Chintu</a>
             <button onClick={() => router.push('/')} className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest hover:text-[var(--text-main)] transition-colors">Return to Home</button>
           </div>
         </div>

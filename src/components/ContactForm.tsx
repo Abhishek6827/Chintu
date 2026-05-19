@@ -90,7 +90,7 @@ export default function ContactForm() {
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            placeholder="contact@getchintu.com"
+            placeholder="user@email.com"
             className="w-full bg-[var(--bg-app)] border border-[var(--glass-border)] px-6 py-4 rounded-2xl text-sm font-bold text-[var(--text-main)] placeholder:text-[var(--text-dim)] focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
           />
         </div>
