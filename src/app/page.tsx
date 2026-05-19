@@ -1825,7 +1825,7 @@ export default function LandingPage() {
         </section>
 
         {/* Contact Section */}
-        <section className="pt-10 sm:pt-16 lg:pt-20 pb-4 sm:pb-8 lg:pb-12 px-6 max-w-7xl mx-auto w-full">
+        <section className="pt-10 sm:pt-16 lg:pt-20 pb-0 sm:pb-2 lg:pb-4 px-6 max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
             <div className="reveal transition-all duration-1000">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal-500/10 border border-teal-500/20 rounded-full mb-6 sm:mb-8">

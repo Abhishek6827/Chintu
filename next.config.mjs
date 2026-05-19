@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-const isProd = process.env.NODE_ENV === "production";
-
 const nextConfig = {
   // We remove output: "export" to allow dynamic routes (Clerk) and API routes (Webhooks) on Vercel.
   

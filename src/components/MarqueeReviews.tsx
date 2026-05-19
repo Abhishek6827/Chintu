@@ -111,8 +111,8 @@ const ReviewCard = ({
 
 export function MarqueeReviews() {
   return (
-    <section className="py-8 sm:py-12 relative flex w-full flex-col items-center justify-center overflow-hidden border-t border-[var(--glass-border)]">
-      <div className="reveal text-center mb-6 sm:mb-8 px-6">
+    <section className="py-3 sm:py-6 relative flex w-full flex-col items-center overflow-hidden border-t border-[var(--glass-border)]">
+      <div className="text-center mb-3 sm:mb-4 px-6">
         <h2 className="text-[10px] font-black text-teal-500 uppercase tracking-[0.5em] mb-4">Wall of Dominance</h2>
         <p className="text-3xl font-black tracking-tight text-[var(--text-main)] uppercase">Real Feedback. <span className="text-teal-600">Real Offers.</span></p>
 
