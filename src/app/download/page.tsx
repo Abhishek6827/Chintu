@@ -46,10 +46,10 @@ export default function DownloadPage() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-teal-200/20 blur-[120px] rounded-full animate-pulse [animation-delay:700ms]" />
       </div>
 
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-24">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-16">
         {/* Hero Section */}
         <motion.div
-          className="max-w-4xl w-full text-center mb-20"
+          className="max-w-4xl w-full text-center mb-14"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}

@@ -329,7 +329,7 @@ export default function ResumeBuilderPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center py-24 space-y-8"
+              className="flex flex-col items-center justify-center py-16 space-y-6"
             >
               <div className="relative flex items-center justify-center w-40 h-40">
                 <div className="absolute inset-0 rounded-full border-[3px] border-teal-500/30 animate-[spin_3s_linear_infinite]"></div>

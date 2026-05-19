@@ -32,9 +32,9 @@ export default function TermsPage() {
       </div>
 
 
-      <main className="relative z-10 flex-1 max-w-4xl mx-auto w-full px-6 py-24 sm:py-32">
+      <main className="relative z-10 flex-1 max-w-4xl mx-auto w-full px-6 py-16 sm:py-24">
         <motion.div
-          className="mb-24"
+          className="mb-14"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}

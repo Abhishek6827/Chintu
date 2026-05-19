@@ -306,10 +306,10 @@ export function TestimonialsSection() {
   ].slice(0, 15);
 
   return (
-    <section className="py-32 px-6 overflow-hidden">
+    <section className="py-16 px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <motion.div
-          className="text-center mb-16"
+          className="text-center mb-10"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

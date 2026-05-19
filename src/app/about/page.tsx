@@ -36,10 +36,10 @@ export default function AboutPage() {
       </div>
 
 
-      <main className="relative z-10 flex-1 max-w-4xl mx-auto w-full px-6 py-20">
+      <main className="relative z-10 flex-1 max-w-4xl mx-auto w-full px-6 py-14">
         {/* Hero Section */}
         <motion.div
-          className="text-center mb-24"
+          className="text-center mb-14"
           initial="hidden"
           animate="visible"
         >

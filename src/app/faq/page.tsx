@@ -111,7 +111,7 @@ export default function FAQPage() {
 
       <main className="relative z-10 flex-1">
         {/* Header */}
-        <section className="py-24 px-6 text-center">
+        <section className="py-16 px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -223,7 +223,7 @@ export default function FAQPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-24 px-6">
+        <section className="py-16 px-6">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}

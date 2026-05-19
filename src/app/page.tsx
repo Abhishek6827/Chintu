@@ -247,7 +247,7 @@ export default function LandingPage() {
       <main className="relative z-10 flex-1">
 
         {/* Hero Section — Stylish Split Layout */}
-        <section id="hero" aria-label="Chintu Ji Hero Section" className="relative px-6 pt-10 lg:pt-16 pb-20 max-w-7xl mx-auto w-full">
+        <section id="hero" aria-label="Chintu Ji Hero Section" className="relative px-6 pt-6 lg:pt-10 pb-12 max-w-7xl mx-auto w-full">
           {/* Decorative blobs */}
           <div className="absolute top-0 left-1/4 w-[28rem] h-[28rem] bg-teal-500/10 blur-[140px] rounded-full pointer-events-none" />
           <div className="absolute top-32 right-0 w-[28rem] h-[28rem] bg-teal-500/10 blur-[140px] rounded-full pointer-events-none" />
@@ -262,7 +262,7 @@ export default function LandingPage() {
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               {/* Eyebrow */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/10 border border-teal-500/20 rounded-full mb-6 shadow-sm">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/10 border border-teal-500/20 rounded-full mb-4 shadow-sm">
                 <Sparkles className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400 animate-pulse" />
                 <span className="text-[10px] font-black text-teal-700 dark:text-teal-400 uppercase tracking-[0.3em]">v2.5 Hyper-Intelligence Active</span>
               </div>
@@ -282,12 +282,12 @@ export default function LandingPage() {
               </h1>
 
               {/* Subtitle */}
-              <p className="text-sm sm:text-sm md:text-base text-[var(--text-dim)] mb-5 sm:mb-8 leading-relaxed font-bold uppercase tracking-wide sm:tracking-widest max-w-xl">
+              <p className="text-sm sm:text-sm md:text-base text-[var(--text-dim)] mb-4 sm:mb-6 leading-relaxed font-bold uppercase tracking-wide sm:tracking-widest max-w-xl">
                 Interviews, Global Exams, MCQs, or Technical Tests. Capture any problem. Get the perfect solution. Instantly.
               </p>
 
               {/* CTAs */}
-              <div className="flex flex-col items-center sm:flex-row gap-3 mb-6 sm:mb-8">
+              <div className="flex flex-col items-center sm:flex-row gap-3 mb-4 sm:mb-6">
                 {isSignedIn ? (
                   <button
                     onClick={async () => {
@@ -320,7 +320,7 @@ export default function LandingPage() {
               </div>
 
               {/* Trust Indicators */}
-              <div className="flex items-center gap-4 mb-8">
+              <div className="flex items-center gap-4 mb-5">
                 <div className="flex items-center -space-x-2">
                   {[1, 2, 3, 4].map((i) => (
                     <div
@@ -618,7 +618,7 @@ export default function LandingPage() {
         </AnimatePresence>
 
         {/* ─── How It Works (3 steps) ─────────────────────── */}
-        <section id="how-it-works" aria-label="How Chintu Ji works" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
+        <section id="how-it-works" aria-label="How Chintu Ji works" className="py-10 sm:py-16 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
           <div className="absolute top-0 left-1/4 w-[28rem] h-[28rem] bg-teal-500/8 blur-[120px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 right-1/4 w-[28rem] h-[28rem] bg-teal-500/8 blur-[120px] rounded-full pointer-events-none" />
 
@@ -628,9 +628,9 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="text-center mb-12 sm:mb-16 lg:mb-20"
+              className="text-center mb-8 sm:mb-10 lg:mb-14"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/10 border border-teal-500/20 rounded-full mb-5 sm:mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/10 border border-teal-500/20 rounded-full mb-3 sm:mb-4">
                 <Rocket className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400" />
                 <span className="text-[10px] font-black text-teal-700 dark:text-teal-400 uppercase tracking-[0.3em]">Get Started in 60s</span>
               </div>
@@ -683,7 +683,7 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-10 sm:mt-14 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
+              className="mt-6 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
             >
               {!isSignedIn ? (
                 <Link
@@ -714,7 +714,7 @@ export default function LandingPage() {
         </section>
 
         {/* Strategic Intelligence Hub */}
-        <section id="strategic-intelligence" aria-label="Chintu Ji Strategic Intelligence Hub" className="py-16 sm:py-20 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+        <section id="strategic-intelligence" aria-label="Chintu Ji Strategic Intelligence Hub" className="py-10 sm:py-14 lg:py-20 px-6 bg-[var(--bg-app)] relative overflow-hidden">
 
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-center justify-between gap-8 lg:gap-12">
@@ -748,7 +748,7 @@ export default function LandingPage() {
                   ))}
                 </div>
               </div>
-              <div className="flex-1 bg-[var(--panel-bg)] rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 border border-[var(--glass-border)] relative overflow-hidden w-full">
+              <div className="flex-1 bg-[var(--panel-bg)] rounded-[2rem] sm:rounded-[3rem] p-4 sm:p-6 border border-[var(--glass-border)] relative overflow-hidden w-full">
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(20,184,166,0.05),transparent)] animate-pulse" />
                 <div className="relative z-10 space-y-3 sm:space-y-6">
                   <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-[var(--bg-app)] rounded-xl sm:rounded-2xl shadow-sm border border-[var(--glass-border)] hover:border-teal-500/30 transition-all group">
@@ -785,11 +785,11 @@ export default function LandingPage() {
         </section>
 
         {/* Total Coverage Section */}
-        <section id="total-coverage" aria-label="Chintu Ji Total Coverage" className="py-20 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+        <section id="total-coverage" aria-label="Chintu Ji Total Coverage" className="py-12 sm:py-16 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-teal-500/50 to-transparent" />
 
           <div className="max-w-7xl mx-auto relative z-10">
-            <div className="reveal text-center mb-12 sm:mb-16 lg:mb-24 transition-all duration-1000">
+            <div className="reveal text-center mb-8 sm:mb-10 lg:mb-14 transition-all duration-1000">
               <h2 className="text-[10px] font-black text-teal-700 dark:text-teal-400 uppercase tracking-[0.4em] sm:tracking-[0.5em] mb-4 sm:mb-6">Omniscient Intelligence</h2>
               <p className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)]">
                 Zero Gaps. <br />
@@ -828,7 +828,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Platform Compatibility ─────────────────────── */}
-        <section id="platforms" aria-label="Supported interview and exam platforms" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+        <section id="platforms" aria-label="Supported interview and exam platforms" className="py-10 sm:py-16 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] bg-gradient-to-r from-teal-500/5 via-teal-500/5 to-cyan-500/5 blur-[120px] rounded-full pointer-events-none" />
 
           <div className="max-w-7xl mx-auto relative z-10">
@@ -837,9 +837,9 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="text-center mb-10 sm:mb-14"
+              className="text-center mb-6 sm:mb-10"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full mb-5 sm:mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full mb-3 sm:mb-4">
                 <Globe className="w-3.5 h-3.5 text-cyan-700 dark:text-cyan-400" />
                 <span className="text-[10px] font-black text-cyan-700 dark:text-cyan-400 uppercase tracking-[0.3em]">Universal Compatibility</span>
               </div>
@@ -900,7 +900,7 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-8 sm:mt-10 text-center text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)]"
+              className="mt-5 sm:mt-7 text-center text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)]"
             >
               + many more — if it runs on your screen, Chintu works with it.
             </motion.p>
@@ -908,17 +908,17 @@ export default function LandingPage() {
         </section>
 
         {/* Snapshot Section */}
-        <section id="snapshot" aria-label="Chintu Ji Snapshot Section" className="py-20 sm:py-32 lg:py-40 px-6 max-w-7xl mx-auto w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+        <section id="snapshot" aria-label="Chintu Ji Snapshot Section" className="py-12 sm:py-20 lg:py-28 px-6 max-w-7xl mx-auto w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <div className="reveal transition-all duration-1000">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal-500/10 border border-teal-500/20 rounded-full mb-6 sm:mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal-500/10 border border-teal-500/20 rounded-full mb-4 sm:mb-5">
                 <Zap className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                 <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-[0.3em]">Snapshot Intelligence</span>
               </div>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-7xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-6 sm:mb-8">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-7xl font-black tracking-tighter uppercase leading-[0.9] text-[var(--text-main)] mb-4 sm:mb-6">
                 See it. <br /><span className="text-teal-600 dark:text-teal-400">Solve it.</span>
               </h2>
-              <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest leading-relaxed mb-8 sm:mb-10 max-w-md text-xs sm:text-sm md:text-base">
+              <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest leading-relaxed mb-6 sm:mb-8 max-w-md text-xs sm:text-sm md:text-base">
                 Stuck on a complex MCQ or a difficult equation? Just take a screenshot. Our vision engine processes the context, identifies the core problem, and generates the exact answer in milliseconds.
               </p>
               <ul className="space-y-3 sm:space-y-5">
@@ -955,7 +955,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Authentic Voice Demo ─── */}
-        <section id="authentic-voice" aria-label="Authentic conversational AI voice demo" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
+        <section id="authentic-voice" aria-label="Authentic conversational AI voice demo" className="py-10 sm:py-16 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-gradient-to-br from-teal-500/5 via-teal-500/5 to-cyan-500/5 blur-[100px] rounded-full" />
           </div>
@@ -966,9 +966,9 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="text-center mb-10 sm:mb-16"
+              className="text-center mb-6 sm:mb-10"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/10 border border-teal-500/20 rounded-full mb-5 sm:mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/10 border border-teal-500/20 rounded-full mb-3 sm:mb-4">
                 <Sparkles className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                 <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-[0.3em]">Authentic Voice</span>
               </div>
@@ -1063,7 +1063,7 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-10 sm:mt-14 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
+              className="mt-6 sm:mt-10 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
             >
               {[
                 { val: 63, suffix: "+", label: "Languages", color: "text-teal-500" },
@@ -1094,7 +1094,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Power Tools Spotlight (Mock + Resume) ─── */}
-        <section id="power-tools" aria-label="Mock Interview and AI Resume Builder" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
+        <section id="power-tools" aria-label="Mock Interview and AI Resume Builder" className="py-10 sm:py-16 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
           <div className="absolute top-0 left-0 w-[35%] h-[60%] bg-teal-500/8 blur-[140px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-[35%] h-[60%] bg-cyan-500/8 blur-[140px] rounded-full pointer-events-none" />
 
@@ -1106,7 +1106,7 @@ export default function LandingPage() {
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               className="text-center mb-12 sm:mb-16"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/10 border border-teal-500/20 rounded-full mb-5 sm:mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/10 border border-teal-500/20 rounded-full mb-3 sm:mb-4">
                 <Layers className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                 <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-[0.3em]">Beyond The Overlay</span>
               </div>
@@ -1185,7 +1185,7 @@ export default function LandingPage() {
         <TestimonialsSection />
 
         {/* ─── Hired At Top Companies ─────────────────────── */}
-        <section id="hired-at" aria-label="Companies whose candidates use Chintu Ji" className="py-12 sm:py-16 lg:py-20 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
+        <section id="hired-at" aria-label="Companies whose candidates use Chintu Ji" className="py-8 sm:py-12 lg:py-16 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
           <div className="max-w-7xl mx-auto relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1248,28 +1248,28 @@ export default function LandingPage() {
         </section>
 
         {/* Features Grid */}
-        <section className="py-20 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] border-y border-[var(--glass-border)]">
+        <section className="py-12 sm:py-16 lg:py-24 px-6 bg-[var(--bg-app)] border-y border-[var(--glass-border)]">
           <div className="max-w-7xl mx-auto">
-            <div className="reveal text-center mb-12 sm:mb-16 lg:mb-24 transition-all duration-1000">
+            <div className="reveal text-center mb-8 sm:mb-10 lg:mb-14 transition-all duration-1000">
               <h2 className="text-[10px] sm:text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-[0.4em] sm:tracking-[0.5em] mb-3 sm:mb-4">Tactical Superiority</h2>
               <p className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--text-main)] uppercase">Engineered for Success</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-12">
-              <motion.div whileHover={{ scale: 1.03, y: -6 }} className="reveal bg-[var(--panel-bg)] p-6 sm:p-8 lg:p-12 rounded-[2rem] lg:rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-teal-500/10 transition-all duration-700 group">
+              <motion.div whileHover={{ scale: 1.03, y: -6 }} className="reveal bg-[var(--panel-bg)] p-5 sm:p-6 lg:p-10 rounded-[2rem] lg:rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-teal-500/10 transition-all duration-700 group">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mb-6 sm:mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-emerald-500/5">
                   <Shield className="w-6 h-6 sm:w-8 sm:h-8" />
                 </div>
                 <h3 className="font-black uppercase tracking-[0.2em] text-[12px] sm:text-[13px] mb-3 sm:mb-6 text-[var(--text-main)]">Protected Protocol</h3>
                 <p className="text-[11px] sm:text-[13px] text-[var(--text-dim)] font-bold uppercase tracking-wide leading-relaxed">Advanced hardware-level abstraction that keeps your AI companion invisible to all proctoring and monitoring systems.</p>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.03, y: -6 }} className="reveal bg-[var(--panel-bg)] p-6 sm:p-8 lg:p-12 rounded-[2rem] lg:rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-teal-500/10 transition-all duration-700 delay-200 group">
+              <motion.div whileHover={{ scale: 1.03, y: -6 }} className="reveal bg-[var(--panel-bg)] p-5 sm:p-6 lg:p-10 rounded-[2rem] lg:rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-teal-500/10 transition-all duration-700 delay-200 group">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 bg-teal-500/10 text-teal-500 rounded-full flex items-center justify-center mb-6 sm:mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-teal-500/5">
                   <Cpu className="w-6 h-6 sm:w-8 sm:h-8" />
                 </div>
                 <h3 className="font-black uppercase tracking-[0.2em] text-[12px] sm:text-[13px] mb-3 sm:mb-6 text-[var(--text-main)]">Quantum Synthesis</h3>
                 <p className="text-[11px] sm:text-[13px] text-[var(--text-dim)] font-bold uppercase tracking-wide leading-relaxed">Proprietary LLM orchestration that combines multiple specialized models for zero-error technical and logical accuracy.</p>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.03, y: -6 }} className="reveal bg-[var(--panel-bg)] p-6 sm:p-8 lg:p-12 rounded-[2rem] lg:rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-teal-500/10 transition-all duration-700 delay-400 group">
+              <motion.div whileHover={{ scale: 1.03, y: -6 }} className="reveal bg-[var(--panel-bg)] p-5 sm:p-6 lg:p-10 rounded-[2rem] lg:rounded-[4rem] border border-[var(--glass-border)] shadow-sm hover:shadow-2xl hover:shadow-teal-500/10 transition-all duration-700 delay-400 group">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 bg-teal-500/10 text-teal-500 rounded-full flex items-center justify-center mb-6 sm:mb-10 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg shadow-teal-500/5">
                   <Sparkles className="w-6 h-6 sm:w-8 sm:h-8" />
                 </div>
@@ -1282,10 +1282,10 @@ export default function LandingPage() {
 
         {/* Strategic Spread - Only show on Web landing, hide in EXE app */}
         {!isElectron && (
-          <section className="py-16 sm:py-20 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+          <section className="py-10 sm:py-14 lg:py-20 px-6 bg-[var(--bg-app)] relative overflow-hidden">
 
             <div className="max-w-7xl mx-auto relative z-10">
-              <div className="reveal text-center mb-10 sm:mb-16 transition-all duration-1000">
+              <div className="reveal text-center mb-6 sm:mb-10 transition-all duration-1000">
                 <h2 className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-[0.4em] mb-2">Protocol Resources</h2>
                 <p className="text-2xl sm:text-3xl font-black text-[var(--text-main)] uppercase tracking-tight">Master the Interview Logic</p>
               </div>
@@ -1297,7 +1297,7 @@ export default function LandingPage() {
         )}
 
         {/* ─── Comparison Table: Chintu vs alternatives ─── */}
-        <section id="compare" aria-label="Compare Chintu Ji to other interview copilots" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+        <section id="compare" aria-label="Compare Chintu Ji to other interview copilots" className="py-10 sm:py-16 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-teal-500/40 to-transparent" />
 
 
@@ -1307,9 +1307,9 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="text-center mb-10 sm:mb-14"
+              className="text-center mb-6 sm:mb-10"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/10 border border-teal-500/20 rounded-full mb-5 sm:mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/10 border border-teal-500/20 rounded-full mb-3 sm:mb-4">
                 <Trophy className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                 <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-[0.3em]">Why Chintu Wins</span>
               </div>
@@ -1340,7 +1340,7 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
+              className="mt-5 sm:mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
             >
               {!isSignedIn ? (
                 <Link
@@ -1365,7 +1365,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Pricing Cards (Monthly / Yearly toggle) ─── */}
-        <section id="pricing" aria-label="Pricing plans for Chintu Ji" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
+        <section id="pricing" aria-label="Pricing plans for Chintu Ji" className="py-10 sm:py-16 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[70%] h-[60%] bg-gradient-to-r from-teal-500/5 via-teal-500/5 to-amber-500/5 blur-[140px] rounded-full pointer-events-none" />
 
 
@@ -1375,9 +1375,9 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="text-center mb-10 sm:mb-14"
+              className="text-center mb-6 sm:mb-10"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full mb-5 sm:mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full mb-3 sm:mb-4">
                 <CircleDollarSign className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-[0.3em]">Honest Pricing</span>
               </div>
@@ -1563,7 +1563,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Creator / Affiliate Program ─────────────────── */}
-        <section id="creators" aria-label="Chintu Ji Creator and Affiliate Program" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+        <section id="creators" aria-label="Chintu Ji Creator and Affiliate Program" className="py-10 sm:py-16 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden">
           <div className="absolute top-0 right-0 w-[40%] h-[60%] bg-amber-500/5 blur-[140px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[40%] h-[60%] bg-rose-500/5 blur-[140px] rounded-full pointer-events-none" />
 
@@ -1573,9 +1573,9 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="text-center mb-10 sm:mb-14"
+              className="text-center mb-6 sm:mb-10"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-full mb-5 sm:mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-full mb-3 sm:mb-4">
                 <Gift className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                 <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-[0.3em]">Creator Program</span>
               </div>
@@ -1637,7 +1637,7 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-10 sm:mt-14 flex flex-col items-center"
+              className="mt-6 sm:mt-10 flex flex-col items-center"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mb-10">
                 <div className="bg-[var(--panel-bg)] border border-teal-500/20 p-6 rounded-3xl text-center">
@@ -1668,7 +1668,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── FAQ Accordion ─── */}
-        <section id="faq" aria-label="Frequently asked questions" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
+        <section id="faq" aria-label="Frequently asked questions" className="py-10 sm:py-16 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden border-y border-[var(--glass-border)]">
           <div className="absolute -top-20 left-1/4 w-[24rem] h-[24rem] bg-teal-500/8 blur-[120px] rounded-full pointer-events-none" />
           <div className="absolute -bottom-20 right-1/4 w-[24rem] h-[24rem] bg-teal-500/8 blur-[120px] rounded-full pointer-events-none" />
 
@@ -1678,9 +1678,9 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="text-center mb-10 sm:mb-14"
+              className="text-center mb-6 sm:mb-10"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full mb-5 sm:mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full mb-3 sm:mb-4">
                 <HelpCircle className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
                 <span className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-[0.3em]">Knowledge Base</span>
               </div>
@@ -1701,7 +1701,7 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.55, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-10 sm:mt-12 text-center"
+              className="mt-6 sm:mt-8 text-center"
             >
               <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)] mb-4">
                 Looking for something more specific?
@@ -1720,7 +1720,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Final CTA + Guarantee Banner ─────────────────── */}
-        <section id="get-started" aria-label="Get started with Chintu Ji today" className="py-16 sm:py-24 lg:py-32 px-6 bg-[var(--bg-app)] relative overflow-hidden">
+        <section id="get-started" aria-label="Get started with Chintu Ji today" className="py-10 sm:py-16 lg:py-24 px-6 bg-[var(--bg-app)] relative overflow-hidden">
 
 
           <motion.div
@@ -1732,31 +1732,31 @@ export default function LandingPage() {
           >
             {/* Glowing border + gradient bg */}
             <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 via-teal-500 to-cyan-400 rounded-[3rem] opacity-30 blur-2xl pointer-events-none" />
-            <div className="relative bg-[var(--panel-bg)] border border-teal-500/30 backdrop-blur-2xl rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-12 lg:p-16 overflow-hidden">
+            <div className="relative bg-[var(--panel-bg)] border border-teal-500/30 backdrop-blur-2xl rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 lg:p-14 overflow-hidden">
               {/* Animated gradient accent */}
               <div className="absolute -top-10 -right-10 w-72 h-72 bg-teal-500/20 blur-[80px] rounded-full pointer-events-none" />
               <div className="absolute -bottom-10 -left-10 w-72 h-72 bg-teal-500/20 blur-[80px] rounded-full pointer-events-none" />
 
               <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 lg:gap-12 items-center">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/15 border border-teal-500/30 rounded-full mb-5 sm:mb-6">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/15 border border-teal-500/30 rounded-full mb-4 sm:mb-5">
                     <Rocket className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                     <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-[0.3em]">Final Mission Brief</span>
                   </div>
 
-                  <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tighter uppercase leading-[0.85] text-[var(--text-main)] mb-5 sm:mb-7">
+                  <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tighter uppercase leading-[0.85] text-[var(--text-main)] mb-4 sm:mb-6">
                     Stop Studying. <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-teal-500 to-cyan-400">
                       Start Winning.
                     </span>
                   </h2>
 
-                  <p className="text-[12px] sm:text-[14px] text-[var(--text-dim)] font-medium leading-relaxed mb-6 sm:mb-8 max-w-xl">
+                  <p className="text-[12px] sm:text-[14px] text-[var(--text-dim)] font-medium leading-relaxed mb-4 sm:mb-6 max-w-xl">
                     Your next interview is a 60-minute window. Don&rsquo;t walk in alone. Activate Chintu,
                     stay invisible, and let elite intelligence handle the questions while you handle the offer.
                   </p>
 
-                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
                     {!isSignedIn ? (
                       <Link
                         href="/sign-up"
@@ -1825,20 +1825,20 @@ export default function LandingPage() {
         </section>
 
         {/* Contact Section */}
-        <section className="pt-10 sm:pt-16 lg:pt-20 pb-0 sm:pb-2 lg:pb-4 px-6 max-w-7xl mx-auto w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+        <section className="pt-6 sm:pt-10 lg:pt-14 pb-0 sm:pb-2 lg:pb-4 px-6 max-w-7xl mx-auto w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <div className="reveal transition-all duration-1000">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal-500/10 border border-teal-500/20 rounded-full mb-6 sm:mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal-500/10 border border-teal-500/20 rounded-full mb-4 sm:mb-5">
                 <MessageSquare className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                 <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-[0.3em]">Support Command</span>
               </div>
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter text-[var(--text-main)] mb-6 sm:mb-8 uppercase leading-[0.9]">
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter text-[var(--text-main)] mb-4 sm:mb-6 uppercase leading-[0.9]">
                 Deploy <br /><span className="text-teal-600 dark:text-teal-400">Tactical Intelligence.</span>
               </h2>
-              <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest leading-relaxed mb-8 sm:mb-12 max-w-md text-xs sm:text-sm md:text-base">
+              <p className="text-[var(--text-dim)] font-bold uppercase tracking-widest leading-relaxed mb-6 sm:mb-8 max-w-md text-xs sm:text-sm md:text-base">
                 Have questions about deployment or strategy? Our elite support team is active 24/7 to ensure your total success.
               </p>
-              <div className="space-y-5 sm:space-y-8">
+              <div className="space-y-4 sm:space-y-6">
                 <div className="flex items-center gap-4 sm:gap-5">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[var(--panel-bg)] border border-[var(--glass-border)] flex items-center justify-center shadow-xl shadow-teal-500/5 text-base sm:text-xl flex-shrink-0">📧</div>
                   <div className="flex flex-col min-w-0">
@@ -1856,7 +1856,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="reveal transition-all duration-1000 delay-300">
-              <div className="bg-[var(--panel-bg)] p-6 sm:p-10 lg:p-16 rounded-[2rem] sm:rounded-[3rem] lg:rounded-[4.5rem] border border-[var(--glass-border)] shadow-[0_50px_100px_-20px_rgba(13,148,136,0.12)] relative overflow-hidden">
+              <div className="bg-[var(--panel-bg)] p-5 sm:p-8 lg:p-12 rounded-[2rem] sm:rounded-[3rem] lg:rounded-[4.5rem] border border-[var(--glass-border)] shadow-[0_50px_100px_-20px_rgba(13,148,136,0.12)] relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-bl-[2rem] sm:rounded-bl-[3rem] lg:rounded-bl-[4.5rem] -mr-10 -mt-10" />
                 <ContactForm />
               </div>
@@ -1869,7 +1869,7 @@ export default function LandingPage() {
       <MarqueeReviews />
 
       {/* Community Ecosystem Bar */}
-      <div className="bg-[var(--bg-app)] py-8 sm:py-12 px-6 border-t border-[var(--glass-border)]">
+      <div className="bg-[var(--panel-bg)] py-5 sm:py-8 px-6 border-t border-[var(--glass-border)]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
             <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-teal-500/10 rounded-2xl border border-teal-500/20">
